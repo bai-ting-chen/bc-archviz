@@ -1,7 +1,6 @@
 # V-Ray for Rhino → Blender
 
-Sources: `Desktop\DESIGN TEMP_2026\ROOK TEST\2608xx_VRAY` (skill `vray-rhino`); rebuilt in
-`studies/261006_vray_parity`, `261006_edge_wear`.
+Source: the V-Ray for Rhino studies (skill `vray-rhino`), rebuilt in Blender 2026-10-06.
 
 | V-Ray | Blender | Status |
 |---|---|---|

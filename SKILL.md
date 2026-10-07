@@ -21,7 +21,7 @@ Windows 10. Project: `C:\Users\ChenBaiting\PROJECT\ARCHVIZ_BLENDER`.
 ```
 - [ ] Read RULES.md and the references/ file for the task
 - [ ] Blender open, MCP on 9876 (get_blendfile_summary_datablocks)
-- [ ] Read the latest studies/*/STUDY_NOTES.md (open items carry over)
+- [ ] Local studies? read `studies/README.md` + the latest STUDY_NOTES.md (open items carry over)
 - [ ] New technique? research + compare workflows first (RULES 3)
 - [ ] Look decision? profile the Render Reference Library slice
 ```

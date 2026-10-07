@@ -44,8 +44,8 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
 1. `refmatch.py grid ref.png` → read the vanishing point (horizon → `shift_y`) and one scale cue
    (rail ≈ 1 m → camera height); verify with `world_to_camera_view`; `archviz.framing_render()` +
    `refmatch.py pair --overlay`.
-2. `refmatch.py patches ref.png regions.json render.png` (example: `studies/261006_spa_pristine/
-   regions.json`); change the light feeding each off patch; colour cast → white balance;
+2. `refmatch.py patches ref.png regions.json render.png` (regions.json lives in the study
+   folder: `{"oak": [x0, y0, x1, y1], …}` in 0..1, y from top); change the light feeding each off patch; colour cast → white balance;
    exposure last.
 
 ## Misc
