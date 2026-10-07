@@ -40,13 +40,54 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
 - White balance: `view_settings.use_white_balance`, `white_balance_temperature` = colour shown
   neutral — **lower = cooler**. 3000 K lights + WB 4300 K kept the warmth of a MIR reference.
 
-## Matching a reference image
-1. `refmatch.py grid ref.png` → read the vanishing point (horizon → `shift_y`) and one scale cue
-   (rail ≈ 1 m → camera height); verify with `world_to_camera_view`; `archviz.framing_render()` +
-   `refmatch.py pair --overlay`.
-2. `refmatch.py patches ref.png regions.json render.png` (regions.json lives in the study
-   folder: `{"oak": [x0, y0, x1, y1], …}` in 0..1, y from top); change the light feeding each off patch; colour cast → white balance;
-   exposure last.
+## Recreating a reference
+### Camera
+1. `refmatch.py grid ref.png out.png --step 25` → read the horizon (where parallel horizontal
+   edges converge) and the vanishing point of the dominant direction. Crop and zoom regions
+   (Pillow) to read edges; one full-frame look misreads thin members.
+2. Eye height without a known size: a vertical element standing on the floor splits at the
+   horizon — `(top − horizon) / (horizon − base)` in pixels = `(H − eye) / eye`. Pick a plausible
+   H (clear height, rail, door) and the eye follows; its width/height ratio then sizes it.
+3. Focal: assume a common archviz lens, then check proportions in the overlay; parallel lines
+   in one direction alone cannot fix the focal.
+4. Level camera + lens shift (parallel verticals). **Shift trap:** with `sensor_fit =
+   HORIZONTAL`, `shift_x/shift_y` are fractions of the frame **width** even on a portrait frame,
+   and +shift_x moves the frame right, so the principal point appears left:
+   `shift_x = −(vp_x − W/2)/W`, `shift_y = (horizon_y − H/2)/W` (pixels from the top).
+   Verify by projecting a far point on the axis with `world_to_camera_view` — it must land on
+   the measured vanishing point. Never trust the first framing render by eye.
+5. `archviz.framing_render()` + `refmatch.py pair --overlay`; move geometry, not the camera,
+   once the vanishing point and one height match.
+
+### Geometry readings
+- When a reading fits one cue but not the structure (a beam that "ends" at another beam's
+  soffit, a member too thin to span), prefer the structurally plausible reading — a downstand
+  beam runs to the slab — and fix the light instead. If still ambiguous, state the reading and
+  let the user correct it.
+- A deep element casting shade over a region that is bright in the reference means either the
+  geometry or the light position is wrong: check both before adding light.
+
+### Light, region by region
+1. `refmatch.py patches ref.png regions.json render.png` (regions.json in the study folder:
+   `{"name": [x0, y0, x1, y1], …}` in 0..1, y from top; ~10 regions: each lit surface type,
+   the shadow side, floor near/far, the background). Keep a table of render/ref ratios per
+   iteration; aim for equal ratios first, then exposure.
+2. Read where the light comes from before placing any:
+   - **Visible fixtures may face away.** A lamp head seen from behind (dark back) lights the far
+     room, not the foreground.
+   - **Cast shadows give direction.** Shadow width w thrown by a member of depth d onto the
+     surface it hangs from → source elevation ≈ atan(d / w), on the opposite side.
+   - A region brighter than anything its visible sources can reach → an **out-of-frame source**
+     (behind or beside the camera). Add it, check it is outside the frustum (project its
+     position), and **declare it** to the user — it is not in the reference image.
+   - Check the ray from a candidate source to the target clears intervening members before
+     trusting it (a beam can shadow the bay you are trying to light).
+3. Spots/floods: a wide cone aimed at a ceiling also lights the column and walls in front of
+   it; when one element is too bright, find which cone it sits in (angle from the axis) and
+   narrow or re-aim that light rather than dimming everything.
+4. Graded references (flat, sepia): AgX *Base Contrast*, white balance near the lamp
+   temperature, tone the material albedo warm/cool before touching grading.
+5. Exposure last (RULES 7).
 
 ## Misc
 - Backdrop that lights nothing: Mix(HDRI, white Background, Light Path *Is Camera Ray*); under AgX

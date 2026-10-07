@@ -22,6 +22,16 @@
 - Editor operators need `bpy.context.temp_override(window=, area=, region=)`;
   `render.render('INVOKE_DEFAULT')` from MCP needs `temp_override(window=…)`.
 
+## Camera
+- `shift_x/shift_y` with `sensor_fit = HORIZONTAL` are fractions of the frame width (also on
+  portrait frames); +shift_x moves the frame right. Probe with `world_to_camera_view`.
+- `archviz.physical_camera()` resets lens/sensor fit — re-apply the solved shifts after it.
+
+## MCP
+- `execute_blender_code`: `result` must be a dict, not a string.
+- Shader Attribute node on a missing attribute returns 0 (not an error) — gate masks that
+  treat 0 as meaningful.
+
 ## Render / images
 - Ray visibility (`visible_diffuse / visible_transmission …`) follows the type of the LAST bounce.
 - `view_settings.white_balance_temperature`: lower = cooler.

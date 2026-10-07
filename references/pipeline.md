@@ -11,6 +11,16 @@
   `system.use_online_access = True` (required even for localhost).
 - Claude Code: `.mcp.json` + `.claude/settings.local.json` `enabledMcpjsonServers`; tools load at
   session start. Server env: `BLENDER_MCP_HOST/PORT`, `BLENDER_PATH`.
+- download.blender.org can answer winget with **403**. Fetch the same MSI from an official
+  mirror (`mirrors.ocf.berkeley.edu/blender/release/…`, `mirror.clarkson.edu/blender/…`) and
+  check its SHA256 against `winget show --id BlenderFoundation.Blender --version <v> --exact`
+  before installing (`msiexec /i … /qn`, elevated — the user must accept the UAC prompt).
+- The MCP server needs Python ≥ 3.10 (3.14 works). Add `numpy pillow` to its venv for
+  `refmatch.py` / `imgstats.py`.
+- Set prefs headless: `blender -b --python set_prefs.py` with `bpy.ops.wm.save_userpref()`
+  (online access, MCP autostart/port, Cycles OPTIX + `refresh_devices()`).
+- On a new machine the hard-coded project paths in `.mcp.json`, `CLAUDE.md` and a few tool
+  scripts may name another user — fix them in that repo; the skill itself uses `~`.
 
 ## MCP tools
 `execute_blender_code` (assign a dict to `result`), `get_objects_summary`,
@@ -38,6 +48,18 @@ Fallback CLI client: `tools/mcp_call.py <tool> [json | --file script.py]`.
 `blender -b scene.blend --python tools/blender/render_variant.py -- out.png res=800x800
 [disp=off|caustics=off|wear=off|chips=off|dirt=off|noise_seed=7|mask_view=1|material_view=NAME|camera=NAME]`
 (forward-slash paths from bash).
+
+## Final render in the open UI
+`bpy.ops.render.render("INVOKE_DEFAULT")` inside `bpy.context.temp_override(window=…)` returns
+immediately and the user watches it; register a `bpy.app.handlers.render_complete` function
+that `save_render`s *Render Result* to the study folder (and removes itself), then wait for the
+file from the shell. Save the .blend first.
+
+## Iteration loop
+Keep two rebuild scripts in the study (`scene_geometry.py`: import + camera; `scene_look.py`:
+materials, lights, exposure) and a small runner that rebuilds, renders `_wip/vNN.png`, prints
+`refmatch.py patches` and writes `pair_vNN.png`. Every change is then one edit + one run, and
+each version's reason lives as a comment next to the value it changed.
 
 ## Study layout
 `studies/<yymmdd>_<topic>/`: Rhino build script, `*.3dm`, scene script (rebuilds from the .3dm via

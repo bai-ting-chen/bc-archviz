@@ -22,6 +22,33 @@ concrete_wall_009 × (0.76, 0.82, 0.99) → albedo 0.265; roughness Mix(0.72, ma
 coat 0.03; Normal Map 0.6 → Bump 4 mm → Bevel 2.5 mm. Leak stain: Megascans leakage on `SpanUV`
 (`height_span_uv`, v 0..0.9, REPEAT) × (1 − |N.z|).
 
+### Monolithic concrete (basements, car parks, cast-in-place frames)
+- **One material** for floor, walls, ceiling, beams and columns (user preference). Vary it by
+  world-space masks inside the shader, not by separate materials: Geometry › Normal Z gives
+  *up* (floor: lower roughness, sealed-slab sheen, softer stains), *down* (ceilings: less
+  grunge) and *vertical* (walls: damp band at the foot).
+- The leak-stain map (Megascans, `library/local/`) needs the user's own download; when it is
+  missing, build `concrete_study(stain=False)` and say so — never silently drop a layer.
+- Check the recipe's tone multiplier against the reference: the default is a cool V-Ray match
+  and reads blue-grey next to a warm reference.
+- **Grunge comes in patches, not streaks** (user correction; check the reference before adding
+  streaks). Recipe, all world-space Noise: patch field = low-frequency noise (scale ~0.45/m,
+  some Distortion) **plus** centred high-frequency noise (~18/m) × ~0.2 *before* a narrow
+  threshold → ragged, speckled borders; interior = mid-frequency mottle × speckle; clean gaps
+  between patches. Separate decorrelated fields (Mapping › Location offset) for floor stains.
+  Damp band at the foot of walls/columns: world Z plus the ragged noise, thresholded ~0.4–0.7 m.
+  Concave-corner grime: AO (outside, ~0.3 m) × fine noise. Multiplying several 0..1 masks
+  quickly washes them out — remap inner/speckle into ~0.55..1 to keep patches strong.
+- Fresh breaks under direct floods: keep their tint barely above the surface (≈ ×1.03); the
+  recipe's lighter paste reads as white paint flecks when lit head-on.
+
+### Tiled maps with joints
+Formwork/panel textures carry joint lines at their tile edges. Box UVs computed from world
+coordinates put a joint at world 0 — usually the camera axis, where it becomes one long line
+to the vanishing point on floor and ceiling. Offset the UVs by a fraction of a tile. Bisect
+odd lines by unlinking chains (normal/bump, grunge) in a border render: a line that survives
+both is in the image itself.
+
 ## Gravel, true displacement — `displaced_ground()` + `enable_true_displacement()`
 Displacement Scale = amount (0.12 m), Midlevel = −shift/amount; method BOTH (Displacement Only once
 finely diced); Subdivision SIMPLE adaptive 1 px, last; `cycles.dicing_camera` = render camera.
