@@ -1,0 +1,38 @@
+# Blender 5.2 API traps
+
+## Nodes
+- GN modifier inputs: `mod["Socket_N"]` fails; values live at `mod.properties.inputs.<id>.value`
+  (empty `.name`; resolve via `node_group.interface.items_tree`) → `wear.set_input`. Group defaults
+  are copied only at modifier creation.
+- Edge Angle (signed): convex arrises read **positive** on outward-normal Rhino meshes.
+- ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `study_materials.sock`.
+- Noise Texture output: "Factor" in GN; index 0 is safest.
+- Capture Attribute: socket index 1 is Selection — link by name.
+- Object/Collection Info geometry keeps source materials → Set Material.
+- Bump invert is a property (`bump.invert`), not a socket.
+- Noise Texture values cluster at 0.5 (sd ≈ 0.1): threshold near 0.5.
+- No per-axis Extend: keep once-spanning UVs inside 0..1 with REPEAT.
+
+## Mesh / scene
+- Subdivision adaptive: `use_adaptive_subdivision`, `adaptive_space='PIXEL'`, `adaptive_pixel_size`.
+- After changing modifier inputs in background scripts: `obj.update_tag()` +
+  `view_layer.update()` before reading evaluated meshes.
+- After `bmesh.ops.delete`: `bm.faces.ensure_lookup_table()` before indexing.
+- MCP context has no `bpy.context.object` after add-primitive operators → bmesh + `objects.new`.
+- Editor operators need `bpy.context.temp_override(window=, area=, region=)`;
+  `render.render('INVOKE_DEFAULT')` from MCP needs `temp_override(window=…)`.
+
+## Render / images
+- Ray visibility (`visible_diffuse / visible_transmission …`) follows the type of the LAST bounce.
+- `view_settings.white_balance_temperature`: lower = cooler.
+- `Image.save()` on float images applies view transform + exposure → for data EXRs use
+  `img.save_render(path)` with OPEN_EXR 32-bit.
+- Pixel analysis: `img.pixels.foreach_get(np_array)` (linear).
+- Headless runs load user prefs unless `--factory-startup` (which disables add-ons, CPU device,
+  and gives new worlds a grey 0.05 background (+π·0.05 W/m² on every surface) — set the
+  Background Strength to 0 for a black test world).
+
+## Windows shell
+- Pass Blender output paths with forward slashes from bash.
+- Edit skill/script files as UTF-8; several skill files use CRLF (use the Edit tool, or
+  `newline=''` when scripting).
