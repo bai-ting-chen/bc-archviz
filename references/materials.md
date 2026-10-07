@@ -14,6 +14,17 @@ Code: `study_materials.py` (concrete, gravel, coated wood, glass, glazed tiles),
   need a UV map; shader-box-projected maps get Bump from height instead (`archviz.pbr_material`).
 - Bump: Distance = real height in m, Strength 1. Relief chain: Normal Map → Bump → (Bevel node).
   Bevel node costs ~20 % and is invalid on MNEE casters/receivers → Bevel *modifier* there.
+- **Choose and scale a texture by its measured mean, not its thumbnail.** Average the diff map
+  in linear space (sRGB → linear, then mean per channel) before picking it: `concrete_floor_03`
+  turned out brown (0.28, 0.20, 0.15) for a pale grey paver, while `concrete_floor_worn_001`
+  (0.09, 0.09, 0.09) is neutral and scales cleanly. Hit the target albedo with a Vector Math
+  MULTIPLY of target/mean per channel. A Mix colour socket clamps factors above 1, so it cannot
+  brighten a dark map. → `lookdev.albedo_material(tex_id, name, target)` (measures and caches
+  the mean in the texture's meta.json).
+- Pick from a contact sheet: Poly Haven thumbnails
+  (`cdn.polyhaven.com/asset_img/thumbs/<id>.png?width=300`) for 10–20 candidates in one image.
+  `api.polyhaven.com/assets?t=textures` filtered by id/tags finds what `polyhaven_fetch.py
+  search <category>` misses.
 - Variation: Object Info Random, Geometry › Random per Island (per plank/tile in one mesh).
 - Node trees in labelled frames. Mix nodes keep hidden same-named sockets → `study_materials.sock()`.
 
@@ -49,6 +60,36 @@ to the vanishing point on floor and ceiling. Offset the UVs by a fraction of a t
 odd lines by unlinking chains (normal/bump, grunge) in a border render: a line that survives
 both is in the image itself.
 
+**Tile edges draw a grid** wherever the map repeats in both directions, and on a curved wall it
+reads as panels the reference doesn't have. Check the map's own features too (rows of tie holes
+in `concrete_wall_006`) before choosing it for a jointless pour.
+
+**Board marks the other way round.** Most board-formed maps run horizontal. To turn them
+vertical, feed a FLAT projection with Combine(z, along-wall): use x+y on planar walls, and on a
+cylinder use arc length (atan2(y−cy, x−cx)·R), which also avoids box-projection stretch on the
+curve. Then add tone per formwork strip (white noise on floor(along/0.9 m), ±8 %) × a
+low-frequency noise (±12 %). That reads as cast panels and hides the tile repeat. If the map's
+stains repeat visibly, mix the diffuse 30–40 % toward its mean.
+→ `lookdev.vertical_boards(mat, cylinder=(cx, cy, r) | None)`.
+
+**Monolithic but not identical.** A drum or infill of the "same" concrete read darker than the
+walls in the reference under the same light (ratio 0.69). Match the measured ratio with its own
+albedo rather than relighting.
+
+## Exposed aggregate, pavers, litter
+- Exposed-aggregate precast (columns, slab edges): `gravel_embedded_concrete`, box-mapped at
+  real size, albedo ~0.30 warm grey. Use the same map on fascia and soffit bands, and keep
+  soffits (Normal Z < −0.5) on a smoother, darker concrete via a second material slot.
+- Long-strip pavers: a Brick Texture on (y, x) puts the long axis across the façade. Read the
+  direction from which vanishing point the long joints run to. Mortar ≥ 8 mm and ~0.2 grey, or
+  the joints vanish at frame scale; set per-paver tone with Color1/Color2 0.95/0.72.
+  → `lookdev.long_pavers(tex_id, name, target, long_axis="Y")`.
+- Leaf litter and foliage: one GN group (Distribute Points on Faces, with selection = Z below a
+  limit AND a noise patch threshold → Instance on Points with random rotation and scale), and
+  per-instance tone via Object Info › Random. A patch threshold of ~0.5 on a 0.6/m noise is very
+  sensitive: 0.42 blanketed a wall, 0.53 removed everything. → `scatter.scatter(objs,
+  scatter.leaf_proto(...), density, z_max=, patch=)` + `lookdev.random_tone_material`.
+
 ## Gravel, true displacement — `displaced_ground()` + `enable_true_displacement()`
 Displacement Scale = amount (0.12 m), Midlevel = −shift/amount; method BOTH (Displacement Only once
 finely diced); Subdivision SIMPLE adaptive 1 px, last; `cycles.dicing_camera` = render camera.
@@ -77,6 +118,8 @@ shade smooth. Brushed: Anisotropic + Tangent. Measured n,k: Metallic BSDF *Physi
 ## Glass
 Principled transmission 1, IOR 1.52, roughness 0. Thin Film for coated glazing (to try).
 Re-lathe Rhino glassware at 256 segments for close-ups.
+Sheer curtains: Mix(Diffuse, Translucent, 0.5) at albedo ~0.8, so a lit room behind glows
+through them (lighting-camera › Glass and what it shows). → `lookdev.sheer()`.
 **Liquid in glass**: no nested-IOR priority in Cycles — three surfaces: GLASS (1.52), INTERFACE
 below the waterline (1.52/1.333), WATER_SURFACE (1.333) → `glassware.glass_of_water()`; check
 normals per wall.

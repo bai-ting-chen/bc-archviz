@@ -59,6 +59,25 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
 5. `archviz.framing_render()` + `refmatch.py pair --overlay`; move geometry, not the camera,
    once the vanishing point and one height match.
 
+### Camera from a repeated element (colonnade, mullions, bays)
+Code: `tools/refsolve.py readings.json` (and `Solve.floor_pt / plane_pt / pt_at_z / fit_circle /
+blender()` from a study script). It reproduced a hand solve to 0.6 px of horizon.
+Read the base and top of every repeat at full resolution (ticked 2x crops, not the downscaled
+frame). Then:
+- Lines through the bases and through the tops meet at the façade vanishing point; its y is
+  the horizon (level camera).
+- Apparent height h ∝ 1/depth, so equal steps in 1/h prove an equal pitch, and the pitch
+  (or one known size) fixes the scale. Eye height = H · (y_base − horizon)/h, which is the same
+  for every repeat — a check on the readings.
+- Focal is the weak unknown. The ellipse of a round base gives depression angle ≈
+  asin(sagitta / half-width), so f ≈ (y_base − horizon)/tan(angle). Per-column values scattered
+  2470–3900 px on one image: take a plausible lens, then judge by the overlay.
+- With f, eye and horizon fixed, image → plan is two formulas. A floor point is at depth
+  `Z = f·eye/(y − horizon)`, `X = (x − cx)·Z/f`. A point on a known vertical plane: intersect
+  the pixel ray with that plane. Read wall bases, openings and lamps this way. A residual of
+  the repeats from one straight line (≤ 0.07 m on a 4.5 m pitch) means the solve holds.
+- Keep the solve as a small script in the study: every later geometry question becomes one call.
+
 ### Geometry readings
 - When a reading fits one cue but not the structure (a beam that "ends" at another beam's
   soffit, a member too thin to span), prefer the structurally plausible reading — a downstand
@@ -66,6 +85,16 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
   let the user correct it.
 - A deep element casting shade over a region that is bright in the reference means either the
   geometry or the light position is wrong: check both before adding light.
+- **What stays visible decides the reading.** A dark band under a slab read as a downstand hid
+  three pendant globes that the reference shows. Re-solved with rays, it is a step UP in the
+  ceiling, and the band is the wall head seen inside the recess. Before keeping any member, check
+  that it does not cover something visible in the reference.
+- **Fit a curve where it meets its neighbour.** A free circle fit through floor points pushed a
+  drum in front of the wall, over a window. Constraining it to meet the wall plane at the pixel
+  where it visibly emerges fixed it, and its shoulder then explained a light strip.
+- Open vs roofed: a region that is bright in the reference but black in the render is usually
+  roofed in the model — but cut the roof only where the reference shows open sky. Cutting it too
+  far lit the drum from above.
 
 ### Light, region by region
 1. `refmatch.py patches ref.png regions.json render.png` (regions.json in the study folder:
@@ -86,10 +115,26 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
    it; when one element is too bright, find which cone it sits in (angle from the axis) and
    narrow or re-aim that light rather than dimming everything.
 4. Graded references (flat, sepia): AgX *Base Contrast*, white balance near the lamp
-   temperature, tone the material albedo warm/cool before touching grading.
-5. Exposure last (RULES 7).
+   temperature, tone the material albedo warm/cool before touching grading. The look follows
+   the reference, not habit: a crisp dusk reference matched under *Medium High Contrast*, and
+   Base Contrast read hazy.
+5. **Glass and what it shows.** Façade glass reflects only ~5–8 % at 30–50° incidence, so
+   glazing that reads bright in the reference is lit from behind. White sheers that read ~4x the
+   surrounding stone need ~3000 lux on their backs. A 60 klm room wash gave ~14 cd/m² and stayed
+   dark, so model the backlight as a wash ~1 m behind the sheer and **declare** it (rooms
+   beyond, not in the image). For the reflection itself, mirror the camera ray in the glass
+   normal, then pick the HDRI rotation from luminance by azimuth: trees on the horizon band,
+   bright sky at 20–40° elevation for upper floors. Rotate the HDRI, not the glass.
+6. Exposure last (RULES 7). When every region is off by the same ratio, that is the exposure
+   step, so take it then.
 
 ## Misc
+- Area lights emit along local −Z. With rotation (θ, 0, 0) the beam goes along
+  (0, sin θ, −cos θ): −90° faces −Y, 145° points up and toward +Y. Print the world direction
+  after creating the light.
+- Pendant globes: a solid glass sphere is a lens ball. Give it a 3 mm Solidify shell, IOR 1.5
+  and roughness ~0.3 so it reads as lit glass (`lookdev.glass_shell(objs)`). The bulb is a point light with
+  `visible_camera = True`; hide the bulb mesh so the fixture counts once.
 - Backdrop that lights nothing: Mix(HDRI, white Background, Light Path *Is Camera Ray*); under AgX
   display-white needs ~4/2^exposure.
 - AgX rolls whites off: match targets on the written PNG, not linear values.

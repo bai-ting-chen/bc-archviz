@@ -4,6 +4,7 @@
 - GN modifier inputs: `mod["Socket_N"]` fails; values live at `mod.properties.inputs.<id>.value`
   (empty `.name`; resolve via `node_group.interface.items_tree`) → `wear.set_input`. Group defaults
   are copied only at modifier creation.
+  New code is where it bites: a fresh scatter group re-hit this trap with `mod[ident] = v`.
 - Edge Angle (signed): convex arrises read **positive** on outward-normal Rhino meshes.
 - ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `study_materials.sock`.
 - Noise Texture output: "Factor" in GN; index 0 is safest.
@@ -34,6 +35,10 @@
 
 ## Render / images
 - Ray visibility (`visible_diffuse / visible_transmission …`) follows the type of the LAST bounce.
+- Lights created from Python default to `visible_camera = False`: a "visible bulb" point light
+  renders nothing until you set it.
+- Area lights emit along local −Z; with rotation (θ, 0, 0) the beam goes along (0, sin θ, −cos θ).
+- Solidify on a sphere (thin glass shell): `thickness` 0.003, `offset` −1 keeps the outer size.
 - `view_settings.white_balance_temperature`: lower = cooler.
 - `Image.save()` on float images applies view transform + exposure → for data EXRs use
   `img.save_render(path)` with OPEN_EXR 32-bit.
