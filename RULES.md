@@ -25,9 +25,11 @@
    double the flux). White balance is a camera setting. Parallel verticals.
 6. Wire every map that applies; real-world UVs; physically plausible albedo/IOR (materials.md) —
    wrong scale or albedo reads as "CG" faster than any lighting error.
-7. Profile the Render Reference Library slice before a look decision. Recreating a reference:
-   solve its camera first, then balance lights region by region; global exposure is the last knob
-   because it hides which light is wrong.
+7. Profile the Render Reference Library slice before a look decision — 3,188 tagged images at
+   `%USERPROFILE%\PROJECT\Render Reference Library`; grep `library.jsonl` to a shortlist of
+   5-10 paths and open only those, never browse. Its `CLAUDE.md` is the facet schema.
+   Recreating a reference: solve its camera first, then balance lights region by region;
+   global exposure is the last knob because it hides which light is wrong.
 8. **Edge wear = dirty edge (shading). Edge chip = geometry.** The user's definitions; keep separate.
 
 ## Process
