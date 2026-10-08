@@ -8,7 +8,7 @@ description: >-
   reference image, control renders and measurement. Use whenever the user mentions Blender,
   Cycles, shader/geometry nodes, Poly Haven, render, rendering, lookdev, materials, lighting,
   HDRI, caustics, water, exposure, a Render Reference Library image, or wants a photoreal image of
-  a Rhino model — even without naming Blender. Replaces vray-rhino unless V-Ray is named.
+  a Rhino model — even without naming Blender.
 ---
 <!-- blender-archviz-skill-loaded-marker -->
 
@@ -112,4 +112,4 @@ More traps: `references/api-traps.md`.
 | `references/render-settings.md` | Sampling, denoise, bias list, memory, colour management |
 | `references/api-traps.md` | Blender 5.2 API gotchas |
 | `references/learning-from-video.md` | `yt_learn.py` use and rules |
-| `references/vray-parity.md` | V-Ray effect → Blender equivalent |
+| `references/capabilities.md` | What the pipeline can do and which technique does it |

@@ -41,7 +41,7 @@ Fallback CLI client: `tools/mcp_call.py <tool> [json | --file script.py]`.
   user's document. Keep the builder as a parameter script in the study, run with
   `exec(open(path).read())` through Rook.
 - `archviz.import_rhino` options: layers as collections, instances, named views → cameras, hidden
-  objects/layers skipped, merge by distance; materials removed; mm → m. Delete `V-Ray Infinite Plane`.
+  objects/layers skipped, merge by distance; materials removed; mm → m. Delete any leftover `V-Ray Infinite Plane` object (older .3dm files carry one).
 - Always start from `read_homefile(use_empty=True)` (importing into an edited factory scene failed once).
 - Imported meshes are welded, manifold, outward normals; coarse — dice where detail is needed.
 

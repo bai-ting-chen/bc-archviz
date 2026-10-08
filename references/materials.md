@@ -40,7 +40,7 @@ coat 0.03; Normal Map 0.6 → Bump 4 mm → Bevel 2.5 mm. Leak stain: Megascans 
   grunge) and *vertical* (walls: damp band at the foot).
 - The leak-stain map (Megascans, `library/local/`) needs the user's own download; when it is
   missing, build `concrete_study(stain=False)` and say so — never silently drop a layer.
-- Check the recipe's tone multiplier against the reference: the default is a cool V-Ray match
+- Check the recipe's tone multiplier against the reference: the default is a cool match
   and reads blue-grey next to a warm reference.
 - **Grunge comes in patches, not streaks** (user correction; check the reference before adding
   streaks). Recipe, all world-space Noise: patch field = low-frequency noise (scale ~0.45/m,
