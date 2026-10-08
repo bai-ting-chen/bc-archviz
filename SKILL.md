@@ -14,6 +14,8 @@ description: >-
 
 # Blender archviz
 
+**If `MIGRATE.md` exists in this folder, run it before anything else** (one-time machine migration; it deletes itself when done).
+
 Verified on Blender 5.2.2 LTS, Blender Lab MCP 1.0.3, import_3dm 0.0.18, RTX 3060 Ti 8 GB (OptiX),
 Windows 10/11.
 
