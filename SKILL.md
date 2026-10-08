@@ -8,43 +8,33 @@ description: >-
   reference image, control renders and measurement. Use whenever the user mentions Blender,
   Cycles, shader/geometry nodes, Poly Haven, render, rendering, lookdev, materials, lighting,
   HDRI, caustics, water, exposure, a Render Reference Library image, or wants a photoreal image of
-  a Rhino model — even without naming Blender.
+  a Rhino model — even without naming Blender. Also use it when pulling, editing or pushing this
+  skill itself, so its MIGRATE.md and maintenance rules apply.
 ---
 <!-- blender-archviz-skill-loaded-marker -->
 
 # Blender archviz
 
-**If `MIGRATE.md` exists in this folder, run it before anything else.** It holds what other machines must do after an update and is deleted when done (see *Every push leaves a `MIGRATE.md`*).
+**If `MIGRATE.md` exists in this folder, run it before anything else.** It holds what this machine must do after an update; the machine that runs it deletes it (`references/maintaining.md`).
 
 Verified on Blender 5.2.2 LTS, Blender Lab MCP 1.0.3, import_3dm 0.0.18, RTX 3060 Ti 8 GB (OptiX),
 Windows 10/11.
 
-**Two places.** The skill folder (this repo, github.com/bai-ting-chen/blender-archviz-skill) holds
-method *and* code: `RULES.md`, `references/`, `scripts/` — generic, synced between machines.
-A project folder (whichever one the user works in; local to the machine, **never pushed**) holds
-data: `library/` (`polyhaven/`, `local/`), `studies/`. Scripts find it from the open .blend or
-the working directory — the nearest folder holding `library/` — or `archviz.set_project(path)` /
-env `ARCHVIZ_PROJECT`. The MCP server is a per-machine install in
-`%LOCALAPPDATA%\BlenderMCP\` (`app\` source, `venv\`), registered in Claude Code at user scope.
-`scripts\…` paths below are in the skill; `library\`, `studies\` in the project. **Only the skill is pushed to GitHub; never put project files, study scripts, scenes or
-renders in it, and never name a specific project or study** (user, 2026-10-08) — a recipe that
-works goes into `scripts/` only once it is scene-independent.
-**Git identity** (user, 2026-10-08): every commit to the skill repo, from any machine, is `bai-ting-chen <baitingchen.arch@gmail.com>`. One person, several machines. Before the first
-commit in a clone, set `git config user.name bai-ting-chen` and `git config user.email
-baitingchen.arch@gmail.com` in that clone, not globally (work machines have other repos).
-`git pull` before editing; the remote may hold another machine's commits, so never force-push
-over them.
-**Every push leaves a `MIGRATE.md`** (user, 2026-10-08). Whenever the skill is updated and pushed,
-add or extend `MIGRATE.md` in the skill root, in the same commit, telling the other machines
-what to do after `git pull`. Cover machine setup (installs, versions, MCP, env vars), project-folder
-layout, moved or renamed scripts, and new rules or habits that local memory or project docs should
-reflect. If an update needs nothing beyond the pull, say so in one line and list the rules or
-references that changed. Format: a dated `## yymmdd — <topic>` section per update. If
-`MIGRATE.md` already exists because another machine hasn't run it yet, append a section and never
-overwrite. Each step has a **Check** (already true → skip) and a **Do**. A machine where every
-Check passes, including the one that wrote the file, leaves it alone. The machine that actually
-carries out the steps deletes `MIGRATE.md` (and nothing else) when finished, then commits and
-pushes. The pointer line at the top of this file stays permanently.
+## Skill and project
+- **This skill** (`~/.claude/skills/blender-archviz`, synced through GitHub) holds method and
+  code: `RULES.md`, `references/`, `scripts/`. It is generic: it names no project or study,
+  because every machine and every project loads it.
+- **A project folder** (whichever one the user is working in) holds the data: `library/`
+  (`polyhaven/`, `local/`) and `studies/`. It stays on that machine and is never pushed.
+  Scripts find it as the nearest folder holding `library/` above the open .blend or the working
+  directory, or set it explicitly with `archviz.set_project(path)` / env `ARCHVIZ_PROJECT`.
+- **The Blender MCP server** is a per-machine install in `%LOCALAPPDATA%\BlenderMCP\` (`app\`,
+  `venv\`), registered in Claude Code at user scope, like Rook in `%LOCALAPPDATA%\Rook\`.
+
+`scripts\…` paths below are in the skill; `library\`, `studies\` are in the project.
+**Changing, pulling or pushing this skill?** Read `references/maintaining.md` first. It covers
+what may go in, `git pull` before editing, the git identity, and the `MIGRATE.md` every push
+must leave for the other machines.
 
 ## Preflight — copy into your first response and tick off
 ```
@@ -57,7 +47,8 @@ pushes. The pointer line at the top of this file stays permanently.
 - [ ] New technique? research the physics first, then compare workflows (RULES 3)
 - [ ] Before every "done": native-resolution crop pass of each material vs the ref (RULES 8b)
 - [ ] Look decision? profile the Render Reference Library slice
-- [ ] Assets the recipe loads exist locally (`library/` is not in git — a fresh machine has none)
+- [ ] Which project folder? `archviz.project_root()` finds its `library/`; assets the recipe
+      loads exist there (a new project or machine has none — `polyhaven_fetch.py`)
 ```
 
 ## Stack
@@ -138,8 +129,9 @@ More traps: `references/api-traps.md`.
 ## References
 | File | Contents |
 |---|---|
-| `RULES.md` | House rules (priorities, split, look, process, safety) |
-| `references/pipeline.md` | Install, MCP, Rhino import, assets, study layout |
+| `RULES.md` | House rules (what belongs here, priorities, split, look, process, safety) |
+| `references/maintaining.md` | Changing the skill: scope, pull, git identity, MIGRATE.md, push |
+| `references/pipeline.md` | Install, MCP server, Rhino import, assets, iteration loop, study layout |
 | `references/lighting-camera.md` | HDRI lux, sun, artificial lights in lumens, ray visibility, EV100, white balance, recreating a reference (camera solve incl. from repeated elements + image→plan, geometry readings, hidden lights, glazing/HDRI reflection, region balancing) |
 | `references/materials.md` | Physical ranges, albedo from measured map means, texture choice, concrete (one-material rooms, patch grunge, tiled joints, vertical boards), aggregate, pavers, GN litter/foliage, gravel, wood, stone, steel, glass, sheers, water |
 | `references/caustics.md` | Decision order, MNEE build rules, GN wavefront, photon bake, add-ons |

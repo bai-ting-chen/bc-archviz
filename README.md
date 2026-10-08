@@ -22,4 +22,6 @@ in `%LOCALAPPDATA%\BlenderMCP\`. Setup of Blender, the MCP server and add-ons:
 `references/pipeline.md`.
 
 **Only this skill goes to GitHub.** Never commit project files, study scripts, scenes or renders
-here, and never name a specific project — only scene-independent methods and code.
+here, and never name a specific project — only scene-independent methods and code. Before
+changing it, read `references/maintaining.md`: pull first, commit as `bai-ting-chen`, and leave a
+`MIGRATE.md` for the other machines with every push.

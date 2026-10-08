@@ -24,10 +24,7 @@
   `refmatch.py` / `imgstats.py`.
 - Set prefs headless: `blender -b --python set_prefs.py` with `bpy.ops.wm.save_userpref()`
   (online access, MCP autostart/port, Cycles OPTIX + `refresh_devices()`).
-- The skill uses `~` / `%LOCALAPPDATA%` only and names no project. Asset paths resolve to the
-  current project's `library/` (`archviz.project_root()`: `set_project()`, env `ARCHVIZ_PROJECT`,
-  else the nearest folder holding `library/` above the open .blend or working directory).
-  Projects stay local — git them locally if wanted, never push them.
+- Where things live (skill, project, MCP server): `SKILL.md` › *Skill and project*.
 
 ## MCP tools
 `execute_blender_code` (assign a dict to `result`), `get_objects_summary`,

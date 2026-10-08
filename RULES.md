@@ -7,6 +7,12 @@
    A chipped edge is 5 mm on one job and 100 mm on the next, so it is a result, not knowledge —
    size it from the shot (RULES 8) and record it in the project's study notes. Physical
    constants (albedo, IOR, lm/W, typical EV100), conventions, procedures and taste belong here.
+0a. **Skill is generic, projects are local** (user, 2026-10-08). Only the skill goes to GitHub;
+   project folders (data, studies, scenes, renders) stay on their machine and are never pushed.
+   The skill names no project, project path, repo or study. Every machine and every project
+   loads it, so a project name in here is wrong everywhere else. Lessons go in without where they
+   came from. Changing the skill: `references/maintaining.md` (pull first, git identity, and a
+   `MIGRATE.md` with every push).
 
 ## Priorities (user, 2026-10-06)
 1. **Native first.** Blender's own features (Cycles, shader nodes, Geometry Nodes, modifiers, Sky
@@ -43,8 +49,9 @@
    double the flux). White balance is a camera setting. Parallel verticals.
 6. Wire every map that applies; real-world UVs; physically plausible albedo/IOR (materials.md) —
    wrong scale or albedo reads as "CG" faster than any lighting error.
-7. Profile the Render Reference Library slice before a look decision — 3,188 tagged images at
-   `%USERPROFILE%\PROJECT\Render Reference Library`; grep `library.jsonl` to a shortlist of
+7. Profile the Render Reference Library slice before a look decision — 3,188 tagged images, a
+   per-machine folder (usually `%USERPROFILE%\PROJECT\Render Reference Library`; ask if it isn't
+   there). Grep its `library.jsonl` to a shortlist of
    5-10 paths and open only those, never browse. Its `CLAUDE.md` is the facet schema.
    Recreating a reference: solve its camera first, then balance lights region by region;
    global exposure is the last knob because it hides which light is wrong.

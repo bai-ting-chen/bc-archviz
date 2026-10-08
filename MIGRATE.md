@@ -93,3 +93,16 @@ Only after steps 1-8 actually changed something on this machine:
 3. `git pull --rebase`, then `git push`.
 
 Last, tell the user to restart Claude Code so the user-scope Blender server loads.
+
+## 261008 — skill review: maintenance rules gathered in one place
+Pull only, nothing to install. What changed: new `references/maintaining.md` (scope, pull first,
+git identity, MIGRATE format), `RULES.md` 0a (skill is generic, projects are local) and 7
+(the reference library is a per-machine folder), and `SKILL.md`, whose new *Skill and project*
+section replaces the long maintenance block. The description now also triggers on pulling or
+pushing the skill.
+
+### 1. Read the changes
+Check: you have read `references/maintaining.md` and RULES 0a in this session.
+Do: read them. If this machine's project memory lacks the *Skill vs project*, *Git identity* or
+*Migrate file* notes, write them (see the section above, step 8).
+
