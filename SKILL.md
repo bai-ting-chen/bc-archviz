@@ -24,6 +24,12 @@ data: `library/`, `studies/`. The MCP server is a per-machine install in
 `%LOCALAPPDATA%\BlenderMCP\` (`app\` source, `venv\`), registered in Claude Code at user scope.
 `scripts\…` paths below are in the skill; `library\`, `studies\` in the project. **Never put project files, study scripts, scenes or renders in the skill repo** (user,
 2026-10-08) — a recipe that works goes into `scripts/` only once it is scene-independent.
+**Git identity** (user, 2026-10-08): every commit to the skill or project repo, from any machine,
+is `bai-ting-chen <baitingchen.arch@gmail.com>`. One person, several machines. Before the first
+commit in a clone, set `git config user.name bai-ting-chen` and `git config user.email
+baitingchen.arch@gmail.com` in that clone, not globally (work machines have other repos).
+`git pull` before editing; the remote may hold another machine's commits, so never force-push
+over them.
 
 ## Preflight — copy into your first response and tick off
 ```
