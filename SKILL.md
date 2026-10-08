@@ -14,7 +14,7 @@ description: >-
 
 # Blender archviz
 
-**If `MIGRATE.md` exists in this folder, run it before anything else** (one-time machine migration; it deletes itself when done).
+**If `MIGRATE.md` exists in this folder, run it before anything else.** It holds what other machines must do after an update and is deleted when done (see *Every push leaves a `MIGRATE.md`*).
 
 Verified on Blender 5.2.2 LTS, Blender Lab MCP 1.0.3, import_3dm 0.0.18, RTX 3060 Ti 8 GB (OptiX),
 Windows 10/11.
@@ -34,6 +34,17 @@ commit in a clone, set `git config user.name bai-ting-chen` and `git config user
 baitingchen.arch@gmail.com` in that clone, not globally (work machines have other repos).
 `git pull` before editing; the remote may hold another machine's commits, so never force-push
 over them.
+**Every push leaves a `MIGRATE.md`** (user, 2026-10-08). Whenever the skill is updated and pushed,
+add or extend `MIGRATE.md` in the skill root, in the same commit, telling the other machines
+what to do after `git pull`. Cover machine setup (installs, versions, MCP, env vars), project-folder
+layout, moved or renamed scripts, and new rules or habits that local memory or project docs should
+reflect. If an update needs nothing beyond the pull, say so in one line and list the rules or
+references that changed. Format: a dated `## yymmdd — <topic>` section per update. If
+`MIGRATE.md` already exists because another machine hasn't run it yet, append a section and never
+overwrite. Each step has a **Check** (already true → skip) and a **Do**. A machine where every
+Check passes, including the one that wrote the file, leaves it alone. The machine that actually
+carries out the steps deletes `MIGRATE.md` (and nothing else) when finished, then commits and
+pushes. The pointer line at the top of this file stays permanently.
 
 ## Preflight — copy into your first response and tick off
 ```
