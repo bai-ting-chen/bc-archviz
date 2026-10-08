@@ -1,4 +1,4 @@
-"""Night-interior recipes (study 261006_spa_pristine): artificial lights in real lumens, polished
+"""Night-interior recipes: artificial lights in real lumens, polished
 stone, stone tiles, steel, pool water with depth tint, steam.
 
 Photometry follows archviz.LM_PER_W (683 lm per Blender W), the same constant the physical camera
@@ -331,7 +331,7 @@ def smooth_flat(obj, sharp_deg=30.0):
 
 def water_surface(obj, cell=0.1):
     """Turn a closed water box into its top surface, diced to `cell` metres and smooth -- the build
-    MNEE needs (measured 261007, _wip/mnee_test.py): a one-quad flat caster delivers NO light, the
+    MNEE needs (control: scripts/controls/mnee_water.py): a one-quad flat caster delivers NO light, the
     same plane diced 40x40 does; a closed box adds a degenerate bottom interface. The volume still
     works: rays enter it crossing the surface downward and leave crossing it upward (opaque basin)."""
     import bmesh

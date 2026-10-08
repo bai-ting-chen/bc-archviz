@@ -25,7 +25,7 @@ def _principled(mat):
 
 def map_mean(tex_id):
     """Linear mean RGB of a Poly Haven diff map; measured once, then cached in meta.json."""
-    folder = os.path.join(archviz.PH, "textures", tex_id)
+    folder = archviz.library("polyhaven", "textures", tex_id)
     meta_path = os.path.join(folder, "meta.json")
     meta = json.load(open(meta_path, encoding="utf-8"))
     if "diff_mean_linear" in meta:

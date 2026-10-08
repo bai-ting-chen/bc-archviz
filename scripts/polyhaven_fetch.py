@@ -1,4 +1,4 @@
-"""Download Poly Haven (CC0) HDRIs and PBR textures into the local library.
+"""Download Poly Haven (CC0) HDRIs and PBR textures into the current project's library/polyhaven.
 
 Assets are CC0. Data comes from the live API at api.polyhaven.com -- Powered by Poly Haven.
 
@@ -16,8 +16,22 @@ import urllib.request
 
 API = "https://api.polyhaven.com"
 UA = {"User-Agent": "ArchvizBlenderPipeline/0.1"}
-PROJECT = os.environ.get("ARCHVIZ_PROJECT") or os.path.expanduser(r"~\PROJECT\ARCHVIZ_BLENDER")
-LIB = os.path.join(PROJECT, "library", "polyhaven")
+
+
+def _project():
+    """env ARCHVIZ_PROJECT, else the nearest folder holding library/ above the working directory,
+    else the working directory (library/ is created there)."""
+    if os.environ.get("ARCHVIZ_PROJECT"):
+        return os.environ["ARCHVIZ_PROJECT"]
+    d = os.getcwd()
+    while not os.path.isdir(os.path.join(d, "library")):
+        if os.path.dirname(d) == d:
+            return os.getcwd()
+        d = os.path.dirname(d)
+    return d
+
+
+LIB = os.path.join(_project(), "library", "polyhaven")
 
 # Poly Haven map key -> (local suffix, preferred formats). "arm" = AO/Rough/Metal packed in R/G/B.
 TEX_MAPS = {

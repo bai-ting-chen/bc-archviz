@@ -1,7 +1,7 @@
 # Rerun after a Blender upgrade: blender -b --factory-startup --python scripts/controls/mnee_water.py
 # Control: does light from a lamp above reach a submerged receiver (pool floor) through flat water?
 # Camera views the floor obliquely (no specular image of the lamp in frame); a "no water" case gives
-# the expected irradiance. Result 261007 (5.2.2): box 0, one flat quad 0, diced 40x40 plane lit.
+# the expected irradiance. Result on Blender 5.2.2: box 0, one flat quad 0, diced 40x40 plane lit.
 import math
 import os
 import sys

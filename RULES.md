@@ -5,7 +5,7 @@
    parameters all change; what carries you is knowing how to operate, how to experiment and
    where to get resources. The test for any number: *would it be the same in a different scene?*
    A chipped edge is 5 mm on one job and 100 mm on the next, so it is a result, not knowledge —
-   size it from the shot (RULES 8) and record it in that study's `STUDY_NOTES.md`. Physical
+   size it from the shot (RULES 8) and record it in the project's study notes. Physical
    constants (albedo, IOR, lm/W, typical EV100), conventions, procedures and taste belong here.
 
 ## Priorities (user, 2026-10-06)
@@ -25,7 +25,7 @@
    Compare 2–4 workflows, choose by 1–2, cite sources, then build and prove. More and more
    requests will be things few people have done in Blender or archviz (user, 2026-10-08): a
    tutorial can only copy a look, the science lets you build a new method and know its limits.
-   Building first and researching late is how the caustics work drifted (261006). Videos are
+   Building first and researching late is how caustics work drifts. Videos are
    evidence, not authority.
 
 ## Split

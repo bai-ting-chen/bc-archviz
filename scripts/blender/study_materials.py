@@ -1,4 +1,4 @@
-"""Shader-node recipes from the 260825-260908 look-dev studies.
+"""Shader-node recipes: concrete, gravel, coated wood, glass, glazed tiles.
 
 Every material is a Cycles node tree, laid out in labelled frames so it reads in the
 Shader Editor.
@@ -8,9 +8,7 @@ import os
 
 import bpy
 
-from archviz import PH, ROOT
-
-LOCAL = os.path.join(ROOT, "library", "local")
+from archviz import library
 
 
 class G:
@@ -64,7 +62,7 @@ def sock(sockets, name):
 
 
 def _ph_maps(tex_id):
-    folder = os.path.join(PH, "textures", tex_id)
+    folder = library("polyhaven", "textures", tex_id)
     meta = json.load(open(os.path.join(folder, "meta.json"), encoding="utf-8"))
     return {k: os.path.join(folder, v) for k, v in meta["maps"].items()}, meta
 
@@ -109,7 +107,7 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
                    round_edge=0.0025, chip_spread=0.05, chip_in=(0.40, 0.90),
                    noise_scale=14.0, noise_band=(0.35, 0.60),
                    edge_dark=True, stain=True, stain_mult=1.15, bevel_chips=True):
-    """/CONCRETE from 260908: tone-matched diffuse, wired roughness/normal/height, round edges
+    """Cast concrete: tone-matched diffuse, wired roughness/normal/height, round edges
     combined with the normal map, chipped-edge wear and a leak stain driving a worn BRDF."""
     maps, meta = _ph_maps(tex_id)
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
@@ -176,7 +174,7 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
 
     if stain:
         suv = g.uv("SpanUV", (-900, -1450), F_WEAR)
-        leak = g.img(os.path.join(LOCAL, "leakage_tdlbbd1c", "Leakage_tdlbbd1c_2K_Opacity.jpg"),
+        leak = g.img(library("local", "leakage_tdlbbd1c", "Leakage_tdlbbd1c_2K_Opacity.jpg"),
                      "Non-Color", (-700, -1450), F_WEAR, suv, "Leak stain (Stain Op)")
         # v stays inside 0..v_repeat (<1), so REPEAT tiles u (wrap_u 1) and never wraps v (wrap_v 0)
         sm = g.node("ShaderNodeMath", (-450, -1450), F_WEAR, label="x1.15")
@@ -219,12 +217,12 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
     g.link(worn.outputs["BSDF"], mix.inputs[2])
     out = g.node("ShaderNodeOutputMaterial", (400, 200))
     g.link(mix.outputs["Shader"], out.inputs["Surface"])
-    mat["recipe"] = "260908 /CONCRETE port"
+    mat["recipe"] = "concrete_study"
     return mat
 
 
 def displaced_ground(name="GRAVEL", tex_id="gray_rocks", relief_m=0.12, shift_m=-0.049):
-    """/FOREST GROUND (gravel) from 260908 with true displacement.
+    """Gravel ground with true displacement.
     Displacement: Scale = relief_m, Midlevel = -shift_m / relief_m."""
     maps, meta = _ph_maps(tex_id)
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
@@ -283,7 +281,7 @@ def solve_levels(path, target_rgb, gamma=0.5):
 def coated_wood(name="COATED_PINE", tex_id="coated_pine", coat=0.2, coat_rough=0.04,
                 rough_toward_matte=0.35, albedo_rgb=(0.52, 0.33, 0.17), levels_gamma=0.5,
                 round_edge=0.002, normal_strength=1.0):
-    """Coated pine (260825/31): every map wired; levels solved to a natural pine albedo; satin
+    """Coated pine: every map wired; levels solved to a natural pine albedo; satin
     varnish = LOW coat amount with TIGHT gloss (the coat trap); base roughness spread toward
     matte instead of cheating Fresnel; round edges combined with the normal map."""
     maps, meta = _ph_maps(tex_id)

@@ -12,9 +12,35 @@ import os
 
 import bpy
 
-# Code lives in the skill (scripts/blender); data (library/, studies/) in the project folder.
-ROOT = os.environ.get("ARCHVIZ_PROJECT") or os.path.expanduser(r"~\PROJECT\ARCHVIZ_BLENDER")
-PH = os.path.join(ROOT, "library", "polyhaven")
+# Code lives in the skill; assets live in the current project's library/ (polyhaven/, local/).
+# The project: set_project(path), else env ARCHVIZ_PROJECT, else the nearest folder holding a
+# library/ above the open .blend or the working directory.
+_PROJECT = os.environ.get("ARCHVIZ_PROJECT")
+
+
+def set_project(path):
+    global _PROJECT
+    _PROJECT = os.path.abspath(path)
+
+
+def project_root():
+    if _PROJECT:
+        return _PROJECT
+    starts = [os.path.dirname(bpy.data.filepath)] if bpy.data.filepath else []
+    for d in starts + [os.getcwd()]:
+        while True:
+            if os.path.isdir(os.path.join(d, "library")):
+                return d
+            if os.path.dirname(d) == d:
+                break
+            d = os.path.dirname(d)
+    raise RuntimeError("no project library/ found: call archviz.set_project(<project folder>)")
+
+
+def library(*parts):
+    """Path inside the project's library/, e.g. library("polyhaven", "hdris", hdri_id)."""
+    return os.path.join(project_root(), "library", *parts)
+
 BUMP_DISTANCE = 0.004  # metres of height for a full-range displacement map, used as bump only
 
 
@@ -36,7 +62,7 @@ def pbr_material(tex_id, name=None, scale=1.0, tint=None):
     scale: multiplies the texture's real-world size (2.0 = twice as large).
     tint: optional (r, g, b) multiplied into the base color.
     """
-    folder = os.path.join(PH, "textures", tex_id)
+    folder = library("polyhaven", "textures", tex_id)
     meta = json.load(open(os.path.join(folder, "meta.json"), encoding="utf-8"))
     maps = {k: os.path.join(folder, v) for k, v in meta["maps"].items()}
     w_mm, h_mm = meta.get("dimensions_mm", [1000, 1000])
@@ -124,7 +150,7 @@ def material_from_spec(spec):
 # --- world / lighting ----------------------------------------------------------------------
 
 def world_hdri(hdri_id, strength=1.0, rotation_deg=0.0, res=None):
-    folder = os.path.join(PH, "hdris", hdri_id)
+    folder = library("polyhaven", "hdris", hdri_id)
     meta = json.load(open(os.path.join(folder, "meta.json"), encoding="utf-8"))
     path = os.path.join(folder, meta["file"] if res is None else "{}_{}.hdr".format(hdri_id, res))
     world = bpy.data.worlds.get("HDRI_" + hdri_id) or bpy.data.worlds.new("HDRI_" + hdri_id)
@@ -317,7 +343,7 @@ def hdri_analyse(hdri_id, rotation_deg=0.0):
     equirect HDRI, in Blender world space after a Z rotation. The sun direction is the
     luminance centroid of the top 0.05 % texels."""
     import numpy as np
-    folder = os.path.join(PH, "hdris", hdri_id)
+    folder = library("polyhaven", "hdris", hdri_id)
     meta = json.load(open(os.path.join(folder, "meta.json"), encoding="utf-8"))
     img = bpy.data.images.load(os.path.join(folder, meta["file"]), check_existing=True)
     w, h = img.size

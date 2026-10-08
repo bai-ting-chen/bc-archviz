@@ -19,13 +19,15 @@ Windows 10/11.
 
 **Two places.** The skill folder (this repo, github.com/bai-ting-chen/blender-archviz-skill) holds
 method *and* code: `RULES.md`, `references/`, `scripts/` — generic, synced between machines.
-The project folder `%USERPROFILE%\PROJECT\ARCHVIZ_BLENDER` (env `ARCHVIZ_PROJECT` overrides) holds
-data: `library/`, `studies/`. The MCP server is a per-machine install in
+A project folder (whichever one the user works in; local to the machine, **never pushed**) holds
+data: `library/` (`polyhaven/`, `local/`), `studies/`. Scripts find it from the open .blend or
+the working directory — the nearest folder holding `library/` — or `archviz.set_project(path)` /
+env `ARCHVIZ_PROJECT`. The MCP server is a per-machine install in
 `%LOCALAPPDATA%\BlenderMCP\` (`app\` source, `venv\`), registered in Claude Code at user scope.
-`scripts\…` paths below are in the skill; `library\`, `studies\` in the project. **Never put project files, study scripts, scenes or renders in the skill repo** (user,
-2026-10-08) — a recipe that works goes into `scripts/` only once it is scene-independent.
-**Git identity** (user, 2026-10-08): every commit to the skill or project repo, from any machine,
-is `bai-ting-chen <baitingchen.arch@gmail.com>`. One person, several machines. Before the first
+`scripts\…` paths below are in the skill; `library\`, `studies\` in the project. **Only the skill is pushed to GitHub; never put project files, study scripts, scenes or
+renders in it, and never name a specific project or study** (user, 2026-10-08) — a recipe that
+works goes into `scripts/` only once it is scene-independent.
+**Git identity** (user, 2026-10-08): every commit to the skill repo, from any machine, is `bai-ting-chen <baitingchen.arch@gmail.com>`. One person, several machines. Before the first
 commit in a clone, set `git config user.name bai-ting-chen` and `git config user.email
 baitingchen.arch@gmail.com` in that clone, not globally (work machines have other repos).
 `git pull` before editing; the remote may hold another machine's commits, so never force-push

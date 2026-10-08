@@ -8,8 +8,8 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
   equirect itself, not the thumbnail sphere: tone-map a 1024 px strip in Blender, draw elevation
   lines at 0° and the reference's horizon-content height (tree tops read ~10° above the horizon
   → `(horizon_y − top_y)/f` rad). Reject maps whose horizon content sits metres from the HDRI
-  camera (it fills the sky and leaves nothing bright for water/glass to reflect — 261007's
-  first pick). Rotation that puts equirect column u at world azimuth a (deg from +X):
+  camera (it fills the sky and leaves nothing bright for water/glass to reflect — an
+  easy first pick). Rotation that puts equirect column u at world azimuth a (deg from +X):
   `ROT = 360·(0.5 − u) − a` (Mapping Z rotation, Cycles `u = 0.5 − atan2(y, x)/2π`).
 - `archviz.hdri_analyse(id, rot)` integrates the upper hemisphere -> lux at strength 1 and the
   sun direction (luminance centroid of the top 0.05 % texels). `world_hdri_lux(id, target_lux)`
@@ -88,7 +88,7 @@ Convert from the lumens printed on the fixture — that is the number a lighting
    measured vanishing point. Never trust the first framing render by eye.
 5. **Conditioning of readings.** Depth from a floor point is `f·eye/(y − horizon)`: a point a
    few pixels below the horizon swings metres per pixel. Two floor lines read 2-3 px apart near
-   the horizon disagreed by ~1 m in plan (261007). Trust points far from the horizon — soffit
+   the horizon disagreed by ~1 m in plan. Trust points far from the horizon — soffit
    edges high in the frame, floor points near the camera — and treat near-horizon readings as
    loose. When two readings disagree, ask which one is well conditioned before adding geometry.
 6. Check the Rhino model before Blender: `scripts/rhino/project_edges.py` (in Rhino via Rook,
