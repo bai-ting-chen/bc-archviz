@@ -38,7 +38,8 @@
 - Lights created from Python default to `visible_camera = False`: a "visible bulb" point light
   renders nothing until you set it.
 - Area lights emit along local −Z; with rotation (θ, 0, 0) the beam goes along (0, sin θ, −cos θ).
-- Solidify on a sphere (thin glass shell): `thickness` 0.003, `offset` −1 keeps the outer size.
+- Solidify on a sphere (thin glass shell): `offset` −1 keeps the outer surface where it was,
+  so the shell grows inward and the silhouette does not change.
 - `view_settings.white_balance_temperature`: lower = cooler.
 - `Image.save()` on float images applies view transform + exposure → for data EXRs use
   `img.save_render(path)` with OPEN_EXR 32-bit.

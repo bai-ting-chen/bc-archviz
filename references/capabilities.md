@@ -1,8 +1,8 @@
 # Pipeline capabilities
 
-What this pipeline can do and which technique does it. Verified by rebuilding the
-260825-260908 look-dev studies in Blender on 2026-10-06; each row was proved with a
-control render (RULES 9), not assumed.
+What this pipeline can do and which technique does it. Every row was proved with a control
+render (RULES 9), not assumed. This is a capability index, not a settings list — the technique
+is the durable part; its dial positions belong to whichever study last used it.
 
 | Effect | Technique | State |
 |---|---|---|
@@ -18,5 +18,3 @@ control render (RULES 9), not assumed.
 | Layered BRDF | Mix Shader | solid |
 | White-backdrop product shot | Light Path *Is Camera Ray* backdrop | solid |
 | Headless batch | `blender -b … render_variant.py` | solid |
-
-Open: canopy contrast against the Berlin reference wants a softer HDRI.
