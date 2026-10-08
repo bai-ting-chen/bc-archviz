@@ -35,7 +35,7 @@
 
 4a. **Rhino models are clean and fast** (user, 2026-10-08): one arc per curved edge, straight
     where straight, a few key readings per edge — not splines through readings or arcs fitted
-    to pixels. Check once with `tools/edge_overlay.py`, then the approval gate (10a).
+    to pixels. Check once with `scripts/edge_overlay.py`, then the approval gate (10a).
 ## Look
 5. **Real units everywhere.** Daylight: calibrated HDRI in lux + matched sun. Artificial: lumens at
    683 lm/W — the same constant the camera uses, so a real ISO/f/shutter gives the right exposure
@@ -80,7 +80,7 @@
     show the user (viewport captures + a list of what was modelled and left out); pipe to
     Blender only after the user approves the geometry. Rework in Rhino is cheap, a look-dev
     round on wrong geometry is not.
-11. Bisect odd behaviour in a minimal headless scene (`tools/controls/`) before tuning the real
+11. Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real
     one — the MNEE and green-ceiling problems were each found in minutes that way.
 
 ## Safety

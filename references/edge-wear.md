@@ -1,6 +1,6 @@
 # Edge wear (dirty edges, shading) and edge chips (geometry)
 
-No built-in "edge wear" node in 5.2; it is a recipe. Code `tools/blender/wear.py`, `wood_wear.py`.
+No built-in "edge wear" node in 5.2; it is a recipe. Code `scripts/blender/wear.py`, `wood_wear.py`.
 
 **Every size here is a dial, not a value** — a chipped arris is millimetres on a close-up and
 can be a hundred across a courtyard. What matters is the pixels it occupies, so set reach, depth

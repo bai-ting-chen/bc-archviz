@@ -26,7 +26,7 @@
 `execute_blender_code` (assign a dict to `result`), `get_objects_summary`,
 `get_screenshot_of_window_as_image`, `render_viewport_to_path` (writes to
 `<tempdir>/blender_mcp/` — copy out), `search_manual_docs`, `get_python_api_docs`. Timeout 300 s.
-Fallback CLI client: `tools/mcp_call.py <tool> [json | --file script.py]`.
+Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
 
 ## Rhino → Blender
 - `import_3dm` reads cached **render meshes**; in Rhino run
@@ -63,7 +63,7 @@ Fallback CLI client: `tools/mcp_call.py <tool> [json | --file script.py]`.
   free items only; download needs the user's own sign-in (their Chrome) — never type passwords.
 
 ## Look-dev headless
-`blender -b scene.blend --python tools/blender/render_variant.py -- out.png res=800x800
+`blender -b scene.blend --python scripts/blender/render_variant.py -- out.png res=800x800
 [disp=off|caustics=off|wear=off|chips=off|dirt=off|noise_seed=7|mask_view=1|material_view=NAME|camera=NAME]`
 (forward-slash paths from bash).
 
@@ -74,7 +74,7 @@ that `save_render`s *Render Result* to the study folder (and removes itself), th
 file from the shell. Save the .blend first.
 
 ## Iteration loop
-`tools/study_run.py <study> vNN.png [--rebuild] [--pct 50 --spp 128]` does all of this for a
+`scripts/study_run.py <study> vNN.png [--rebuild] [--pct 50 --spp 128]` does all of this for a
 study holding `scene_geometry.py` + `scene_look.py` (+ `_wip/ref.jpg`, `regions.json`).
 Keep two rebuild scripts in the study (`scene_geometry.py`: import + camera; `scene_look.py`:
 materials, lights, exposure) and a small runner that rebuilds, renders `_wip/vNN.png`, prints

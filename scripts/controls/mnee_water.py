@@ -1,0 +1,103 @@
+# Rerun after a Blender upgrade: blender -b --factory-startup --python scripts/controls/mnee_water.py
+# Control: does light from a lamp above reach a submerged receiver (pool floor) through flat water?
+# Camera views the floor obliquely (no specular image of the lamp in frame); a "no water" case gives
+# the expected irradiance. Result 261007 (5.2.2): box 0, one flat quad 0, diced 40x40 plane lit.
+import math
+import os
+import sys
+import tempfile
+
+import bmesh
+import bpy
+import numpy as np
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "blender"))
+TMP = os.path.join(tempfile.gettempdir(), "mnee_control.exr")
+
+
+def box(name, x0, y0, z0, x1, y1, z1, top_only=False, cuts=0):
+    me = bpy.data.meshes.new(name)
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1.0)
+    for v in bm.verts:
+        v.co.x, v.co.y, v.co.z = (x0 if v.co.x < 0 else x1), (y0 if v.co.y < 0 else y1), (z0 if v.co.z < 0 else z1)
+    if top_only:
+        bm.normal_update()
+        if cuts:
+            bmesh.ops.subdivide_edges(bm, edges=bm.edges[:], cuts=cuts, use_grid_fill=True)
+            bm.normal_update()
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.normal.z < 0.5], context="FACES")
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(ob)
+    return ob
+
+
+def run(kind="SPOT", water="plane", mnee=True, volume=False, caustics=True, samples=512, blur=0.0, smooth=True, cuts=0):
+    bpy.ops.wm.read_homefile(use_empty=True)
+    import importlib
+    import interior
+    importlib.reload(interior)
+    sc = bpy.context.scene
+    sc.render.engine = "CYCLES"
+    sc.cycles.samples, sc.cycles.use_denoising, sc.cycles.use_adaptive_sampling = samples, False, False
+    sc.cycles.blur_glossy = blur
+    sc.cycles.caustics_refractive = caustics
+    sc.render.resolution_x = sc.render.resolution_y = 64
+    sc.view_settings.view_transform = "Standard"
+    sc.world = bpy.data.worlds.new("k")
+    sc.world.use_nodes = True
+    sc.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.0
+    floor = box("floor", -2, -2, -1.3, 2, 2, -1.2)          # pool floor (receiver), white Lambert
+    m = bpy.data.materials.new("white"); m.use_nodes = True
+    b = m.node_tree.nodes["Principled BSDF"]
+    b.inputs["Roughness"].default_value, b.inputs["Specular IOR Level"].default_value = 1.0, 0.0
+    floor.data.materials.append(m)
+    floor.cycles.is_caustics_receiver = mnee
+    if water != "none":
+        w = box("water", -2, -2, -1.2 + 0.0005, 2, 2, 0.0, top_only=(water == "plane"), cuts=cuts)
+        wm = interior.pool_water("W", density=1.0, ripple_m=0.0)
+        if not volume:
+            for l in list(wm.node_tree.links):
+                if l.to_socket.name == "Volume":
+                    wm.node_tree.links.remove(l)
+        w.data.materials.append(wm)
+        if smooth:
+            interior.smooth_flat(w)
+        w.cycles.is_caustics_caster = mnee
+    ld = bpy.data.lights.new("L", kind)
+    ld.energy = 100.0
+    if kind == "SPOT":
+        ld.spot_size, ld.shadow_soft_size = math.radians(60), 0.03
+    elif kind == "POINT":
+        ld.shadow_soft_size = 0.03
+    elif kind == "SUN":
+        ld.energy, ld.angle = 5.0, math.radians(1.0)
+    else:
+        ld.size = 0.1
+    ld.cycles.is_caustics_light = mnee
+    lo = bpy.data.objects.new("L", ld); sc.collection.objects.link(lo)
+    lo.location = (0, 0, 2.0)
+    cam = bpy.data.objects.new("cam", bpy.data.cameras.new("cam")); sc.collection.objects.link(cam)
+    cam.data.lens = 50
+    cam.location = (0.0, -3.0, 1.0)
+    cam.rotation_euler = (math.radians(90 - math.degrees(math.atan2(2.2, 3.0))), 0, 0)   # aim at floor centre
+    sc.camera = cam
+    sc.render.resolution_x = sc.render.resolution_y = 64
+    bpy.ops.render.render()
+    sc.render.image_settings.file_format = "OPEN_EXR"
+    bpy.data.images["Render Result"].save_render(TMP)
+    im = bpy.data.images.load(TMP)
+    a = np.empty(len(im.pixels), dtype=np.float32); im.pixels.foreach_get(a)
+    px = a.reshape(64, 64, 4)[:, :, :3]
+    c = px[26:38, 26:38].reshape(-1, 3)
+    return tuple(c.mean(0).round(4)), round(float(c.mean(1).std() / max(c.mean(), 1e-6)), 3)
+
+
+cases = [dict(water="none", kind="SPOT"), dict(water="box", kind="SPOT"), dict(water="plane", kind="SPOT"),
+         dict(water="plane", kind="SPOT", cuts=40), dict(water="plane", kind="SUN", cuts=40),
+         dict(water="plane", kind="SPOT", cuts=40, volume=True)]
+for kw in cases:
+    print("MNEE-TEST", kw, "floor centre rgb, rel. noise:", run(**kw))
+os.remove(TMP)

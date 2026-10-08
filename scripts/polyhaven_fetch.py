@@ -1,0 +1,114 @@
+"""Download Poly Haven (CC0) HDRIs and PBR textures into the local library.
+
+Assets are CC0. Data comes from the live API at api.polyhaven.com -- Powered by Poly Haven.
+
+Usage:
+    python polyhaven_fetch.py hdri  <id> [<id> ...] [--res 4k]
+    python polyhaven_fetch.py tex   <id> [<id> ...] [--res 2k]
+    python polyhaven_fetch.py search <hdris|textures> <category> [--top 10]
+"""
+import argparse
+import hashlib
+import json
+import os
+import urllib.parse
+import urllib.request
+
+API = "https://api.polyhaven.com"
+UA = {"User-Agent": "ArchvizBlenderPipeline/0.1"}
+PROJECT = os.environ.get("ARCHVIZ_PROJECT") or os.path.expanduser(r"~\PROJECT\ARCHVIZ_BLENDER")
+LIB = os.path.join(PROJECT, "library", "polyhaven")
+
+# Poly Haven map key -> (local suffix, preferred formats). "arm" = AO/Rough/Metal packed in R/G/B.
+TEX_MAPS = {
+    "Diffuse": ("diff", ("jpg",)),
+    "arm": ("arm", ("jpg",)),
+    "nor_gl": ("nor_gl", ("jpg", "png")),
+    "Displacement": ("disp", ("png", "jpg")),
+}
+
+
+def _get(url):
+    with urllib.request.urlopen(urllib.request.Request(url, headers=UA)) as r:
+        return json.load(r)
+
+
+def _download(url, dst, md5=None):
+    if os.path.exists(dst) and md5 and hashlib.md5(open(dst, "rb").read()).hexdigest() == md5:
+        return "cached"
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    tmp = dst + ".part"
+    with urllib.request.urlopen(urllib.request.Request(url, headers=UA)) as r, open(tmp, "wb") as f:
+        while chunk := r.read(1 << 20):
+            f.write(chunk)
+    if md5 and hashlib.md5(open(tmp, "rb").read()).hexdigest() != md5:
+        os.remove(tmp)
+        raise RuntimeError("md5 mismatch: " + url)
+    os.replace(tmp, dst)
+    return "ok"
+
+
+def _write_meta(folder, asset_id, extra):
+    info = _get(f"{API}/info/{asset_id}")
+    meta = {
+        "id": asset_id, "name": info.get("name"), "categories": info.get("categories"),
+        "tags": info.get("tags"), "authors": info.get("authors"), "license": "CC0",
+        "source": f"https://polyhaven.com/a/{asset_id}", **extra,
+    }
+    if "dimensions" in info:  # textures: real-world size in mm, used for UV scale
+        meta["dimensions_mm"] = info["dimensions"]
+    if "whitebalance" in info:
+        meta["whitebalance"] = info["whitebalance"]
+    with open(os.path.join(folder, "meta.json"), "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2)
+
+
+def fetch_hdri(asset_id, res):
+    files = _get(f"{API}/files/{asset_id}")["hdri"][res]["hdr"]
+    folder = os.path.join(LIB, "hdris", asset_id)
+    dst = os.path.join(folder, f"{asset_id}_{res}.hdr")
+    status = _download(files["url"], dst, files.get("md5"))
+    _write_meta(folder, asset_id, {"res": res, "file": os.path.basename(dst)})
+    print(f"hdri {asset_id} {res}: {status}")
+
+
+def fetch_tex(asset_id, res):
+    files = _get(f"{API}/files/{asset_id}")
+    folder = os.path.join(LIB, "textures", asset_id)
+    maps = {}
+    for key, (suffix, fmts) in TEX_MAPS.items():
+        entry = files.get(key, {}).get(res, {})
+        fmt = next((f for f in fmts if f in entry), None)
+        if not fmt:
+            continue
+        dst = os.path.join(folder, f"{asset_id}_{suffix}_{res}.{fmt}")
+        _download(entry[fmt]["url"], dst, entry[fmt].get("md5"))
+        maps[suffix] = os.path.basename(dst)
+    _write_meta(folder, asset_id, {"res": res, "maps": maps})
+    print(f"tex  {asset_id} {res}: {sorted(maps)}")
+
+
+def search(kind, category, top):
+    d = _get(f"{API}/assets?t={kind}&c={urllib.parse.quote(category)}")
+    for k, v in sorted(d.items(), key=lambda kv: -kv[1].get("download_count", 0))[:top]:
+        print(f"{k:40s} {v['name']}")
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("cmd", choices=["hdri", "tex", "search"])
+    p.add_argument("ids", nargs="+")
+    p.add_argument("--res")
+    p.add_argument("--top", type=int, default=10)
+    a = p.parse_args()
+    if a.cmd == "search":
+        search(a.ids[0], a.ids[1], a.top)
+    for i in a.ids if a.cmd != "search" else ():
+        try:
+            (fetch_hdri if a.cmd == "hdri" else fetch_tex)(i, a.res or ("4k" if a.cmd == "hdri" else "2k"))
+        except Exception as ex:
+            print(f"FAILED {i}: {ex}")
+
+
+if __name__ == "__main__":
+    main()

@@ -21,7 +21,7 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
 - Sun matched to the HDRI: `sun_from_direction(dir, lux)` (strength W/m² = lux/683).
 - Sky Texture `MULTIPLE_SCATTERING` (5.2 name): calibrate with a white-plane render.
 
-## Artificial light (formulas measured to 0.2 %, `tools/controls/light_units.py`)
+## Artificial light (formulas measured to 0.2 %, `scripts/controls/light_units.py`)
 Convert from the lumens printed on the fixture — that is the number a lighting schedule gives you.
 
 - **Spot/point = point-equivalent**: power is for the full sphere, the cone only masks.
@@ -91,14 +91,14 @@ Convert from the lumens printed on the fixture — that is the number a lighting
    the horizon disagreed by ~1 m in plan (261007). Trust points far from the horizon — soffit
    edges high in the frame, floor points near the camera — and treat near-horizon readings as
    loose. When two readings disagree, ask which one is well conditioned before adding geometry.
-6. Check the Rhino model before Blender: `tools/rhino/project_edges.py` (in Rhino via Rook,
-   with the solved camera) + `tools/edge_overlay.py` draws its edges over the reference. Rook
+6. Check the Rhino model before Blender: `scripts/rhino/project_edges.py` (in Rhino via Rook,
+   with the solved camera) + `scripts/edge_overlay.py` draws its edges over the reference. Rook
    viewport captures ignore the requested size, so a lens-shifted named view captures wrong.
 7. `archviz.framing_render()` + `refmatch.py pair --overlay`; move geometry, not the camera, once
    the vanishing point and one height match.
 
 ### Camera from a repeated element (colonnade, mullions, bays)
-Code: `tools/refsolve.py readings.json` (and `Solve.floor_pt / plane_pt / pt_at_z / fit_circle /
+Code: `scripts/refsolve.py readings.json` (and `Solve.floor_pt / plane_pt / pt_at_z / fit_circle /
 blender()` from a study script). Read the base and top of every repeat at full resolution (ticked
 2x crops, not the downscaled frame). Then:
 - Lines through the bases and through the tops meet at the façade vanishing point; its y is the

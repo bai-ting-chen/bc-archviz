@@ -15,8 +15,15 @@ description: >-
 # Blender archviz
 
 Verified on Blender 5.2.2 LTS, Blender Lab MCP 1.0.3, import_3dm 0.0.18, RTX 3060 Ti 8 GB (OptiX),
-Windows 10/11. Project: `%USERPROFILE%\PROJECT\ARCHVIZ_BLENDER` (the repo
-github.com/bai-ting-chen/archviz-blender; paths below are relative to it).
+Windows 10/11.
+
+**Two places.** The skill folder (this repo, github.com/bai-ting-chen/blender-archviz-skill) holds
+method *and* code: `RULES.md`, `references/`, `scripts/` — generic, synced between machines.
+The project folder `%USERPROFILE%\PROJECT\ARCHVIZ_BLENDER` (env `ARCHVIZ_PROJECT` overrides) holds
+data and machine setup: `library/`, `studies/`, `.mcp.json`, `tools/blender-mcp-server` (venv +
+installers). `scripts\…` paths below are in the skill; `library\`, `studies\`, `tools\` in the
+project. **Never put project files, study scripts, scenes or renders in the skill repo** (user,
+2026-10-08) — a recipe that works goes into `scripts/` only once it is scene-independent.
 
 ## Preflight — copy into your first response and tick off
 ```
@@ -37,17 +44,17 @@ github.com/bai-ting-chen/archviz-blender; paths below are relative to it).
 |---|---|
 | Blender | `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` |
 | MCP | server `.mcp.json` → `tools\blender-mcp-server\.venv`; add-on `mcp` autostarts on 127.0.0.1:9876 (needs Prefs → *Allow Online Access*) |
-| Helpers (run in Blender) | `tools\blender\`: `archviz` (import, UVs, HDRI, camera, render), `study_materials`, `interior` (lights in lumens, stone, steel, water), `lookdev` (measured-albedo PBR, vertical boards, long pavers, sheers, glass shells, per-instance tone), `scatter` (GN leaf litter / foliage), `wear`, `wood_wear`, `glassware`, `gn_caustics`, `caustic_photons`, `render_variant` |
-| Measure | `tools\imgstats.py stats|patch|diff`; `tools\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python |
-| Geometry check | `tools\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `tools\edge_overlay.py edges.json ref.png out.png` |
-| Reference recreation | `tools\refsolve.py readings.json` (camera from a repeated element + image→plan); `tools\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
-| Controls | `tools\controls\light_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`) |
-| Assets | `tools\polyhaven_fetch.py` → `library\polyhaven\`; others `library\local\` |
-| Video research | `tools\yt_learn.py` |
+| Helpers (run in Blender) | `scripts\blender\`: `archviz` (import, UVs, HDRI, camera, render), `study_materials`, `interior` (lights in lumens, stone, steel, water), `lookdev` (measured-albedo PBR, vertical boards, long pavers, sheers, glass shells, per-instance tone), `scatter` (GN leaf litter / foliage), `wear`, `wood_wear`, `glassware`, `gn_caustics`, `caustic_photons`, `render_variant` |
+| Measure | `scripts\imgstats.py stats|patch|diff`; `scripts\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python |
+| Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\edge_overlay.py edges.json ref.png out.png` |
+| Reference recreation | `scripts\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
+| Controls | `scripts\controls\light_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`) |
+| Assets | `scripts\polyhaven_fetch.py` → `library\polyhaven\`; others `library\local\` |
+| Video research | `scripts\yt_learn.py` |
 
-In Blender code: `sys.path.insert(0, os.path.expanduser(r"~\PROJECT\ARCHVIZ_BLENDER\tools\blender"))`.
+In Blender code: `sys.path.insert(0, os.path.expanduser(r"~\.claude\skills\blender-archviz\scripts\blender"))`.
 Without the MCP tools loaded (session started elsewhere), drive Blender with
-`tools/mcp_call.py execute_blender_code --file script.py`; the script must assign a **dict** to `result`.
+`scripts/mcp_call.py execute_blender_code --file script.py`; the script must assign a **dict** to `result`.
 Anything in a Blender panel is RNA → scriptable via MCP `execute_blender_code`. Not scriptable:
 hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 (`search_manual_docs`, `get_python_api_docs`) — the authority for generic Blender facts.

@@ -18,7 +18,7 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Layered BRDF | Mix Shader | solid |
 | White-backdrop product shot | Light Path *Is Camera Ray* backdrop | solid |
 | Headless batch | `blender -b … render_variant.py` | solid |
-| Model-vs-reference geometry check | `tools/rhino/project_edges.py` + `tools/edge_overlay.py` | solid |
+| Model-vs-reference geometry check | `scripts/rhino/project_edges.py` + `scripts/edge_overlay.py` | solid |
 | Matching overcast HDRI | tag shortlist → equirect strip with elevation lines → rotation formula | solid |
 | Burnished / polished white concrete | low roughness clouds, two-scale tone, stretched-noise trowel marks | solid (261007) |
 | Faint dirty arris on huge meshes | shader Bevel normal vs true normal mask | solid, control-proved |

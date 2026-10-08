@@ -10,6 +10,15 @@ git clone https://github.com/bai-ting-chen/blender-archviz-skill.git %USERPROFIL
 ```
 Update later with `git pull` in that folder.
 
-The skill drives code in the project folder `ARCHVIZ_BLENDER` — its own private repo
-github.com/bai-ting-chen/archviz-blender (setup in its README); paths assume `%USERPROFILE%\PROJECT\ARCHVIZ_BLENDER`. Setup of Blender,
-the MCP server and add-ons: `references/pipeline.md`.
+Method and code travel together: `scripts/` holds the helpers run inside Blender
+(`scripts/blender/`), in Rhino via Rook (`scripts/rhino/`), headless controls (`scripts/controls/`)
+and host tools (measurement, reference matching, asset fetch, MCP client). Run host tools with the
+MCP server's venv python (it has numpy + Pillow).
+
+Data and machine setup stay in the project folder `%USERPROFILE%\PROJECT\ARCHVIZ_BLENDER` (private
+repo github.com/bai-ting-chen/archviz-blender; override with env `ARCHVIZ_PROJECT`): `library/`,
+`studies/`, `.mcp.json`, MCP server venv and installers. Setup of Blender, the MCP server and
+add-ons: `references/pipeline.md`.
+
+**Never commit project files, study scripts, scenes or renders here** — only scene-independent
+methods and code.

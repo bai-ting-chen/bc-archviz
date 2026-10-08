@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+# never: project data, scenes, renders
+*.blend
+*.blend1
+*.3dm
+*.png
+*.jpg
+*.exr
+*.hdr
+studies/
+library/

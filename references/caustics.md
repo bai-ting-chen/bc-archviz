@@ -11,7 +11,7 @@
 The ranking is the knowledge; the measured ratios behind it are in the study. Rerun the
 comparison when the scene is unlike these cases.
 
-## MNEE build rules (measured, `tools/controls/mnee_water.py`)
+## MNEE build rules (measured, `scripts/controls/mnee_water.py`)
 - Flags: `obj.cycles.is_caustics_caster` / `is_caustics_receiver`, `light.cycles.is_caustics_light`.
 - The caster must be **tessellated and smooth**. One flat quad or a closed box gives no light at
   all; water as a diced, smoothed top plane works (`interior.water_surface`).
