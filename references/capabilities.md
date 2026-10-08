@@ -18,3 +18,11 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Layered BRDF | Mix Shader | solid |
 | White-backdrop product shot | Light Path *Is Camera Ray* backdrop | solid |
 | Headless batch | `blender -b … render_variant.py` | solid |
+| Model-vs-reference geometry check | `tools/rhino/project_edges.py` + `tools/edge_overlay.py` | solid |
+| Matching overcast HDRI | tag shortlist → equirect strip with elevation lines → rotation formula | solid |
+| Burnished / polished white concrete | low roughness clouds, two-scale tone, stretched-noise trowel marks | solid (261007) |
+| Faint dirty arris on huge meshes | shader Bevel normal vs true normal mask | solid, control-proved |
+| Wind ripples on a pool | Ocean DISPLACE on a 2-3 cm mesh, slight chop | solid |
+| Pool water, reflective + slightly clear | IOR 1.333 transmission + Volume Absorption + Scatter (volume_bounces > 0) | solid |
+| Opaque stylised pool | opaque diffuse body under IOR 1.333 surface (declared) | solid |
+| Wet surround, splashes, dried marks | analytic edge distance mask; dry**1.4 + coat film IOR 1.33; patchy by noise | test (261007) |

@@ -3,6 +3,14 @@
 One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera exposure).
 
 ## Daylight
+- **Matching an HDRI to a reference** (RULES 8a). Shortlist by tags from the Poly Haven API
+  (`api.polyhaven.com/assets?t=hdris`: overcast/clear, forest/park/urban...), then judge on the
+  equirect itself, not the thumbnail sphere: tone-map a 1024 px strip in Blender, draw elevation
+  lines at 0° and the reference's horizon-content height (tree tops read ~10° above the horizon
+  → `(horizon_y − top_y)/f` rad). Reject maps whose horizon content sits metres from the HDRI
+  camera (it fills the sky and leaves nothing bright for water/glass to reflect — 261007's
+  first pick). Rotation that puts equirect column u at world azimuth a (deg from +X):
+  `ROT = 360·(0.5 − u) − a` (Mapping Z rotation, Cycles `u = 0.5 − atan2(y, x)/2π`).
 - `archviz.hdri_analyse(id, rot)` integrates the upper hemisphere -> lux at strength 1 and the
   sun direction (luminance centroid of the top 0.05 % texels). `world_hdri_lux(id, target_lux)`
   scales it. Measure the HDRI rather than remembering it — every file differs, and the tool is
@@ -78,7 +86,15 @@ Convert from the lumens printed on the fixture — that is the number a lighting
    `shift_x = -(vp_x - W/2)/W`, `shift_y = (horizon_y - H/2)/W` (pixels from the top).
    Verify by projecting a far point on the axis with `world_to_camera_view` — it must land on the
    measured vanishing point. Never trust the first framing render by eye.
-5. `archviz.framing_render()` + `refmatch.py pair --overlay`; move geometry, not the camera, once
+5. **Conditioning of readings.** Depth from a floor point is `f·eye/(y − horizon)`: a point a
+   few pixels below the horizon swings metres per pixel. Two floor lines read 2-3 px apart near
+   the horizon disagreed by ~1 m in plan (261007). Trust points far from the horizon — soffit
+   edges high in the frame, floor points near the camera — and treat near-horizon readings as
+   loose. When two readings disagree, ask which one is well conditioned before adding geometry.
+6. Check the Rhino model before Blender: `tools/rhino/project_edges.py` (in Rhino via Rook,
+   with the solved camera) + `tools/edge_overlay.py` draws its edges over the reference. Rook
+   viewport captures ignore the requested size, so a lens-shifted named view captures wrong.
+7. `archviz.framing_render()` + `refmatch.py pair --overlay`; move geometry, not the camera, once
    the vanishing point and one height match.
 
 ### Camera from a repeated element (colonnade, mullions, bays)
@@ -100,6 +116,11 @@ blender()` from a study script). Read the base and top of every repeat at full r
 - Keep the solve as a small script in the study: every later geometry question becomes one call.
 
 ### Geometry readings
+- **Clean geometry, not a pixel match** (user, 2026-10-08). Model like an architect: one arc
+  per curved edge (3-point arc through start, apex, end readings), straight where straight.
+  Splines through point readings look sloppy, and multi-arc fitting to pixels costs far more time
+  than it returns. Check once with an edge overlay (project the model's edges through the solved
+  camera onto the reference), then stop at the Rhino approval gate (RULES 10a).
 - When a reading fits one cue but not the structure (a beam that "ends" at another beam's soffit,
   a member too thin to span), prefer the structurally plausible reading — a downstand beam runs to
   the slab — and fix the light instead. If still ambiguous, state the reading and let the user

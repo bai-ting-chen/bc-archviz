@@ -40,6 +40,14 @@ Fallback CLI client: `tools/mcp_call.py <tool> [json | --file script.py]`.
   `f.Write(path, 7)`. Meshes need no cached render mesh, and `objectsCreated` stays 0 in the
   user's document. Keep the builder as a parameter script in the study, run with
   `exec(open(path).read())` through Rook.
+- **No Rhino open**: `rhino_launch` starts an owned workbench (empty document) — safe to build in.
+- **RhinoCommon traps**: `Extrusion.Create(curve, h, cap)` follows the curve's plane normal, so a
+  clockwise outline extrudes *down* (jambs and a canopy hung below their datum). Use
+  `Surface.CreateExtrusion(curve, Vector3d(0, 0, h))` + `CapPlanarHoles`. `Curve.Offset(…, 0)`
+  returns None. `RhinoViewport.SetFrustum` does not exist: build a `ViewportInfo`, `SetFrustum`
+  on it, then `SetViewProjection`.
+- **Clean curves**: `ArcCurve(Arc(p0, p1, p2))` through three readings; extend with
+  `CurveExtensionStyle.Arc` so the extension keeps the radius (RULES 4a).
 - `archviz.import_rhino` options: layers as collections, instances, named views → cameras, hidden
   objects/layers skipped, merge by distance; materials removed; mm → m. Delete any leftover `V-Ray Infinite Plane` object (older .3dm files carry one).
 - Always start from `read_homefile(use_empty=True)` (importing into an edited factory scene failed once).

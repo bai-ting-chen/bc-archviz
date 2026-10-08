@@ -34,6 +34,8 @@
   treat 0 as meaningful.
 
 ## Render / images
+- `cycles.volume_bounces` defaults to **0**: Volume Scatter then only removes light (murky,
+  dark water/haze). Set 2-4 whenever a volume scatters.
 - Ray visibility (`visible_diffuse / visible_transmission …`) follows the type of the LAST bounce.
 - Lights created from Python default to `visible_camera = False`: a "visible bulb" point light
   renders nothing until you set it.

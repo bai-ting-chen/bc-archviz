@@ -17,15 +17,25 @@
    (c) external tools only when nothing native works — tell the user. Fakes (light-path tricks,
    projected patterns) only as a declared fallback. The point of the studies is renders that
    hold up as physics, so a bias must always be named, never hidden.
-3. **Research before anything new.** Manual/API, forums, YouTube (`yt_learn.py`); compare 2–4
-   workflows, choose by 1–2, cite sources, then build and prove. Building first and researching
-   late is how the caustics work drifted (261006). Videos are evidence, not authority.
+3. **Research before anything new — from the physics down, not from tutorials up.** Order:
+   (a) the mechanism: optics/physics papers, measured data, the governing equations (why does wet
+   concrete darken? Lekner–Dorf: internal reflection in the water film, non-linear in albedo);
+   (b) how others implement it: manual/API, forums, papers' renderers, YouTube (`yt_learn.py`);
+   (c) map the model onto native nodes and say which terms are kept and which approximated.
+   Compare 2–4 workflows, choose by 1–2, cite sources, then build and prove. More and more
+   requests will be things few people have done in Blender or archviz (user, 2026-10-08): a
+   tutorial can only copy a look, the science lets you build a new method and know its limits.
+   Building first and researching late is how the caustics work drifted (261006). Videos are
+   evidence, not authority.
 
 ## Split
 4. **Rhino = geometry only.** Materials, lights, camera look and render settings live in Blender
    (one place to edit the look; Rhino materials don't translate). Layer/block/object names are the
    hooks; discard .3dm materials. Rhino files are read-only; re-meshing imported meshes is fine.
 
+4a. **Rhino models are clean and fast** (user, 2026-10-08): one arc per curved edge, straight
+    where straight, a few key readings per edge — not splines through readings or arcs fitted
+    to pixels. Check once with `tools/edge_overlay.py`, then the approval gate (10a).
 ## Look
 5. **Real units everywhere.** Daylight: calibrated HDRI in lux + matched sun. Artificial: lumens at
    683 lm/W — the same constant the camera uses, so a real ISO/f/shutter gives the right exposure
@@ -43,6 +53,21 @@
    joints, ripples and grunge all read by how many pixels they occupy, so the same material wants
    different numbers on a close-up and on a wall 4 m away. Judge the first render and scale.
 
+8a. **Natural light = matching HDRI sky first** (user, 2026-10-07). Whenever sun, sky or any
+   daylight is in the scene, light it with an HDRI whose sky matches the reference (overcast vs
+   clear, sun height and direction, horizon content) before any Sky Texture, sun-only rig or
+   fake. Search Poly Haven by tag/thumbnail for the match; fall back to Sky Texture only when no
+   HDRI fits, and say so.
+8b. **Detail pass at native resolution** (user praised, 2026-10-08). Region means match long
+    before the image does. Once they agree, crop each material/effect at full resolution beside
+    the same crop of the reference and judge its *character*: feature size, edge sharpness,
+    contrast, density, orientation, distribution. The trowel marks matched in mean but read as
+    thin bright scratches against the ref's soft wisps — only the crop showed it. Repeat after
+    every change to that feature; half-res pairs hide it.
+8c. **Nature is patchy, never continuous or uniform** (user, 2026-10-08). Wetness, stains,
+    wear, dirt, splashes: large here, small there, absent elsewhere. A constant-width band or a
+    contour ring reads as impossible. Drive extent with a slow noise that can reach zero, and
+    give marks a physical shape (dried splash = blob darker at its rim, not a line).
 ## Process
 9. **A control render is the only proof.** Feature OFF + same scene twice (noise floor; same seed
    for the feature diff); read *changed > 2 %* and look at a diff/crop; verify the control really
@@ -51,6 +76,10 @@
 10. Measure on the PNG the renderer wrote (`imgstats.py`, `refmatch.py`) — AgX rolls off whites,
     so linear values mislead. Process frames → study `_wip/`; finals through the open Blender UI
     so the user sees them.
+10a. **Rhino → Blender gate** (user, 2026-10-07). After the Rhino model is finished, stop and
+    show the user (viewport captures + a list of what was modelled and left out); pipe to
+    Blender only after the user approves the geometry. Rework in Rhino is cheap, a look-dev
+    round on wrong geometry is not.
 11. Bisect odd behaviour in a minimal headless scene (`tools/controls/`) before tuning the real
     one — the MNEE and green-ceiling problems were each found in minutes that way.
 

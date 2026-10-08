@@ -26,7 +26,8 @@ github.com/bai-ting-chen/archviz-blender; paths below are relative to it).
 - [ ] Rhino: which document is open, is it modified? A user's file stays untouched — write
       the study geometry with File3dm (pipeline.md)
 - [ ] Local studies? read `studies/README.md` + the latest STUDY_NOTES.md (open items carry over)
-- [ ] New technique? research + compare workflows first (RULES 3)
+- [ ] New technique? research the physics first, then compare workflows (RULES 3)
+- [ ] Before every "done": native-resolution crop pass of each material vs the ref (RULES 8b)
 - [ ] Look decision? profile the Render Reference Library slice
 - [ ] Assets the recipe loads exist locally (`library/` is not in git — a fresh machine has none)
 ```
@@ -38,6 +39,7 @@ github.com/bai-ting-chen/archviz-blender; paths below are relative to it).
 | MCP | server `.mcp.json` → `tools\blender-mcp-server\.venv`; add-on `mcp` autostarts on 127.0.0.1:9876 (needs Prefs → *Allow Online Access*) |
 | Helpers (run in Blender) | `tools\blender\`: `archviz` (import, UVs, HDRI, camera, render), `study_materials`, `interior` (lights in lumens, stone, steel, water), `lookdev` (measured-albedo PBR, vertical boards, long pavers, sheers, glass shells, per-instance tone), `scatter` (GN leaf litter / foliage), `wear`, `wood_wear`, `glassware`, `gn_caustics`, `caustic_photons`, `render_variant` |
 | Measure | `tools\imgstats.py stats|patch|diff`; `tools\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python |
+| Geometry check | `tools\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `tools\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `tools\refsolve.py readings.json` (camera from a repeated element + image→plan); `tools\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
 | Controls | `tools\controls\light_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`) |
 | Assets | `tools\polyhaven_fetch.py` → `library\polyhaven\`; others `library\local\` |
@@ -53,11 +55,12 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 ## Workflow
 1. **Rhino** (Rook): geometry on named layers; force render meshes; save `.3dm` — or, when the
    user has their own file open, build meshes into a `File3dm` and write it (pipeline.md).
+   **Gate: stop and get the user's approval of the model before step 2** (RULES 10a).
 2. **Import**: `bpy.ops.wm.read_homefile(use_empty=True)`, `archviz.import_rhino(path)` → layer
    collections, blocks → instances, named views → cameras, materials dropped, mm → m.
 3. **UVs**: `archviz.box_uv(obj, size_m)`; wood `wood_wear.grain_uv(obj, tex_size_m, axis)`.
 4. **Materials** by layer → `references/materials.md`.
-5. **Light**: daylight `archviz.world_hdri_lux` + matched sun; artificial `interior.downlight /
+5. **Light**: daylight = a **matching HDRI sky first** (RULES 8a), `archviz.world_hdri_lux` + matched sun; artificial `interior.downlight /
    led_strip / lens_luminance` → `references/lighting-camera.md`.
 6. **Camera**: `archviz.physical_camera(cam, iso, f, shutter, focal)`, `straighten_verticals`,
    white balance if lights are warm. From a reference image: `refmatch.py grid` → solve the
@@ -96,6 +99,10 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | An area renders black that is bright in the ref | it is roofed in the model but open to the sky in the ref — check sky access |
 | Visible joint grid on walls / a curved wall | texture tile edges — rotate/flatten the map (materials › Tiled maps) |
 | Edited look script fails to run | a scripted edit put a `#` comment mid-call — syntax-check the scripts in the runner (pipeline) |
+| Water/haze volume murky and dark | `cycles.volume_bounces` defaults to 0 — set 2-4 |
+| Rhino boxes/slabs hang below their datum | `Extrusion.Create` follows the curve normal — `Surface.CreateExtrusion` (pipeline) |
+| Ripples look fake or stretched | noise bump — Ocean geometry on a finer mesh, never stretch (materials › Water) |
+| Numbers match, image doesn't | native-resolution crop pass beside the ref (RULES 8b) |
 | Poly Haven download `HTTP Error 52x` | Cloudflare hiccup — retry the same call |
 
 More traps: `references/api-traps.md`.

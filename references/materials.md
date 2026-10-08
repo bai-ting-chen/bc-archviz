@@ -70,6 +70,18 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
 - Fresh breaks under direct floods want their tint only *barely* above the surface; a visibly
   lighter paste reads as white paint flecks when lit head-on.
 
+### Burnished / polished white concrete (microcement, soffits)
+- Reads glossy, not matte: roughness ~0.2-0.35 varied in soft clouds; the plaster relief mostly
+  polished off (bump < 1 mm). Tone clouds at two scales need ±7-13 % to survive lighting
+  gradients — ±5 % renders as perfectly clean. Trowel marks: a noise stretched ×4 (not ×10 —
+  that draws parallel lines), rotated, high distortion, thresholded to its top few percent and
+  clustered by a patch mask, lighter and smoother than the field.
+- Next to a turquoise pool, a neutral white soffit renders cyan from the bounce: warm the albedo
+  to land on the reference's grey-green rather than relighting.
+- Faint dirty arris on huge meshes (30 m slabs, canopies): shader **Bevel normal vs true
+  normal** as the edge mask (no dicing needed) — GN `edge_dist` would need the mesh diced.
+  ~-15-20 % with noise breakup is "very faint"; -10 % was below visibility in a control.
+
 ### Tiled maps with joints
 - Formwork and panel textures carry joint lines at their tile edges. Box UVs computed from world
   coordinates put a joint at world 0 — usually the camera axis, where it becomes one long line
@@ -149,6 +161,24 @@ Anisotropic + Tangent.
 - Rippled sunlit pool: Ocean modifier on a diced plane — no choppiness on short waves, and
   `wave_scale_min` >= 5 x grid spacing or the waves alias. Short wavelengths give the tight
   caustic networks; long swell does not.
+- **Wind ripples are geometry, not a bump.** A noise bump faking short ripples reads artificial,
+  and stretching it "because ripples look flat" doubles what perspective already does — never
+  stretch. Dice the surface finer (2-3 cm) and let the Ocean carry them (wave_scale_min >= 5 x
+  cell, a little choppiness ~0.4 for crisp crests; check for downward faces = folds). Keep only a
+  ~1 mm micro bump in the shader. Size the swell by RMS slope, not just amplitude.
+- **Wet surround (pool coping, splash zone)**: wet porous albedo falls non-linearly and
+  saturates (Lekner & Dorf 1988; Jensen et al. 1999) -> wet colour = dry ** ~1.4 (Gamma node;
+  1.8 turns a warm white beige-brown and reads as dirt), roughness ~0.1, plus a water film as
+  Principled coat (IOR 1.33, rough ~0.03). When the edge is an arc, mask by the analytic
+  distance d = R - |P.xy - C| (no mesh density); ragged splash band by noise-pushed d, Voronoi
+  drops thinning with d, faint darker tide rings beyond, scum band at the waterline on vertical
+  faces. Gate by height so canopies and far floors stay dry.
+  **Never a continuous band or ring** (user): real splashes are large here, small there, absent
+  elsewhere — drive the band width with a slow noise along the edge (down to negative = dry),
+  and make dried marks blobs darker at their rim (coffee-ring) rather than contour lines.
+- **Opaque pool look** (user-requested stylisation): opaque diffuse body under an exact IOR 1.333
+  surface. Declare it; near-field sky reflection is Fresnel-limited (~6-12 % at 55-65 deg), so a
+  reference that is near-white there is showing a pale floor through clear water.
 - To try (manual-confirmed): **Volume Coefficients** node (absorption per channel in 1/m, from
   measured water absorption) + Volume Scatter phase **Fournier-Forand** (IOR 1.0-1.2,
   backscatter) for haze and light shafts; noise -> roughness for wind patches; Gabor texture for
