@@ -13,11 +13,11 @@ Update later with `git pull` in that folder.
 Method and code travel together: `scripts/` holds the helpers run inside Blender
 (`scripts/blender/`), in Rhino via Rook (`scripts/rhino/`), headless controls (`scripts/controls/`)
 and host tools (measurement, reference matching, asset fetch, MCP client). Run host tools with the
-MCP server's venv python (it has numpy + Pillow).
+MCP server's venv python, `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python` (it has numpy + Pillow).
 
 Data and machine setup stay in the project folder `%USERPROFILE%\PROJECT\ARCHVIZ_BLENDER` (private
 repo github.com/bai-ting-chen/archviz-blender; override with env `ARCHVIZ_PROJECT`): `library/`,
-`studies/`, `.mcp.json`, MCP server venv and installers. Setup of Blender, the MCP server and
+`studies/`. The Blender MCP server is a per-machine install in `%LOCALAPPDATA%\BlenderMCP\`. Setup of Blender, the MCP server and
 add-ons: `references/pipeline.md`.
 
 **Never commit project files, study scripts, scenes or renders here** — only scene-independent

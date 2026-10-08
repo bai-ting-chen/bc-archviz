@@ -4,23 +4,28 @@
 - Blender: `winget install --id BlenderFoundation.Blender --version 5.2.2 --exact` — winget
   upgrades in place (removed 5.0.1); use the portable zip for side-by-side versions.
 - MCP (Blender Lab, projects.blender.org/lab/blender_mcp, Blender ≥ 5.1): `mcp-<v>.zip` = add-on,
-  `blender-<v>.mcpb` = server (unzip, `pip install .` into a venv). The site is behind Cloudflare;
+  `blender-<v>.mcpb` = server. Installers are downloaded when needed, not kept. The site is behind Cloudflare;
   Gitea API `/api/v1/repos/lab/blender_mcp/...` works with curl.
 - Add-on from file: `blender -c extension install-file -r user_default --enable <zip>`.
 - Prefs: MCP `use_autostart`, port 9876; Cycles `compute_device_type = OPTIX`;
   `system.use_online_access = True` (required even for localhost).
-- Claude Code: `.mcp.json` + `.claude/settings.local.json` `enabledMcpjsonServers`; tools load at
-  session start. Server env: `BLENDER_MCP_HOST/PORT`, `BLENDER_PATH`.
+- Server install (per machine, like Rook in `%LOCALAPPDATA%\Rook`): unzip the `.mcpb` into
+  `%LOCALAPPDATA%\BlenderMCP\app`, `python -m venv %LOCALAPPDATA%\BlenderMCP\venv`, then
+  `venv\Scripts\pip install app numpy pillow`. A venv can't be moved (absolute paths) — rebuild it.
+- Claude Code, user scope (every project): `claude mcp add-json blender
+  '{"type":"stdio","command":"<LOCALAPPDATA>/BlenderMCP/venv/Scripts/blender-mcp.exe","env":{...}}'
+  --scope user`; check with `claude mcp get blender`. A project `.mcp.json` named `blender`
+  overrides it — don't keep one. Tools load at session start. Server env: `BLENDER_MCP_HOST/PORT`, `BLENDER_PATH`.
 - download.blender.org can answer winget with **403**. Fetch the same MSI from an official
   mirror (`mirrors.ocf.berkeley.edu/blender/release/…`, `mirror.clarkson.edu/blender/…`) and
   check its SHA256 against `winget show --id BlenderFoundation.Blender --version <v> --exact`
   before installing (`msiexec /i … /qn`, elevated — the user must accept the UAC prompt).
-- The MCP server needs Python ≥ 3.10 (3.14 works). Add `numpy pillow` to its venv for
+- The MCP server needs Python ≥ 3.10 (3.14 works). `numpy pillow` in its venv serve
   `refmatch.py` / `imgstats.py`.
 - Set prefs headless: `blender -b --python set_prefs.py` with `bpy.ops.wm.save_userpref()`
   (online access, MCP autostart/port, Cycles OPTIX + `refresh_devices()`).
-- On a new machine the hard-coded project paths in `.mcp.json`, `CLAUDE.md` and a few tool
-  scripts may name another user — fix them in that repo; the skill itself uses `~`.
+- The skill uses `~` / `%LOCALAPPDATA%` only; the project folder defaults to
+  `~\PROJECT\ARCHVIZ_BLENDER` (env `ARCHVIZ_PROJECT` overrides).
 
 ## MCP tools
 `execute_blender_code` (assign a dict to `result`), `get_objects_summary`,

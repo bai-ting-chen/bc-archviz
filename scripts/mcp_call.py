@@ -13,9 +13,10 @@ import sys
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-PROJECT = os.environ.get("ARCHVIZ_PROJECT") or os.path.expanduser(r"~\PROJECT\ARCHVIZ_BLENDER")
-# the MCP server venv is machine setup and stays in the project (tools/blender-mcp-server)
-SERVER = os.path.join(PROJECT, "tools", "blender-mcp-server", ".venv", "Scripts", "blender-mcp.exe")
+# the MCP server is a per-machine install, like Rook: %LOCALAPPDATA%\BlenderMCP\{app,venv}
+SERVER = os.environ.get("BLENDER_MCP_EXE") or os.path.join(
+    os.environ.get("LOCALAPPDATA", os.path.expanduser(r"~\AppData\Local")),
+    "BlenderMCP", "venv", "Scripts", "blender-mcp.exe")
 
 
 async def main():
