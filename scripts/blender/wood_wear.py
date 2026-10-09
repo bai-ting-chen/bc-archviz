@@ -4,7 +4,7 @@ skin on the top surface that exposes the pale inner wood (both real geometry).
 Builds on wear.py (edge field, dicing, Blender 5.2 modifier inputs) and study_materials.coated_wood.
 
   round_arrises()  -- real 2.5 mm bevel (the Bevel *node* is invalid on MNEE caustic receivers)
-  grain_uv()       -- UV U runs along each piece's long axis, so the texture grain follows it
+  grain_uv()       -- alias of archviz.directional_uv (U along each piece's long axis)
   wood_wear_group()-- GN: edge_dist field; arris band + top faces subdivided; chips at arrises;
                       breaks on the top, stretched along the grain; stores `chip`, `break`
   weathered_wood() -- shader: varnish worn + grime at arrises; inner wood where chip/break > 0
@@ -36,29 +36,10 @@ def round_arrises(obj, width=0.0025, segments=2, min_angle_deg=30.0):
 
 
 def grain_uv(obj, size, name="BoxUV", axis=None, along="U"):
-    """Box UVs whose U axis follows the grain: the object's longest dimension, or world `axis`
-    ("X"/"Y"/"Z", e.g. "Z" for vertical cladding). Faces whose normal lies along the grain (end
-    grain) get the other two axes. along="V" for textures whose grain runs up the image."""
-    dims = obj.dimensions
-    grain = "XYZ".index(axis) if axis else max(range(3), key=lambda i: dims[i])
-    mw, rot = obj.matrix_world, obj.matrix_world.to_3x3()
-    bm = bmesh.new()
-    bm.from_mesh(obj.data)
-    uv = bm.loops.layers.uv.get(name) or bm.loops.layers.uv.new(name)
-    for f in bm.faces:
-        n = (rot @ f.normal).normalized()
-        ax = max(range(3), key=lambda i: abs(n[i]))
-        plane = [i for i in range(3) if i != ax]
-        u_ax = grain if grain in plane else plane[0]
-        v_ax = next(i for i in plane if i != u_ax)
-        for lp in f.loops:
-            p = mw @ lp.vert.co
-            uv_ = (p[u_ax] / size, p[v_ax] / size)
-            lp[uv].uv = uv_ if along == "U" else (uv_[1], uv_[0])
-    bm.to_mesh(obj.data)
-    bm.free()
-    obj.data.uv_layers.active = obj.data.uv_layers[name]
-    return "XYZ"[grain]
+    """Kept for existing scripts: archviz.directional_uv, which serves every directional texture
+    (not only wood)."""
+    import archviz
+    return archviz.directional_uv(obj, size, name=name, axis=axis, along=along)
 
 
 # --- Geometry Nodes ---------------------------------------------------------------------

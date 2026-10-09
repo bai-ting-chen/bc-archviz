@@ -88,7 +88,10 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
    **Gate: stop and get the user's approval of the model before step 2** (RULES 10a).
 2. **Import**: `bpy.ops.wm.read_homefile(use_empty=True)`, `archviz.import_rhino(path)` → layer
    collections, blocks → instances, named views → cameras, materials dropped, mm → m.
-3. **UVs**: `archviz.box_uv(obj, size_m)`; wood `wood_wear.grain_uv(obj, tex_size_m, axis)`.
+3. **UVs** at the texture's real size: non-directional textures (plain concrete, plaster,
+   terrazzo, mortar, gravel) `archviz.box_uv(obj, size_m)`; directional ones (wood grain, boards,
+   brushed metal, vein-cut stone, ribbed sheet, weave, long tiles) `archviz.directional_uv(obj,
+   size_m, axis)` so the direction follows the element on every face (materials.md › Choosing).
 4. **Materials** by layer → `references/materials.md`.
 5. **Light**: daylight = a **matching HDRI sky first** (RULES 8a), `archviz.world_hdri_lux` + matched sun; artificial `interior.downlight /
    led_strip / lens_luminance` → `references/lighting-camera.md`.
@@ -123,7 +126,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Submerged surfaces black under lamps | shadow rays can't pass refraction — MNEE with a diced top plane (caustics.md) |
 | Scallops on walls | spots used as washers — grazing area strip |
 | Image too cold after white balance | WB temperature = light shown neutral: raise it |
-| Grain runs across planks | `grain_uv(axis=…)`, size = texture's real size |
+| Grain / boards / brushing turns 90° between faces or runs across planks | `archviz.directional_uv(axis=…)`, size = texture's real size |
 | Out of memory on GPU | no adaptive subdivision on large diced areas; GN band detail; texture limits |
 | GN geometry renders with source's material | Object Info keeps materials — Set Material |
 | `bpy_struct[key] = val: id properties not supported` on a GN modifier | 5.2 inputs: `wear.set_input(mod, name, value)` |

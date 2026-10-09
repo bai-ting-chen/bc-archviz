@@ -41,7 +41,7 @@ several faces → dirt band wider than reach.
   that read well on a hero object look chewed on a beam several metres away.
 
 ## Wood (`wood_wear.py`)
-A real bevel on the arris (`round_arrises`) rather than a shaded one; `grain_uv`; GN dents on the
+A real bevel on the arris (`round_arrises`) rather than a shaded one; `archviz.directional_uv`; GN dents on the
 edges plus surface breaks on up-facing faces, the break noise stretched *along* the grain so it
 reads as split timber rather than dents. Shader: worn edge = varnish off + grime; exposed wood =
 the texture lifted and pulled toward a raw tint.

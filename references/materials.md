@@ -49,6 +49,14 @@ These transfer to any scene and any renderer — they are measurements of the wo
   dark, matrix albedo ~0.86, honed roughness 0.30 (chips 0.15). Bake such patterns to a
   seamless image (numpy, tileable via FFT noise + wrapped chip stamps) when the renderer has no
   procedural textures (LuxCore).
+- **Directional or not decides the UVs.** `box_uv` projects each face along its own dominant
+  axis, so the image turns 90° from one face to the next — invisible on non-directional maps
+  (plain concrete, plaster, terrazzo, mortar, gravel, most granites), wrong on anything with a
+  direction: wood grain and veneer, bamboo, board-formed concrete, brushed/linear metal,
+  vein-cut or banded stone (travertine), ribbed or corrugated sheet, woven fabric, long-format
+  tiles and pavers. Those take `archviz.directional_uv(obj, size_m, axis)`: U follows the
+  element's long axis (or the given world axis) on every face; `along="V"` when the texture's
+  direction runs up the image.
 - Variation: Object Info Random, Geometry › Random per Island (per plank/tile in one mesh).
 - Node trees in labelled frames. Mix nodes keep hidden same-named sockets → `study_materials.sock()`.
 
@@ -136,7 +144,7 @@ adaptive 1 px, last in the stack; `cycles.dicing_camera` = the render camera.
 - **Coated** `coated_wood()`: the coat trap — satin varnish is a *low* coat weight with *tight*
   coat roughness, not a strong rough coat. Spread the base roughness toward matte; don't lower
   IOR to compensate. Coat › Normal can stay smooth over bumped wood (to try).
-- Cladding: pick the plank map by its real size and run `grain_uv(obj, tex_size_m, axis)` so the
+- Cladding: pick the plank map by its real size and run `archviz.directional_uv(obj, tex_size_m, axis)` so the
   grain follows the boards. A map whose grain runs along V needs `along="V"`.
 - Battens and veneers want matte — a coat mirrors lenses as halos.
 

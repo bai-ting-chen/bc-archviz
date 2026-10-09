@@ -24,5 +24,11 @@ Check: new studies are created with their own `library/` (`polyhaven/`, `local/`
 Do: update the project `CLAUDE.md` table: assets live in each study's `library/`; a top-level
 `library/` remains only for studies that already use it (leave finished studies untouched).
 
+### 4. Directional UVs moved into archviz
+Check: `scripts/blender/archviz.py` defines `directional_uv` (it does after pulling).
+Do: nothing to run. New code calls `archviz.directional_uv(obj, size_m, axis)` for any
+directional texture (grain, boards, brushing, veining, long tiles); `wood_wear.grain_uv` still
+works as an alias for older study scripts.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.
