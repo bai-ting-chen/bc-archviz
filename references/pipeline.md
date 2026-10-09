@@ -50,8 +50,8 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   `Surface.CreateExtrusion(curve, Vector3d(0, 0, h))` + `CapPlanarHoles`. `Curve.Offset(…, 0)`
   returns None. `RhinoViewport.SetFrustum` does not exist: build a `ViewportInfo`, `SetFrustum`
   on it, then `SetViewProjection`.
-- **Clean curves**: `ArcCurve(Arc(p0, p1, p2))` through three readings; extend with
-  `CurveExtensionStyle.Arc` so the extension keeps the radius (RULES 4a).
+- Arc through three points: `ArcCurve(Arc(p0, p1, p2))`; extending an arc with
+  `CurveExtensionStyle.Arc` keeps its radius.
 - **Rook scripts run on Rhino's UI thread and cannot be interrupted.** A per-element bisection
   solver calling `LengthParameter` ~40 M times froze Rhino for 20+ min; the only way out was
   killing Rhino (unsaved changes lost). Keep each call short and timed (`time.time()` log per

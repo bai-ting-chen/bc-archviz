@@ -46,9 +46,6 @@
    (one place to edit the look; Rhino materials don't translate). Layer/block/object names are the
    hooks; discard .3dm materials. Rhino files are read-only; re-meshing imported meshes is fine.
 
-4a. **Rhino models are clean and fast**: one arc per curved edge, straight
-    where straight, a few key readings per edge — not splines through readings or arcs fitted
-    to pixels. Check once with `scripts/edge_overlay.py`, then the approval gate (10a).
 ## Look
 5. **Real units everywhere.** Daylight: calibrated HDRI in lux, nothing else (8a). Artificial: lumens at
    683 lm/W — the same constant the camera uses, so a real ISO/f/shutter gives the right exposure

@@ -133,11 +133,6 @@ blender()` from a study script). Read the base and top of every repeat at full r
 - Keep the solve as a small script in the study: every later geometry question becomes one call.
 
 ### Geometry readings
-- **Clean geometry, not a pixel match**. Model like an architect: one arc
-  per curved edge (3-point arc through start, apex, end readings), straight where straight.
-  Splines through point readings look sloppy, and multi-arc fitting to pixels costs far more time
-  than it returns. Check once with an edge overlay (project the model's edges through the solved
-  camera onto the reference), then stop at the Rhino approval gate (RULES 10a).
 - When a reading fits one cue but not the structure (a beam that "ends" at another beam's soffit,
   a member too thin to span), prefer the structurally plausible reading — a downstand beam runs to
   the slab — and fix the light instead. If still ambiguous, state the reading and let the user
