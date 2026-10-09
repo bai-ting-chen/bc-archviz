@@ -27,7 +27,7 @@ Windows 10/11.
   because every machine and every project loads it.
 - **A project folder** (whichever one the user is working in) holds the data: `studies/`. It
   stays on that machine and is never pushed.
-- **Each study owns its assets** (user rule): `studies/<yymmdd>_<topic>/library/` (`polyhaven/`,
+- **Each study owns its assets**: `studies/<yymmdd>_<topic>/library/` (`polyhaven/`,
   `local/` for edited HDRIs, generated maps, other sources) holds every HDRI, texture and
   generated bitmap that study renders with — downloaded again even if another study has the
   same file — so a study folder moves or archives on its own. Point everything at the study:
