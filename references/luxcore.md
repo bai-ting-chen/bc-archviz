@@ -75,6 +75,11 @@ editor); the value still applies.
 - Save the linear EXR, then graded PNGs from it (AgX at a few EVs) with `img.save_render(p, scene=sc)`.
 
 ## Final in the open UI (RULES 10b)
+No halt condition on a final (`halt.enable = False`): it renders until the user presses Esc.
+On Esc LuxCore still draws the final film, but Blender fires `render_cancel`, not
+`render_complete` — register the save handler on **both** (and remove it from both), or a
+user-stopped final is never saved. The OIDN pass is produced when the session stops; check the
+saved EXR is the denoised one.
 Build the scene in the UI session, save the .blend, then from a timer
 `bpy.ops.render.render("INVOKE_DEFAULT")` inside `temp_override(window=…)` with a
 `render_complete` handler that saves `Render Result` (`save_render`, composited = denoised)

@@ -98,7 +98,9 @@
     resolution, time budget and expected noise, and **wait for approval** — the user reviews the
     preview first; a material or light change after approval means a new preview. (2) Run the
     final **in the open Blender UI** so the user watches it live; headless renders are for tests,
-    controls and previews. A final started headless or unapproved gets thrown away the moment
+    controls and previews. (3) Set **no time or sample limit** on the final: it renders until the
+    user stops it, and saving/denoising run on stop. A halt time is fixed when the session starts
+    and a finished render cannot be resumed, so a limit can only cut the user's choice short. A final started headless or unapproved gets thrown away the moment
     the user wants a change or wants to watch — both happened.
 10c. **Each study owns its assets** (user, 2026-10-08). HDRIs, textures, edited HDRIs, generated
     maps and their `meta.json` live in the study's own `library/`, downloaded again even when

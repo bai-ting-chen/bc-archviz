@@ -111,8 +111,11 @@ file from the shell. Save the .blend first.
   build.py -- …`, no `-b`); the script builds the scene, saves the .blend, then starts the render
   from `bpy.app.timers.register(start, first_interval=3)`. If no render window appears, put an
   Image Editor on `Render Result` (api-traps).
-- Before proposing the final, state resolution, time and expected noise from a measured preview
-  (noise ∝ 1/√(samples/px)); leave a buffer for denoise and saving.
+- No time or sample limit on the final (RULES 10b): Cycles `samples` high with `time_limit = 0`
+  and adaptive off, LuxCore `halt.enable = False`; the user stops it. Register the save handler on
+  `render_complete` **and** `render_cancel` — Esc fires only the latter.
+- Before proposing the final, estimate how long the expected quality takes from a measured
+  preview (noise ∝ 1/√(samples/px)), so the user knows when stopping is reasonable.
 - Tests and previews run headless (`blender -b`), one at a time; tell the user when a CPU-only
   engine leaves the GPU idle — it looks like wasted capacity otherwise.
 
