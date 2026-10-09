@@ -7,14 +7,14 @@
    A chipped edge is 5 mm on one job and 100 mm on the next, so it is a result, not knowledge —
    size it from the shot (RULES 8) and record it in the project's study notes. Physical
    constants (albedo, IOR, lm/W, typical EV100), conventions, procedures and taste belong here.
-0a. **Skill is generic, projects are local** (user, 2026-10-08). Only the skill goes to GitHub;
+0a. **Skill is generic, projects are local**. Only the skill goes to GitHub;
    project folders (data, studies, scenes, renders) stay on their machine and are never pushed.
    The skill names no project, project path, repo or study. Every machine and every project
    loads it, so a project name in here is wrong everywhere else. Lessons go in without where they
    came from. Changing the skill: `references/maintaining.md` (pull first, git identity, and a
    `MIGRATE.md` with every push).
 
-## Priorities (user, 2026-10-06)
+## Priorities
 1. **Native first.** Blender's own features (Cycles, shader nodes, Geometry Nodes, modifiers, Sky
    Texture) before self-written external tools — native work stays editable in the .blend and
    survives Blender updates; external tools are a last resort, and say so when used.
@@ -23,7 +23,7 @@
    (c) external tools only when nothing native works — tell the user. Fakes (light-path tricks,
    projected patterns) only as a declared fallback. The point of the studies is renders that
    hold up as physics, so a bias must always be named, never hidden.
-2a. **Renderer: Cycles by default, LuxCore for detailed caustics** (user, 2026-10-08). When
+2a. **Renderer: Cycles by default, LuxCore for detailed caustics**. When
    caustics or heavy refraction carry the shot — sun through patterned glass or glass block,
    glass-on-water, multi-interface glass — render in LuxCore (BlendLuxCore, CPU path tracing with
    light tracing). It is the one standing exception to native-first: measured, Cycles path
@@ -36,7 +36,7 @@
    (b) how others implement it: manual/API, forums, papers' renderers, YouTube (`yt_learn.py`);
    (c) map the model onto native nodes and say which terms are kept and which approximated.
    Compare 2–4 workflows, choose by 1–2, cite sources, then build and prove. More and more
-   requests will be things few people have done in Blender or archviz (user, 2026-10-08): a
+   requests will be things few people have done in Blender or archviz: a
    tutorial can only copy a look, the science lets you build a new method and know its limits.
    Building first and researching late is how caustics work drifts. Videos are
    evidence, not authority.
@@ -46,7 +46,7 @@
    (one place to edit the look; Rhino materials don't translate). Layer/block/object names are the
    hooks; discard .3dm materials. Rhino files are read-only; re-meshing imported meshes is fine.
 
-4a. **Rhino models are clean and fast** (user, 2026-10-08): one arc per curved edge, straight
+4a. **Rhino models are clean and fast**: one arc per curved edge, straight
     where straight, a few key readings per edge — not splines through readings or arcs fitted
     to pixels. Check once with `scripts/edge_overlay.py`, then the approval gate (10a).
 ## Look
@@ -67,21 +67,21 @@
    joints, ripples and grunge all read by how many pixels they occupy, so the same material wants
    different numbers on a close-up and on a wall 4 m away. Judge the first render and scale.
 
-8a. **Natural light = matching HDRI sky first** (user, 2026-10-07). Whenever sun, sky or any
+8a. **Natural light = matching HDRI sky first**. Whenever sun, sky or any
    daylight is in the scene, light it with an HDRI whose sky matches the reference (overcast vs
    clear, sun height and direction, horizon content) before any Sky Texture, sun-only rig or
    fake. Search Poly Haven by tag/thumbnail for the match; fall back to Sky Texture only when no
-   HDRI fits, and say so. **The HDRI is the sole natural light source** (user, 2026-10-08):
+   HDRI fits, and say so. **The HDRI is the sole natural light source**:
    never a sun lamp alongside it — not "matched", not to boost a weak sun, not after painting the
    disc out. The HDRI's sun direction (`hdri_analyse`) only guides rotating and placing the map.
    If its sun is too weak or in the wrong place for the shot, choose another HDRI.
-8b. **Detail pass at native resolution** (user praised, 2026-10-08). Region means match long
+8b. **Detail pass at native resolution**. Region means match long
     before the image does. Once they agree, crop each material/effect at full resolution beside
     the same crop of the reference and judge its *character*: feature size, edge sharpness,
     contrast, density, orientation, distribution. The trowel marks matched in mean but read as
     thin bright scratches against the ref's soft wisps — only the crop showed it. Repeat after
     every change to that feature; half-res pairs hide it.
-8c. **Nature is patchy, never continuous or uniform** (user, 2026-10-08). Wetness, stains,
+8c. **Nature is patchy, never continuous or uniform**. Wetness, stains,
     wear, dirt, splashes: large here, small there, absent elsewhere. A constant-width band or a
     contour ring reads as impossible. Drive extent with a slow noise that can reach zero, and
     give marks a physical shape (dried splash = blob darker at its rim, not a line).
@@ -93,11 +93,11 @@
 10. Measure on the PNG the renderer wrote (`imgstats.py`, `refmatch.py`) — AgX rolls off whites,
     so linear values mislead. Process frames → study `_wip/`; finals through the open Blender UI
     so the user sees them.
-10a. **Rhino → Blender gate** (user, 2026-10-07). After the Rhino model is finished, stop and
+10a. **Rhino → Blender gate**. After the Rhino model is finished, stop and
     show the user (viewport captures + a list of what was modelled and left out); pipe to
     Blender only after the user approves the geometry. Rework in Rhino is cheap, a look-dev
     round on wrong geometry is not.
-10b. **Final render gate** (user, 2026-10-08). (1) Render a preview, show it, state the final's
+10b. **Final render gate**. (1) Render a preview, show it, state the final's
     resolution, time budget and expected noise, and **wait for approval** — the user reviews the
     preview first; a material or light change after approval means a new preview. (2) Run the
     final **in the open Blender UI** so the user watches it live; headless renders are for tests,
@@ -105,7 +105,7 @@
     user stops it, and saving/denoising run on stop. A halt time is fixed when the session starts
     and a finished render cannot be resumed, so a limit can only cut the user's choice short. A final started headless or unapproved gets thrown away the moment
     the user wants a change or wants to watch — both happened.
-10c. **Each study owns its assets** (user, 2026-10-08). HDRIs, textures, edited HDRIs, generated
+10c. **Each study owns its assets**. HDRIs, textures, edited HDRIs, generated
     maps and their `meta.json` live in the study's own `library/`, downloaded again even when
     another study has the same file, so a study moves, archives or hands over self-contained.
 11. Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real

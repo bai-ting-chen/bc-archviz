@@ -133,7 +133,7 @@ blender()` from a study script). Read the base and top of every repeat at full r
 - Keep the solve as a small script in the study: every later geometry question becomes one call.
 
 ### Geometry readings
-- **Clean geometry, not a pixel match** (user, 2026-10-08). Model like an architect: one arc
+- **Clean geometry, not a pixel match**. Model like an architect: one arc
   per curved edge (3-point arc through start, apex, end readings), straight where straight.
   Splines through point readings look sloppy, and multi-arc fitting to pixels costs far more time
   than it returns. Check once with an edge overlay (project the model's edges through the solved
