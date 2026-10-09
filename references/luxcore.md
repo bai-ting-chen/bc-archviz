@@ -19,7 +19,8 @@ sc.render.engine = "LUXCORE"; cfg = sc.luxcore.config
 cfg.engine = "PATH"; cfg.device = "CPU"
 cfg.path.hybridbackforward_enable = True            # "Add Light Tracing": light paths splat on the film
 cfg.path.depth_total, depth_diffuse, depth_glossy, depth_specular = 32, 4, 16, 32
-h = sc.luxcore.halt; h.enable = h.use_time = True; h.time = secs
+h = sc.luxcore.halt                                 # tests/previews: a time budget; finals: h.enable = False
+h.enable = h.use_time = True; h.time = secs
 h.use_samples = False; h.use_noise_thresh = False   # halt-by-samples is ON by default (stops at "100 %")
 tm = cam.data.luxcore.imagepipeline.tonemapper      # linear, no auto, for measurement and AgX later
 tm.type = "TONEMAP_LINEAR"; tm.use_autolinear = False; tm.linear_scale = 1.0
@@ -30,7 +31,7 @@ tm.type = "TONEMAP_LINEAR"; tm.use_autolinear = False; tm.linear_scale = 1.0
   `path.hybridbackforward.partition` (100 % → 0).
 - BIDIR (CPU only) converges the same caustic far more noisily. The PhotonGI caustic cache
   (GPU) is fast but biased: blurred by its lookup radius and ~25 % dark in a measured case.
-- Memory is small: a corridor of ~770 instanced 73 k-quad blocks peaked at 0.7 GB RAM.
+- Memory is small with instancing: ~800 instances of a 73 k-quad mesh peaked under 1 GB RAM.
 - Resolution vs time: noise ∝ 1/√(samples per pixel), samples ∝ time / pixels. Measure one
   preview, then scale (4× pixels for 5.3× time = 1.33× samples per pixel).
 
@@ -51,8 +52,8 @@ glass (camera paths hit it). The lamp settings below are for tests and controls 
 - **Sky:** `world.luxcore.use_cycles_settings = True` converts a flat Background colour. An HDRI
   through the Cycles world is converted **without the Mapping rotation** — set the native light:
   `world.luxcore.light = "infinite"`, `.image`, `.gain = Cycles Background Strength`,
-  `.rotation = −radians(Cycles Mapping Z)`. The sign was verified on a sun patch
-  (Cycles 579/146 px 0.678 vs LuxCore 582/146 px 0.684).
+  `.rotation = −radians(Cycles Mapping Z)` (sign verified: the sun patch lands on the same
+  pixels at the same brightness in both engines).
 
 ## Materials LuxCore can render
 Build Cycles node materials and set `material.luxcore.use_cycles_nodes = True`. The converter
@@ -76,15 +77,8 @@ editor); the value still applies.
   `view_layer.update()`, so the pass exists).
 - Save the linear EXR, then graded PNGs from it (AgX at a few EVs) with `img.save_render(p, scene=sc)`.
 
-## Final in the open UI (RULES 10b)
-No halt condition on a final (`halt.enable = False`): it renders until the user presses Esc.
-On Esc LuxCore still draws the final film, but Blender fires `render_cancel`, not
-`render_complete` — register the save handler on **both** (and remove it from both), or a
-user-stopped final is never saved. The OIDN pass is produced when the session stops; check the
-saved EXR is the denoised one.
-Build the scene in the UI session, save the .blend, then from a timer
-`bpy.ops.render.render("INVOKE_DEFAULT")` inside `temp_override(window=…)` with a
-`render_complete` handler that saves `Render Result` (`save_render`, composited = denoised)
-and the graded PNGs. If no render window opens, switch the largest area to an Image Editor on
-`Render Result` — LuxCore refreshes it live. The first passes look like scattered dots; the
-denoiser runs once at the end.
+## Final in the open UI
+Mechanics: pipeline.md › *Final render in the open UI*. LuxCore specifics: `halt.enable =
+False`; on Esc it still draws the final film and produces the OIDN pass, so the saved
+`Render Result` (composited = DENOISED) is the clean image — check it. The live view refreshes in
+an Image Editor on `Render Result`; the first light-tracing passes look like scattered dots.

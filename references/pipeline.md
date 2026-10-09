@@ -1,8 +1,8 @@
 # Pipeline
 
-## Install (2026-10-06)
+## Install
 - Blender: `winget install --id BlenderFoundation.Blender --version 5.2.2 --exact` — winget
-  upgrades in place (removed 5.0.1); use the portable zip for side-by-side versions.
+  upgrades in place; use the portable zip for side-by-side versions.
 - MCP (Blender Lab, projects.blender.org/lab/blender_mcp, Blender ≥ 5.1): `mcp-<v>.zip` = add-on,
   `blender-<v>.mcpb` = server. Installers are downloaded when needed, not kept. The site is behind Cloudflare;
   Gitea API `/api/v1/repos/lab/blender_mcp/...` works with curl.
@@ -52,20 +52,20 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   on it, then `SetViewProjection`.
 - Arc through three points: `ArcCurve(Arc(p0, p1, p2))`; extending an arc with
   `CurveExtensionStyle.Arc` keeps its radius.
-- **Rook scripts run on Rhino's UI thread and cannot be interrupted.** A per-element bisection
-  solver calling `LengthParameter` ~40 M times froze Rhino for 20+ min; the only way out was
-  killing Rhino (unsaved changes lost). Keep each call short and timed (`time.time()` log per
-  step), prefer closed forms (on a constant radius, equal centre spacing gives equal joints),
-  sample a curve once into a table if you must search, and split builds into steps
-  (`STEPS = "block" | "wall"` globals). A background `rhino_execute` that times out is still
-  running — check the Rhino process CPU before queuing more.
+- **Rook scripts run on Rhino's UI thread and cannot be interrupted.** A long Python loop (a
+  numeric solver calling curve queries millions of times) freezes Rhino until it finishes; the
+  only way out is killing Rhino, losing unsaved changes. Keep each call short and timed
+  (`time.time()` log per step), prefer closed-form layouts, sample a curve once into a table if
+  you must search, and split builds into steps run as separate calls. A background
+  `rhino_execute` that times out is still running — check the Rhino process CPU before queuing
+  more.
 - **Displaced surfaces need explicit grids.** `Mesh.CreateFromBrep` ignores `MaxEdgeLength` on
-  planar faces (46 mm triangles inside a "1.5 mm" mesh), so a relief displaced on it vanishes.
+  planar faces (large triangles inside a fine mesh), so a relief displaced on it vanishes.
   Build regular quad grids instead; a rounded box = grid on the box pulled onto
   `core + r·unit(p − core)`.
-- **Booleans on shared planes come out open.** Slab ∪ footprint band with the same top/bottom
-  planes returned an open brep (and `MergeCoplanarFaces` then dropped its big faces); a 2D
-  curve union failed where the curves touch tangentially. Edit the outline instead (swap one edge,
+- **Booleans on shared planes come out open.** A union of solids sharing their top and bottom
+  planes returns an open brep (and `MergeCoplanarFaces` can then drop its big faces); a 2D curve
+  union fails where the curves touch tangentially. Edit the outline instead (swap one edge,
   matched by end points) and extrude. Check `IsSolid` on every generated brep; on failure re-show
   the original rather than leaving the scene with a hole.
 - `ObjectTable.FindByLayer` skips hidden objects: re-runnable builders must enumerate with
@@ -78,7 +78,7 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   stays instanced; one unique mesh per element does not.
 - `archviz.import_rhino` options: layers as collections, instances, named views → cameras, hidden
   objects/layers skipped, merge by distance; materials removed; mm → m. Delete any leftover `V-Ray Infinite Plane` object (older .3dm files carry one).
-- Always start from `read_homefile(use_empty=True)` (importing into an edited factory scene failed once).
+- Always start from `read_homefile(use_empty=True)`; importing into an edited factory scene is unreliable.
 - Imported meshes are welded, manifold, outward normals; coarse — dice where detail is needed.
 
 ## Assets
@@ -92,10 +92,7 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
 - **Where:** the study's own `library/` (RULES 10c) — `ARCHVIZ_PROJECT=<study> polyhaven_fetch.py …`,
   `archviz.set_project(<study>)` in Blender. Edited HDRIs, baked/generated maps and their
   generator script references go in `<study>/library/local/` with a `meta.json`. Never repoint a
-  study at another study's or a shared copy.
-- Judge a texture on its colour map at full size, not by its tags: "white / clean" plaster and
-  concrete scans turned out to be painted formwork boards with peeling paint, or weathered and
-  stained (materials.md › Choosing).
+  study at another study's or a shared copy. Choosing a texture: materials.md › Choosing.
 
 ## Look-dev headless
 `blender -b scene.blend --python scripts/blender/render_variant.py -- out.png res=800x800
@@ -126,17 +123,16 @@ Keep two rebuild scripts in the study (`scene_geometry.py`: import + camera; `sc
 materials, lights, exposure) and a small runner that rebuilds, renders `_wip/vNN.png`, prints
 `refmatch.py patches` and writes `pair_vNN.png`. Every change is then one edit + one run, and
 each version's reason lives as a comment next to the value it changed.
-- The runner must `ast.parse` both scripts before sending them to Blender. Scripted
-  replacements (sed or str.replace) appending `# reason` to a line that continues the call
-  commented out the arguments three times in one study, and each cost a render round-trip.
-  Put the comment on its own line above the value, or use the Edit tool.
-- Long Python patches don't belong in a bash heredoc (quotes broke the shell). Write the patch
-  as a file with `assert old in s` per replacement, so a stale anchor fails loudly. This was
-  hit again with a patch holding nested quotes; sed replacements of whole lines also silently
-  dropped a second statement on the same line. Use the Edit tool for multi-statement lines.
-- Render the wip frames at 50 % / 128 spp (about a minute). Look at the stacked render-over-
-  reference every iteration, not only the patch table: the table missed a joint grid, missing
-  globes and the black courtyard.
+- The runner must `ast.parse` both scripts before sending them to Blender. A scripted
+  replacement (sed or str.replace) appending `# reason` to a line that continues a call comments
+  out the rest of the call — put the comment on its own line above the value, or use the Edit tool.
+- Long Python patches don't belong in a bash heredoc (nested quotes break the shell). Write the
+  patch as a file with `assert old in s` per replacement, so a stale anchor fails loudly. A sed
+  replacement of a whole line silently drops any second statement on it — use the Edit tool for
+  multi-statement lines.
+- Render the wip frames at 50 % / 128 spp. Look at the stacked render-over-reference every
+  iteration, not only the patch table: region numbers miss joint grids, missing objects and
+  wrongly roofed areas.
 - When patch scripts pile up, fold them back into the scene scripts before the study is reused.
 
 ## Study layout

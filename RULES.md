@@ -26,10 +26,10 @@
 2a. **Renderer: Cycles by default, LuxCore for detailed caustics**. When
    caustics or heavy refraction carry the shot — sun through patterned glass or glass block,
    glass-on-water, multi-interface glass — render in LuxCore (BlendLuxCore, CPU path tracing with
-   light tracing). It is the one standing exception to native-first: measured, Cycles path
-   tracing, path guiding and MNEE all fail on specular–diffuse–specular paths from a sun-sized
-   source, LuxCore light tracing is unbiased and energy-correct there, and the user judged its
-   caustics and refraction far better. Say it is an external engine when you switch.
+   light tracing). It is the one standing exception to native-first: Cycles path tracing, path
+   guiding and MNEE all fail on specular–diffuse–specular paths from a sun-sized source, while
+   LuxCore light tracing is unbiased and energy-correct there (caustics.md › Decision). Say it is
+   an external engine when you switch.
 3. **Research before anything new — from the physics down, not from tutorials up.** Order:
    (a) the mechanism: optics/physics papers, measured data, the governing equations (why does wet
    concrete darken? Lekner–Dorf: internal reflection in the water film, non-linear in albedo);
@@ -38,8 +38,7 @@
    Compare 2–4 workflows, choose by 1–2, cite sources, then build and prove. More and more
    requests will be things few people have done in Blender or archviz: a
    tutorial can only copy a look, the science lets you build a new method and know its limits.
-   Building first and researching late is how caustics work drifts. Videos are
-   evidence, not authority.
+   Videos are evidence, not authority.
 
 ## Split
 4. **Rhino = geometry only.** Materials, lights, camera look and render settings live in Blender
@@ -75,9 +74,8 @@
 8b. **Detail pass at native resolution**. Region means match long
     before the image does. Once they agree, crop each material/effect at full resolution beside
     the same crop of the reference and judge its *character*: feature size, edge sharpness,
-    contrast, density, orientation, distribution. The trowel marks matched in mean but read as
-    thin bright scratches against the ref's soft wisps — only the crop showed it. Repeat after
-    every change to that feature; half-res pairs hide it.
+    contrast, density, orientation, distribution — a feature can match in mean and still read
+    wrong in character. Repeat after every change to that feature; half-res pairs hide it.
 8c. **Nature is patchy, never continuous or uniform**. Wetness, stains,
     wear, dirt, splashes: large here, small there, absent elsewhere. A constant-width band or a
     contour ring reads as impossible. Drive extent with a slow noise that can reach zero, and
@@ -99,13 +97,12 @@
     final **in the open Blender UI** so the user watches it live; headless renders are for tests,
     controls and previews. (3) Set **no time or sample limit** on the final: it renders until the
     user stops it, and saving/denoising run on stop. A halt time is fixed when the session starts
-    and a finished render cannot be resumed, so a limit can only cut the user's choice short. A final started headless or unapproved gets thrown away the moment
-    the user wants a change or wants to watch — both happened.
+    and a finished render cannot be resumed, so a limit can only cut the user's choice short.
 10c. **Each study owns its assets**. HDRIs, textures, edited HDRIs, generated
     maps and their `meta.json` live in the study's own `library/`, downloaded again even when
     another study has the same file, so a study moves, archives or hands over self-contained.
 11. Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real
-    one — the MNEE and green-ceiling problems were each found in minutes that way.
+    one — a small scene isolates the cause in minutes where the full scene hides it.
 
 ## Safety
 12. MCP code runs unguarded in the user's Blender: save first, rebuild-from-script study files,

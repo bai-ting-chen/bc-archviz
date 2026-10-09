@@ -18,7 +18,7 @@ description: >-
 
 **If `MIGRATE.md` exists in this folder, run it before anything else.** It holds what this machine must do after an update; the machine that runs it deletes it (`references/maintaining.md`).
 
-Verified on Blender 5.2.2 LTS, Blender Lab MCP 1.0.3, import_3dm 0.0.18, RTX 3060 Ti 8 GB (OptiX),
+Verified on Blender 5.2.2 LTS, Blender Lab MCP 1.0.3, import_3dm 0.0.18, BlendLuxCore 2.11.1, RTX 3060 Ti 8 GB (OptiX),
 Windows 10/11.
 
 ## Skill and project
@@ -132,7 +132,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Sun through patterned glass: fireflies, no caustic shape | specular–diffuse–specular paths from a sun-sized source: Cycles PT, path guiding and MNEE cannot resolve them — LuxCore CPU light tracing (caustics.md) |
 | LuxCore render stops after a few seconds at "100 %" | halt-by-samples is on by default — `halt.use_samples = False` (luxcore.md) |
 | LuxCore GPU light tracing changes nothing | it is a no-op on the GPU in 2.11 — light tracing runs on CPU (luxcore.md) |
-| LuxCore sun casts but never glints through glass | `distant` lights are never hit by camera rays — use the `sun` type (luxcore.md) |
+| LuxCore test sun casts but never glints through glass | `distant` lights are never hit by camera rays — use the `sun` type (luxcore.md) |
 | LuxCore saved image noisy though OIDN ran | the denoised image is a separate DENOISED pass — route it through the compositor (luxcore.md) |
 | Caustics a flat glow on far surfaces / one S-shaped bright line per pattern tile | relief too steep (focal length cm) / single-frequency pattern — size relief slope from receiver distance, randomise (caustics.md › Designing a refractive relief) |
 | Rhino UI frozen by a Rook script | Python loop calling curve queries per element — kill Rhino (unsaved work lost); use closed-form layouts and time each step (pipeline.md) |

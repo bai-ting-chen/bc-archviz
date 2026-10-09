@@ -35,5 +35,15 @@ Check: the project's memory index has an entry saying an HDRI sky is never combi
 Do: add that memory (feedback type) from RULES 8a; in any open study script, remove sun lamps
 that sit alongside an HDRI and rotate the HDRI to place its own sun instead.
 
+## 261009 — Review: general knowledge only, each rule once
+Pull-only. RULES.md and every reference were reviewed: study anecdotes and one scene's tuned
+numbers removed or generalised, provenance tags dropped, each rule stated once in RULES.md with
+pointers elsewhere, the clean-arcs Rhino rule removed, `archviz.directional_uv` added. Re-read
+RULES.md; drop any local memory that repeats the removed clean-arcs Rhino rule.
+
+### 6. Local memory
+Check: the project's memory has no entry telling Rhino models to use one arc per curved edge.
+Do: delete such a memory file and its index line.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

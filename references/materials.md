@@ -38,17 +38,16 @@ These transfer to any scene and any renderer — they are measurements of the wo
   search <category>` misses.
 - Check the map's own features before choosing it: rows of tie holes, strong directional stains
   or a visible repeat disqualify a map for a large jointless surface however good its mean is.
-  Open the colour map itself, not the sphere thumbnail or the tags: maps tagged "white, clean"
-  were painted formwork boards with peeling paint, or weathered and stained.
-- **"Very white, light, clean"** (concrete, plaster, mortar): a good scan still reads dirty at its
-  own contrast. Keep only a fraction of its tonal variation around a flat target — Mix(flat
-  albedo, scaled scan, fac 0.25) — desaturate, target albedo ~0.8, normal strength ~0.5; no panel
-  joints or tie holes unless asked. Cement mortar: albedo ~0.6, sandy plaster scan at true scale.
-- **Grain size is a design choice — size it from the brief.** "Too big" terrazzo meant chips of
-  r 1.5–7 mm; fine white terrazzo is r 0.6–2.5 mm, mostly white/very light grey chips, ~1 %
-  dark, matrix albedo ~0.86, honed roughness 0.30 (chips 0.15). Bake such patterns to a
-  seamless image (numpy, tileable via FFT noise + wrapped chip stamps) when the renderer has no
-  procedural textures (LuxCore).
+  Open the colour map itself, not the sphere thumbnail or the tags — a "white, clean" tag can sit
+  on painted boards or a weathered, stained surface.
+- **Clean white finishes** (concrete, plaster, mortar): a good scan still reads dirty at its own
+  contrast. Keep only a fraction of its tonal variation around a flat target — Mix(flat albedo,
+  scaled scan, fac) with fac set from the shot — desaturate, soften the normal map, and leave out
+  panel joints and tie holes unless the design has them. White paint and plaster sit near 0.8
+  albedo, cement mortar lower.
+- **Aggregate, chip and grain size is a design choice** — take it from the brief or the
+  reference, and judge it at the shot's scale. Bake such patterns to a seamless image (numpy,
+  tileable via FFT noise + wrapped stamps) when the renderer has no procedural textures (LuxCore).
 - **Directional or not decides the UVs.** `box_uv` projects each face along its own dominant
   axis, so the image turns 90° from one face to the next — invisible on non-directional maps
   (plain concrete, plaster, terrazzo, mortar, gravel, most granites), wrong on anything with a
@@ -66,7 +65,7 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
 `height_span_uv` (v clamped below 1, REPEAT) x (1 - |N.z|) so streaks only run down verticals.
 
 ### Monolithic concrete (basements, car parks, cast-in-place frames)
-- **One material** for floor, walls, ceiling, beams and columns (user preference). Vary it by
+- **One material** for floor, walls, ceiling, beams and columns. Vary it by
   world-space masks inside the shader, not by separate materials: Geometry › Normal Z separates
   *up* (floor: lower roughness, sealed-slab sheen, softer stains), *down* (ceilings: less grunge)
   and *vertical* (walls: damp band at the foot).
@@ -74,8 +73,8 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
   missing, build `concrete_study(stain=False)` and say so — never silently drop a layer.
 - Check the recipe's tone multiplier against the reference. The default is a cool match and will
   read blue-grey next to a warm reference.
-- **Grunge comes in patches, not streaks** (user correction — check the reference before adding
-  any streak). Shape, all world-space Noise: a low-frequency patch field (with some Distortion)
+- **Grunge comes in patches, not streaks** (RULES 8c; check the reference before adding any
+  streak). Shape, all world-space Noise: a low-frequency patch field (with some Distortion)
   *plus* a centred high-frequency field at low amplitude, summed *before* a narrow threshold —
   that sum is what gives ragged, speckled borders instead of soft blobs. Inside a patch,
   mid-frequency mottle x speckle; keep clean gaps between patches. Use separate decorrelated
@@ -90,16 +89,18 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
   lighter paste reads as white paint flecks when lit head-on.
 
 ### Burnished / polished white concrete (microcement, soffits)
-- Reads glossy, not matte: roughness ~0.2-0.35 varied in soft clouds; the plaster relief mostly
-  polished off (bump < 1 mm). Tone clouds at two scales need ±7-13 % to survive lighting
-  gradients — ±5 % renders as perfectly clean. Trowel marks: a noise stretched ×4 (not ×10 —
-  that draws parallel lines), rotated, high distortion, thresholded to its top few percent and
-  clustered by a patch mask, lighter and smoother than the field.
-- Next to a turquoise pool, a neutral white soffit renders cyan from the bounce: warm the albedo
-  to land on the reference's grey-green rather than relighting.
+- Reads glossy, not matte: low roughness varied in soft clouds; the plaster relief mostly
+  polished off (sub-millimetre bump). Tone clouds at two scales; lighting gradients swallow small
+  tone differences, so a variation that looks right in the node preview can render perfectly
+  clean — judge it in a render. Trowel marks: a moderately stretched noise (a strong stretch draws
+  parallel lines), rotated, high distortion, thresholded to its top few percent and clustered by
+  a patch mask, lighter and smoother than the field.
+- A neutral white next to a strongly coloured surface takes its bounce colour (a soffit over a
+  turquoise pool renders cyan): correct the albedo toward the reference rather than relighting.
 - Faint dirty arris on huge meshes (30 m slabs, canopies): shader **Bevel normal vs true
   normal** as the edge mask (no dicing needed) — GN `edge_dist` would need the mesh diced.
-  ~-15-20 % with noise breakup is "very faint"; -10 % was below visibility in a control.
+  "Very faint" sits just above visibility: set the darkening with a control (RULES 9), since a
+  value that looks faint in the shader can vanish entirely in the render.
 
 ### Tiled maps with joints
 - Formwork and panel textures carry joint lines at their tile edges. Box UVs computed from world
@@ -174,8 +175,8 @@ Anisotropic + Tangent.
   bands ≥ 15 mm, panels ≤ ~15 m². Curved walls: the concave-side joint stays constant and the
   convex one opens, E = (L + g)(1 + s/r) − L; with g 10 / E 25 mm the inner radius is ≥ ~1.05 m
   (190 units), ≥ ~1.33 m (240). Model the relief as geometry (caustics.md › Designing a
-  refractive relief), mortar recessed ~2 mm with a 0.3 mm air gap to the glass so surfaces never
-  coincide.
+  refractive relief), and leave a fraction of a millimetre of air between mortar and glass so the
+  surfaces never coincide.
 - **Liquid in glass**: Cycles has no nested-IOR priority, so model three surfaces — GLASS (1.52),
   INTERFACE below the waterline (1.52/1.333) and WATER_SURFACE (1.333) →
   `glassware.glass_of_water()`. Check normals per wall.
@@ -191,20 +192,20 @@ Anisotropic + Tangent.
   caustic networks; long swell does not.
 - **Wind ripples are geometry, not a bump.** A noise bump faking short ripples reads artificial,
   and stretching it "because ripples look flat" doubles what perspective already does — never
-  stretch. Dice the surface finer (2-3 cm) and let the Ocean carry them (wave_scale_min >= 5 x
-  cell, a little choppiness ~0.4 for crisp crests; check for downward faces = folds). Keep only a
-  ~1 mm micro bump in the shader. Size the swell by RMS slope, not just amplitude.
+  stretch. Dice the surface finer, sized from the ripples visible in the shot, and let the Ocean
+  carry them (wave_scale_min >= 5 x cell, a little choppiness for crisp crests; check for
+  downward faces = folds). Keep only a millimetre-scale micro bump in the shader. Size the swell
+  by RMS slope, not just amplitude.
 - **Wet surround (pool coping, splash zone)**: wet porous albedo falls non-linearly and
   saturates (Lekner & Dorf 1988; Jensen et al. 1999) -> wet colour = dry ** ~1.4 (Gamma node;
   1.8 turns a warm white beige-brown and reads as dirt), roughness ~0.1, plus a water film as
   Principled coat (IOR 1.33, rough ~0.03). When the edge is an arc, mask by the analytic
   distance d = R - |P.xy - C| (no mesh density); ragged splash band by noise-pushed d, Voronoi
   drops thinning with d, faint darker tide rings beyond, scum band at the waterline on vertical
-  faces. Gate by height so canopies and far floors stay dry.
-  **Never a continuous band or ring** (user): real splashes are large here, small there, absent
-  elsewhere — drive the band width with a slow noise along the edge (down to negative = dry),
-  and make dried marks blobs darker at their rim (coffee-ring) rather than contour lines.
-- **Opaque pool look** (user-requested stylisation): opaque diffuse body under an exact IOR 1.333
+  faces. Gate by height so canopies and far floors stay dry. Patchy, never a band (RULES 8c):
+  drive the band width with a slow noise along the edge (down to negative = dry), and make dried
+  marks blobs darker at their rim (coffee-ring) rather than contour lines.
+- **Opaque pool look** (a stylisation, only when asked): opaque diffuse body under an exact IOR 1.333
   surface. Declare it; near-field sky reflection is Fresnel-limited (~6-12 % at 55-65 deg), so a
   reference that is near-white there is showing a pale floor through clear water.
 - To try (manual-confirmed): **Volume Coefficients** node (absorption per channel in 1/m, from

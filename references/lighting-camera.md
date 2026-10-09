@@ -28,12 +28,11 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
   soft shadows and washed caustics — choose another map. Check its sun elevation too: rotation
   changes only the azimuth.
 - **What a window shows of the HDRI:** for a viewer at eye height h_e looking through glazing
-  from z0 to z1, the horizon sits at (h_e − z0)/(z1 − z0) of the glass height (~45 % for a
-  1.5 m eye and 0.4–2.9 m glass). Horizon content above 0° fills the upper glass; to keep trees
-  in the lower third with open sky above (and a sun that plausibly shines in), the tree tops
-  must sit at or below 0° — a viewpoint/hill HDRI, not a clearing ringed by trees. Profile
-  candidate maps by elevation in a ±50° azimuth window around the sun (green vs blue, median
-  luminance per 5°) instead of judging thumbnails. Horizon content, sun elevation and sun share
+  from z0 to z1, the horizon sits at (h_e − z0)/(z1 − z0) of the glass height. Horizon content
+  above 0° fills the glass above that line; to keep landscape low with open sky above, it must
+  sit at or below 0° (a map shot from a viewpoint, not from inside a clearing). Profile candidate
+  maps by elevation in an azimuth window around the view direction (colour and median luminance
+  per few degrees) instead of judging thumbnails. Horizon content, sun elevation and sun share
   all have to fit in one map, so shortlist widely.
 - Sky Texture `MULTIPLE_SCATTERING` (5.2 name): calibrate with a white-plane render.
 
@@ -62,8 +61,7 @@ Convert from the lumens printed on the fixture — that is the number a lighting
 - **Count each fixture once.** Either the lens is the source (luminance from lumens, visible to
   all rays) or the lens is decor for an analytic light → `interior.lit_once()` = `visible_diffuse`
   AND `visible_transmission` off. Visibility follows the LAST bounce: a diffuse ray through water
-  arrives as *transmission*, so turning diffuse off alone still leaks (that is how a ceiling
-  turned green).
+  arrives as *transmission*, so turning diffuse off alone still leaks.
 - Underwater lights: aimed spots along the pool; a Lambert lens near the surface throws most of
   its light out onto the ceiling instead of into the water.
 
@@ -105,8 +103,7 @@ Convert from the lumens printed on the fixture — that is the number a lighting
    Verify by projecting a far point on the axis with `world_to_camera_view` — it must land on the
    measured vanishing point. Never trust the first framing render by eye.
 5. **Conditioning of readings.** Depth from a floor point is `f·eye/(y − horizon)`: a point a
-   few pixels below the horizon swings metres per pixel. Two floor lines read 2-3 px apart near
-   the horizon disagreed by ~1 m in plan. Trust points far from the horizon — soffit
+   few pixels below the horizon swings metres per pixel. Trust points far from the horizon — soffit
    edges high in the frame, floor points near the camera — and treat near-horizon readings as
    loose. When two readings disagree, ask which one is well conditioned before adding geometry.
 6. Check the Rhino model before Blender: `scripts/rhino/project_edges.py` (in Rhino via Rook,

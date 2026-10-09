@@ -3,8 +3,7 @@
 ## Nodes
 - GN modifier inputs: `mod["Socket_N"]` fails; values live at `mod.properties.inputs.<id>.value`
   (empty `.name`; resolve via `node_group.interface.items_tree`) → `wear.set_input`. Group defaults
-  are copied only at modifier creation.
-  New code is where it bites: a fresh scatter group re-hit this trap with `mod[ident] = v`.
+  are copied only at modifier creation. New code re-hits this with `mod[ident] = v`.
 - Edge Angle (signed): convex arrises read **positive** on outward-normal Rhino meshes.
 - ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `study_materials.sock`.
 - Noise Texture output: "Factor" in GN; index 0 is safest.
@@ -51,7 +50,7 @@
   `img.save_render(path)` with OPEN_EXR 32-bit.
 - Pixel analysis: `img.pixels.foreach_get(np_array)` is linear for **float** images only; 8-bit
   sRGB textures come back sRGB-encoded — decode (`((v+0.055)/1.055)**2.4`) before measuring an
-  albedo (a plaster map read 0.51 encoded vs 0.236 linear).
+  albedo (encoded means read about twice the linear value on mid-grey maps).
 - Compositor in 5.x is a node group: `bpy.data.node_groups.new(name, "CompositorNodeTree")`,
   an output socket via `tree.interface.new_socket("Image", in_out="OUTPUT",
   socket_type="NodeSocketColor")`, a `NodeGroupOutput` node, then `scene.compositing_node_group

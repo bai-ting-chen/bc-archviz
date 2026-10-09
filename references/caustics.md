@@ -45,7 +45,7 @@ Model the relief as geometry: bump and normal maps do not bend a caustic.
   (1 ± 0.45), scaled to the target RMS slope; a mild vertical stretch reads as poured/flowing.
 - **Preview before modelling:** a thin-lens numpy sketch — deflection = (n − 1)∇h per face,
   land at x + D·θ, histogram, blur by the sun's angular size — shows the network at several D in
-  seconds. It caught both failures above before any render.
+  seconds, before any modelling or render.
 - **Variety without memory:** ~16 relief variants as block definitions, each placed at random
   with random 180° turns/flips (64 looks), instanced; unique meshes per element would be
   tens of millions of faces. Fade the relief to a flat border over ≥ 25 mm — a short fade

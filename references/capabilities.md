@@ -15,7 +15,7 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Displacement | Displacement + adaptive subdivision | solid, fast |
 | Tiling by real height | `height_span_uv` + REPEAT | solid |
 | Caustics | `caustic_photons.py` (glassware), GN wavefront (pools) | solid |
-| Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH CPU + light tracing (luxcore.md); energy control 0.80 vs 0.83 predicted | solid |
+| Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH CPU + light tracing (luxcore.md), energy-checked (caustics.md) | solid |
 | Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh (materials › Glass block) | solid |
 | Baked procedural textures for LuxCore (terrazzo) | numpy seamless colour + roughness maps | test |
 | Layered BRDF | Mix Shader | solid |
@@ -25,7 +25,7 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Matching overcast HDRI | tag shortlist → equirect strip with elevation lines → rotation formula | solid |
 | Burnished / polished white concrete | low roughness clouds, two-scale tone, stretched-noise trowel marks | solid |
 | Faint dirty arris on huge meshes | shader Bevel normal vs true normal mask | solid, control-proved |
-| Wind ripples on a pool | Ocean DISPLACE on a 2-3 cm mesh, slight chop | solid |
+| Wind ripples on a pool | Ocean DISPLACE on a finely diced mesh, slight chop | solid |
 | Pool water, reflective + slightly clear | IOR 1.333 transmission + Volume Absorption + Scatter (volume_bounces > 0) | solid |
 | Opaque stylised pool | opaque diffuse body under IOR 1.333 surface (declared) | solid |
 | Wet surround, splashes, dried marks | analytic edge distance mask; dry**1.4 + coat film IOR 1.33; patchy by noise | test |
