@@ -1,9 +1,6 @@
 # LuxCore — the caustics renderer (RULES 2a)
 
-Cycles stays the default. Switch to LuxCore when caustics or heavy refraction carry the shot:
-sun through patterned glass or glass block, glass on water, any multi-interface glass. Measured
-on sun → 4 glass interfaces → diffuse floor (caustics.md › Decision): only LuxCore CPU light
-tracing gave a clean, energy-correct caustic.
+When to use it: RULES 2a; the measured comparison is in caustics.md › Decision.
 
 ## Install (BlendLuxCore 2.11, official support for Blender 4.5 LTS and 5.2 LTS)
 - `gh release download <tag> -R LuxCoreRender/BlendLuxCore -p "BlendLuxCore-*.zip"` into an
@@ -38,10 +35,9 @@ tm.type = "TONEMAP_LINEAR"; tm.use_autolinear = False; tm.linear_scale = 1.0
   preview, then scale (4× pixels for 5.3× time = 1.33× samples per pixel).
 
 ## Daylight in LuxCore
-The HDRI is the only natural light (RULES 8a): LuxCore's `infinite` light importance-samples the
-map, so its sun disc both casts the caustics (light tracing emits from it) and appears as glints
-through glass (camera paths hit it). No sun lamp. The lamp settings below are only for tests
-and controls without an HDRI.
+Daylight is the HDRI (RULES 8a): LuxCore's `infinite` light importance-samples the map, so its
+sun disc both casts the caustics (light tracing emits from it) and appears as glints through
+glass (camera paths hit it). The lamp settings below are for tests and controls without an HDRI.
 
 ## Matching Cycles units (do this once per scene; check on an open sunlit patch)
 - Render the same frame in both engines; a floor patch lit through an *open* opening is the

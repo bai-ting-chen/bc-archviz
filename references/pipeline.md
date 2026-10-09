@@ -102,7 +102,7 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
 [disp=off|caustics=off|wear=off|chips=off|dirt=off|noise_seed=7|mask_view=1|material_view=NAME|camera=NAME]`
 (forward-slash paths from bash).
 
-## Final render in the open UI (RULES 10b: only after the user approved the preview)
+## Final render in the open UI (RULES 10b)
 `bpy.ops.render.render("INVOKE_DEFAULT")` inside `bpy.context.temp_override(window=…)` returns
 immediately and the user watches it; register a `bpy.app.handlers.render_complete` function
 that `save_render`s *Render Result* to the study folder (and removes itself), then wait for the
@@ -111,8 +111,8 @@ file from the shell. Save the .blend first.
   build.py -- …`, no `-b`); the script builds the scene, saves the .blend, then starts the render
   from `bpy.app.timers.register(start, first_interval=3)`. If no render window appears, put an
   Image Editor on `Render Result` (api-traps).
-- No time or sample limit on the final (RULES 10b): Cycles `samples` high with `time_limit = 0`
-  and adaptive off, LuxCore `halt.enable = False`; the user stops it. Register the save handler on
+- Unlimited final: Cycles `samples` high with `time_limit = 0` and adaptive off, LuxCore
+  `halt.enable = False`. Register the save handler on
   `render_complete` **and** `render_cancel` — Esc fires only the latter.
 - Before proposing the final, estimate how long the expected quality takes from a measured
   preview (noise ∝ 1/√(samples/px)), so the user knows when stopping is reasonable.

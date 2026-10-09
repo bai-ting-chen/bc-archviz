@@ -88,8 +88,7 @@
    removed the feature. Whole-frame averages hide local effects, and a broken control looks like
    "no effect".
 10. Measure on the PNG the renderer wrote (`imgstats.py`, `refmatch.py`) — AgX rolls off whites,
-    so linear values mislead. Process frames → study `_wip/`; finals through the open Blender UI
-    so the user sees them.
+    so linear values mislead. Process frames → study `_wip/`.
 10a. **Rhino → Blender gate**. After the Rhino model is finished, stop and
     show the user (viewport captures + a list of what was modelled and left out); pipe to
     Blender only after the user approves the geometry. Rework in Rhino is cheap, a look-dev

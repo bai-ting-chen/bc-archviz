@@ -23,18 +23,13 @@ Windows 10/11.
 
 ## Skill and project
 - **This skill** (`~/.claude/skills/blender-archviz`, synced through GitHub) holds method and
-  code: `RULES.md`, `references/`, `scripts/`. It is generic: it names no project or study,
-  because every machine and every project loads it.
+  code: `RULES.md`, `references/`, `scripts/` (scope: RULES 0, 0a).
 - **A project folder** (whichever one the user is working in) holds the data: `studies/`. It
   stays on that machine and is never pushed.
-- **Each study owns its assets**: `studies/<yymmdd>_<topic>/library/` (`polyhaven/`,
-  `local/` for edited HDRIs, generated maps, other sources) holds every HDRI, texture and
-  generated bitmap that study renders with — downloaded again even if another study has the
-  same file — so a study folder moves or archives on its own. Point everything at the study:
-  `archviz.set_project(<study folder>)` in Blender, env `ARCHVIZ_PROJECT=<study folder>` for
-  `polyhaven_fetch.py`. Without that, scripts take the nearest folder holding `library/` above
-  the .blend / working directory — which may be an old shared project `library/`; never let a
-  new study read from it.
+- **Assets** (RULES 10c): `studies/<yymmdd>_<topic>/library/` (`polyhaven/`, `local/`). Point
+  scripts at the study with `archviz.set_project(<study>)` / env `ARCHVIZ_PROJECT=<study>`;
+  otherwise they take the nearest `library/` above the .blend or working directory, which may
+  be a legacy shared one.
 - **The Blender MCP server** is a per-machine install in `%LOCALAPPDATA%\BlenderMCP\` (`app\`,
   `venv\`), registered in Claude Code at user scope, like Rook in `%LOCALAPPDATA%\Rook\`.
 
@@ -85,7 +80,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 ## Workflow
 1. **Rhino** (Rook): geometry on named layers; force render meshes; save `.3dm` — or, when the
    user has their own file open, build meshes into a `File3dm` and write it (pipeline.md).
-   **Gate: stop and get the user's approval of the model before step 2** (RULES 10a).
+   Then the model gate (RULES 10a).
 2. **Import**: `bpy.ops.wm.read_homefile(use_empty=True)`, `archviz.import_rhino(path)` → layer
    collections, blocks → instances, named views → cameras, materials dropped, mm → m.
 3. **UVs** at the texture's real size: non-directional textures (plain concrete, plaster,
@@ -93,25 +88,22 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
    brushed metal, vein-cut stone, ribbed sheet, weave, long tiles) `archviz.directional_uv(obj,
    size_m, axis)` so the direction follows the element on every face (materials.md › Choosing).
 4. **Materials** by layer → `references/materials.md`.
-5. **Light**: daylight = a **matching HDRI sky as the sole natural light** (RULES 8a):
-   `archviz.world_hdri_lux`, rotated so its own sun sits where the shot needs it
-   (`hdri_analyse` sun direction is the guide) — never a sun lamp with it; artificial `interior.downlight /
+5. **Light**: daylight (RULES 8a) `archviz.world_hdri_lux`, rotated by its `hdri_analyse` sun
+   direction; artificial `interior.downlight /
    led_strip / lens_luminance` → `references/lighting-camera.md`.
 6. **Camera**: `archviz.physical_camera(cam, iso, f, shutter, focal)`, `straighten_verticals`,
    white balance if lights are warm. From a reference image: `refmatch.py grid` → solve the
    camera (`refsolve.py` when the image has a repeated element) → `archviz.framing_render()` +
    `refmatch.py pair --overlay`; then light region by region with `study_run.py`
    (lighting-camera.md › *Recreating a reference*).
-7. **Render**: `archviz.render_setup(...)` → `references/render-settings.md`. Caustics through
-   refractive glass in the shot → LuxCore instead (`references/luxcore.md`); Cycles otherwise.
+7. **Render**: `archviz.render_setup(...)` → `references/render-settings.md`; LuxCore case
+   (RULES 2a) → `references/luxcore.md`.
 8. **Look-dev**: headless `render_variant.py` or MCP renders into the study `_wip/`; measure
    with `imgstats`; prove each feature with a control (RULES 9). Reuse the helpers
    (`wear.set_input`, `study_materials.sock`, `archviz.pbr_material`, `lookdev`, `scatter`) instead of re-deriving
    node plumbing — the traps they wrap get hit again otherwise.
-9. **Preview → approval → final** (RULES 10b): show a preview render and wait for the user's
-   go before the final; state resolution, time and expected noise. The final runs in the open
-   Blender UI so the user watches it live (pipeline.md › *Final render in the open UI*); never
-   headless. Save the linear EXR + graded PNGs into the study folder.
+9. **Final** (RULES 10b) → pipeline.md › *Final render in the open UI*; linear EXR + graded
+   PNGs into the study folder.
 10. `studies/<yymmdd>_<topic>/STUDY_NOTES.md`: what, proof numbers, traps, open items.
 
 ## Troubleshooting
