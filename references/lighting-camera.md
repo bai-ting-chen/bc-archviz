@@ -54,8 +54,10 @@ Convert from the lumens printed on the fixture — that is the number a lighting
   a pool or feature light is ~1-2.5 klm. Set from the reference, not from this list.
 
 ## Placement and visibility
-- Wall grazing: a thin area strip a few centimetres off the wall at the top, toed slightly in.
-  Spots used as washers give scallops.
+- Grazed or washed wall (when the design calls for it): a linear source along the wall — a thin
+  area light or emissive slot. Offset and aim set the effect: closer and steeper means more
+  texture relief and falloff; size them from the fixture or the reference. A row of spots on a
+  wall gives scallops; use spots only when scallops are intended.
 - Recessed fixture: `visible_camera = False` on the light (it sits in a slot).
 - **Count each fixture once.** Either the lens is the source (luminance from lumens, visible to
   all rays) or the lens is decor for an analytic light → `interior.lit_once()` = `visible_diffuse`
