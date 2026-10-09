@@ -17,6 +17,9 @@ instructions behind.
   `archviz.project_root()`, never a user folder or a fixed project path. A machine-specific
   resource such as the Render Reference Library gets a default location plus "ask if missing".
 - Code goes into `scripts/` only once it runs on a scene it was not written for.
+- **State each rule once, in `RULES.md`.** SKILL.md and the references carry only the how-to
+  (commands, functions, numbers) and a pointer such as "(RULES 10c)". A rule repeated in several
+  files drifts apart the first time it changes.
 
 ## Before editing
 1. `git pull` in the skill folder. Other machines push too, and editing a stale copy means a
