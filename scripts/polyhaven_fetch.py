@@ -1,4 +1,5 @@
-"""Download Poly Haven (CC0) HDRIs and PBR textures into the current project's library/polyhaven.
+"""Download Poly Haven (CC0) HDRIs and PBR textures into a study's library/polyhaven.
+Each study owns its assets (RULES 10c): run with env ARCHVIZ_PROJECT=<study folder>.
 
 Assets are CC0. Data comes from the live API at api.polyhaven.com -- Powered by Poly Haven.
 

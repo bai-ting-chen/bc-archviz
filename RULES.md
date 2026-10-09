@@ -23,6 +23,13 @@
    (c) external tools only when nothing native works — tell the user. Fakes (light-path tricks,
    projected patterns) only as a declared fallback. The point of the studies is renders that
    hold up as physics, so a bias must always be named, never hidden.
+2a. **Renderer: Cycles by default, LuxCore for detailed caustics** (user, 2026-10-08). When
+   caustics or heavy refraction carry the shot — sun through patterned glass or glass block,
+   glass-on-water, multi-interface glass — render in LuxCore (BlendLuxCore, CPU path tracing with
+   light tracing). It is the one standing exception to native-first: measured, Cycles path
+   tracing, path guiding and MNEE all fail on specular–diffuse–specular paths from a sun-sized
+   source, LuxCore light tracing is unbiased and energy-correct there, and the user judged its
+   caustics and refraction far better. Say it is an external engine when you switch.
 3. **Research before anything new — from the physics down, not from tutorials up.** Order:
    (a) the mechanism: optics/physics papers, measured data, the governing equations (why does wet
    concrete darken? Lekner–Dorf: internal reflection in the water film, non-linear in albedo);
@@ -49,7 +56,7 @@
    double the flux). White balance is a camera setting. Parallel verticals.
 6. Wire every map that applies; real-world UVs; physically plausible albedo/IOR (materials.md) —
    wrong scale or albedo reads as "CG" faster than any lighting error.
-7. Profile the Render Reference Library slice before a look decision — 3,188 tagged images, a
+7. Profile the Render Reference Library slice before a look decision — a tagged image library in a
    per-machine folder (usually `%USERPROFILE%\PROJECT\Render Reference Library`; ask if it isn't
    there). Grep its `library.jsonl` to a shortlist of
    5-10 paths and open only those, never browse. Its `CLAUDE.md` is the facet schema.
@@ -87,6 +94,15 @@
     show the user (viewport captures + a list of what was modelled and left out); pipe to
     Blender only after the user approves the geometry. Rework in Rhino is cheap, a look-dev
     round on wrong geometry is not.
+10b. **Final render gate** (user, 2026-10-08). (1) Render a preview, show it, state the final's
+    resolution, time budget and expected noise, and **wait for approval** — the user reviews the
+    preview first; a material or light change after approval means a new preview. (2) Run the
+    final **in the open Blender UI** so the user watches it live; headless renders are for tests,
+    controls and previews. A final started headless or unapproved gets thrown away the moment
+    the user wants a change or wants to watch — both happened.
+10c. **Each study owns its assets** (user, 2026-10-08). HDRIs, textures, edited HDRIs, generated
+    maps and their `meta.json` live in the study's own `library/`, downloaded again even when
+    another study has the same file, so a study moves, archives or hands over self-contained.
 11. Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real
     one — the MNEE and green-ceiling problems were each found in minutes that way.
 

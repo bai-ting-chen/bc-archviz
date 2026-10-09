@@ -15,6 +15,10 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Displacement | Displacement + adaptive subdivision | solid, fast |
 | Tiling by real height | `height_span_uv` + REPEAT | solid |
 | Caustics | `caustic_photons.py` (glassware), GN wavefront (pools) | solid |
+| Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH CPU + light tracing (luxcore.md); energy control 0.80 vs 0.83 predicted | solid |
+| Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh (materials › Glass block) | solid |
+| HDRI with a weak sun | sun disc painted out + analytic sun at its direction (lighting-camera) | solid |
+| Baked procedural textures for LuxCore (terrazzo) | numpy seamless colour + roughness maps | test |
 | Layered BRDF | Mix Shader | solid |
 | White-backdrop product shot | Light Path *Is Camera Ray* backdrop | solid |
 | Headless batch | `blender -b … render_variant.py` | solid |

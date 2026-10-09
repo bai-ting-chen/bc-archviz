@@ -38,6 +38,17 @@ These transfer to any scene and any renderer — they are measurements of the wo
   search <category>` misses.
 - Check the map's own features before choosing it: rows of tie holes, strong directional stains
   or a visible repeat disqualify a map for a large jointless surface however good its mean is.
+  Open the colour map itself, not the sphere thumbnail or the tags: maps tagged "white, clean"
+  were painted formwork boards with peeling paint, or weathered and stained.
+- **"Very white, light, clean"** (concrete, plaster, mortar): a good scan still reads dirty at its
+  own contrast. Keep only a fraction of its tonal variation around a flat target — Mix(flat
+  albedo, scaled scan, fac 0.25) — desaturate, target albedo ~0.8, normal strength ~0.5; no panel
+  joints or tie holes unless asked. Cement mortar: albedo ~0.6, sandy plaster scan at true scale.
+- **Grain size is a design choice — size it from the brief.** "Too big" terrazzo meant chips of
+  r 1.5–7 mm; fine white terrazzo is r 0.6–2.5 mm, mostly white/very light grey chips, ~1 %
+  dark, matrix albedo ~0.86, honed roughness 0.30 (chips 0.15). Bake such patterns to a
+  seamless image (numpy, tileable via FFT noise + wrapped chip stamps) when the renderer has no
+  procedural textures (LuxCore).
 - Variation: Object Info Random, Geometry › Random per Island (per plank/tile in one mesh).
 - Node trees in labelled frames. Mix nodes keep hidden same-named sockets → `study_materials.sock()`.
 
@@ -148,6 +159,15 @@ Anisotropic + Tangent.
 - Re-lathe Rhino glassware at a high segment count for close-ups.
 - Sheer curtains: Mix(Diffuse, Translucent, ~0.5) at high albedo, so a lit room behind glows
   through them (lighting-camera.md › Glass and what it shows). → `lookdev.sheer()`.
+- **Glass block** (pressed hollow unit): two pressed halves fused hot and sealed hollow (partial
+  vacuum); the pattern is on the **inner** faces, outer faces smooth with slight pressing
+  waviness; coated sides key to the mortar. Common units 190×190×80 mm (2.3 kg) and 240×240×80
+  (4.1 kg) — from the weight, ~8 mm face glass, ~7 mm sides. Stack bond, 10 mm joints, perimeter
+  bands ≥ 15 mm, panels ≤ ~15 m². Curved walls: the concave-side joint stays constant and the
+  convex one opens, E = (L + g)(1 + s/r) − L; with g 10 / E 25 mm the inner radius is ≥ ~1.05 m
+  (190 units), ≥ ~1.33 m (240). Model the relief as geometry (caustics.md › Designing a
+  refractive relief), mortar recessed ~2 mm with a 0.3 mm air gap to the glass so surfaces never
+  coincide.
 - **Liquid in glass**: Cycles has no nested-IOR priority, so model three surfaces — GLASS (1.52),
   INTERFACE below the waterline (1.52/1.333) and WATER_SURFACE (1.333) →
   `glassware.glass_of_water()`. Check normals per wall.

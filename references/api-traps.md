@@ -11,6 +11,10 @@
 - Capture Attribute: socket index 1 is Selection — link by name.
 - Object/Collection Info geometry keeps source materials → Set Material.
 - Bump invert is a property (`bump.invert`), not a socket.
+- `ShaderNodeSeparateRGB` / `CombineRGB` no longer exist in 5.2 (`Node type … undefined`): use
+  Separate/Combine Color — or Separate XYZ when the material must also convert to LuxCore.
+- `Material.use_nodes` / `World.use_nodes` log a DeprecationWarning (removal planned for 6.0);
+  still required in 5.2.
 - Noise Texture values cluster at 0.5 (sd ≈ 0.1): threshold near 0.5.
 - No per-axis Extend: keep once-spanning UVs inside 0..1 with REPEAT.
 
@@ -45,7 +49,15 @@
 - `view_settings.white_balance_temperature`: lower = cooler.
 - `Image.save()` on float images applies view transform + exposure → for data EXRs use
   `img.save_render(path)` with OPEN_EXR 32-bit.
-- Pixel analysis: `img.pixels.foreach_get(np_array)` (linear).
+- Pixel analysis: `img.pixels.foreach_get(np_array)` is linear for **float** images only; 8-bit
+  sRGB textures come back sRGB-encoded — decode (`((v+0.055)/1.055)**2.4`) before measuring an
+  albedo (a plaster map read 0.51 encoded vs 0.236 linear).
+- Compositor in 5.x is a node group: `bpy.data.node_groups.new(name, "CompositorNodeTree")`,
+  an output socket via `tree.interface.new_socket("Image", in_out="OUTPUT",
+  socket_type="NodeSocketColor")`, a `NodeGroupOutput` node, then `scene.compositing_node_group
+  = tree` and `scene.render.use_compositing = True` (`scene.node_tree` is gone).
+- `render.render("INVOKE_DEFAULT")` from a startup-script timer renders but may open no render
+  window: switch the largest area to `IMAGE_EDITOR` showing `Render Result` to watch it.
 - Headless runs load user prefs unless `--factory-startup` (which disables add-ons, CPU device,
   and gives new worlds a grey 0.05 background (+π·0.05 W/m² on every surface) — set the
   Background Strength to 0 for a black test world).
