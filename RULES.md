@@ -50,7 +50,7 @@
     where straight, a few key readings per edge — not splines through readings or arcs fitted
     to pixels. Check once with `scripts/edge_overlay.py`, then the approval gate (10a).
 ## Look
-5. **Real units everywhere.** Daylight: calibrated HDRI in lux + matched sun. Artificial: lumens at
+5. **Real units everywhere.** Daylight: calibrated HDRI in lux, nothing else (8a). Artificial: lumens at
    683 lm/W — the same constant the camera uses, so a real ISO/f/shutter gives the right exposure
    without eyeballing. Model each fixture once (a visible lens *and* an analytic light both lighting
    double the flux). White balance is a camera setting. Parallel verticals.
@@ -71,7 +71,10 @@
    daylight is in the scene, light it with an HDRI whose sky matches the reference (overcast vs
    clear, sun height and direction, horizon content) before any Sky Texture, sun-only rig or
    fake. Search Poly Haven by tag/thumbnail for the match; fall back to Sky Texture only when no
-   HDRI fits, and say so.
+   HDRI fits, and say so. **The HDRI is the sole natural light source** (user, 2026-10-08):
+   never a sun lamp alongside it — not "matched", not to boost a weak sun, not after painting the
+   disc out. The HDRI's sun direction (`hdri_analyse`) only guides rotating and placing the map.
+   If its sun is too weak or in the wrong place for the shot, choose another HDRI.
 8b. **Detail pass at native resolution** (user praised, 2026-10-08). Region means match long
     before the image does. Once they agree, crop each material/effect at full resolution beside
     the same crop of the reference and judge its *character*: feature size, edge sharpness,

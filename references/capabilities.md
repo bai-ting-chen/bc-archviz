@@ -6,7 +6,7 @@ is the durable part; its dial positions belong to whichever study last used it.
 
 | Effect | Technique | State |
 |---|---|---|
-| Daylight | HDRI scaled to real lux + matched sun | solid |
+| Daylight | HDRI scaled to real lux, rotated to place its sun; the sole natural light | solid |
 | Camera | `physical_camera`, `straighten_verticals` | solid |
 | Tone match to a reference | Mix Multiply (`color_mult`) | solid |
 | Edge highlight | Bevel node with Normal input, or Bevel modifier | solid |
@@ -17,7 +17,6 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Caustics | `caustic_photons.py` (glassware), GN wavefront (pools) | solid |
 | Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH CPU + light tracing (luxcore.md); energy control 0.80 vs 0.83 predicted | solid |
 | Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh (materials › Glass block) | solid |
-| HDRI with a weak sun | sun disc painted out + analytic sun at its direction (lighting-camera) | solid |
 | Baked procedural textures for LuxCore (terrazzo) | numpy seamless colour + roughness maps | test |
 | Layered BRDF | Mix Shader | solid |
 | White-backdrop product shot | Light Path *Is Camera Ray* backdrop | solid |

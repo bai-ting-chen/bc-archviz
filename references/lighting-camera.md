@@ -18,25 +18,24 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
 - **Target illuminance** (these are the world, so they carry everywhere): full sun 80-100 klux,
   overcast daylight 10-20 klux, a bright north-lit studio ~2 klux, a tabletop studio ~500 lux.
 - Equirect: `u = 0.5 - atan2(y,x)/2π`, `v = elev/π + 0.5`; world Mapping rotates the lookup (Rzᵀ).
-- Sun matched to the HDRI: `sun_from_direction(dir, lux)` (strength W/m² = lux/683).
-- **Measure the HDRI's sun share before adding a lamp.** Integrate the horizontal irradiance of
-  the texels within ~1.5° of the sun centroid vs the whole upper hemisphere. A clear-sky map
-  whose disc carries ~90 % is unclipped: light with the HDRI alone — a lamp on top counts the
-  sun twice. A clear day at 20–30° elevation is ~2/3 sun; a map well under that (partly cloudy,
-  hazy, clipped) gives soft shadows and washed caustics.
-- **HDRI with a weak sun:** copy the map with the disc (≤ 1.5°) replaced by the median of the
-  1.5–3° ring — the removed share should equal the measured sun share — store it in the study's
-  `library/local/<id>/` with a `meta.json` (source, modification, original sun direction, lux at
-  strength 1), light the sky at a target lux and add an analytic sun at the map's own sun
-  direction (rotated with the map). Clear-day starting values: sky 15–20 klux horizontal, sun
-  80–100 klux normal.
+- **The HDRI is the only natural light (RULES 8a).** No sun lamp with it, ever. Use its sun
+  direction (`hdri_analyse`) to rotate the map so the sun falls where the shot needs it (the
+  rotation formula above), and scale it with `world_hdri_lux`. `sun_from_direction` is only for
+  scenes with no HDRI (a bare sun-only test or control).
+- **Pick the HDRI by its sun when sun matters** (hard shadows, caustics, sunlit patches):
+  measure the sun share — horizontal irradiance of the texels within ~1.5° of the sun centroid
+  vs the whole upper hemisphere. A clear-sky map whose disc carries ~70–90 % is unclipped and
+  gives crisp shadows and caustics; a map well under ~60 % (partly cloudy, hazy, clipped) gives
+  soft shadows and washed caustics — choose another map rather than adding or boosting a sun.
+  Check its sun elevation too: it cannot be changed, only the azimuth (by rotation).
 - **What a window shows of the HDRI:** for a viewer at eye height h_e looking through glazing
   from z0 to z1, the horizon sits at (h_e − z0)/(z1 − z0) of the glass height (~45 % for a
   1.5 m eye and 0.4–2.9 m glass). Horizon content above 0° fills the upper glass; to keep trees
   in the lower third with open sky above (and a sun that plausibly shines in), the tree tops
   must sit at or below 0° — a viewpoint/hill HDRI, not a clearing ringed by trees. Profile
   candidate maps by elevation in a ±50° azimuth window around the sun (green vs blue, median
-  luminance per 5°) instead of judging thumbnails.
+  luminance per 5°) instead of judging thumbnails. Horizon content, sun elevation and sun share
+  all have to fit in one map, so shortlist widely.
 - Sky Texture `MULTIPLE_SCATTERING` (5.2 name): calibrate with a white-plane render.
 
 ## Artificial light (formulas measured to 0.2 %, `scripts/controls/light_units.py`)

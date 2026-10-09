@@ -452,7 +452,9 @@ def straighten_verticals(cam_obj):
 
 
 def sun_from_direction(direction, strength_lux, angle_deg=0.53, name="Sun_matched"):
-    """Sun lamp pointing along -direction (direction = towards the sun). Strength in lux."""
+    """Sun lamp pointing along -direction (direction = towards the sun). Strength in lux.
+    Only for scenes WITHOUT an HDRI (tests, controls): with an HDRI sky the map is the sole
+    natural light and its own sun does this job (RULES 8a)."""
     from mathutils import Vector
     d = Vector(direction).normalized()
     lamp = bpy.data.lights.get(name) or bpy.data.lights.new(name, "SUN")

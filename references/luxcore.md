@@ -37,11 +37,17 @@ tm.type = "TONEMAP_LINEAR"; tm.use_autolinear = False; tm.linear_scale = 1.0
 - Resolution vs time: noise ∝ 1/√(samples per pixel), samples ∝ time / pixels. Measure one
   preview, then scale (4× pixels for 5.3× time = 1.33× samples per pixel).
 
+## Daylight in LuxCore
+The HDRI is the only natural light (RULES 8a): LuxCore's `infinite` light importance-samples the
+map, so its sun disc both casts the caustics (light tracing emits from it) and appears as glints
+through glass (camera paths hit it). No sun lamp. The lamp settings below are only for tests
+and controls without an HDRI.
+
 ## Matching Cycles units (do this once per scene; check on an open sunlit patch)
 - Render the same frame in both engines; a floor patch lit through an *open* opening is the
   calibration. Agreement within ~2 % means lights and sky match; differences elsewhere are
   light transport, not units.
-- **Sun:** `light.luxcore.light_type = "sun"` (physical, spectral, warm, hittable). The
+- **Sun lamp (tests/controls only):** `light.luxcore.light_type = "sun"` (physical, spectral, warm, hittable). The
   `distant` type with `theta` = half-angle and Normalize on takes `gain` = W/m² like Cycles, but
   **camera rays never hit it** → no sun glints through glass. Calibrate `sun_sky_gain` for the
   physical sun: measured 3.62e-5 ≙ Cycles sun Strength 3 W/m² normal (scales linearly; turbidity

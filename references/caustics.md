@@ -50,9 +50,10 @@ Model the relief as geometry: bump and normal maps do not bend a caustic.
   with random 180° turns/flips (64 looks), instanced; unique meshes per element would be
   tens of millions of faces. Fade the relief to a flat border over ≥ 25 mm — a short fade
   lenses into bright square outlines.
-- **Light for caustics:** sun share matters. If the HDRI sun gives well under ~60 % of the
-  horizontal light (hazy, partly cloudy), caustics wash out — paint the disc out and add an
-  analytic sun (lighting-camera.md › HDRI with a weak sun).
+- **Light for caustics:** the HDRI is the only natural light (RULES 8a), so its sun decides the
+  caustics. Choose a map whose sun carries ~70 %+ of the horizontal light (clear sky, unclipped);
+  under ~60 % (hazy, partly cloudy) caustics wash out — pick another map, never add a sun lamp
+  (lighting-camera.md › Pick the HDRI by its sun).
 
 ## MNEE build rules (measured, `scripts/controls/mnee_water.py`)
 - Flags: `obj.cycles.is_caustics_caster` / `is_caustics_receiver`, `light.cycles.is_caustics_light`.

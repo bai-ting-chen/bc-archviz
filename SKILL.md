@@ -93,7 +93,9 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
    brushed metal, vein-cut stone, ribbed sheet, weave, long tiles) `archviz.directional_uv(obj,
    size_m, axis)` so the direction follows the element on every face (materials.md › Choosing).
 4. **Materials** by layer → `references/materials.md`.
-5. **Light**: daylight = a **matching HDRI sky first** (RULES 8a), `archviz.world_hdri_lux` + matched sun; artificial `interior.downlight /
+5. **Light**: daylight = a **matching HDRI sky as the sole natural light** (RULES 8a):
+   `archviz.world_hdri_lux`, rotated so its own sun sits where the shot needs it
+   (`hdri_analyse` sun direction is the guide) — never a sun lamp with it; artificial `interior.downlight /
    led_strip / lens_luminance` → `references/lighting-camera.md`.
 6. **Camera**: `archviz.physical_camera(cam, iso, f, shutter, focal)`, `straighten_verticals`,
    white balance if lights are warm. From a reference image: `refmatch.py grid` → solve the

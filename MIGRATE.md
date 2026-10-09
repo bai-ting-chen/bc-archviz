@@ -30,5 +30,10 @@ Do: nothing to run. New code calls `archviz.directional_uv(obj, size_m, axis)` f
 directional texture (grain, boards, brushing, veining, long tiles); `wood_wear.grain_uv` still
 works as an alias for older study scripts.
 
+### 5. HDRI is the sole natural light
+Check: the project's memory index has an entry saying an HDRI sky is never combined with a sun lamp.
+Do: add that memory (feedback type) from RULES 8a; in any open study script, remove sun lamps
+that sit alongside an HDRI and rotate the HDRI to place its own sun instead.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.
