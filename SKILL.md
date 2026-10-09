@@ -118,7 +118,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Material/light change has no visible effect | look at the control; suspiciously identical numbers = feature not removed / stale mesh (`update_tag()` + `view_layer.update()`) |
 | Colour cast from a pool or glass | a lens seen through water by transmission rays — `interior.lit_once()` (lighting-camera) |
 | Submerged surfaces black under lamps | shadow rays can't pass refraction — MNEE with a diced top plane (caustics.md) |
-| Scallops on walls | spots used as washers — grazing area strip |
+| Unwanted scallops on a washed wall | spots used as washers — a linear source along the wall (lighting-camera) |
 | Image too cold after white balance | WB temperature = light shown neutral: raise it |
 | Grain / boards / brushing turns 90° between faces or runs across planks | `archviz.directional_uv(axis=…)`, size = texture's real size |
 | Out of memory on GPU | no adaptive subdivision on large diced areas; GN band detail; texture limits |
