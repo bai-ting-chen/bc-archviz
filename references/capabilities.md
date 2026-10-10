@@ -17,7 +17,12 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Caustics | `caustic_photons.py` (glassware), GN wavefront (pools) | solid |
 | Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH CPU + light tracing (luxcore.md), energy-checked (caustics.md) | solid |
 | Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh (materials › Glass block) | solid |
-| Baked procedural textures for LuxCore (terrazzo) | numpy seamless colour + roughness maps | test |
+| Baked procedural textures for LuxCore (terrazzo, smooth concrete, sand mortar) | numpy seamless colour + roughness maps | test |
+| Tangled glass-block caustics across units | long-wave relief at higher slope (Wave/Iceberg mix), sized by a thin-lens sim (caustics.md › Designing a relief) | test |
+| Clean caustic renders without OIDN blotches | LuxCore radiance clamping (camera paths only) | solid, measured |
+| Concave-corner dust | AO band × noise × height; Cycles live or baked for LuxCore (`lux_materials.bake_dust`) | test |
+| Anti-tiling | LuxCore Randomized Tiling (native); Cycles: noise-mixed lookups / hex tiling built from nodes | LuxCore test, Cycles untested |
+| Per-instance variation | Object Info Random / Attribute Instancer (converts to LuxCore per instance) | test |
 | Layered BRDF | Mix Shader | solid |
 | White-backdrop product shot | Light Path *Is Camera Ray* backdrop | solid |
 | Headless batch | `blender -b … render_variant.py` | solid |

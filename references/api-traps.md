@@ -65,3 +65,20 @@
 - Pass Blender output paths with forward slashes from bash.
 - Edit skill/script files as UTF-8; several skill files use CRLF (use the Edit tool, or
   `newline=''` when scripting).
+
+## Output and UI scripts (5.2)
+- **Multilayer EXR is a media type now:** `image_settings.media_type = "MULTI_LAYER_IMAGE"`
+  first, then `file_format = "OPEN_EXR_MULTILAYER"` (setting the format alone raises "enum not
+  found"); set `media_type = "IMAGE"` back before saving PNGs. `Render Result.save_render()`
+  then writes every pass (e.g. Combined + DENOISED) into one file. Read layers back with the
+  bundled `OpenImageIO` (`seek_subimage` per layer); `scripts/blender/from_passes.py`.
+- **Blender's render cancel skips the compositor** (Esc, status-bar ✕): `render_cancel` fires,
+  `render_complete` does not, and the composited Render Result is the uncomposited image.
+- **Operators in a `--python` startup script with UI** see no active object in their context
+  (`mode_set.poll()` fails: "Context missing active object"), unlike `-b`. Wrap them:
+  `bpy.context.temp_override(window=w, screen=w.screen, object=ob, active_object=ob,
+  selected_objects=[ob], edit_object=ob)` (`lux_materials._ctx`). Test UI-run code in the UI
+  once — a headless pass proves nothing about it.
+- An object with **no material slots bakes nothing** ("No active image found"): give it a
+  temporary slot for the bake material.
+

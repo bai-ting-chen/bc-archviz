@@ -80,6 +80,11 @@
     wear, dirt, splashes: large here, small there, absent elsewhere. A constant-width band or a
     contour ring reads as impossible. Drive extent with a slow noise that can reach zero, and
     give marks a physical shape (dried splash = blob darker at its rim, not a line).
+8d. **Repetition and imperfection**. Every surface of repeated units or tiled maps (glass block,
+    brick, stone, tile, curtain wall, mortar) gets randomness: no visible texture repeat, variation
+    per unit (tint, roughness, pattern, small tilt), and concave joints get dust, darkest in the
+    corner and fading outward. Plan it into the first material pass; perfectly regular units and
+    razor-clean corners read as CG. How: materials.md › Randomness, edge-wear.md › Concave corners.
 ## Process
 9. **A control render is the only proof.** Feature OFF + same scene twice (noise floor; same seed
    for the feature diff); read *changed > 2 %* and look at a diff/crop; verify the control really
@@ -98,9 +103,17 @@
     controls and previews. (3) Set **no time or sample limit** on the final: it renders until the
     user stops it, and saving/denoising run on stop. A halt time is fixed when the session starts
     and a finished render cannot be resumed, so a limit can only cut the user's choice short.
+    (4) Before any long or unattended final, render a short **full-frame** test with exactly the
+    final's settings (raw and denoised) and look at every surface, not only the one under
+    discussion. Bring known risks and their tested fixes to the user *before* launch; a fix is
+    not withheld because it is not yet approved. Look at the saved result before calling it done
+    or sending it anywhere.
 10c. **Each study owns its assets**. HDRIs, textures, edited HDRIs, generated
     maps and their `meta.json` live in the study's own `library/`, downloaded again even when
     another study has the same file, so a study moves, archives or hands over self-contained.
+10d. **Everything a study makes stays in its folder**: crops, comparisons, test renders,
+    measurements, downloads and throwaway scripts go in the study's `_wip/`, never the session
+    scratchpad or %TEMP% — tell subagents the path too. One place holds all a study produced.
 11. Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real
     one — a small scene isolates the cause in minutes where the full scene hides it.
 

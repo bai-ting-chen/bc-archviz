@@ -58,7 +58,14 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   (`time.time()` log per step), prefer closed-form layouts, sample a curve once into a table if
   you must search, and split builds into steps run as separate calls. A background
   `rhino_execute` that times out is still running — check the Rhino process CPU before queuing
-  more.
+  more. The client gives up after ~2 min while Rhino carries on ("dispatcher busy"): run
+  **open, build and save as three calls**.
+- **Open models with `Rhino.RhinoDoc.OpenFile(path)` inside `rhino_execute`** (the document
+  tool's open fails in a fresh workbench). Opening while the current document counts as
+  modified raises a modal "save changes?" that blocks every call until a person clicks it; after
+  writing a copy, set `doc.Modified = False`. A force-killed Rhino leaves `<file>.3dm.rhl` lock
+  files (delete once no Rhino owns them) and a crash-report dialog on the next start that only
+  the user can dismiss. A relaunched workbench needs `rhino_set_active_instance(port=…)`.
 - **Displaced surfaces need explicit grids.** `Mesh.CreateFromBrep` ignores `MaxEdgeLength` on
   planar faces (large triangles inside a fine mesh), so a relief displaced on it vanishes.
   Build regular quad grids instead; a rounded box = grid on the box pulled onto
@@ -110,7 +117,12 @@ file from the shell. Save the .blend first.
   Image Editor on `Render Result` (api-traps).
 - Unlimited final: Cycles `samples` high with `time_limit = 0` and adaptive off, LuxCore
   `halt.enable = False`. Register the save handler on
-  `render_complete` **and** `render_cancel` — Esc fires only the latter.
+  `render_complete` **and** `render_cancel` — Esc fires only the latter, and skips the
+  compositor: save all passes as multilayer EXR and build the finals from the denoised layer
+  (`scripts/blender/from_passes.py`; luxcore.md › Final in the open UI).
+- The pre-final full-frame check (RULES 10b (4)) runs the same build script headless at reduced
+  resolution; it caught a broken save helper and a UI-only context error before a multi-hour run.
+  Only one Blender may hold the MCP port: quit an idle finished-final window first.
 - Before proposing the final, estimate how long the expected quality takes from a measured
   preview (noise ∝ 1/√(samples/px)), so the user knows when stopping is reasonable.
 - Tests and previews run headless (`blender -b`), one at a time; tell the user when a CPU-only
@@ -138,4 +150,5 @@ each version's reason lives as a comment next to the value it changed.
 ## Study layout
 `studies/<yymmdd>_<topic>/`: Rhino build script, `*.3dm`, scene script (rebuilds from the .3dm via
 MCP), `.blend`, finals, `STUDY_NOTES.md`, `library/` (`polyhaven/`, `local/` — every asset the
-study uses, RULES 10c), `_wip/` (controls, boards, test scripts). Delete `*.blend1` / `*.3dmbak`.
+study uses, RULES 10c), `_wip/` (controls, boards, test scripts, crops, measurements,
+downloads — everything the study produces, RULES 10d). Delete `*.blend1` / `*.3dmbak`.

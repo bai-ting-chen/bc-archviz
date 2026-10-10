@@ -19,6 +19,7 @@ sc.render.engine = "LUXCORE"; cfg = sc.luxcore.config
 cfg.engine = "PATH"; cfg.device = "CPU"
 cfg.path.hybridbackforward_enable = True            # "Add Light Tracing": light paths splat on the film
 cfg.path.depth_total, depth_diffuse, depth_glossy, depth_specular = 32, 4, 16, 32
+cfg.path.use_clamping = True; cfg.path.clamping = 2000   # camera paths only; caustics untouched (below)
 h = sc.luxcore.halt                                 # tests/previews: a time budget; finals: h.enable = False
 h.enable = h.use_time = True; h.time = secs
 h.use_samples = False; h.use_noise_thresh = False   # halt-by-samples is ON by default (stops at "100 %")
@@ -34,6 +35,40 @@ tm.type = "TONEMAP_LINEAR"; tm.use_autolinear = False; tm.linear_scale = 1.0
 - Memory is small with instancing: ~800 instances of a 73 k-quad mesh peaked under 1 GB RAM.
 - Resolution vs time: noise ∝ 1/√(samples per pixel), samples ∝ time / pixels. Measure one
   preview, then scale (4× pixels for 5.3× time = 1.33× samples per pixel).
+
+## Fireflies, clamping and the denoiser
+- **Where they come from.** Hybrid back/forward splits the work (LuxCore source,
+  `pathtracer.cpp`): light tracing renders light → specular… → one diffuse hit → camera (the
+  caustic itself); camera paths skip exactly those. The *bounce of that caustic light* onto other
+  surfaces (sun → glass → floor → ceiling → camera) is left to camera paths that must hit a
+  0.53° sun through wavy glass by chance: rare, enormous samples. In a measured case two
+  thirds of a ceiling's mean radiance sat in such samples, and **6 h left the raw noise where
+  10 min had it** — time does not cure them.
+- **OIDN turns them into blotches.** Fireflies are the worst denoiser input: the network keeps
+  them as features and smears them into large soft clouds. A strongly textured surface hides
+  the clouds; a smooth white one shows every one.
+- **Fix: radiance clamping** (`cfg.path.use_clamping = True; cfg.path.clamping = 2000`, LuxCore
+  `path.clamping.variance.maxvalue`). LuxCore clamps **only camera-path samples** ("I clamp only
+  eye paths samples", `pathtracer.cpp`), each to the pixel's running mean + √value, so the
+  light-traced caustics are untouched: caustic medians moved < 2 %, the ceiling's mean/median
+  went 3.35 → 1.15 and its brightest raw pixel 21 698 → 38. 2000 and 10 000 gave the same image —
+  the energy removed sits > 100× the pixel mean. BlendLuxCore's printed "recommended clamp value"
+  is (mean film luminance × 10)², inflated by the fireflies themselves: an upper bound only.
+  Check the clamped brightness with an energy balance (bounce ≈ albedo × view factor × source
+  radiance) rather than trusting an unconverged unclamped mean.
+- **Diagnose before fixing:** per region, raw *mean / median* (≈ 1 = clean; ≫ 1 = energy in rare
+  samples) and the brightest pixel. Bright spots that sit on the **same pixels in an independent
+  render** and span several pixels are caustic hot spots; single random pixels are fireflies.
+- **Trap — a scripted sun hits glass:** BlendLuxCore's sun UI defaults Visibility › Specular
+  (indirect) to off, but that default only reaches the exporter when the box is edited; a sun
+  made by script exports `visibility.indirect.specular.enable = 1`, the developers' "fireflies
+  generator". Light tracing ignores visibility flags, so setting
+  `light.luxcore.visibility_indirect_specular = False` keeps the caustics; it does drop all
+  sun-through-glass light reaching camera paths (bounce glow, glints), so try clamping first.
+- **Do not:** use Architectural glass or a white Shadow Color on the glass — the light tracer
+  stops at any shadow-transparent surface, so the caustics vanish; or raise the glossiness
+  threshold above a glossy floor's roughness (the floor then counts as specular and its
+  caustics fall between both halves).
 
 ## Daylight in LuxCore
 Daylight is the HDRI (RULES 8a): LuxCore's `infinite` light importance-samples the map, so its
@@ -67,6 +102,25 @@ Coordinate, Separate Color. So:
 - roughness from an ARM map via Separate XYZ (`Y` = green).
 Setting `use_cycles_nodes` from a script logs a harmless traceback (it tries to show a node
 editor); the value still applies.
+- **Per-instance variation converts:** Object Info › Random → `objectidnormalized`, and every
+  instance of a collection gets its own ID automatically (do not set a manual LuxCore object ID
+  on the source meshes). `lux_materials.glass_instance_tint()`.
+
+## Native LuxCore materials (`scripts/blender/lux_materials.py`)
+Needed when the converter cannot express it — notably **Image › Randomized Tiling**
+(histogram-preserving blending after Burley: removes visible tile repeat; only when Wrap =
+Repeat) and **2D Mapping › Randomized UV** (random rotation/scale/offset per object ID or mesh
+island = V-Ray's UVW Randomizer). Build: `bpy.data.node_groups.new(n, "luxcore_material_nodes")`,
+`mat.luxcore.node_tree = tree; mat.luxcore.use_cycles_nodes = False`; nodes
+`LuxCoreNodeMatOutput`, `LuxCoreNodeMatDisney`, `LuxCoreNodeTexImagemap` (`gamma` 2.2 colour /
+1.0 data, `randomized_tiling`), `LuxCoreNodeTexMapping2D` (`uvindex` = the mesh's UV layer index),
+`LuxCoreNodeTexColorMix` (`mode` "scale"/"mix"), `LuxCoreNodeTexSplitFloat3`.
+`lux_materials.lux_textured(name, folder, mesh, dust_png)` does it from a map folder.
+- **A `uvindex` that points at a missing UV layer (-1) crashes pyluxcore** at export
+  (EXCEPTION_ACCESS_VIOLATION in `pyluxcore.pyd`, no Python error). Build every UV layer the
+  tree references on every run, even when the map itself is cached.
+- No AO texture and no usable dirt texture in LuxCore (Pointiness has no width control and cannot
+  see where two objects meet): bake corner dust with Cycles (edge-wear.md › Concave corners).
 
 ## Output
 - The OIDN result (`sc.luxcore.denoiser.enabled = True`) is a **separate `DENOISED` pass**; a
@@ -78,7 +132,17 @@ editor); the value still applies.
 - Save the linear EXR, then graded PNGs from it (AgX at a few EVs) with `img.save_render(p, scene=sc)`.
 
 ## Final in the open UI
-Mechanics: pipeline.md › *Final render in the open UI*. LuxCore specifics: `halt.enable =
-False`; on Esc it still draws the final film and produces the OIDN pass, so the saved
-`Render Result` (composited = DENOISED) is the clean image — check it. The live view refreshes in
-an Image Editor on `Render Result`; the first light-tracing passes look like scattered dots.
+Mechanics: pipeline.md › *Final render in the open UI*. LuxCore specifics: `halt.enable = False`.
+- **Two ways to stop, different results.** LuxCore's own Stop (render-window button;
+  scriptable as `LuxCoreDisplaySettings.stop_requested = True` from
+  `bl_ext.user_default.blendluxcore.properties.display`) ends normally: OIDN, compositor,
+  `render_complete`. **Blender's cancel** (Esc in a Blender window, or the ✕ beside "Rendering…"
+  in the main window's status bar) also runs OIDN but fires `render_cancel` and **skips the
+  compositor, so the composited Render Result is the raw image.** An accidental click there ends
+  a no-limit final; warn the user.
+- So the save handler writes a **multilayer EXR of all passes** (api-traps › multilayer) and
+  builds the finals from its `DENOISED` layer with `scripts/blender/from_passes.py` — never from
+  the composite. Check the result (grain on a smooth wall = raw saved by mistake).
+- A cancelled LuxCore session cannot be resumed; the time spent is in the passes file only.
+- The live view refreshes in an Image Editor on `Render Result`; the first light-tracing passes
+  look like scattered dots. A snapshot mid-render: `Render Result.save_render(...)` over MCP.

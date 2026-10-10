@@ -45,5 +45,29 @@ RULES.md; drop any local memory that repeats the removed clean-arcs Rhino rule.
 Check: the project's memory has no entry telling Rhino models to use one arc per curved edge.
 Do: delete such a memory file and its index line.
 
+## 261010 — LuxCore fireflies, glass-block relief, dust, randomness, final-render safety
+A long LuxCore study of sun caustics through a glass-block wall showed: OIDN turns caustic-bounce
+fireflies into blotches that more time cannot fix — radiance clamping (camera paths only)
+removes them without touching the caustics; a render cancelled from Blender skips the
+compositor, so finals are now built from a multilayer passes EXR; long-wave reliefs at a higher
+slope make units' caustics tangle into one net; corner dust and anti-tiling for LuxCore need a
+Cycles bake and native node trees. New user rules: RULES 8d (repetition and imperfection, corner
+dust), 10b step 4 (full-frame test of the exact final settings before any long run; raise known
+fixes first) and 10d (everything a study makes stays in its folder). New scripts
+`scripts/blender/lux_materials.py` and `scripts/blender/from_passes.py`. Updated: luxcore,
+caustics, edge-wear, materials, pipeline, api-traps, render-settings, capabilities, SKILL.md.
+
+### 7. Local memory for the new rules
+Check: the project's memory index has entries for (a) randomness on repeated units + corner dust,
+(b) saving everything inside the study folder, and (c) the full-frame pre-final test in the
+final-render-gate memory.
+Do: add/extend those memory files (feedback type) from RULES 8d, 10d and 10b (4), with index lines.
+
+### 8. Study scripts that saved finals from the composite
+Check: no open (unfinished) study script saves its final from the composited Render Result
+without also writing a multilayer passes EXR.
+Do: in such scripts, save all passes (`media_type = "MULTI_LAYER_IMAGE"`) and build finals with
+`scripts/blender/from_passes.py`. Leave finished studies alone.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

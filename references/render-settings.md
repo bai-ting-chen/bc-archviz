@@ -16,6 +16,10 @@ around that, rather than carrying someone else's numbers.
   it is high enough to swamp a real effect — hence finals at a thousand-plus samples, and
   controls that must beat the floor by a clear multiple (RULES 9).
 - Light tree on (default); `light_sampling_threshold` is ignored while it is on.
+- **Fireflies vs real highlights:** per region compare the raw *mean / median* (≈ 1 clean, ≫ 1 =
+  energy in rare samples) and look again in an independent render: real caustic hot spots span
+  several pixels and land on the same pixels; fireflies are lone random pixels. Remove fireflies
+  *before* the denoiser (clamping; luxcore.md › Fireflies) — OIDN smears them into blotches.
 
 ## Biased settings — use knowingly
 Bounce caps (energy beyond is lost), `sample_clamp_indirect` (keep direct at 0), Filter Glossy,

@@ -8,7 +8,7 @@ description: >-
   in real lumens, physical camera, displacement, caustics, edge wear and chips, recreating a
   reference image, control renders and measurement. Use whenever the user mentions Blender,
   Cycles, shader/geometry nodes, Poly Haven, render, rendering, lookdev, materials, lighting,
-  HDRI, caustics, LuxCore, glass blocks, patterned glass, water, exposure, a Render Reference Library image, or wants a photoreal image of
+  HDRI, caustics, LuxCore, glass blocks, patterned glass, water, exposure, texture repetition / stochastic or anti-tiling, randomizing repeated units, dust or grime in corners, fireflies or denoiser blotches, a Render Reference Library image, or wants a photoreal image of
   a Rhino model — even without naming Blender. Also use it when pulling, editing or pushing this
   skill itself, so its MIGRATE.md and maintenance rules apply.
 ---
@@ -61,7 +61,7 @@ must leave for the other machines.
 |---|---|
 | Blender | `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` |
 | MCP | server `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\blender-mcp.exe` (user scope, `claude mcp get blender`); add-on `mcp` autostarts on 127.0.0.1:9876 (needs Prefs → *Allow Online Access*) |
-| Helpers (run in Blender) | `scripts\blender\`: `archviz` (import, UVs, HDRI, camera, render), `study_materials`, `interior` (lights in lumens, stone, steel, water), `lookdev` (measured-albedo PBR, vertical boards, long pavers, sheers, glass shells, per-instance tone), `scatter` (GN leaf litter / foliage), `wear`, `wood_wear`, `glassware`, `gn_caustics`, `caustic_photons`, `render_variant` |
+| Helpers (run in Blender) | `scripts\blender\`: `archviz` (import, UVs, HDRI, camera, render), `study_materials`, `interior` (lights in lumens, stone, steel, water), `lookdev` (measured-albedo PBR, vertical boards, long pavers, sheers, glass shells, per-instance tone), `scatter` (GN leaf litter / foliage), `wear`, `wood_wear`, `glassware`, `gn_caustics`, `caustic_photons`, `render_variant`, `lux_materials` (LuxCore: baked corner dust, native Randomized Tiling, per-instance glass tint), `from_passes` (finals from a multilayer passes EXR) |
 | Measure | `scripts\imgstats.py stats|patch|diff`; `scripts\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `scripts\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
@@ -142,6 +142,12 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Ripples look fake or stretched | noise bump — Ocean geometry on a finer mesh, never stretch (materials › Water) |
 | Numbers match, image doesn't | native-resolution crop pass beside the ref (RULES 8b) |
 | Poly Haven download `HTTP Error 52x` | Cloudflare hiccup — retry the same call |
+| Cloudy blotches on smooth walls/ceiling after OIDN (LuxCore) | fireflies from caustic-bounce paths — radiance clamping, not more time (luxcore.md › Fireflies) |
+| Saved final is grainy although the denoiser ran | the render was cancelled (Esc / status-bar ✕) and the compositor skipped — rebuild with `from_passes.py` |
+| LuxCore crashes at export, `EXCEPTION_ACCESS_VIOLATION` in pyluxcore | a native mapping's `uvindex` points at a missing UV layer (luxcore.md › Native) |
+| Script works headless, fails in the UI ("Context missing active object") | operators need `temp_override` in a UI startup script (api-traps) |
+| Rook call hangs / "dispatcher busy" / file won't open | long script still running, or a modal dialog (save-changes, crash report) — split calls; pipeline › Rhino |
+| Caustics on a wall look like vertical streaks | seen at a grazing angle; judge on a face-on surface (caustics.md) |
 
 More traps: `references/api-traps.md`.
 

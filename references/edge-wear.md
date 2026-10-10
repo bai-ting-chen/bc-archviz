@@ -49,10 +49,20 @@ the texture lifted and pulled toward a raw tint.
 **The break share is a steep response** — a small fraction of the top surface is all you want,
 and a little more reads as damage rather than wear. Bisect it against a render.
 
-## Concave corners
-Corner grime (beam/slab, wall/floor) is shading, not geometry: AO node (**outside**, not Inside)
-over a modest distance, remapped so only the tight corner darkens, x fine noise, into the grunge
-darkening (materials.md › Monolithic concrete).
+## Concave corners (RULES 8d)
+Corner dust (wall/floor, wall/ceiling, plinths, beam/slab) is shading, not geometry. Target (as
+VRayDirt does it): darkest in the joint, fading outward over ~15–25 cm, broken up, stronger where
+air is still — floor joints and the tops of plinths — and fainter, greyer at the ceiling.
+- **Cycles:** AO node, **Inside off, Only Local off** (floor and wall are usually separate Rhino
+  objects; Only Local would miss their joint), Distance ≈ 0.2 m → Map Range AO 0.55..0.97 →
+  1..0, ^1.2, × a 5/m noise remapped 0.45–1 (patchy extent) × a 90/m noise 0.7–1 (speckle) ×
+  a height falloff (1.0 at 0.6 m → 0.45 at 2.6 m); albedo × mix(1, (0.62, 0.58, 0.52), mask). AO is
+  expensive: bake it for repeated renders.
+- **LuxCore** (no AO texture): the same shader **baked** per object into its own UV layout,
+  then multiplied in a native tree — `lux_materials.bake_dust(objs, cache_dir)` +
+  `lux_textured(..., dust_png=...)`. 4096 px per object keeps a 20 cm band smooth at room scale.
+- A reach of 0.12 m reads as a pencil line from a few metres; judge the width on the full frame,
+  not a close-up.
 
 ## Proving it
 Each layer gets its own control (RULES 9). A layer that moves the frame a few times the noise
