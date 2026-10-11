@@ -106,7 +106,8 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
                    color_mult=(0.76, 0.82, 0.99), normal_strength=0.6, bump_distance=0.004,
                    round_edge=0.0025, chip_spread=0.05, chip_in=(0.40, 0.90),
                    noise_scale=14.0, noise_band=(0.35, 0.60),
-                   edge_dark=True, stain=True, stain_mult=1.15, bevel_chips=True):
+                   edge_dark=True, stain=True, stain_mult=1.15, bevel_chips=True,
+                   stain_map=("local", "leakage_tdlbbd1c", "Leakage_tdlbbd1c_2K_Opacity.jpg")):
     """Cast concrete: tone-matched diffuse, wired roughness/normal/height, round edges
     combined with the normal map, chipped-edge wear and a leak stain driving a worn BRDF."""
     maps, meta = _ph_maps(tex_id)
@@ -173,8 +174,14 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
         mask = _union(mask, line_r.outputs["Result"], (-120, -950))
 
     if stain:
+        # stain_map: a leak/runoff opacity map under the study's library/ (a Megascans download
+        # needs the user's sign-in). Missing -> stop and say so; never drop the layer silently.
+        stain_path = library(*stain_map)
+        if not os.path.exists(stain_path):
+            raise FileNotFoundError(f"leak-stain map missing: {stain_path} -- download it into the "
+                                    "study library or build with stain=False and tell the user")
         suv = g.uv("SpanUV", (-900, -1450), F_WEAR)
-        leak = g.img(library("local", "leakage_tdlbbd1c", "Leakage_tdlbbd1c_2K_Opacity.jpg"),
+        leak = g.img(stain_path,
                      "Non-Color", (-700, -1450), F_WEAR, suv, "Leak stain (Stain Op)")
         # v stays inside 0..v_repeat (<1), so REPEAT tiles u (wrap_u 1) and never wraps v (wrap_v 0)
         sm = g.node("ShaderNodeMath", (-450, -1450), F_WEAR, label="x1.15")

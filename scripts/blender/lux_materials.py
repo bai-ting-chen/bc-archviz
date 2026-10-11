@@ -47,7 +47,7 @@ def dust_uv(ob, name="DustUV"):
     if keep: me.uv_layers.active = me.uv_layers[keep]
 
 def _dust_bake_material():
-    m = bpy.data.materials.new("DustBake"); m.use_nodes = True; nt = m.node_tree; nt.nodes.clear()
+    m = bpy.data.materials.get("DustBake") or bpy.data.materials.new("DustBake"); m.use_nodes = True; nt = m.node_tree; nt.nodes.clear()
     N, L = nt.nodes.new, nt.links.new
     def rng(lo, hi, to_lo, to_hi):
         r = N("ShaderNodeMapRange"); r.clamp = True
@@ -96,14 +96,16 @@ def bake_dust(objs, cache_dir, rebake=False, samples=64):
         if added: o.data.materials.append(bm)
         for s in o.material_slots: s.material = bm
         me = o.data; keep = me.uv_layers.active.name; me.uv_layers.active = me.uv_layers["DustUV"]
-        for x in bpy.context.view_layer.objects: x.select_set(False)
-        bpy.context.view_layer.objects.active = o; o.select_set(True)
-        with _ctx(o): bpy.ops.object.bake(type="EMIT", margin=8, use_clear=True)
-        img.filepath_raw = paths[o.name]; img.file_format = "PNG"; img.save()
-        me.uv_layers.active = me.uv_layers[keep]
-        if added: o.data.materials.clear()
-        for s, mat in zip(o.material_slots, saved): s.material = mat
-    sc.render.engine = eng
+        try:
+            for x in bpy.context.view_layer.objects: x.select_set(False)
+            bpy.context.view_layer.objects.active = o; o.select_set(True)
+            with _ctx(o): bpy.ops.object.bake(type="EMIT", margin=8, use_clear=True)
+            img.filepath_raw = paths[o.name]; img.file_format = "PNG"; img.save()
+        finally:                              # a failed bake must not leave the scene on DustBake
+            me.uv_layers.active = me.uv_layers[keep]
+            if added: o.data.materials.clear()
+            for s, mat in zip(o.material_slots, saved): s.material = mat
+            sc.render.engine = eng
     return paths
 
 def lux_textured(name, folder, me, dust_png=None, uv_tex="BoxUV", uv_dust="DustUV", randomized=True, specular=0.5):
@@ -113,7 +115,7 @@ def lux_textured(name, folder, me, dust_png=None, uv_tex="BoxUV", uv_dust="DustU
     i_tex = me.uv_layers.find(uv_tex); i_dust = me.uv_layers.find(uv_dust)
     if i_tex < 0 or (dust_png and i_dust < 0):
         raise RuntimeError("%s lacks UV layer %s / %s" % (me.name, uv_tex, uv_dust))
-    m = bpy.data.materials.new(name)
+    m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     tree = bpy.data.node_groups.new(name + "_lux", "luxcore_material_nodes")
     m.luxcore.node_tree = tree; m.luxcore.use_cycles_nodes = False
     N, L = tree.nodes.new, tree.links.new
@@ -143,7 +145,7 @@ def lux_textured(name, folder, me, dust_png=None, uv_tex="BoxUV", uv_dust="DustU
 def glass_instance_tint(name="Glass_rand", tint=(0.985, 0.996, 0.99), ior=1.52):
     """Clear glass; Object Info Random mixes white -> `tint` per instance (per face crossed, so a
     hollow block's 4 faces give ~tint^4)."""
-    m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree; nt.nodes.clear()
+    m = bpy.data.materials.get(name) or bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree; nt.nodes.clear()
     N, L = nt.nodes.new, nt.links.new
     info = N("ShaderNodeObjectInfo"); mix = N("ShaderNodeMixRGB"); mix.blend_type = "MIX"
     mix.inputs["Color1"].default_value = (1, 1, 1, 1); mix.inputs["Color2"].default_value = (*tint, 1)

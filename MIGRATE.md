@@ -86,5 +86,40 @@ Do: edit it to "LuxCore PATH + light tracing, GPU camera paths + Use CPUs (CPU l
 Check: no open (unfinished) study script sets `cfg.device = "CPU"` for a final or `devices.use_native_cpu = False` with light tracing.
 Do: switch them to `cfg.device = "OCL"`, `use_native_cpu = True`, `hybridbackforward_lightpartition_opencl = 100`. Leave finished studies alone.
 
+## 261011 — Light types and IES photometry
+Cycles' IES Texture converts candela with 177.83 lm/W (D65), not the skill's 683, so an IES on a
+1 W light is 3.84x too bright; on a point light, power 177.83/683 W reproduces the file's candela
+exactly (control `scripts/controls/ies_units.py`, real files 1.000). New `interior.ies_read`
+(lumens, beam/field angles from the file) and `interior.ies_light` (point light, embedded file,
+optional lumen rescale). lighting-camera.md has a light-type table and an IES section (scale,
+orientation, absolute vs relative photometry, where to get files); SKILL.md and capabilities.md
+updated.
+
+Also: `scripts/ldt2ies.py` (Eulumdat → IES); linear fixtures as N point lights; a light's
+sphere must sit clear of the ceiling/housing; `archviz.straighten_verticals` now updates the
+view layer first (it misread scripted cameras); `archviz.render_setup` enables OptiX when the
+preferences have no compute device (`--factory-startup` rendered on CPU before).
+
+### 11. IES files per study
+Check: `scripts/blender/interior.py` defines `ies_light` (it does after pulling).
+Do: nothing to install. Fixture IES files go in the study's `library/local/ies/` with a
+`meta.json`; never set an IES light's power by eye.
+
+## 261011b — Full review of docs and scripts
+Pull-only. Docs: README describes per-study assets; RULES 5 now requires a specified fixture's
+photometric file; lighting-camera gains the incident-meter exposure (EV100 = log2(E/2.5)) and
+correct helper signatures; caustics and edge-wear lose one scene's numbers; video outputs go to
+the study `_wip/`; SKILL description triggers on IES/LDT/lux. Scripts: `mcp_call.py` image
+output crash fixed; `concrete_study(stain_map=…)` stops with a clear message when the leak map
+is missing; `caustic_photons` stores its receiver grid with the geometry and takes
+`albedo_label`; `render_variant` options `key_target`, `coll`; cleanup on failure in
+`study_run`, `polyhaven_fetch`, `lux_materials.bake_dust`; `refsolve` reports parallel lines.
+
+### 12. Callers of changed signatures
+Check: no open (unfinished) study script calls `render_variant … key_area=` expecting the aim
+point at z 0.73, or `caustic_photons.add_caustic_light` on a receiver whose BSDF is not labelled
+"Pine + satin varnish coat" without passing `albedo_label`.
+Do: add `key_target=0,0,0.73` / `albedo_label=…` there. Leave finished studies alone.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

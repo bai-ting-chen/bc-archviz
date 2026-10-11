@@ -48,7 +48,9 @@
 ## Look
 5. **Real units everywhere.** Daylight: calibrated HDRI in lux, nothing else (8a). Artificial: lumens at
    683 lm/W — the same constant the camera uses, so a real ISO/f/shutter gives the right exposure
-   without eyeballing. Model each fixture once (a visible lens *and* an analytic light both lighting
+   without eyeballing. A specified fixture uses the manufacturer's photometric file (IES; LDT
+   converted) at its catalogue output — never a power set by eye (lighting-camera › IES).
+   Model each fixture once (a visible lens *and* an analytic light both lighting
    double the flux). White balance is a camera setting. Parallel verticals.
 6. Wire every map that applies; real-world UVs; physically plausible albedo/IOR (materials.md) —
    wrong scale or albedo reads as "CG" faster than any lighting error.

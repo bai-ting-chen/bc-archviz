@@ -53,9 +53,14 @@ def _download(url, dst, md5=None):
         return "cached"
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     tmp = dst + ".part"
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA)) as r, open(tmp, "wb") as f:
-        while chunk := r.read(1 << 20):
-            f.write(chunk)
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA)) as r, open(tmp, "wb") as f:
+            while chunk := r.read(1 << 20):
+                f.write(chunk)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        raise
     if md5 and hashlib.md5(open(tmp, "rb").read()).hexdigest() != md5:
         os.remove(tmp)
         raise RuntimeError("md5 mismatch: " + url)

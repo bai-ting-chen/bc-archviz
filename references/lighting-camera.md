@@ -37,12 +37,14 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
 - Sky Texture `MULTIPLE_SCATTERING` (5.2 name): calibrate with a white-plane render.
 
 ## Artificial light (formulas measured to 0.2 %, `scripts/controls/light_units.py`)
-Convert from the lumens printed on the fixture — that is the number a lighting schedule gives you.
+When the fixture is specified, use its IES file (*IES profiles* below) — it carries the beam and
+the intensity. Otherwise convert from the lumens printed on the fixture — the number a lighting
+schedule gives you.
 
 - **Spot/point = point-equivalent**: power is for the full sphere, the cone only masks.
-  F lm into a full beam angle a: `P = F/683 · 4π / (2π(1 - cos a/2))` → `interior.downlight(lumens, beam_deg)`.
-- **Area = Lambert emitter**: `E = P/(πd²)` on axis; `spread` focuses the same power.
-  Strip: `P = lm_per_m · L / 683` → `interior.led_strip(p0, p1, lm_per_m, normal, spread)`.
+  F lm into a full beam angle a: `P = F/683 · 4π / (2π(1 - cos a/2))` → `interior.downlight(name, loc, lumens, beam_deg)`.
+- **Area = Lambert emitter**: `E = P/(πd²)` on axis; `spread` (`spread_deg` in the helpers) focuses the same power.
+  Strip: `P = lm_per_m · L / 683` → `interior.led_strip(name, p0, p1, lm_per_m, normal=…, spread_deg=…)`.
   For a target E at distance d: `P = E·π·d²/683`.
 - **Emissive lens**: `L = F/(πA)` cd/m², strength = L/683 → `interior.lens_luminance`.
 - Colour: `light.use_temperature`, `light.temperature` (K). Warm white 2700-3000 K, neutral
@@ -51,6 +53,70 @@ Convert from the lumens printed on the fixture — that is the number a lighting
   downlight is several hundred to ~1000 lm; an LED cove or niche strip runs a few hundred lm/m
   (grazing a wall wants the low end — a bright strip close to a surface blows the top out);
   a pool or feature light is ~1-2.5 klm. Set from the reference, not from this list.
+
+## Light types — which one models what
+| Source | Use for | Units / traps |
+|---|---|---|
+| World (HDRI / Sky) | all daylight (RULES 8a) | lux via `world_hdri_lux` |
+| Point | bulbs, **any IES fixture** | W for the full sphere; Radius = bulb/lens size (softness only) |
+| Spot | downlights/spots without an IES | same power as a point, the cone only masks; Blend softens the edge, not the shadow |
+| Area (rect/square/disk/ellipse) | panels, troffers, coves, light boxes, backlit sheers | Lambert emitter, P = flux; *Spread* narrows like a louvre/honeycomb; *Portal* in windows only samples the HDRI (no light of its own) |
+| Sun | tests and controls only, never with an HDRI | W/m² |
+| Emissive mesh | visible lenses, LED lines, screens, signage | luminance cd/m² (`interior.emitter`); count once with the analytic light (`lit_once`) |
+
+Per-light Cycles settings: *Max Bounces*, *Cast Shadow*, *Multiple Importance* (keep on for
+area lights and glossy floors), *Shadow Caustics* (MNEE, caustics.md); *Light Linking* limits
+what a light reaches; the light tree (Sampling › Lights, on by default) is what keeps dozens of
+fixtures from turning into noise. *Normalize* (default on) keeps power constant as the size
+changes; *Exposure* multiplies by 2^x — keep both at defaults so watts stay lumens/683.
+
+## IES profiles — measured fixtures (`interior.ies_light`, control `scripts/controls/ies_units.py`)
+An IES file (ANSI/IES LM-63) is the goniophotometer test of one luminaire: candela on a grid of
+vertical angles (0° = nadir) × horizontal C-planes, plus a multiplier, ballast factors and the
+lamp lumens. It holds the beam shape, cut-off, side-throw and the absolute intensity, so with
+the manufacturer's file a render's illuminance is the fixture's, not a guess from a cone angle.
+- **Cycles' scale is 177.83 lm/W, not 683.** The IES node converts candela with 4π/177.83
+  (D65 efficacy, `intern/cycles/util/ies.cpp`), applies multiplier × ballast factors, then
+  multiplies by the light's power/4π. On a point/spot, power **177.83/683 = 0.2604 W** gives the
+  file's candela in our convention (measured 0.999, real files 1.000). A 1 W light with an IES
+  is 3.84× too bright — the usual "IES lights look blown out" complaint.
+- **Host it on a point light** (or a spot with the cone opened to 180°). On an area light the
+  profile multiplies a Lambert emitter: 4× on axis and cosine-weighted, no longer the
+  measured distribution.
+- **Orientation:** nadir = light −Z, C0 plane = light −Y, C90 = light −X. Asymmetric files (wall
+  washers, asymmetric downlights) are aimed with this. LM-63 puts a luminaire's length on the
+  90–270 axis, so a linear fixture's length goes on light −X.
+- **Linear fixtures** (coves, linear pendants, wall-grazers): one point light with the file is
+  right only far away (> ~5× the length). Split the run into N point lights along it, each with
+  the same file at lumens/N — exact for a uniform emitter, because each piece has the whole
+  fixture's angular shape at 1/N of its intensity. Keep each piece shorter than ~¼ of its
+  distance to the lit surface.
+- **Absolute vs relative photometry.** LED files are absolute (lamp lumens −1; candela are the
+  fixture's). Older lamp files are relative: candela are for the rated lamp lumens and already
+  include the luminaire efficiency, so the integrated flux (e.g. 852 lm) is below the lamp's
+  (1650 lm). Either way the file is self-calibrated: use it unscaled. `ies_read` integrates the
+  candela to the luminaire lumens, beam (50 %) and field (10 %) angles; it matched a file's own
+  absolute-lumens tag to 0.3 %.
+- **Rescale** only for a different lumen package or a dimmed scene: `ies_light(lumens=…)` keeps
+  the shape and sets the flux. Colour temperature does not change luminance (measured).
+- **Radius** of the host point light = the lens size: it softens shadows and highlights but the
+  file assumes a point at far field, so the pattern near a wall (< ~5× the lens size) is
+  approximate. **Keep the whole sphere clear of geometry:** the light is a sphere, and any part of
+  it inside the ceiling or a housing is shadowed. A 45 mm sphere centred 3 mm under a ceiling
+  delivered 0.57× its flux to the floor. Centre it radius + 2 mm below the surface.
+- **Check a lit room by hand:** direct-only illuminance (every surface but a Lambert floor black;
+  `max_bounces = 0` is not used for this) against Σ I(γ)·cos γ / r² from the files at a grid of
+  floor points. Unshadowed points should agree within ~1 %; points that disagree reveal
+  occluders or misplaced lights.
+- **Files:** the manufacturer's product page (photometry / downloads tab) is the source of
+  truth — match the exact catalogue number, lumen package, CCT and optic. Aggregators:
+  ieslibrary.com (search by manufacturer; account + API key; previews CC BY-ND), Acuity brands
+  bulk zips; the DIALux online catalogue (luminaires.dialux.com) has a direct *Photometric data*
+  zip on each article page, no account. Some makers expose a plain file tree (the LM-79 report
+  PDF's URL with `.ies` often serves the file). European makers often ship Eulumdat `.ldt`
+  only: Cycles reads IES only, so convert with `scripts/ldt2ies.py in.ldt out.ies` (MCP venv
+  python), which prints the lumens integrated from the written file against the LDT's. Save into the study's `library/local/ies/` with a `meta.json` (maker, catalogue,
+  URL, lumens) (RULES 10c). `ies_light` embeds the file in the .blend (Internal mode).
 
 ## Placement and visibility
 - Grazed or washed wall (when the design calls for it): a linear source along the wall — a thin
@@ -79,6 +145,9 @@ Convert from the lumens printed on the fixture — that is the number a lighting
   | Daylit interior | 9 | ISO 200, f/5.6, 1/30 |
   | Dim night interior | ~5 | ISO 800, f/8, 1/4 |
 
+  **From the illuminance instead** (incident meter, C = 250): EV100 = log2(E_lux / 2.5); an
+  interior at ~400 lux on the work plane wants EV100 ≈ 7. Read E off a Lambert patch in a
+  linear render (lux = 683·π·pixel / albedo) rather than guessing the condition.
   Archviz convention: a longish exposure on a tripod, so prefer a mid aperture for depth and
   move shutter/ISO. Pick the triple a photographer would actually use for that light.
 - `straighten_verticals(cam)`: level + `shift_y = lens·tan(pitch)/sensor_width`.
@@ -180,11 +249,11 @@ blender()` from a study script). Read the base and top of every repeat at full r
    step, so take it then.
 
 ## Misc
-- Area lights emit along local -Z. With rotation (θ, 0, 0) the beam goes along (0, sin θ, -cos θ):
-  -90° faces -Y, 145° points up and toward +Y. Print the world direction after creating the light.
+- Area-light direction: api-traps › Render (they emit along local −Z); print the world direction
+  after creating the light.
 - Pendant globes: a solid glass sphere is a lens ball. Give it a thin Solidify shell, IOR 1.5 and
   mid roughness so it reads as lit glass (`lookdev.glass_shell(objs)`). The bulb is a point light
   with `visible_camera = True`; hide the bulb mesh so the fixture counts once.
 - Backdrop that lights nothing: Mix(HDRI, white Background, Light Path *Is Camera Ray*); under AgX
   display-white needs ~4/2^exposure.
-- AgX rolls whites off: match targets on the written PNG, not on linear values.
+- Match targets on the written PNG (RULES 10).

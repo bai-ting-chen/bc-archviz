@@ -5,11 +5,12 @@ becomes an irradiance map (W/m2) that the table's material adds as Lambertian re
 (rho * E / pi) -- the same thing a renderer's caustic photon map does.
 
 Use:
-  1. export_geometry(path)              -- in Blender: glass surfaces + per-surface IOR to .npz
+  1. export_geometry(path, surfaces, axis, grid) -- in Blender: glass surfaces + IOR + receiver
+                                         grid to .npz (defaults match glassware.glass_of_water)
   2. blender -b --factory-startup --python caustic_photons.py -- trace <geom.npz> <out.npy>
          <n_photons> <seed> <json source>         (run several in parallel)
-  3. bake_irradiance(npys, meta, exr)   -- merge, kernel-smooth, write float EXR (W/m2)
-  4. add_caustic_light(material, exr, meta)  -- Emission = albedo * E / pi on up-facing faces
+  3. bake_irradiance(npy_paths, exr_path, sigma_cells) -- merge, kernel-smooth, float EXR (W/m2)
+  4. add_caustic_light(mat, exr_path, scale, albedo_label) -- Emission = albedo * E / pi, up faces
 
 Source json: {"type": "sun", "dir": [x,y,z] (towards light), "half_angle_deg": 0.2665,
               "irradiance": W/m2 perpendicular}
@@ -28,8 +29,12 @@ GRID = {"x0": -0.45, "y0": -0.45, "size": 0.90, "res": 900, "z": 0.7300}   # 1 m
 
 # --- 1. geometry export (inside Blender) -----------------------------------------------------
 
-def export_geometry(path, surfaces=SURFACES, axis=(0.0, 0.0)):
+def export_geometry(path, surfaces=SURFACES, axis=(0.0, 0.0), grid=None):
+    """`surfaces` {object: eta}; `grid` overrides GRID (receiver plane x0, y0, size, res, z) and
+    is stored with the geometry so the tracer, bake and material all use the same one."""
     import bpy
+    if grid:
+        GRID.update(grid)
     V, F, S, E = [], [], [], []
     off = 0
     for sid, (name, eta) in enumerate(surfaces.items()):
@@ -42,7 +47,7 @@ def export_geometry(path, surfaces=SURFACES, axis=(0.0, 0.0)):
         E.append(eta)
         off += len(ob.data.vertices)
     np.savez(path, verts=np.array(V), faces=np.array(F, dtype=object), surf=np.array(S),
-             eta=np.array(E), axis=np.array(axis), allow_pickle=True)
+             eta=np.array(E), axis=np.array(axis), grid=json.dumps(GRID), allow_pickle=True)
     return {"verts": len(V), "faces": len(F)}
 
 
@@ -67,12 +72,14 @@ def trace(geom_path, n, seed, source, max_bounce=40):
     faces = [list(f) for f in g["faces"]]
     surf, etas = g["surf"], g["eta"]
     ax, ay = float(g["axis"][0]), float(g["axis"][1])
+    if "grid" in g.files:
+        GRID.update(json.loads(str(g["grid"])))
     bvh = BVHTree.FromPolygons(verts, faces)
     rng = np.random.default_rng(seed)
     res, x0, y0, size, zt = GRID["res"], GRID["x0"], GRID["y0"], GRID["size"], GRID["z"]
     cell = size / res
     grid = np.zeros((res, res), dtype=np.float64)
-    centre = Vector((ax, ay, 0.81))
+    centre = Vector((ax, ay, float(np.mean([v[2] for v in verts]))))   # aim at the glass
     Z = Vector((0, 0, 1))
     launched_power = 0.0
     landed_power = 0.0
@@ -197,15 +204,17 @@ def bake_irradiance(npy_paths, exr_path, sigma_cells=1.0):
 
 # --- 4. feed the map back into the receiver's material --------------------------------------
 
-def add_caustic_light(mat, exr_path, scale=1.0):
-    """Adds Emission = albedo * E / pi on up-facing faces, E sampled at world XY from the map."""
+def add_caustic_light(mat, exr_path, scale=1.0, albedo_label="Pine + satin varnish coat"):
+    """Adds Emission = albedo * E / pi on up-facing faces, E sampled at world XY from the map.
+    `albedo_label`: label of the receiver's BSDF whose Base Color input carries the albedo (the
+    default is study_materials.coated_wood's)."""
     import bpy
     nt = mat.node_tree
     for n in [n for n in nt.nodes if n.label.startswith("caustic map")]:
         nt.nodes.remove(n)
     out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
     surf_src = out.inputs["Surface"].links[0].from_socket
-    albedo_src = next(n for n in nt.nodes if n.label == "Pine + satin varnish coat").inputs["Base Color"].links[0].from_socket
+    albedo_src = next(n for n in nt.nodes if n.label == albedo_label).inputs["Base Color"].links[0].from_socket
     N = lambda kind, loc, label: _node(nt, kind, loc, "caustic map: " + label)
     geo = N("ShaderNodeNewGeometry", (-400, -1600), "position")
     mp = N("ShaderNodeMapping", (-200, -1600), "world XY -> map UV")

@@ -7,6 +7,9 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Effect | Technique | State |
 |---|---|---|
 | Daylight | HDRI scaled to real lux, rotated to place its sun; the sole natural light | solid |
+| Specified light fixtures | manufacturer IES on a point light at 177.83/683 W (`interior.ies_light`), candela reproduced 1.000; room direct illuminance = hand calc ±1 % | solid |
+| Linear fixtures (cove, linear pendant) | the IES split into N point lights at lumens/N along the run | solid |
+| Eulumdat-only fixtures | `scripts/ldt2ies.py` (lumens checked; rotational symmetry tested, other symmetries untested) | partial |
 | Camera | `physical_camera`, `straighten_verticals` | solid |
 | Tone match to a reference | Mix Multiply (`color_mult`) | solid |
 | Edge highlight | Bevel node with Normal input, or Bevel modifier | solid |

@@ -21,6 +21,9 @@
 - Subdivision adaptive: `use_adaptive_subdivision`, `adaptive_space='PIXEL'`, `adaptive_pixel_size`.
 - After changing modifier inputs in background scripts: `obj.update_tag()` +
   `view_layer.update()` before reading evaluated meshes.
+- `matrix_world` is stale right after a script sets `location`/`rotation_euler`: call
+  `view_layer.update()` before reading it (`straighten_verticals` read a camera as pointing straight
+  down: yaw −90°, lens shift −2·10¹⁶, black frame).
 - After `bmesh.ops.delete`: `bm.faces.ensure_lookup_table()` before indexing.
 - MCP context has no `bpy.context.object` after add-primitive operators → bmesh + `objects.new`.
 - Editor operators need `bpy.context.temp_override(window=, area=, region=)`;
@@ -57,7 +60,8 @@
   = tree` and `scene.render.use_compositing = True` (`scene.node_tree` is gone).
 - `render.render("INVOKE_DEFAULT")` from a startup-script timer renders but may open no render
   window: switch the largest area to `IMAGE_EDITOR` showing `Render Result` to watch it.
-- Headless runs load user prefs unless `--factory-startup` (which disables add-ons, CPU device,
+- Headless runs load user prefs unless `--factory-startup` (which disables add-ons, CPU device —
+  `archviz.render_setup` turns OptiX on when no compute device is set —
   and gives new worlds a grey 0.05 background (+π·0.05 W/m² on every surface) — set the
   Background Strength to 0 for a black test world).
 

@@ -1,7 +1,7 @@
 # Run inside Rhino through Rook rhino_execute:
 #     CAM = {"eye": (0, 0, 0.5), "yaw_deg": 0, "f_mm": 24, "sensor_mm": 36,
 #            "w_px": 1000, "h_px": 1053, "horizon_px": 624, "out": r"...\_wip\edges.json"}
-#     exec(open(r"~\.claude\skills\blender-archviz\scripts\rhino\project_edges.py").read())
+#     import os; exec(open(os.path.expanduser(r"~\.claude\skills\blender-archviz\scripts\rhino\project_edges.py")).read())
 # Projects every brep edge of the open document through a LEVEL pinhole camera with lens shift
 # (horizon row given in pixels from the top) and writes [layer, [[x, y] | null, ...]] polylines in
 # pixels. Draw them over the reference with scripts/edge_overlay.py. Units: model mm -> m.

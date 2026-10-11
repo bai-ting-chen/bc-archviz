@@ -143,6 +143,7 @@ def material_from_spec(spec):
         if spec == "glass":
             return glass_material()
         raise ValueError(spec)
+    spec = dict(spec)
     kind = spec.pop("type")
     return {"ph": lambda **k: pbr_material(**k), "glass": glass_material, "simple": simple_material}[kind](**spec)
 
@@ -255,6 +256,12 @@ def render_setup(width=1920, height=1080, samples=256, look="AgX - Medium High C
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
     sc.cycles.device = "GPU"
+    prefs = bpy.context.preferences.addons["cycles"].preferences
+    if prefs.compute_device_type == "NONE":       # --factory-startup: "GPU" would silently run on CPU
+        prefs.compute_device_type = "OPTIX"
+        prefs.refresh_devices()
+        for d in prefs.devices:
+            d.use = d.type == "OPTIX"
     sc.cycles.samples = samples
     sc.cycles.use_adaptive_sampling = True
     sc.cycles.adaptive_threshold = 0.01
@@ -440,6 +447,7 @@ def straighten_verticals(cam_obj):
     with vertical lens shift, so verticals stay parallel."""
     from mathutils import Vector
     cam = cam_obj.data
+    bpy.context.view_layer.update()       # matrix_world is stale right after a scripted rotation
     fwd = cam_obj.matrix_world.to_3x3() @ Vector((0, 0, -1))
     pitch = math.asin(max(-1, min(1, fwd.z)))
     e = cam_obj.rotation_euler.copy()

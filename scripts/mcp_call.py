@@ -35,7 +35,7 @@ async def main():
                 if c.type == "text":
                     print(c.text)
                 elif c.type == "image":
-                    out = os.environ.get("MCP_IMAGE_OUT", os.path.join(HERE, "mcp_image.png"))
+                    out = os.environ.get("MCP_IMAGE_OUT", os.path.join(os.getcwd(), "mcp_image.png"))
                     with open(out, "wb") as f:
                         f.write(base64.b64decode(c.data))
                     print("image saved:", out)

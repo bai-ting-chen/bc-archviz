@@ -39,7 +39,8 @@ def map_mean(tex_id):
         rgb = np.where(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055) ** 2.4)
     mean = tuple(round(float(v), 4) for v in rgb.mean(0))
     meta["diff_mean_linear"] = list(mean)
-    json.dump(meta, open(meta_path, "w", encoding="utf-8"), indent=2)
+    with open(meta_path, "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2)
     return mean
 
 

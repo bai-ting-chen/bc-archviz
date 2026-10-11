@@ -2,7 +2,8 @@
 
 blender -b scene.blend --python render_variant.py -- out.png [key=value ...]
   res=800x800  samples=256  disp=off  caustics=off  wear=off  stain=off  noise_seed=N
-  camera=<object name>  material_view=<material name>   (assign one material to every mesh)
+  camera=<object name>  material_view=<material name> [coll=<collection>]  (one material on every mesh)
+  key_area=SIZE,DIST[,LUX] [key_target=x,y,z]   water_test=empty_glass|water_only (glassware scenes)
 """
 import sys
 import time
@@ -36,10 +37,10 @@ if "key_area" in opts:  # key_area=SIZE,DIST[,LUX]: swap the sun for a square ar
     lux = lux[0] if lux else 6000.0
     sun = next(o for o in bpy.data.objects if o.type == "LIGHT" and o.data.type == "SUN")
     d = (sun.matrix_world.to_3x3() @ Vector((0, 0, 1))).normalized()   # towards the light
-    target = Vector((0, 0, 0.73))
+    target = Vector([float(v) for v in opts.get("key_target", "0,0,0").split(",")])
     lamp = bpy.data.lights.new("Key_area", "AREA")
     lamp.shape, lamp.size = "SQUARE", size
-    lamp.energy = lux * math.pi * dist ** 2 / 683.0
+    lamp.energy = lux * math.pi * dist ** 2 / 683.0          # archviz.LM_PER_W
     lamp.cycles.is_caustics_light = sun.data.cycles.is_caustics_light
     ob = bpy.data.objects.new("Key_area", lamp)
     sc.collection.objects.link(ob)
@@ -87,7 +88,10 @@ if "material_view" in opts:  # assign one material to every concrete mesh (mask 
     mv = bpy.data.materials[opts["material_view"]]
     for ob in bpy.data.collections[opts.get("coll", "concrete")].all_objects:
         if ob.type == "MESH":
-            ob.data.materials[0] = mv
+            if ob.data.materials:
+                ob.data.materials[0] = mv
+            else:
+                ob.data.materials.append(mv)
     sc.view_settings.exposure = 0
     sc.view_settings.view_transform = "Standard"
 def _zero_gn_input(input_name):

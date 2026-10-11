@@ -42,9 +42,14 @@ class Solve:
         self.F, self.CX, self.W, self.H = float(f_px), float(cx), W, H
         if horizon is None:   # intersect the base and top lines
             kb, cb = _fit_line(xs, bases); kt, ct = _fit_line(xs, tops)
+            if abs(kb - kt) < 1e-9:
+                raise ValueError("base and top lines are parallel (facade seen head-on): "
+                                 "give \"horizon\" in the readings JSON")
             xv = (ct - cb) / (kb - kt)
             horizon = kb * xv + cb
             self.vp = (xv, horizon)
+        else:
+            self.vp = None
         self.HOR = float(horizon)
         hs = [b - t for b, t in zip(bases, tops)]
         unit = [((x - cx) / h, self.F / h) for x, h in zip(xs, hs)]      # camera plan at height 1
@@ -115,7 +120,8 @@ class Solve:
 
 
 def from_json(path):
-    r = json.load(open(path, encoding="utf-8"))
+    with open(path, encoding="utf-8") as f:
+        r = json.load(f)
     return Solve(r["xs"], r["bases"], r["tops"], r["pitch"], r["f_px"], r.get("cx", r["W"] / 2), r["W"], r["H"],
                  widths=r.get("widths"), horizon=r.get("horizon"))
 

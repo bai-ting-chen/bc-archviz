@@ -15,7 +15,6 @@ import bmesh
 import bpy
 
 import study_materials as sm
-import wear
 from study_materials import sock
 from wear import _GN, _input, _attr, _noise, _range, _math
 
@@ -49,7 +48,7 @@ def wood_wear_group(name="Wood Wear + Breaks", band=0.02, level=3,
                     break_share=0.5, break_depth=0.0015, grain_stretch=(35.0, 5.0, 35.0),
                     seed=(0.0, 0.0, 0.0), sharp_deg=30.0):
     """grain_stretch: noise scale per world axis for break outlines; the small value is the
-    grain axis (Y for this table top), so breaks run long along the grain."""
+    grain axis (the board's long axis), so breaks run long along the grain."""
     ng = bpy.data.node_groups.get(name)
     if ng:
         bpy.data.node_groups.remove(ng)
@@ -178,7 +177,6 @@ def weathered_wood(name="PINE_WEATHERED", wear_band=0.012, wear_amount=0.9,
     coated = next(n for n in nt.nodes if n.label == "Pine + satin varnish coat")
     out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
     col_src = coated.inputs["Base Color"].links[0].from_socket
-    rough_src = coated.inputs["Roughness"].links[0].from_socket
     nrm_src = coated.inputs["Normal"].links[0].from_socket
 
     g.frame("Edge field + damage attributes (from GN)", (0.22, 0.22, 0.32))

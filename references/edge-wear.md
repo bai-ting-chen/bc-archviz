@@ -53,7 +53,8 @@ and a little more reads as damage rather than wear. Bisect it against a render.
 Corner dust (wall/floor, wall/ceiling, plinths, beam/slab) is shading, not geometry. Target (as
 VRayDirt does it): darkest in the joint, fading outward over ~15–25 cm, broken up, stronger where
 air is still — floor joints and the tops of plinths — and fainter, greyer at the ceiling.
-- **Cycles:** AO node, **Inside off, Only Local off** (floor and wall are usually separate Rhino
+- **Cycles** (the numbers are one room's starting point — size them from the shot, RULES 8):
+  AO node, **Inside off, Only Local off** (floor and wall are usually separate Rhino
   objects; Only Local would miss their joint), Distance ≈ 0.2 m → Map Range AO 0.55..0.97 →
   1..0, ^1.2, × a 5/m noise remapped 0.45–1 (patchy extent) × a 90/m noise 0.7–1 (speckle) ×
   a height falloff (1.0 at 0.6 m → 0.45 at 2.6 m); albedo × mix(1, (0.62, 0.58, 0.52), mask). AO is

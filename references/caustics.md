@@ -35,7 +35,7 @@ Model the relief as geometry: bump and normal maps do not bend a caustic.
 - **Each curved patch is a lens.** f ≈ 1 / ((n − 1)·κ), κ the curvature; for a relief of
   amplitude A and wavelength λ, κ ≈ A(2π/λ)². The caustic network is sharpest at one to a few
   focal lengths; far beyond, neighbouring patches overlap into a flat glow. **Size the relief
-  from the receiver distance** (here 1.5–3 m), and choose between two looks:
+  from the receiver distance** (in a room, typically 1.5–3 m), and choose between two looks:
   - *Separate patches* — each unit's light stays inside its own footprint, a grid of rippled
     squares: RMS slope ≈ 0.015–0.02 over λ ≈ 40–150 mm.
   - *One tangled net across units* (what real wavy glass block shows) — the light must travel
@@ -76,9 +76,10 @@ Model the relief as geometry: bump and normal maps do not bend a caustic.
 - **Light for caustics:** the HDRI's own sun casts them (RULES 8a) — pick a map by its sun share
   (lighting-camera.md › Pick the HDRI by its sun).
 - **Contrast of light against the surface is set by the fill, not the caustic.** Sky through a
-  large glazed wall plus white walls bouncing it lift the "shade" the caustics sit in. Lowering
-  the sky from ~18 to ~10 klux (a clear blue sky; sun share ~89 %) separated light from concrete
-  far more than matte concrete or grading did; an AgX "High Contrast" look adds a little on top.
+  large glazed wall plus white walls bouncing it lift the "shade" the caustics sit in. A clearer,
+  bluer map — less sky illuminance for the same sun, i.e. a higher sun share — separates light
+  from surface far more than a matter material or grading does; an AgX "High Contrast" look adds
+  a little on top.
 - **Judge pattern shape on a surface seen face-on.** A wall seen at a grazing angle squeezes
   every shape 4–5× sideways, so any caustic on it reads as vertical streaks.
 

@@ -8,7 +8,7 @@ description: >-
   in real lumens, physical camera, displacement, caustics, edge wear and chips, recreating a
   reference image, control renders and measurement. Use whenever the user mentions Blender,
   Cycles, shader/geometry nodes, Poly Haven, render, rendering, lookdev, materials, lighting,
-  HDRI, caustics, LuxCore, glass blocks, patterned glass, water, exposure, texture repetition / stochastic or anti-tiling, randomizing repeated units, dust or grime in corners, fireflies or denoiser blotches, a Render Reference Library image, or wants a photoreal image of
+  HDRI, light fixtures, IES or LDT photometric files, lux / illuminance, caustics, LuxCore, glass blocks, patterned glass, water, exposure, texture repetition / stochastic or anti-tiling, randomizing repeated units, dust or grime in corners, fireflies or denoiser blotches, a Render Reference Library image, or wants a photoreal image of
   a Rhino model — even without naming Blender. Also use it when pulling, editing or pushing this
   skill itself, so its MIGRATE.md and maintenance rules apply.
 ---
@@ -62,10 +62,11 @@ must leave for the other machines.
 | Blender | `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` |
 | MCP | server `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\blender-mcp.exe` (user scope, `claude mcp get blender`); add-on `mcp` autostarts on 127.0.0.1:9876 (needs Prefs → *Allow Online Access*) |
 | Helpers (run in Blender) | `scripts\blender\`: `archviz` (import, UVs, HDRI, camera, render), `study_materials`, `interior` (lights in lumens, stone, steel, water), `lookdev` (measured-albedo PBR, vertical boards, long pavers, sheers, glass shells, per-instance tone), `scatter` (GN leaf litter / foliage), `wear`, `wood_wear`, `glassware`, `gn_caustics`, `caustic_photons`, `render_variant`, `lux_materials` (LuxCore: baked corner dust, native Randomized Tiling, per-instance glass tint), `from_passes` (finals from a multilayer passes EXR) |
+| Photometry | `scripts\ldt2ies.py in.ldt out.ies` (Eulumdat → IES for Cycles, lumens checked); IES files → `interior.ies_light` |
 | Measure | `scripts\imgstats.py stats|patch|diff`; `scripts\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `scripts\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
-| Controls | `scripts\controls\light_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`) |
+| Controls | `scripts\controls\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension (`references/luxcore.md`): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
 | Assets | `scripts\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); others `<study>\library\local\` with a `meta.json` |
 | Video research | `scripts\yt_learn.py` |
@@ -89,11 +90,11 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
    size_m, axis)` so the direction follows the element on every face (materials.md › Choosing).
 4. **Materials** by layer → `references/materials.md`.
 5. **Light**: daylight (RULES 8a) `archviz.world_hdri_lux`, rotated by its `hdri_analyse` sun
-   direction; artificial `interior.downlight /
+   direction; artificial: the fixture's IES file `interior.ies_light` when it is specified, else `interior.downlight /
    led_strip / lens_luminance` → `references/lighting-camera.md`.
 6. **Camera**: `archviz.physical_camera(cam, iso, f, shutter, focal)`, `straighten_verticals`,
    white balance if lights are warm. From a reference image: `refmatch.py grid` → solve the
-   camera (`refsolve.py` when the image has a repeated element) → `archviz.framing_render()` +
+   camera (`refsolve.py` when the image has a repeated element) → `archviz.framing_render(root, path)` +
    `refmatch.py pair --overlay`; then light region by region with `study_run.py`
    (lighting-camera.md › *Recreating a reference*).
 7. **Render**: `archviz.render_setup(...)` → `references/render-settings.md`; LuxCore case
@@ -125,6 +126,8 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | GN geometry renders with source's material | Object Info keeps materials — Set Material |
 | `bpy_struct[key] = val: id properties not supported` on a GN modifier | 5.2 inputs: `wear.set_input(mod, name, value)` |
 | Region numbers identical after a geometry change | the patches miss the change — look at the image before concluding "no effect" |
+| IES / point light much dimmer than the hand calc | its sphere (radius) is partly inside the ceiling or housing — centre it radius + 2 mm clear (lighting-camera › IES) |
+| Scripted camera faces the wrong way / huge lens shift | `matrix_world` stale after setting rotation — `view_layer.update()` (fixed in `straighten_verticals`) |
 | Lamp/bulb invisible in render | new lights default to `visible_camera = False` |
 | Glazing far darker than the reference | glass reflects ~5 % at ~30°: brightness is the room behind (light it, declare it) or the HDRI direction the glass reflects (lighting-camera) |
 | An area renders black that is bright in the ref | it is roofed in the model but open to the sky in the ref — check sky access |

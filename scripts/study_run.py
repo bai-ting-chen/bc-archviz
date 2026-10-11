@@ -53,9 +53,13 @@ def main():
     blend = os.path.basename(study.rstrip("\\/")).split("_", 1)[-1] + ".blend"
     code = RUNNER.format(study=study, scripts=scripts, pct=a.pct, spp=a.spp, out=a.out, blend=blend)
     tmp = os.path.join(study, "_wip", "_run_now.py")
-    open(tmp, "w", encoding="utf-8").write(code)
-    r = subprocess.run([sys.executable, os.path.join(TOOLS, "mcp_call.py"), "execute_blender_code", "--file", tmp],
-                       capture_output=True, text=True)
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(code)
+    try:
+        r = subprocess.run([sys.executable, os.path.join(TOOLS, "mcp_call.py"), "execute_blender_code",
+                            "--file", tmp], capture_output=True, text=True)
+    finally:
+        os.remove(tmp)
     text = r.stdout + r.stderr
     if '"status": "error"' in text or r.returncode:
         sys.exit("Blender error:\n" + text[-3000:].replace("\\n", "\n"))
