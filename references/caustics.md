@@ -107,6 +107,9 @@ conserving energy and the pattern can be trusted.
 Forward photon tracing on CPU -> irradiance EXR -> `albedo·E/π` emission on the receiver, with
 Cycles refractive caustics off. Cost scales with photon count and core count; a quality bake is
 minutes, not seconds. Re-bake on any light or object change — it is a bake, not a shader.
+The receiver grid (`export_geometry(grid=…)`) travels with every stage as `<file>.grid.json`
+beside the .npy / .exr, so a bake in a fresh Blender uses the same plane; `add_caustic_light` can
+be re-run on the same material after a re-bake.
 
 ## Traps
 - `caustics_refractive = False` *also* blocks ordinary sky and lamp light reaching submerged

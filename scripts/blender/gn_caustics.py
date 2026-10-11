@@ -143,9 +143,10 @@ def caustic_sheet_group(name="Wavefront Caustics"):
 
 
 def caustic_sheet_material(name="CAUSTIC_SHEET", floor_tex=None, floor_tile_m=2.0,
-                           wall_albedo=(0.60, 0.79, 0.83)):
+                           wall_albedo=(0.60, 0.79, 0.83), floor_albedo=(0.5, 0.5, 0.5)):
     """Transparent + Emission(albedo * E / pi). Floor albedo from the same world-box-mapped texture
-    the floor uses; walls a constant glaze colour."""
+    the floor uses (or `floor_albedo` without one -- set it to the floor's real albedo); walls a
+    constant glaze colour."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     mat.use_nodes = True
     nt = mat.node_tree
@@ -158,6 +159,7 @@ def caustic_sheet_material(name="CAUSTIC_SHEET", floor_tex=None, floor_tile_m=2.
     albedo = N("ShaderNodeMix", (-450, -50)); albedo.data_type = "RGBA"
     sock(albedo.inputs, "A").default_value = (*wall_albedo, 1)
     nt.links.new(fl.outputs["Fac"], albedo.inputs["Factor"])
+    sock(albedo.inputs, "B").default_value = (*floor_albedo, 1)
     if floor_tex:
         geo = N("ShaderNodeNewGeometry", (-1100, -300))
         mp = N("ShaderNodeMapping", (-900, -300)); mp.inputs["Scale"].default_value = (1 / floor_tile_m,) * 3
@@ -179,7 +181,7 @@ def caustic_sheet_material(name="CAUSTIC_SHEET", floor_tex=None, floor_tile_m=2.
 
 
 def add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_tex=None,
-                      floor_tile_m=2.0, name="CAUSTIC_SHEET"):
+                      floor_tile_m=2.0, name="CAUSTIC_SHEET", floor_albedo=(0.5, 0.5, 0.5)):
     """Create the overlay object with the GN modifier; inputs set on the modifier itself."""
     from mathutils import Vector
     import wear
@@ -193,7 +195,7 @@ def add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_te
                  ("Sun Direction", tuple(d)), ("Sun Irradiance", sun_obj.data.energy),
                  ("IOR Ratio", 1.0 / ior)):
         wear.set_input(mod, k, v)
-    mat = caustic_sheet_material(floor_tex=floor_tex, floor_tile_m=floor_tile_m)
+    mat = caustic_sheet_material(floor_tex=floor_tex, floor_tile_m=floor_tile_m, floor_albedo=floor_albedo)
     me.materials.append(mat)
     next(n for n in mod.node_group.nodes if n.type == "SET_MATERIAL").inputs["Material"].default_value = mat
     ob.visible_shadow = False

@@ -88,6 +88,14 @@ def bake_dust(objs, cache_dir, rebake=False, samples=64):
     sc.render.engine = "CYCLES"; sc.cycles.samples = samples; sc.cycles.use_denoising = False
     archviz.use_gpu(force=True)
     bm = _dust_bake_material(); tgt = bm.node_tree.nodes["target"]
+    try:
+        _bake_each(todo, bm, tgt, paths)
+    finally:                                  # every object bakes under Cycles; engine back once
+        sc.render.engine = eng
+    return paths
+
+
+def _bake_each(todo, bm, tgt, paths):
     for o in todo:
         img = bpy.data.images.new("dust_" + o.name, DUST_PX, DUST_PX, float_buffer=False, is_data=True)
         tgt.image = img
@@ -105,8 +113,6 @@ def bake_dust(objs, cache_dir, rebake=False, samples=64):
             me.uv_layers.active = me.uv_layers[keep]
             if added: o.data.materials.clear()
             for s, mat in zip(o.material_slots, saved): s.material = mat
-            sc.render.engine = eng
-    return paths
 
 def lux_textured(name, folder, me, dust_png=None, uv_tex="BoxUV", uv_dust="DustUV", randomized=True, specular=0.5):
     """Native LuxCore Disney from a generated/scanned map folder; `me` = the mesh it goes on

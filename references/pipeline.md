@@ -103,8 +103,9 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
 
 ## Look-dev headless
 `blender -b scene.blend --python scripts/blender/render_variant.py -- out.png res=800x800
-[disp=off|caustics=off|wear=off|chips=off|dirt=off|noise_seed=7|mask_view=1|material_view=NAME|camera=NAME]`
-(forward-slash paths from bash).
+[disp=off|caustics=off|wear=off|stain=off|chips=off|dirt=off|noise_seed=7|mask_view=1|material_view=NAME|camera=NAME]`
+(forward-slash paths from bash; the script's docstring lists every option, and an unknown option
+stops it rather than rendering an unchanged "control"). It renders on the GPU (`archviz.use_gpu`).
 
 ## Final render in the open UI (RULES 10b)
 `bpy.ops.render.render("INVOKE_DEFAULT")` inside `bpy.context.temp_override(window=…)` returns

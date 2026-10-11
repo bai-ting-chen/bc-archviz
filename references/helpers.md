@@ -14,7 +14,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `use_gpu(force=False)` — Cycles on the GPU. --factory-startup leaves no compute device, so scene "GPU" would silently render on the CPU: pick OptiX then (always, with force=True).
 - `pbr_material(tex_id, name=None, scale=1.0, tint=None)` — Material from a Poly Haven texture folder, box-mapped in world space at real-world size.
 - `dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None)` — The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled, transmission 1. `tint` multiplies every crossing, so keep it within a few % of white.
-- `glass_material(name='Glass_Clear', tint=(0.92, 0.96, 0.97), roughness=0.0)` — Clear glass (IOR 1.52) via dielectric; the default tint is slightly green, for thick panes.
+- `glass_material(name='Glass_Clear', tint=(0.92, 0.96, 0.97), roughness=0.0)` — Clear glass (IOR 1.52); the default tint is slightly green, for thick panes. An existing material is edited in place (nodes the user added stay); a new one is built by dielectric.
 - `simple_material(name, color, roughness=0.5, metallic=0.0)` — Principled with a flat colour, roughness and metallic -- placeholders and controls.
 - `material_from_spec(spec)` — spec: "ph:<tex_id>" | "glass" | {"type": "ph"|"glass"|"simple", ...kwargs}.
 - `world_hdri(hdri_id, strength=1.0, rotation_deg=0.0, res=None)` — World = equirect HDRI from library/polyhaven/hdris/<id>, Z-rotated; strength is raw (use world_hdri_lux for lux).
@@ -52,8 +52,8 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `gn_caustics` — Native wavefront caustics (Evan Wallace's mesh method) in Geometry Nodes, rendered by Cycles.
 
 - `caustic_sheet_group(name='Wavefront Caustics')` — GN group: refract water vertices, raycast to receivers and sun, store E = E_sun T A_perp / A_landed.
-- `caustic_sheet_material(name='CAUSTIC_SHEET', floor_tex=None, floor_tile_m=2.0, wall_albedo=(0.6, 0.79, 0.83))` — Transparent + Emission(albedo * E / pi). Floor albedo from the same world-box-mapped texture the floor uses; walls a constant glaze colour.
-- `add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_tex=None, floor_tile_m=2.0, name='CAUSTIC_SHEET')` — Create the overlay object with the GN modifier; inputs set on the modifier itself.
+- `caustic_sheet_material(name='CAUSTIC_SHEET', floor_tex=None, floor_tile_m=2.0, wall_albedo=(0.6, 0.79, 0.83), floor_albedo=(0.5, 0.5, 0.5))` — Transparent + Emission(albedo * E / pi). Floor albedo from the same world-box-mapped texture the floor uses (or `floor_albedo` without one -- set it to the floor's real albedo); walls a constant glaze colour.
+- `add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_tex=None, floor_tile_m=2.0, name='CAUSTIC_SHEET', floor_albedo=(0.5, 0.5, 0.5))` — Create the overlay object with the GN modifier; inputs set on the modifier itself.
 
 ## `interior` — Night-interior recipes: artificial lights in real lumens, polished stone, stone tiles, steel, pool water with depth tint, steam.
 

@@ -338,8 +338,11 @@ def solve_levels(path, target_rgb, gamma=0.5):
     img = bpy.data.images.load(path, check_existing=True)
     img.colorspace_settings.name = "sRGB"
     px = np.empty(len(img.pixels), dtype=np.float32)
-    img.pixels.foreach_get(px)  # linear, since the image is tagged sRGB
-    mean = (px.reshape(-1, 4)[:, :3] ** gamma).mean(axis=0)
+    img.pixels.foreach_get(px)
+    rgb = px.reshape(-1, img.channels)[:, :3].astype(np.float64)
+    if not img.is_float:   # byte images come back sRGB-encoded, not linear (api-traps)
+        rgb = np.where(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055) ** 2.4)
+    mean = (rgb ** gamma).mean(axis=0)
     return tuple(float(t / max(m, 1e-4)) for t, m in zip(target_rgb, mean))
 
 

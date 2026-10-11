@@ -164,16 +164,36 @@ def dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None):
     return mat
 
 
+def _principled_of(mat):
+    """The material's Principled BSDF; one wired to the output is added if it has none."""
+    mat.use_nodes = True
+    nt = mat.node_tree
+    b = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
+    if b is None:
+        b = nt.nodes.new("ShaderNodeBsdfPrincipled")
+        o = next((n for n in nt.nodes if n.type == "OUTPUT_MATERIAL"), None) or nt.nodes.new("ShaderNodeOutputMaterial")
+        nt.links.new(b.outputs["BSDF"], o.inputs["Surface"])
+    return b
+
+
 def glass_material(name="Glass_Clear", tint=(0.92, 0.96, 0.97), roughness=0.0):
-    """Clear glass (IOR 1.52) via dielectric; the default tint is slightly green, for thick panes."""
-    return dielectric(name, 1.52, tint, roughness, label="")
+    """Clear glass (IOR 1.52); the default tint is slightly green, for thick panes. An existing
+    material is edited in place (nodes the user added stay); a new one is built by dielectric."""
+    mat = bpy.data.materials.get(name)
+    if mat is None:
+        return dielectric(name, 1.52, tint, roughness, label="")
+    b = _principled_of(mat)
+    b.inputs["Base Color"].default_value = (*tint, 1.0)
+    b.inputs["Roughness"].default_value = roughness
+    b.inputs["IOR"].default_value = 1.52
+    b.inputs["Transmission Weight"].default_value = 1.0
+    return mat
 
 
 def simple_material(name, color, roughness=0.5, metallic=0.0):
     """Principled with a flat colour, roughness and metallic -- placeholders and controls."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    mat.use_nodes = True
-    b = mat.node_tree.nodes.get("Principled BSDF")
+    b = _principled_of(mat)
     b.inputs["Base Color"].default_value = (*color, 1.0)
     b.inputs["Roughness"].default_value = roughness
     b.inputs["Metallic"].default_value = metallic

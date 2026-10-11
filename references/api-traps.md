@@ -43,6 +43,8 @@
 - `cycles.volume_bounces` defaults to **0**: Volume Scatter then only removes light (murky,
   dark water/haze). Set 2-4 whenever a volume scatters.
 - Ray visibility (`visible_diffuse / visible_transmission …`) follows the type of the LAST bounce.
+- Changing `light.type` (POINT → SPOT) keeps the datablock but the Python handle keeps the old
+  subclass (`'PointLight' object has no attribute 'spot_size'`): re-fetch `bpy.data.lights[name]`.
 - Lights created from Python default to `visible_camera = False`: a "visible bulb" point light
   renders nothing until you set it.
 - Area lights emit along local −Z; with rotation (θ, 0, 0) the beam goes along (0, sin θ, −cos θ).

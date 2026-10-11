@@ -19,12 +19,31 @@ Source json: {"type": "sun", "dir": [x,y,z] (towards light), "half_angle_deg": 0
 """
 import json
 import math
+import os
 import sys
 
 import numpy as np
 
 SURFACES = {"GLASS_TUMBLER": 1.52, "GLASS_WATER_INTERFACE": 1.52 / 1.333, "WATER_SURFACE": 1.333}
 GRID = {"x0": -0.45, "y0": -0.45, "size": 0.90, "res": 900, "z": 0.7300}   # 1 mm cells
+
+
+def _stem(path):
+    return path[:-4] if path.lower().endswith((".npy", ".npz", ".exr")) else path
+
+
+def _save_grid(path):
+    """Write GRID next to a stage's output (<file>.grid.json) so the next stage, often a fresh
+    Blender, uses the same receiver plane."""
+    with open(_stem(path) + ".grid.json", "w") as f:
+        json.dump(GRID, f)
+
+
+def _load_grid(path):
+    p = _stem(path) + ".grid.json"
+    if os.path.exists(p):
+        with open(p) as f:
+            GRID.update(json.load(f))
 
 
 # --- 1. geometry export (inside Blender) -----------------------------------------------------
@@ -73,7 +92,7 @@ def trace(geom_path, n, seed, source, max_bounce=40):
     faces = [list(f) for f in g["faces"]]
     surf, etas = g["surf"], g["eta"]
     ax, ay = float(g["axis"][0]), float(g["axis"][1])
-    if "grid" in g.files:
+    if "grid" in g.files:                     # the grid stored with the geometry wins
         GRID.update(json.loads(str(g["grid"])))
     bvh = BVHTree.FromPolygons(verts, faces)
     rng = np.random.default_rng(seed)
@@ -172,6 +191,7 @@ def trace(geom_path, n, seed, source, max_bounce=40):
 def bake_irradiance(npy_paths, exr_path, sigma_cells=1.0):
     """Merge photon grids, smooth by sigma_cells, write the irradiance EXR (W/m2)."""
     import bpy
+    _load_grid(npy_paths[0])
     # each worker's grid is already a full estimate (photon power uses that worker's own n): AVERAGE
     grid = sum(np.load(p) for p in npy_paths) / len(npy_paths)
     cell = GRID["size"] / GRID["res"]
@@ -196,6 +216,7 @@ def bake_irradiance(npy_paths, exr_path, sigma_cells=1.0):
     prev = (s.file_format, s.color_depth, s.exr_codec)
     s.file_format, s.color_depth, s.exr_codec = "OPEN_EXR", "32", "ZIP"
     img.save_render(exr_path)
+    _save_grid(exr_path)
     s.file_format, s.color_depth, s.exr_codec = prev
     img.filepath_raw = exr_path
     img.source = "FILE"
@@ -212,11 +233,16 @@ def add_caustic_light(mat, exr_path, scale=1.0, albedo_label="Pine + satin varni
     default is study_materials.coated_wood's)."""
     import bpy
     from study_materials import G, sock
+    _load_grid(exr_path)
     nt = mat.node_tree
+    out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
+    old_add = next((n for n in nt.nodes if n.label == "caustic map: surface + caustic"), None)
+    if old_add is not None:                   # re-run: the surface is what the old Add received
+        surf_src = old_add.inputs[0].links[0].from_socket
+    else:
+        surf_src = out.inputs["Surface"].links[0].from_socket
     for n in [n for n in nt.nodes if n.label.startswith("caustic map")]:
         nt.nodes.remove(n)
-    out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
-    surf_src = out.inputs["Surface"].links[0].from_socket
     albedo_src = next(n for n in nt.nodes if n.label == albedo_label).inputs["Base Color"].links[0].from_socket
     g = G(nt, clear=False)
     N = lambda kind, loc, label: g.node(kind, loc, label="caustic map: " + label)
@@ -264,4 +290,5 @@ if __name__ == "__main__" and "--" in sys.argv:
     if a[0] == "trace":
         grid, stats = trace(a[1], int(a[3]), int(a[4]), json.loads(a[5]))
         np.save(a[2], grid)
+        _save_grid(a[2])
         print("TRACE_STATS " + json.dumps(stats))

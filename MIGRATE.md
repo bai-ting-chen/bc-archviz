@@ -141,5 +141,23 @@ identifier (`Socket_N`) instead of by name.
 Do: set inputs by name (`wear.set_input` / `add_edge_wear`) — the new Seed input shifts the
 output socket's identifier.
 
+## 261011d — Code review fixes (each reproduced in Blender/Rhino, then fixed)
+`lux_materials.bake_dust` bakes every object under Cycles (only the first did); 
+`caustic_photons.add_caustic_light` can be re-run, and the receiver grid travels as
+`<file>.grid.json`; `study_materials.solve_levels` measures linear values (it read sRGB-encoded
+bytes), so **`coated_wood` / `weathered_wood` now reach their target albedo** — before, the pine
+came out at about (0.31, 0.14, 0.05) against a target of (0.52, 0.33, 0.17); `interior` lights
+refuse a name held by a non-light object and switch light kind on re-run; `render_variant`
+refuses unknown options, implements `stain=off` and renders on the GPU; `gn_caustics` takes
+`floor_albedo`; `archviz.glass_material` edits an existing material in place again and
+`simple_material` repairs a missing Principled; `scripts/rhino/project_edges.py` reads the model
+units and includes block instances and meshes.
+
+### 14. Open studies that use coated_wood / weathered_wood
+Check: no open (unfinished) study rebuilds its look with `study_materials.coated_wood` or
+`wood_wear.weathered_wood` and relies on the old (darker) pine.
+Do: re-render a preview of that study and re-tune its wood target if the brighter, correct pine
+is not wanted. Leave finished studies alone.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

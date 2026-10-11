@@ -2,17 +2,30 @@
 
 blender -b scene.blend --python render_variant.py -- out.png [key=value ...]
   res=800x800  samples=256  disp=off  caustics=off  wear=off  stain=off  noise_seed=N
+  chips=off  breaks=off  woodwear=off  dirt=off  mnee=off  denoise=off  adaptive=T  sun_angle=DEG
+  mask_view=1|<node label>
   camera=<object name>  material_view=<material name> [coll=<collection>]  (one material on every mesh)
   key_area=SIZE,DIST[,LUX] [key_target=x,y,z]   water_test=empty_glass|water_only (glassware scenes)
 """
+import os
 import sys
 import time
 
 import bpy
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import archviz  # noqa: E402
+
+KNOWN = {"res", "samples", "noise_seed", "camera", "disp", "caustics", "wear", "stain", "chips", "breaks",
+         "woodwear", "dirt", "mask_view", "material_view", "coll", "key_area", "key_target", "mnee",
+         "adaptive", "denoise", "water_test", "sun_angle"}
 argv = sys.argv[sys.argv.index("--") + 1:]
 out, opts = argv[0], dict(a.split("=", 1) for a in argv[1:])
+unknown = set(opts) - KNOWN
+if unknown:   # a typo must not render an unchanged "control"
+    sys.exit("render_variant: unknown option(s) %s; known: %s" % (sorted(unknown), sorted(KNOWN)))
 sc = bpy.context.scene
+archviz.use_gpu()
 
 if "res" in opts:
     sc.render.resolution_x, sc.render.resolution_y = map(int, opts["res"].split("x"))
@@ -119,6 +132,15 @@ if opts.get("woodwear") == "off":  # negative control: no worn-edge shading on t
             for l in list(n.inputs["Fac"].links):
                 nt.links.remove(l)
             n.inputs["Fac"].default_value = 0.0
+if opts.get("stain") == "off":  # negative control: no leak stain in the wear mask
+    for m in bpy.data.materials:
+        nt = m.node_tree
+        n = nt and next((n for n in nt.nodes if n.label == "stain (vertical faces)"), None)
+        if n:
+            for l in list(n.outputs[0].links):
+                to = l.to_socket
+                nt.links.remove(l)
+                to.default_value = 0.0
 if opts.get("dirt") == "off":  # negative control: no dirty-edge grime
     for m in bpy.data.materials:
         nt = m.node_tree

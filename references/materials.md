@@ -29,8 +29,10 @@ These transfer to any scene and any renderer — they are measurements of the wo
 - **Judge a map by its measured mean, not its thumbnail.** Average the diffuse map in linear
   space (sRGB -> linear, mean per channel) before committing: maps that look like a pale grey
   paver routinely measure warm brown, and a map whose mean sits far from the target will not
-  scale cleanly. Hit the target albedo with a Vector Math MULTIPLY of target/mean per channel —
-  a Mix colour socket clamps factors above 1, so it cannot brighten a dark map.
+  scale cleanly. Hit the target albedo with a per-channel gain of target/mean (Vector Math
+  MULTIPLY, or a Mix MULTIPLY whose B colour is set above 1 by script — measured unclamped; only
+  the Mix *Factor* clamps at 1). Measure the mean on linear values: Blender returns 8-bit maps
+  sRGB-encoded (api-traps).
   → `lookdev.albedo_material(tex_id, name, target)` (measures and caches the mean in meta.json).
 - Pick from a contact sheet: Poly Haven thumbnails
   (`cdn.polyhaven.com/asset_img/thumbs/<id>.png?width=300`) for 10-20 candidates in one image.
