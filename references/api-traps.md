@@ -88,3 +88,4 @@
 - An object with **no material slots bakes nothing** ("No active image found"): give it a
   temporary slot for the bake material.
 
+- `archviz.render_setup` sets `view_settings.exposure` (default 0) — call it before `archviz.physical_camera`, which writes the camera's exposure there; the other order renders white.

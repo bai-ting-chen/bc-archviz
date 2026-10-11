@@ -91,6 +91,13 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `lux_textured(name, folder, me, dust_png=None, uv_tex='BoxUV', uv_dust='DustUV', randomized=True, specular=0.5)` — Native LuxCore Disney from a generated/scanned map folder; `me` = the mesh it goes on (its UV layer indices are baked into the tree, so one material per mesh layout).
 - `glass_instance_tint(name='Glass_rand', tint=(0.985, 0.996, 0.99), ior=1.52)` — Clear glass; Object Info Random mixes white -> `tint` per instance (per face crossed, so a hollow block's 4 faces give ~tint^4).
 
+## `max_import` — 3ds Max .max -> Blender: repaired import, units and slots, vendor V-Ray materials rebuilt (run in Blender).
+
+- `load(path, **kw)` — Import a .max through io_scene_max and repair faces, material IDs and UVs; returns (objects, reports).
+- `tidy(objs, unit_scale=0.01)` — Bake transforms, scale Max system units to metres (cm: 0.01), drop loose verts and unused slots.
+- `rebuild_materials(objs, maps_dir, bark_roughness=0.85, leaf_roughness=0.8)` — Rebuild imported V-Ray materials from the vendor maps: leaf cards (opacity map) or opaque PBR.
+- `open_loops(obj, material_index=None)` — Open-edge loops (optionally of one material): z, span, closed, which side the faces are on - holes vs tube ends.
+
 ## `scatter` — Geometry Nodes scatter for small instances: leaf litter, climbers, shrub foliage (run in Blender).
 
 - `scatter_group(name='SCATTER')` — GN group: distribute points below a height and inside a noise patch, instance with random rotation/scale.

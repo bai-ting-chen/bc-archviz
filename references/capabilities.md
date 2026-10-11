@@ -36,4 +36,6 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Wind ripples on a pool | Ocean DISPLACE on a finely diced mesh, slight chop | solid |
 | Pool water, reflective + slightly clear | IOR 1.333 transmission + Volume Absorption + Scatter (volume_bounces > 0) | solid |
 | Opaque stylised pool | opaque diffuse body under IOR 1.333 surface (declared) | solid |
+| 3ds Max assets (vegetation, V-Ray materials) | io_scene_max + `max_import` repairs (bands, IDs, slots, UV channel), materials rebuilt from maps; checked on 4 models 25–320 MB | solid |
+| Foliage cards | Principled + Translucent (transmission map) cut by opacity; roughness from the glossiness map | solid, control-proved |
 | Wet surround, splashes, dried marks | analytic edge distance mask; dry**1.4 + coat film IOR 1.33; patchy by noise | test |

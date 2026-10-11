@@ -9,7 +9,10 @@ description: >-
   reference image, control renders and measurement. Use whenever the user mentions Blender,
   Cycles, shader/geometry nodes, Poly Haven, render, rendering, lookdev, materials, lighting,
   HDRI, light fixtures, IES or LDT photometric files, lux / illuminance, caustics, LuxCore, glass blocks, patterned glass, water, exposure, texture repetition / stochastic or anti-tiling, randomizing repeated units, dust or grime in corners, fireflies or denoiser blotches, a Render Reference Library image, or wants a photoreal image of
-  a Rhino model — even without naming Blender. Also use it when pulling, editing or pushing this
+  a Rhino model — even without naming Blender. Also use it for bringing 3ds Max (.max) assets
+  into Blender — vegetation / tree / plant libraries (Maxtree, Evermotion, Forest Pack meshes),
+  furniture or props with V-Ray or Corona materials — even when the user only says "convert my
+  .max models". Also use it when pulling, editing or pushing this
   skill itself, so its MIGRATE.md and maintenance rules apply.
 ---
 <!-- blender-archviz-skill-loaded-marker -->
@@ -62,6 +65,7 @@ must leave for the other machines.
 | Blender | `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` |
 | MCP | server `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\blender-mcp.exe` (user scope, `claude mcp get blender`); add-on `mcp` autostarts on 127.0.0.1:9876 (needs Prefs → *Allow Online Access*) |
 | Helpers (run in Blender) | `scripts\blender\`: `archviz` (import, UVs, HDRI, camera, render), `study_materials`, `interior` (lights in lumens, stone, steel, water), `lookdev` (measured-albedo PBR, vertical boards, long pavers, sheers, glass shells, per-instance tone), `scatter` (GN leaf litter / foliage), `wear`, `wood_wear`, `glassware`, `gn_caustics`, `caustic_photons`, `render_variant`, `lux_materials` (LuxCore: baked corner dust, native Randomized Tiling, per-instance glass tint), `from_passes` (finals from a multilayer passes EXR) |
+| 3ds Max assets | `scripts\blender\max_import.py`: `load` (io_scene_max extension + repairs), `tidy`, `rebuild_materials`, `open_loops` — `references/max-import.md` |
 | Photometry | `scripts\ldt2ies.py in.ldt out.ies` (Eulumdat → IES for Cycles, lumens checked); IES files → `interior.ies_light` |
 | Measure | `scripts\imgstats.py stats|patch|diff`; `scripts\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\edge_overlay.py edges.json ref.png out.png` |
@@ -153,6 +157,9 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | LuxCore crashes at export, `EXCEPTION_ACCESS_VIOLATION` in pyluxcore | a native mapping's `uvindex` points at a missing UV layer (luxcore.md › Native) |
 | Script works headless, fails in the UI ("Context missing active object") | operators need `temp_override` in a UI startup script (api-traps) |
 | Rook call hangs / "dispatcher busy" / file won't open | long script still running, or a modal dialog (save-changes, crash report) — split calls; pipeline › Rhino |
+| Imported .max: trunk/twigs missing, leaves rendered as bark, bark squashed | stock io_scene_max import — use `max_import.load` and its checks (max-import.md) |
+| Back-lit leaves glint white | the importer's stored glossiness scalar used instead of the wired glossiness map (max-import.md › Materials) |
+| Render white / exposure ignored | `archviz.render_setup` sets view exposure — call it before `physical_camera` |
 | Caustics on a wall look like vertical streaks | seen at a grazing angle; judge on a face-on surface (caustics.md) |
 
 More traps: `references/api-traps.md`.
@@ -170,6 +177,7 @@ More traps: `references/api-traps.md`.
 | `references/edge-wear.md` | Dirty edges vs chips (GN), whole-room gating, corner grime, wood wear |
 | `references/render-settings.md` | Sampling, denoise, bias list, memory, colour management |
 | `references/api-traps.md` | Blender 5.2 API gotchas |
+| `references/max-import.md` | 3ds Max assets: io_scene_max install, the four importer faults and their repair, per-model checks, rebuilding V-Ray materials (leaf cards) |
 | `references/helpers.md` | Every public helper in `scripts/blender/` with signature and purpose (generated) |
 | `references/learning-from-video.md` | `yt_learn.py` use and rules |
 | `references/capabilities.md` | What the pipeline can do and which technique does it |

@@ -116,6 +116,8 @@
 10d. **Everything a study makes stays in its folder**: crops, comparisons, test renders,
     measurements, downloads and throwaway scripts go in the study's `_wip/`, never the session
     scratchpad or %TEMP% — tell subagents the path too. One place holds all a study produced.
+    Software is not study output: Blender extensions and add-ons install into Blender's own
+    extension folder through the installer, and the downloaded zip is deleted afterwards.
 11. Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real
     one — a small scene isolates the cause in minutes where the full scene hides it.
 

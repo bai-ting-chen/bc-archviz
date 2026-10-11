@@ -159,5 +159,31 @@ Check: no open (unfinished) study rebuilds its look with `study_materials.coated
 Do: re-render a preview of that study and re-tune its wood target if the brighter, correct pine
 is not wanted. Leave finished studies alone.
 
+## 261011e — 3ds Max (.max) assets into Blender
+Vendor vegetation libraries ship as `.max` with V-Ray materials. Blender reads them through the
+`io_scene_max` extension, but version 1.9.2 drops tube bands (trunks, twigs: 13-28 % of faces),
+shifts material IDs after them, maps Multi/Sub slots wrongly and can take vertex colours as UVs.
+New `scripts/blender/max_import.py` (`load` repairs all four; `tidy`, `rebuild_materials`,
+`open_loops`) and `references/max-import.md` (install, faults, per-model checks, leaf-card
+material; a wired V-Ray map beats its stored scalar). Proved on four models, 25-320 MB.
+RULES 10d: software (extensions, add-ons) installs into Blender's own folder, never a study.
+SKILL.md (description, stack, troubleshooting, references), capabilities.md, api-traps.md
+(`render_setup` before `physical_camera`) and helpers.md updated.
+
+### 15. Install the .max importer (needs Blender 4.2+)
+Check: `%APPDATA%\Blender Foundation\Blender\5.2\extensions\user_default\io_scene_max\blender_manifest.toml` exists with `version = "1.9.2"` or newer.
+Do: read `archive_url` and `archive_hash` for id `io_scene_max` from
+`https://extensions.blender.org/api/v1/extensions/?type=add-on`; download into an empty temp
+folder; compare the sha256; `"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" -b -c extension install-file -r user_default --enable <zip>`; delete the zip and folder.
+A newer version may fix some faults: rerun the checks in max-import.md on one model either way.
+
+### 16. Local memory: software is not study output
+Check: the project's memory index has an entry saying Blender extensions / add-ons install into Blender's extension folder, never a study folder.
+Do: add that memory (feedback type) from RULES 10d, with its index line.
+
+### 17. Studies with their own copy of a .max repair script
+Check: no open (unfinished) study folder contains its own `max_import.py`.
+Do: import it from the skill (`scripts/blender` on `sys.path`) and delete the local copy.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.
