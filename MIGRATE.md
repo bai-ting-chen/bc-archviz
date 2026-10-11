@@ -69,5 +69,22 @@ without also writing a multilayer passes EXR.
 Do: in such scripts, save all passes (`media_type = "MULTI_LAYER_IMAGE"`) and build finals with
 `scripts/blender/from_passes.py`. Leave finished studies alone.
 
+
+## 261011 — LuxCore: GPU + CPU light tracing; geometry is not the cost
+A speed study of a glass-block caustic scene showed the old "light tracing is a no-op on the GPU"
+came from a test with *Use CPUs* off. In PATHOCL, light tracing runs on the native CPU threads
+while the GPU does camera paths: same image, 2–6× faster at equal noise than CPU-only. Flat
+blocks instead of a modelled relief were only 1.1–1.3× faster, so displacement / normal maps are
+no speedup. Updated: luxcore.md (engine settings, Speed bullets, PhotonGI), caustics.md, RULES 2a,
+SKILL.md, capabilities.md.
+
+### 9. Local memory: LuxCore device
+Check: the project's LuxCore-for-caustics memory does not say "CPU light tracing" as the setup (or says GPU + Use CPUs).
+Do: edit it to "LuxCore PATH + light tracing, GPU camera paths + Use CPUs (CPU light paths)".
+
+### 10. Open study scripts that force CPU-only or disable native threads
+Check: no open (unfinished) study script sets `cfg.device = "CPU"` for a final or `devices.use_native_cpu = False` with light tracing.
+Do: switch them to `cfg.device = "OCL"`, `use_native_cpu = True`, `hybridbackforward_lightpartition_opencl = 100`. Leave finished studies alone.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

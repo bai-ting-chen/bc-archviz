@@ -25,10 +25,10 @@
    hold up as physics, so a bias must always be named, never hidden.
 2a. **Renderer: Cycles by default, LuxCore for detailed caustics**. When
    caustics or heavy refraction carry the shot — sun through patterned glass or glass block,
-   glass-on-water, multi-interface glass — render in LuxCore (BlendLuxCore, CPU path tracing with
-   light tracing). It is the one standing exception to native-first: Cycles path tracing, path
-   guiding and MNEE all fail on specular–diffuse–specular paths from a sun-sized source, while
-   LuxCore light tracing is unbiased and energy-correct there (caustics.md › Decision). Say it is
+   glass-on-water, multi-interface glass — render in LuxCore (BlendLuxCore, path tracing with
+   light tracing: GPU camera paths + CPU light paths). It is the one standing exception to
+   native-first: Cycles path tracing, path guiding and MNEE all fail on specular–diffuse–specular
+   paths from a sun-sized source, while LuxCore light tracing is unbiased and energy-correct there (caustics.md › Decision). Say it is
    an external engine when you switch.
 3. **Research before anything new — from the physics down, not from tutorials up.** Order:
    (a) the mechanism: optics/physics papers, measured data, the governing equations (why does wet

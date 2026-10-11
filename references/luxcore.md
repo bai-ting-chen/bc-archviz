@@ -16,7 +16,10 @@ When to use it: RULES 2a; the measured comparison is in caustics.md › Decision
 ## Engine settings that converge caustics
 ```python
 sc.render.engine = "LUXCORE"; cfg = sc.luxcore.config
-cfg.engine = "PATH"; cfg.device = "CPU"
+cfg.engine = "PATH"; cfg.device = "OCL"                # GPU camera paths ...
+sc.luxcore.devices.use_native_cpu = True             # ... + CPU threads that do the light tracing
+cfg.path.hybridbackforward_lightpartition_opencl = 100   # GPU mode: share of the CPU threads on light paths
+prefs.gpu_backend = "CUDA"                           # addons["bl_ext.user_default.blendluxcore"].preferences
 cfg.path.hybridbackforward_enable = True            # "Add Light Tracing": light paths splat on the film
 cfg.path.depth_total, depth_diffuse, depth_glossy, depth_specular = 32, 4, 16, 32
 cfg.path.use_clamping = True; cfg.path.clamping = 2000   # camera paths only; caustics untouched (below)
@@ -26,12 +29,41 @@ h.use_samples = False; h.use_noise_thresh = False   # halt-by-samples is ON by d
 tm = cam.data.luxcore.imagepipeline.tonemapper      # linear, no auto, for measurement and AgX later
 tm.type = "TONEMAP_LINEAR"; tm.use_autolinear = False; tm.linear_scale = 1.0
 ```
-- **Light tracing is CPU-only in practice.** On the GPU (PATHOCL, OpenCL or CUDA) the image is
-  identical at 20/50/90 % light rays — it does nothing. GPU PATH without it is just camera
-  paths: no caustic. BlendLuxCore's light-ray % is inverted into LuxCore's
+- **Light tracing runs only on CPU threads — on the GPU engine too.** In PATHOCL the GPU traces
+  camera paths and skips the caustic ones; light paths come from the native CPU threads, which
+  exist only with Devices › *Use CPUs* (`devices.use_native_cpu`, default on). With it off, GPU
+  PATH + light tracing renders camera paths only: no caustic at any light-ray %. The GPU mode has
+  its own light-ray field (`hybridbackforward_lightpartition_opencl`, default 100 % = the CPU
+  threads trace only light paths); the CPU field (`hybridbackforward_lightpartition`, default
+  20 %) does nothing there. BlendLuxCore's % is inverted into LuxCore's
   `path.hybridbackforward.partition` (100 % → 0).
+- **GPU + CPU is the fast setup**, same image as CPU-only (bias < 1 %). Measured at equal time
+  against a 14 h CPU reference, per region (6-core CPU + mid-range RTX): walls and ceiling — whose
+  noise is camera paths — reached equal noise 4–6× sooner, glass seen from inside 4×, a floor
+  lit purely by the caustic 2.2× (it is still bound by the CPU's light tracing). CPU-only is the
+  fallback without a usable GPU.
+- **Speed — what did not help** (same comparison): more light-ray share on CPU-only (the 20 %
+  default was best overall; 50/80 % helped one wall and hurt everything camera-path lit);
+  `light_strategy` POWER vs LOG_POWER (no change when the sun dominates); the env-light cache
+  (no gain, −8 % bias on one wall). Light and sun paths are emitted over a disk of the scene's
+  bounding sphere (`sunlight.cpp`, `infinitelight.cpp`), so far geometry — a large ground
+  plane, a sky-dome mesh, distant context — wastes light paths: keep the scene tight to what
+  the camera and the caustic need.
+- **Geometry is not the cost; variance is.** Replacing a modelled relief (67 k faces per
+  instanced block) by 12-face boxes raised throughput only 1.1–1.3× (camera / light paths) —
+  the ceiling for any flat-glass shortcut, and it removes the caustic. Displacement is no
+  shortcut: LuxCore tessellates it into real triangles at load (`shapes/displacement.cpp`),
+  per object, losing instancing. A normal map does bend light-traced caustics (shading normals
+  are used on light paths, with the adjoint correction), but costs texture lookups, loses
+  parallax and edge refraction close up, and steep normals give dark seams. Model the relief.
+- Measuring a speedup: render each variant raw for equal time at reduced resolution, score
+  per region the relative RMSE of luminance against a long reference of the same scene
+  (downsampled), and convert: k× lower error = k²× faster (noise ∝ 1/√t). Check bias too; a
+  "faster" variant with a few % bias is a different image. Read LuxCore's own counters
+  (`stats.renderengine.pass.eye` / `.pass.light`, `total.samplesec`) for throughput.
 - BIDIR (CPU only) converges the same caustic far more noisily. The PhotonGI caustic cache
-  (GPU) is fast but biased: blurred by its lookup radius and ~25 % dark in a measured case.
+  (GPU) is biased: blurred by its lookup radius and ~25 % dark in one measured case; on a whole
+  room (50 M photons, radius 0.03 m) it came out 50–220 % too bright and slower — not a shortcut.
 - Memory is small with instancing: ~800 instances of a 73 k-quad mesh peaked under 1 GB RAM.
 - Resolution vs time: noise ∝ 1/√(samples per pixel), samples ∝ time / pixels. Measure one
   preview, then scale (4× pixels for 5.3× time = 1.33× samples per pixel).

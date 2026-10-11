@@ -15,7 +15,7 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Displacement | Displacement + adaptive subdivision | solid, fast |
 | Tiling by real height | `height_span_uv` + REPEAT | solid |
 | Caustics | `caustic_photons.py` (glassware), GN wavefront (pools) | solid |
-| Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH CPU + light tracing (luxcore.md), energy-checked (caustics.md) | solid |
+| Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH, GPU + CPU light tracing (luxcore.md), energy-checked (caustics.md) | solid |
 | Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh (materials › Glass block) | solid |
 | Baked procedural textures for LuxCore (terrazzo, smooth concrete, sand mortar) | numpy seamless colour + roughness maps | test |
 | Tangled glass-block caustics across units | long-wave relief at higher slope (Wave/Iceberg mix), sized by a thin-lens sim (caustics.md › Designing a relief) | test |

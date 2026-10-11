@@ -66,7 +66,7 @@ must leave for the other machines.
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `scripts\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
 | Controls | `scripts\controls\light_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`) |
-| Caustics renderer | LuxCore via the BlendLuxCore extension (`references/luxcore.md`): PATH, CPU, *Add Light Tracing* |
+| Caustics renderer | LuxCore via the BlendLuxCore extension (`references/luxcore.md`): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
 | Assets | `scripts\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); others `<study>\library\local\` with a `meta.json` |
 | Video research | `scripts\yt_learn.py` |
 
@@ -129,9 +129,10 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Glazing far darker than the reference | glass reflects ~5 % at ~30°: brightness is the room behind (light it, declare it) or the HDRI direction the glass reflects (lighting-camera) |
 | An area renders black that is bright in the ref | it is roofed in the model but open to the sky in the ref — check sky access |
 | Visible joint grid on walls / a curved wall | texture tile edges — rotate/flatten the map (materials › Tiled maps) |
-| Sun through patterned glass: fireflies, no caustic shape | specular–diffuse–specular paths from a sun-sized source: Cycles PT, path guiding and MNEE cannot resolve them — LuxCore CPU light tracing (caustics.md) |
+| Sun through patterned glass: fireflies, no caustic shape | specular–diffuse–specular paths from a sun-sized source: Cycles PT, path guiding and MNEE cannot resolve them — LuxCore light tracing (caustics.md) |
 | LuxCore render stops after a few seconds at "100 %" | halt-by-samples is on by default — `halt.use_samples = False` (luxcore.md) |
-| LuxCore GPU light tracing changes nothing | it is a no-op on the GPU in 2.11 — light tracing runs on CPU (luxcore.md) |
+| LuxCore GPU light tracing changes nothing | light tracing runs on CPU threads: Devices › *Use CPUs* on, GPU light-ray field (`_opencl`) 100 % (luxcore.md) |
+| LuxCore caustic final takes many hours | CPU-only: switch to GPU + *Use CPUs* (2–6× at equal noise); geometry is not the cost — no displacement/normal-map shortcut (luxcore.md › Speed) |
 | LuxCore test sun casts but never glints through glass | `distant` lights are never hit by camera rays — use the `sun` type (luxcore.md) |
 | LuxCore saved image noisy though OIDN ran | the denoised image is a separate DENOISED pass — route it through the compositor (luxcore.md) |
 | Caustics a flat glow on far surfaces / one S-shaped bright line per pattern tile | relief too steep (focal length cm) / single-frequency pattern — size relief slope from receiver distance, randomise (caustics.md › Designing a refractive relief) |

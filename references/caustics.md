@@ -7,13 +7,14 @@
 | Lamps above calm water, submerged surfaces | **MNEE** | cheap and clean, but under-delivers energy and ignores volumes on the light leg |
 | Sun through a rippled pool | **GN wavefront** `gn_caustics.add_caustic_sheet()` | native, exact, noise-free; MNEE fails outright on real ripples |
 | Sun through glassware | `caustic_photons.py` (external, CPU) | the most faithful of the three on a measured shadow/lit ratio; MNEE and path tracing both fall short |
-| **Sun through patterned glass / glass block / several interfaces, room-scale receivers** | **LuxCore PATH CPU + light tracing** (luxcore.md, RULES 2a) | unbiased and energy-correct; the only engine that converged |
+| **Sun through patterned glass / glass block / several interfaces, room-scale receivers** | **LuxCore PATH + light tracing**, GPU camera paths + CPU light tracing (luxcore.md, RULES 2a) | unbiased and energy-correct; the only engine that converged |
 
 Measured on sun (0.53°) → 4 glass interfaces with a wavy relief → diffuse floor, equal 120 s,
 scored against a 900 s reference: LuxCore CPU light tracing 18 % rel. error, −0.5 % bias;
 LuxCore GPU caustic cache 40 % (−24 % bias, blur); LuxCore BIDIR 105 % (noise); Cycles path
 tracing ~1000 %, Cycles CPU path guiding ~3500 % (fireflies only), MNEE −82 % (gives up after
-one interface); LuxCore GPU with light tracing = camera paths only, no caustic. The ranking is
+one interface); LuxCore GPU with light tracing but *Use CPUs* off = camera paths only, no caustic (light tracing runs on
+CPU threads; with them on, GPU + CPU is the same caustic 2–6× faster, luxcore.md). The ranking is
 the knowledge; rerun the comparison when the scene is unlike these cases.
 
 ## Comparing renderers (do this before trusting one)
@@ -69,7 +70,8 @@ Model the relief as geometry: bump and normal maps do not bend a caustic.
   reflections; vary the caustics through the relief itself.
 - **Variety without memory:** ~16 relief variants as block definitions, each placed at random
   with random 180° turns/flips (64 looks), instanced; unique meshes per element would be
-  tens of millions of faces. Fade the relief to a flat border over ≥ 25 mm — a short fade
+  tens of millions of faces. Instanced, the modelled relief is cheap to trace (flat boxes were
+  only 1.1–1.3× faster); displacement or normal maps are no speedup (luxcore.md). Fade the relief to a flat border over ≥ 25 mm — a short fade
   lenses into bright square outlines.
 - **Light for caustics:** the HDRI's own sun casts them (RULES 8a) — pick a map by its sun share
   (lighting-camera.md › Pick the HDRI by its sun).
