@@ -63,6 +63,14 @@ Do: <what to run or edit>
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.
 ```
 
+## Helpers changed?
+Run `python scripts/helper_index.py` (MCP venv python) so `references/helpers.md` matches the
+code, and give every new public helper a one-line docstring — that line is its index entry.
+Refactoring a helper: prove nothing else moved with `scripts/regress_helpers.py` (dump with the
+old and the new code, then compare; its docstring has the steps).
+Keep one builder per job (one dielectric, one node-graph builder `study_materials.G`, one
+`archviz.read_meta`, `archviz.use_gpu`); extend it rather than writing a second.
+
 ## Commit and push
 Commit messages say what changed and why. End them with the session's attribution line, if
 there is one. Push only the skill. Project folders stay local and never get a remote.

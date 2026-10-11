@@ -64,6 +64,7 @@ def led_strip(name, p0, p1, lm_per_m=1000.0, kelvin=2700, width=0.012, normal=(0
 
 
 def panel_light(name, loc, rot, size=(0.2, 0.2), lumens=500.0, kelvin=3000, spread_deg=180.0, coll=None):
+    """Rectangular area light emitting `lumens` (Lambert, `spread_deg` like a louvre)."""
     ob, ld = _light_obj(name, "AREA", loc, rot, coll=coll)
     ld.shape, ld.size, ld.size_y = "RECTANGLE", size[0], size[1]
     ld.energy = lumens / LM_PER_W

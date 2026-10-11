@@ -19,11 +19,13 @@ _PROJECT = os.environ.get("ARCHVIZ_PROJECT")
 
 
 def set_project(path):
+    """Point library() at a project/study folder (else env ARCHVIZ_PROJECT, else the nearest library/ above)."""
     global _PROJECT
     _PROJECT = os.path.abspath(path)
 
 
 def project_root():
+    """The folder whose library/ holds the assets (see set_project)."""
     if _PROJECT:
         return _PROJECT
     starts = [os.path.dirname(bpy.data.filepath)] if bpy.data.filepath else []
@@ -40,6 +42,35 @@ def project_root():
 def library(*parts):
     """Path inside the project's library/, e.g. library("polyhaven", "hdris", hdri_id)."""
     return os.path.join(project_root(), "library", *parts)
+
+
+def read_meta(folder):
+    """An asset folder's meta.json (Poly Haven fetch or a local/ asset)."""
+    with open(os.path.join(folder, "meta.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+
+def write_meta(folder, meta):
+    """Write an asset folder's meta.json (pair of read_meta)."""
+    with open(os.path.join(folder, "meta.json"), "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2)
+
+
+def sock(sockets, name):
+    """Active socket by name (Mix nodes keep hidden same-named sockets per data type)."""
+    return next(s for s in sockets if s.name == name and s.enabled)
+
+
+def use_gpu(force=False):
+    """Cycles on the GPU. --factory-startup leaves no compute device, so scene "GPU" would
+    silently render on the CPU: pick OptiX then (always, with force=True)."""
+    prefs = bpy.context.preferences.addons["cycles"].preferences
+    if force or prefs.compute_device_type == "NONE":
+        prefs.compute_device_type = "OPTIX"
+        prefs.refresh_devices()
+        for d in prefs.devices:
+            d.use = d.type == "OPTIX"
+    bpy.context.scene.cycles.device = "GPU"
 
 BUMP_DISTANCE = 0.004  # metres of height for a full-range displacement map, used as bump only
 
@@ -63,7 +94,7 @@ def pbr_material(tex_id, name=None, scale=1.0, tint=None):
     tint: optional (r, g, b) multiplied into the base color.
     """
     folder = library("polyhaven", "textures", tex_id)
-    meta = json.load(open(os.path.join(folder, "meta.json"), encoding="utf-8"))
+    meta = read_meta(folder)
     maps = {k: os.path.join(folder, v) for k, v in meta["maps"].items()}
     w_mm, h_mm = meta.get("dimensions_mm", [1000, 1000])
 
@@ -86,10 +117,10 @@ def pbr_material(tex_id, name=None, scale=1.0, tint=None):
     if tint:
         mix = N.new("ShaderNodeMix"); mix.data_type = "RGBA"; mix.blend_type = "MULTIPLY"
         mix.inputs["Factor"].default_value = 1.0
-        next(x for x in mix.inputs if x.name == "B" and x.enabled).default_value = (*tint, 1.0)
+        sock(mix.inputs, "B").default_value = (*tint, 1.0)
         mix.location = (100, 300)
-        L.new(diff.outputs["Color"], next(x for x in mix.inputs if x.name == "A" and x.enabled))
-        L.new(next(x for x in mix.outputs if x.name == "Result" and x.enabled), bsdf.inputs["Base Color"])
+        L.new(diff.outputs["Color"], sock(mix.inputs, "A"))
+        L.new(sock(mix.outputs, "Result"), bsdf.inputs["Base Color"])
     else:
         L.new(diff.outputs["Color"], bsdf.inputs["Base Color"])
 
@@ -114,18 +145,32 @@ def pbr_material(tex_id, name=None, scale=1.0, tint=None):
     return mat
 
 
-def glass_material(name="Glass_Clear", tint=(0.92, 0.96, 0.97), roughness=0.0):
+def dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None):
+    """The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled,
+    transmission 1. `tint` multiplies every crossing, so keep it within a few % of white."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     mat.use_nodes = True
-    b = mat.node_tree.nodes.get("Principled BSDF")
-    b.inputs["Base Color"].default_value = (*tint, 1.0)
+    nt = mat.node_tree
+    nt.nodes.clear()
+    b = nt.nodes.new("ShaderNodeBsdfPrincipled")
+    b.label = "%s (IOR %.3f)" % (name, ior) if label is None else label
+    b.inputs["Base Color"].default_value = (*tint, 1)
     b.inputs["Roughness"].default_value = roughness
-    b.inputs["IOR"].default_value = 1.52
+    b.inputs["IOR"].default_value = ior
     b.inputs["Transmission Weight"].default_value = 1.0
+    o = nt.nodes.new("ShaderNodeOutputMaterial")
+    o.location = (300, 0)
+    nt.links.new(b.outputs["BSDF"], o.inputs["Surface"])
     return mat
 
 
+def glass_material(name="Glass_Clear", tint=(0.92, 0.96, 0.97), roughness=0.0):
+    """Clear glass (IOR 1.52) via dielectric; the default tint is slightly green, for thick panes."""
+    return dielectric(name, 1.52, tint, roughness, label="")
+
+
 def simple_material(name, color, roughness=0.5, metallic=0.0):
+    """Principled with a flat colour, roughness and metallic -- placeholders and controls."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     mat.use_nodes = True
     b = mat.node_tree.nodes.get("Principled BSDF")
@@ -151,8 +196,9 @@ def material_from_spec(spec):
 # --- world / lighting ----------------------------------------------------------------------
 
 def world_hdri(hdri_id, strength=1.0, rotation_deg=0.0, res=None):
+    """World = equirect HDRI from library/polyhaven/hdris/<id>, Z-rotated; strength is raw (use world_hdri_lux for lux)."""
     folder = library("polyhaven", "hdris", hdri_id)
-    meta = json.load(open(os.path.join(folder, "meta.json"), encoding="utf-8"))
+    meta = read_meta(folder)
     path = os.path.join(folder, meta["file"] if res is None else "{}_{}.hdr".format(hdri_id, res))
     world = bpy.data.worlds.get("HDRI_" + hdri_id) or bpy.data.worlds.new("HDRI_" + hdri_id)
     world.use_nodes = True
@@ -227,6 +273,7 @@ def apply_material_map(root, mapping):
 # --- camera / render -----------------------------------------------------------------------
 
 def use_camera(name, lens=None):
+    """Make the named camera active, optionally setting its focal length (mm)."""
     cam = bpy.data.objects[name]
     if lens:
         cam.data.lens = lens
@@ -253,15 +300,10 @@ def framing_render(root, path):
 
 
 def render_setup(width=1920, height=1080, samples=256, look="AgX - Medium High Contrast", exposure=0.0):
+    """Cycles on the GPU, adaptive sampling, OptiX denoise, AgX look, 12 bounces (render-settings.md)."""
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
-    sc.cycles.device = "GPU"
-    prefs = bpy.context.preferences.addons["cycles"].preferences
-    if prefs.compute_device_type == "NONE":       # --factory-startup: "GPU" would silently run on CPU
-        prefs.compute_device_type = "OPTIX"
-        prefs.refresh_devices()
-        for d in prefs.devices:
-            d.use = d.type == "OPTIX"
+    use_gpu()
     sc.cycles.samples = samples
     sc.cycles.use_adaptive_sampling = True
     sc.cycles.adaptive_threshold = 0.01
@@ -281,6 +323,7 @@ def render_setup(width=1920, height=1080, samples=256, look="AgX - Medium High C
 
 
 def render_to(path):
+    """Render the active camera and write a PNG to `path`."""
     sc = bpy.context.scene
     sc.render.filepath = path
     sc.render.image_settings.file_format = "PNG"
@@ -382,7 +425,7 @@ def hdri_analyse(hdri_id, rotation_deg=0.0):
     luminance centroid of the top 0.05 % texels."""
     import numpy as np
     folder = library("polyhaven", "hdris", hdri_id)
-    meta = json.load(open(os.path.join(folder, "meta.json"), encoding="utf-8"))
+    meta = read_meta(folder)
     img = bpy.data.images.load(os.path.join(folder, meta["file"]), check_existing=True)
     w, h = img.size
     px = np.empty(w * h * 4, dtype=np.float32)
@@ -421,6 +464,7 @@ def world_hdri_lux(hdri_id, target_lux, rotation_deg=0.0, visible=True):
 
 
 def ev100(iso, fstop, shutter_s):
+    """EV100 of a camera triple: log2(N^2/t) - log2(ISO/100)."""
     return math.log2(fstop ** 2 / shutter_s) - math.log2(iso / 100.0)
 
 

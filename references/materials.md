@@ -57,7 +57,12 @@ These transfer to any scene and any renderer — they are measurements of the wo
   element's long axis (or the given world axis) on every face; `along="V"` when the texture's
   direction runs up the image.
 - Variation: Object Info Random, Geometry › Random per Island (per plank/tile in one mesh).
-- Node trees in labelled frames. Mix nodes keep hidden same-named sockets → `study_materials.sock()`.
+- Node trees in labelled frames (`study_materials.G`). Mix nodes keep hidden same-named sockets
+  → `archviz.sock()`.
+- **Which Poly Haven builder:** `archviz.pbr_material` — shader box projection, no UVs needed,
+  bump from height (quick, any Rhino mesh); the `study_materials` / `lookdev` recipes — real-size
+  `BoxUV`/`directional_uv` UVs, so normal maps and directional grain work; `lux_materials.lux_textured`
+  — native LuxCore tree (Randomized Tiling). Clear glass and water: `archviz.dielectric`.
 
 ## Concrete
 `concrete_study()`. Structure: map x tone multiplier to hit the target albedo, roughness mixed

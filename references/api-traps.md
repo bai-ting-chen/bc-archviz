@@ -5,7 +5,7 @@
   (empty `.name`; resolve via `node_group.interface.items_tree`) → `wear.set_input`. Group defaults
   are copied only at modifier creation. New code re-hits this with `mod[ident] = v`.
 - Edge Angle (signed): convex arrises read **positive** on outward-normal Rhino meshes.
-- ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `study_materials.sock`.
+- ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `archviz.sock`.
 - Noise Texture output: "Factor" in GN; index 0 is safest.
 - Capture Attribute: socket index 1 is Selection — link by name.
 - Object/Collection Info geometry keeps source materials → Set Material.

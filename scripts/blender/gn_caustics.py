@@ -14,10 +14,11 @@ import math
 import bpy
 
 from wear import _GN, _input
-from study_materials import sock
+from study_materials import G, sock
 
 
 def caustic_sheet_group(name="Wavefront Caustics"):
+    """GN group: refract water vertices, raycast to receivers and sun, store E = E_sun T A_perp / A_landed."""
     ng = bpy.data.node_groups.get(name)
     if ng:
         bpy.data.node_groups.remove(ng)
@@ -149,7 +150,7 @@ def caustic_sheet_material(name="CAUSTIC_SHEET", floor_tex=None, floor_tile_m=2.
     mat.use_nodes = True
     nt = mat.node_tree
     nt.nodes.clear()
-    N = lambda kind, loc: _n(nt, kind, loc)
+    N = G(nt, clear=False).n
     at = N("ShaderNodeAttribute", (-900, 200)); at.attribute_name = "E"
     fl = N("ShaderNodeAttribute", (-900, -100)); fl.attribute_name = "onfloor"
     pi = N("ShaderNodeMath", (-700, 200)); pi.operation = "DIVIDE"; pi.inputs[1].default_value = math.pi
@@ -175,12 +176,6 @@ def caustic_sheet_material(name="CAUSTIC_SHEET", floor_tex=None, floor_tile_m=2.
     out = N("ShaderNodeOutputMaterial", (200, 100))
     nt.links.new(add.outputs[0], out.inputs["Surface"])
     return mat
-
-
-def _n(nt, kind, loc):
-    n = nt.nodes.new(kind)
-    n.location = loc
-    return n
 
 
 def add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_tex=None,

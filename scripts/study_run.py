@@ -44,7 +44,8 @@ def main():
     study = os.path.abspath(a.study)
     scripts = (["scene_geometry.py"] if a.rebuild else []) + ["scene_look.py"]
     for f in scripts:
-        src = open(os.path.join(study, f), encoding="utf-8").read()
+        with open(os.path.join(study, f), encoding="utf-8") as fh:
+            src = fh.read()
         try:
             ast.parse(src, f)
         except SyntaxError as e:

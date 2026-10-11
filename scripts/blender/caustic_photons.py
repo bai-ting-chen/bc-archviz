@@ -65,6 +65,7 @@ def _fresnel(cos_i, eta):
 
 
 def trace(geom_path, n, seed, source, max_bounce=40):
+    """Trace n photons from `source` through the exported glass and histogram where they land (background Blender)."""
     from mathutils import Vector
     from mathutils.bvhtree import BVHTree
     g = np.load(geom_path, allow_pickle=True)
@@ -169,6 +170,7 @@ def trace(geom_path, n, seed, source, max_bounce=40):
 # --- 3. bake (inside Blender: writes a float EXR) -------------------------------------------
 
 def bake_irradiance(npy_paths, exr_path, sigma_cells=1.0):
+    """Merge photon grids, smooth by sigma_cells, write the irradiance EXR (W/m2)."""
     import bpy
     # each worker's grid is already a full estimate (photon power uses that worker's own n): AVERAGE
     grid = sum(np.load(p) for p in npy_paths) / len(npy_paths)
@@ -209,13 +211,15 @@ def add_caustic_light(mat, exr_path, scale=1.0, albedo_label="Pine + satin varni
     `albedo_label`: label of the receiver's BSDF whose Base Color input carries the albedo (the
     default is study_materials.coated_wood's)."""
     import bpy
+    from study_materials import G, sock
     nt = mat.node_tree
     for n in [n for n in nt.nodes if n.label.startswith("caustic map")]:
         nt.nodes.remove(n)
     out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
     surf_src = out.inputs["Surface"].links[0].from_socket
     albedo_src = next(n for n in nt.nodes if n.label == albedo_label).inputs["Base Color"].links[0].from_socket
-    N = lambda kind, loc, label: _node(nt, kind, loc, "caustic map: " + label)
+    g = G(nt, clear=False)
+    N = lambda kind, loc, label: g.node(kind, loc, label="caustic map: " + label)
     geo = N("ShaderNodeNewGeometry", (-400, -1600), "position")
     mp = N("ShaderNodeMapping", (-200, -1600), "world XY -> map UV")
     mp.inputs["Location"].default_value = (-GRID["x0"] / GRID["size"], -GRID["y0"] / GRID["size"], 0)
@@ -242,23 +246,17 @@ def add_caustic_light(mat, exr_path, scale=1.0, albedo_label="Pine + satin varni
     col = N("ShaderNodeMix", (600, -1550), "albedo x E/pi")
     col.data_type, col.blend_type = "RGBA", "MULTIPLY"
     col.inputs["Factor"].default_value = 1.0
-    nt.links.new(albedo_src, next(s for s in col.inputs if s.name == "A" and s.enabled))
+    nt.links.new(albedo_src, sock(col.inputs, "A"))
     em = N("ShaderNodeEmission", (800, -1550), "reflected caustic light")
-    nt.links.new(next(s for s in col.outputs if s.name == "Result" and s.enabled), em.inputs["Color"])
+    nt.links.new(sock(col.outputs, "Result"), em.inputs["Color"])
     nt.links.new(m2.outputs[0], em.inputs["Strength"])
     # the Mix colour's B is driven by a grey value = 1 (albedo * 1), strength carries E/pi
-    next(s for s in col.inputs if s.name == "B" and s.enabled).default_value = (1, 1, 1, 1)
+    sock(col.inputs, "B").default_value = (1, 1, 1, 1)
     add = N("ShaderNodeAddShader", (1000, -300), "surface + caustic")
     nt.links.new(surf_src, add.inputs[0])
     nt.links.new(em.outputs["Emission"], add.inputs[1])
     nt.links.new(add.outputs["Shader"], out.inputs["Surface"])
     return mat
-
-
-def _node(nt, kind, loc, label):
-    n = nt.nodes.new(kind)
-    n.location, n.label = loc, label
-    return n
 
 
 if __name__ == "__main__" and "--" in sys.argv:

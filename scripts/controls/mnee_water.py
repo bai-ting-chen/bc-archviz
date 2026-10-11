@@ -5,14 +5,13 @@
 import math
 import os
 import sys
-import tempfile
 
 import bmesh
 import bpy
-import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "blender"))
-TMP = os.path.join(tempfile.gettempdir(), "mnee_control.exr")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _scene import black_scene, render_linear, white_lambert  # noqa: E402
 
 
 def box(name, x0, y0, z0, x1, y1, z1, top_only=False, cuts=0):
@@ -35,25 +34,14 @@ def box(name, x0, y0, z0, x1, y1, z1, top_only=False, cuts=0):
 
 
 def run(kind="SPOT", water="plane", mnee=True, volume=False, caustics=True, samples=512, blur=0.0, smooth=True, cuts=0):
-    bpy.ops.wm.read_homefile(use_empty=True)
+    sc = black_scene(samples, 64)
     import importlib
     import interior
     importlib.reload(interior)
-    sc = bpy.context.scene
-    sc.render.engine = "CYCLES"
-    sc.cycles.samples, sc.cycles.use_denoising, sc.cycles.use_adaptive_sampling = samples, False, False
     sc.cycles.blur_glossy = blur
     sc.cycles.caustics_refractive = caustics
-    sc.render.resolution_x = sc.render.resolution_y = 64
-    sc.view_settings.view_transform = "Standard"
-    sc.world = bpy.data.worlds.new("k")
-    sc.world.use_nodes = True
-    sc.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.0
-    floor = box("floor", -2, -2, -1.3, 2, 2, -1.2)          # pool floor (receiver), white Lambert
-    m = bpy.data.materials.new("white"); m.use_nodes = True
-    b = m.node_tree.nodes["Principled BSDF"]
-    b.inputs["Roughness"].default_value, b.inputs["Specular IOR Level"].default_value = 1.0, 0.0
-    floor.data.materials.append(m)
+    floor = box("floor", -2, -2, -1.3, 2, 2, -1.2)          # pool floor (receiver), Lambert 0.8
+    floor.data.materials.append(white_lambert(albedo=0.8))
     floor.cycles.is_caustics_receiver = mnee
     if water != "none":
         w = box("water", -2, -2, -1.2 + 0.0005, 2, 2, 0.0, top_only=(water == "plane"), cuts=cuts)
@@ -84,13 +72,7 @@ def run(kind="SPOT", water="plane", mnee=True, volume=False, caustics=True, samp
     cam.location = (0.0, -3.0, 1.0)
     cam.rotation_euler = (math.radians(90 - math.degrees(math.atan2(2.2, 3.0))), 0, 0)   # aim at floor centre
     sc.camera = cam
-    sc.render.resolution_x = sc.render.resolution_y = 64
-    bpy.ops.render.render()
-    sc.render.image_settings.file_format = "OPEN_EXR"
-    bpy.data.images["Render Result"].save_render(TMP)
-    im = bpy.data.images.load(TMP)
-    a = np.empty(len(im.pixels), dtype=np.float32); im.pixels.foreach_get(a)
-    px = a.reshape(64, 64, 4)[:, :, :3]
+    px = render_linear()[:, :, :3]
     c = px[26:38, 26:38].reshape(-1, 3)
     return tuple(c.mean(0).round(4)), round(float(c.mean(1).std() / max(c.mean(), 1e-6)), 3)
 
@@ -100,4 +82,3 @@ cases = [dict(water="none", kind="SPOT"), dict(water="box", kind="SPOT"), dict(w
          dict(water="plane", kind="SPOT", cuts=40, volume=True)]
 for kw in cases:
     print("MNEE-TEST", kw, "floor centre rgb, rel. noise:", run(**kw))
-os.remove(TMP)

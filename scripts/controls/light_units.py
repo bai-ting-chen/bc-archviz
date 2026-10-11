@@ -4,50 +4,28 @@
 # background adds pi*0.05 = 0.157 W/m2 (first seen as a mysterious +8 %).
 import math
 import os
-import tempfile
+import sys
 
 import bpy
-import numpy as np
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _scene import black_scene, ortho_camera, render_linear, white_lambert  # noqa: E402
 
 D = 2.0          # light height above the plane, m
 P = 100.0        # Blender W
 
 
 def scene(kind, **kw):
-    bpy.ops.wm.read_homefile(use_empty=True)
-    sc = bpy.context.scene
-    sc.render.engine = "CYCLES"
-    sc.cycles.samples, sc.cycles.use_denoising = 256, False
-    sc.cycles.use_adaptive_sampling = False
-    sc.render.resolution_x = sc.render.resolution_y = 64
-    sc.view_settings.view_transform = "Standard"
-    sc.world = bpy.data.worlds.new("black")
-    sc.world.use_nodes = True
-    sc.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.0
+    sc = black_scene(256, 64)
     bpy.ops.mesh.primitive_plane_add(size=0.2)
-    m = bpy.data.materials.new("white"); m.use_nodes = True
-    b = m.node_tree.nodes["Principled BSDF"]
-    b.inputs["Base Color"].default_value = (1, 1, 1, 1); b.inputs["Roughness"].default_value = 1
-    b.inputs["Specular IOR Level"].default_value = 0.0
-    bpy.context.object.data.materials.append(m)
-    cam = bpy.data.objects.new("cam", bpy.data.cameras.new("cam")); sc.collection.objects.link(cam)
-    cam.data.type = "ORTHO"; cam.data.ortho_scale = 0.1
-    cam.location = (0, 0, 0.5); sc.camera = cam
+    bpy.context.object.data.materials.append(white_lambert())
+    ortho_camera(0.5, 0.1)
     ld = bpy.data.lights.new("L", kind); ld.energy = P
     for k, v in kw.items():
         setattr(ld, k, v)
     lo = bpy.data.objects.new("L", ld); sc.collection.objects.link(lo)
     lo.location = (0, 0, D)
-    bpy.ops.render.render()
-    img = bpy.data.images["Render Result"]
-    tmp = os.path.join(tempfile.gettempdir(), "light_units_control.exr")
-    sc.render.image_settings.file_format = "OPEN_EXR"
-    img.save_render(tmp)
-    im = bpy.data.images.load(tmp)
-    a = np.empty(len(im.pixels), dtype=np.float32); im.pixels.foreach_get(a)
-    px = a.reshape(-1, 4)[:, 0].mean()
-    os.remove(tmp)
-    return px * math.pi        # E in Blender W/m2 (albedo 1)
+    return render_linear()[:, :, 0].mean() * math.pi       # E in Blender W/m2 (albedo 1)
 
 
 E_point = P / (4 * math.pi * D * D)

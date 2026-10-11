@@ -15,6 +15,8 @@ the UI has no active object in its context, unlike background mode."""
 import os, json
 import bpy
 
+import archviz
+
 DUST_DIST = 0.20                    # m, AO reach = width of the band; 0.12 read as a pencil line
 DUST_BAND = (0.55, 0.97)            # AO in the joint .. AO where the dust has faded out
 DUST_POWER = 1.2                    # falloff shape: higher = tighter to the corner
@@ -84,9 +86,7 @@ def bake_dust(objs, cache_dir, rebake=False, samples=64):
     if not todo: return paths
     sc = bpy.context.scene; eng = sc.render.engine
     sc.render.engine = "CYCLES"; sc.cycles.samples = samples; sc.cycles.use_denoising = False
-    p = bpy.context.preferences.addons["cycles"].preferences; p.compute_device_type = "OPTIX"; p.refresh_devices()
-    for d in p.devices: d.use = d.type == "OPTIX"
-    sc.cycles.device = "GPU"
+    archviz.use_gpu(force=True)
     bm = _dust_bake_material(); tgt = bm.node_tree.nodes["target"]
     for o in todo:
         img = bpy.data.images.new("dust_" + o.name, DUST_PX, DUST_PX, float_buffer=False, is_data=True)
@@ -111,7 +111,7 @@ def bake_dust(objs, cache_dir, rebake=False, samples=64):
 def lux_textured(name, folder, me, dust_png=None, uv_tex="BoxUV", uv_dust="DustUV", randomized=True, specular=0.5):
     """Native LuxCore Disney from a generated/scanned map folder; `me` = the mesh it goes on
     (its UV layer indices are baked into the tree, so one material per mesh layout)."""
-    meta = json.load(open(os.path.join(folder, "meta.json")))
+    meta = archviz.read_meta(folder)
     i_tex = me.uv_layers.find(uv_tex); i_dust = me.uv_layers.find(uv_dust)
     if i_tex < 0 or (dust_png and i_dust < 0):
         raise RuntimeError("%s lacks UV layer %s / %s" % (me.name, uv_tex, uv_dust))

@@ -27,7 +27,9 @@ def colour(layer):
     return tuple(int(v * 255) for v in colorsys.hsv_to_rgb(h, 0.9, 0.8))
 
 
-for lay, pts in json.load(open(a.edges)):
+with open(a.edges) as f:
+    edges = json.load(f)
+for lay, pts in edges:
     seg = []
     for p in pts + [None]:
         if p is None or abs(p[0]) > 5 * a.w or abs(p[1]) > 5 * a.w:

@@ -14,7 +14,7 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Tone match to a reference | Mix Multiply (`color_mult`) | solid |
 | Edge highlight | Bevel node with Normal input, or Bevel modifier | solid |
 | Edge wear (shading) | GN `edge_dist` x noise | solid |
-| Edge chips (geometry) | GN band subdivision + Set Position | solid |
+| Edge chips (geometry) | GN band subdivision + Set Position; per-object `Seed` | solid |
 | Displacement | Displacement + adaptive subdivision | solid, fast |
 | Tiling by real height | `height_span_uv` + REPEAT | solid |
 | Caustics | `caustic_photons.py` (glassware), GN wavefront (pools) | solid |

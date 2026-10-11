@@ -69,7 +69,6 @@ def lathe(name, profile, centre, segments=256, normal_hint=None):
     """Revolve an (r, z) polyline about the Z axis through `centre`. Points with r == 0 become a
     single pole vertex. `normal_hint(p)` -> desired normal direction at point p (to orient)."""
     import bmesh
-    from mathutils import Vector
     bm = bmesh.new()
     rings = []
     for r, z in profile:
@@ -105,20 +104,9 @@ def lathe(name, profile, centre, segments=256, normal_hint=None):
 
 
 def dielectric(name, ior, tint=(1, 1, 1)):
-    mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    mat.use_nodes = True
-    nt = mat.node_tree
-    nt.nodes.clear()
-    b = nt.nodes.new("ShaderNodeBsdfPrincipled")
-    b.label = "%s (IOR %.3f)" % (name, ior)
-    b.inputs["Base Color"].default_value = (*tint, 1)
-    b.inputs["Roughness"].default_value = 0.0
-    b.inputs["IOR"].default_value = ior
-    b.inputs["Transmission Weight"].default_value = 1.0
-    o = nt.nodes.new("ShaderNodeOutputMaterial")
-    o.location = (300, 0)
-    nt.links.new(b.outputs["BSDF"], o.inputs["Surface"])
-    return mat
+    """Kept for existing scripts: archviz.dielectric."""
+    import archviz
+    return archviz.dielectric(name, ior, tint)
 
 
 def glass_of_water(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256, lift=0.0001):

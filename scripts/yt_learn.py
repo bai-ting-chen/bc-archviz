@@ -66,12 +66,14 @@ def learn(url, out_dir, frames=False, max_height=1080, scene=0.12, every=8):
     os.makedirs(d, exist_ok=True)
     info = {k: meta.get(k) for k in ("id", "title", "channel", "upload_date", "duration_string",
                                        "webpage_url", "description", "chapters", "tags")}
-    json.dump(info, open(os.path.join(d, "info.json"), "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+    with open(os.path.join(d, "info.json"), "w", encoding="utf-8") as f:
+        json.dump(info, f, indent=2, ensure_ascii=False)
     run([YTDLP, url, "--skip-download", "--write-subs", "--write-auto-subs", "--sub-langs", "en.*,en",
          "--sub-format", "vtt", "-o", os.path.join(d, "subs.%(ext)s")])
     vtts = sorted(glob.glob(os.path.join(d, "subs*.vtt")), key=lambda p: ("orig" in p, p))
     lines = clean_vtt(vtts[0]) if vtts else ["(no captions available)"]
-    open(os.path.join(d, "transcript.txt"), "w", encoding="utf-8").write("\n".join(lines))
+    with open(os.path.join(d, "transcript.txt"), "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
     for v in vtts:
         os.remove(v)
     n_frames = 0

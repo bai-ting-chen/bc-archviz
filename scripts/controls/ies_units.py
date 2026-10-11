@@ -8,10 +8,13 @@
 import math
 import os
 import shutil
+import sys
 import tempfile
 
 import bpy
-import numpy as np
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _scene import black_scene, ortho_camera, render_linear, white_lambert  # noqa: E402
 
 D = 2.0          # light height above the plane, m
 I0 = 1000.0      # candela in the test files
@@ -40,25 +43,10 @@ C90 = ies_file("c90.ies", V, H, [[I0 if h in (45, 90, 135) else 0.0] * len(V) fo
 
 
 def base(cam_z=0.5, ortho=0.1, plane=0.2):
-    bpy.ops.wm.read_homefile(use_empty=True)
-    sc = bpy.context.scene
-    sc.render.engine = "CYCLES"
-    sc.cycles.samples, sc.cycles.use_denoising = 256, False
-    sc.cycles.use_adaptive_sampling = False
-    sc.render.resolution_x = sc.render.resolution_y = 64
-    sc.view_settings.view_transform = "Standard"
-    sc.world = bpy.data.worlds.new("black")
-    sc.world.use_nodes = True
-    sc.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.0
+    sc = black_scene(256, 64)
     bpy.ops.mesh.primitive_plane_add(size=plane)
-    m = bpy.data.materials.new("white"); m.use_nodes = True
-    b = m.node_tree.nodes["Principled BSDF"]
-    b.inputs["Base Color"].default_value = (1, 1, 1, 1); b.inputs["Roughness"].default_value = 1
-    b.inputs["Specular IOR Level"].default_value = 0.0
-    bpy.context.object.data.materials.append(m)
-    cam = bpy.data.objects.new("cam", bpy.data.cameras.new("cam")); sc.collection.objects.link(cam)
-    cam.data.type = "ORTHO"; cam.data.ortho_scale = ortho
-    cam.location = (0, 0, cam_z); sc.camera = cam
+    bpy.context.object.data.materials.append(white_lambert())
+    ortho_camera(cam_z, ortho)
     return sc
 
 
@@ -77,46 +65,40 @@ def ies_light(sc, kind, path, power=1.0, strength=1.0, rot=(0, 0, 0), **kw):
 
 
 def render(sc):
-    bpy.ops.render.render()
-    tmp = os.path.join(TMP, "r.exr")
-    sc.render.image_settings.file_format = "OPEN_EXR"
-    bpy.data.images["Render Result"].save_render(tmp)
-    im = bpy.data.images.load(tmp)
-    a = np.empty(len(im.pixels), dtype=np.float32); im.pixels.foreach_get(a)
-    w, h = im.size
-    bpy.data.images.remove(im)
-    return a.reshape(h, w, 4)[:, :, 0] * math.pi       # E in Blender W/m2 (albedo 1)
+    return render_linear()[:, :, 0] * math.pi        # E in Blender W/m2 (albedo 1)
 
 
-E683 = I0 / (683 * D * D)
-E178 = I0 / (177.83 * D * D)
-print(f"\nE if 683 lm/W   I/(683 d2)    = {E683:.5f}")
-print(f"E if 177.83 lm/W I/(177.83 d2) = {E178:.5f}   (P=1 W, Strength=1)")
-rows = []
-for name, kind, path, kw in [("POINT iso P=1", "POINT", ISO, {"shadow_soft_size": 0.0}),
-                             ("POINT down P=1", "POINT", DOWN, {"shadow_soft_size": 0.0}),
-                             ("POINT iso P=0.2604", "POINT", ISO, {"shadow_soft_size": 0.0, "power": 177.83 / 683}),
-                             ("POINT iso P=1 S=0.2604", "POINT", ISO, {"shadow_soft_size": 0.0, "strength": 177.83 / 683}),
-                             ("POINT iso r=0.05", "POINT", ISO, {"shadow_soft_size": 0.05}),
-                             ("SPOT 180 iso P=1", "SPOT", ISO, {"shadow_soft_size": 0.0, "spot_size": math.pi, "spot_blend": 0.0}),
-                             ("AREA 0.05 disk iso P=1", "AREA", ISO, {"shape": "DISK", "size": 0.05})]:
-    sc = base()
-    p = kw.pop("power", 1.0); s = kw.pop("strength", 1.0)
-    ies_light(sc, kind, path, power=p, strength=s, **kw)
-    e = render(sc).mean()
-    rows.append((name, e))
-    print(f"{name:26s} E = {e:.5f}  x683-pred = {e / E683:.3f}")
+try:
+    E683 = I0 / (683 * D * D)
+    E178 = I0 / (177.83 * D * D)
+    print(f"\nE if 683 lm/W   I/(683 d2)    = {E683:.5f}")
+    print(f"E if 177.83 lm/W I/(177.83 d2) = {E178:.5f}   (P=1 W, Strength=1)")
+    rows = []
+    for name, kind, path, kw in [("POINT iso P=1", "POINT", ISO, {"shadow_soft_size": 0.0}),
+                                 ("POINT down P=1", "POINT", DOWN, {"shadow_soft_size": 0.0}),
+                                 ("POINT iso P=0.2604", "POINT", ISO, {"shadow_soft_size": 0.0, "power": 177.83 / 683}),
+                                 ("POINT iso P=1 S=0.2604", "POINT", ISO, {"shadow_soft_size": 0.0, "strength": 177.83 / 683}),
+                                 ("POINT iso r=0.05", "POINT", ISO, {"shadow_soft_size": 0.05}),
+                                 ("SPOT 180 iso P=1", "SPOT", ISO, {"shadow_soft_size": 0.0, "spot_size": math.pi, "spot_blend": 0.0}),
+                                 ("AREA 0.05 disk iso P=1", "AREA", ISO, {"shape": "DISK", "size": 0.05})]:
+        sc = base()
+        p = kw.pop("power", 1.0); s = kw.pop("strength", 1.0)
+        ies_light(sc, kind, path, power=p, strength=s, **kw)
+        e = render(sc).mean()
+        rows.append((name, e))
+        print(f"{name:26s} E = {e:.5f}  x683-pred = {e / E683:.3f}")
 
-# Orientation: top-down view of a 6 m floor, light pointing down (no rotation).
-for nm, path in (("C0", C0), ("C90", C90)):
+    # Orientation: top-down view of a 6 m floor, light pointing down (no rotation).
+    for nm, path in (("C0", C0), ("C90", C90)):
+        sc = base(cam_z=1.0, ortho=6.0, plane=6.0)
+        ies_light(sc, "POINT", path, shadow_soft_size=0.0)
+        e = render(sc)                                   # rows run -Y -> +Y (image origin bottom-left)
+        h, w = e.shape
+        q = {"+X": e[:, w // 2 + 4:].mean(), "-X": e[:, :w // 2 - 4].mean(),
+             "+Y": e[h // 2 + 4:, :].mean(), "-Y": e[:h // 2 - 4, :].mean()}
+        print(f"{nm}-lit profile, light unrotated, floor mean by side:", {k: round(float(v), 5) for k, v in q.items()})
     sc = base(cam_z=1.0, ortho=6.0, plane=6.0)
-    ies_light(sc, "POINT", path, shadow_soft_size=0.0)
-    e = render(sc)                                   # rows run -Y -> +Y (image origin bottom-left)
-    h, w = e.shape
-    q = {"+X": e[:, w // 2 + 4:].mean(), "-X": e[:, :w // 2 - 4].mean(),
-         "+Y": e[h // 2 + 4:, :].mean(), "-Y": e[:h // 2 - 4, :].mean()}
-    print(f"{nm}-lit profile, light unrotated, floor mean by side:", {k: round(float(v), 5) for k, v in q.items()})
-sc = base(cam_z=1.0, ortho=6.0, plane=6.0)
-ies_light(sc, "POINT", DOWN, shadow_soft_size=0.0, rot=(math.pi, 0, 0))
-print("down profile, light flipped 180 about X: floor mean =", round(render(sc).mean(), 6))
-shutil.rmtree(TMP, ignore_errors=True)
+    ies_light(sc, "POINT", DOWN, shadow_soft_size=0.0, rot=(math.pi, 0, 0))
+    print("down profile, light flipped 180 about X: floor mean =", round(render(sc).mean(), 6))
+finally:
+    shutil.rmtree(TMP, ignore_errors=True)

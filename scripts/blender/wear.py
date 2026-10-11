@@ -40,57 +40,9 @@ def dice(obj, size=0.05):
     return len(obj.data.polygons)
 
 
-class _GN:
-    """Small Geometry Nodes graph builder."""
-
-    def __init__(self, ng):
-        self.nt, self.L = ng, ng.links.new
-
-    def n(self, kind, loc, **props):
-        node = self.nt.nodes.new(kind)
-        node.location = loc
-        for k, v in props.items():
-            setattr(node, k, v)
-        return node
-
-    def math(self, op, a, b, loc, clamp=False):
-        node = self.n("ShaderNodeMath", loc, operation=op, use_clamp=clamp)
-        for i, v in enumerate((a, b)):
-            if isinstance(v, (int, float)):
-                node.inputs[i].default_value = v
-            else:
-                self.L(v, node.inputs[i])
-        return node.outputs[0]
-
-    def range(self, v, fmin, fmax, loc, tmin=0.0, tmax=1.0):
-        node = self.n("ShaderNodeMapRange", loc)
-        for k, x in (("From Min", fmin), ("From Max", fmax), ("To Min", tmin), ("To Max", tmax)):
-            if isinstance(x, (int, float)):
-                node.inputs[k].default_value = x
-            else:
-                self.L(x, node.inputs[k])
-        self.L(v, node.inputs["Value"])
-        return node.outputs["Result"]
-
-    def noise(self, vec, scale, loc, detail=6.0, rough=0.6):
-        node = self.n("ShaderNodeTexNoise", loc)
-        node.inputs["Scale"].default_value = scale
-        node.inputs["Detail"].default_value = detail
-        node.inputs["Roughness"].default_value = rough
-        self.L(vec, node.inputs["Vector"])
-        return node.outputs[0]
-
-    def store(self, geo, name, dtype, val, loc):
-        st = self.n("GeometryNodeStoreNamedAttribute", loc, data_type=dtype, domain="POINT")
-        st.inputs["Name"].default_value = name
-        self.L(geo, st.inputs["Geometry"])
-        self.L(val, sock(st.inputs, "Value"))
-        return st.outputs["Geometry"]
-
-    def named(self, name, dtype, loc):
-        node = self.n("GeometryNodeInputNamedAttribute", loc, data_type=dtype)
-        node.inputs["Name"].default_value = name
-        return node.outputs[0]
+def _GN(ng):
+    """Kept for existing scripts: study_materials.G on a node group."""
+    return G(ng, clear=False)
 
 
 def _input(ng, name, kind, default, subtype=None):
@@ -100,10 +52,63 @@ def _input(ng, name, kind, default, subtype=None):
         it.subtype = subtype
 
 
+def _edge_field(b, gi, x0):
+    """Distance to the nearest convex arris -> `edge_dist`, and the rest position offset by the
+    group's Seed -> `rest_pos` (noise lookups; a per-object Seed decorrelates repeated objects).
+    Measured on outward-normal meshes: convex arrises give a POSITIVE signed angle, inner
+    corners a negative one."""
+    L = b.L
+    ang = b.n("GeometryNodeInputMeshEdgeAngle", (x0, -300))
+    cmp = b.n("FunctionNodeCompare", (x0 + 200, -300), data_type="FLOAT", operation="GREATER_THAN")
+    L(ang.outputs["Signed Angle"], sock(cmp.inputs, "A"))
+    L(gi.outputs["Sharp Angle"], sock(cmp.inputs, "B"))
+    m2c = b.n("GeometryNodeMeshToCurve", (x0 + 400, -200))
+    L(gi.outputs["Geometry"], m2c.inputs["Mesh"])
+    L(cmp.outputs[0], m2c.inputs["Selection"])
+    c2m = b.n("GeometryNodeCurveToMesh", (x0 + 600, -200))
+    L(m2c.outputs["Curve"], c2m.inputs["Curve"])
+    prox = b.n("GeometryNodeProximity", (x0 + 800, -200), target_element="EDGES")
+    L(c2m.outputs["Mesh"], prox.inputs["Geometry"])
+    pos = b.n("GeometryNodeInputPosition", (x0 + 800, -450))
+    seed_v = b.n("ShaderNodeVectorMath", (x0 + 950, -450), operation="ADD")
+    L(pos.outputs["Position"], seed_v.inputs[0])
+    L(gi.outputs["Seed"], seed_v.inputs[1])
+    g = b.store(gi.outputs["Geometry"], "edge_dist", "FLOAT", prox.outputs["Distance"], (x0 + 1050, 0))
+    return b.store(g, "rest_pos", "FLOAT_VECTOR", seed_v.outputs["Vector"], (x0 + 1250, 0))
+
+
+def _chip_field(b, gi, rp, dd, seg_scale, bite_scale, soft, prof_end):
+    """Chips along the arris: segments of the edge chipped (share -> threshold; Noise clusters
+    near 0.5, sd ~0.1), bite noise varies the reach. Returns (chip 0..1, depth profile)."""
+    t = b.math("SUBTRACT", 0.5, gi.outputs["Chipped Share"], (500, -700))
+    t = b.math("MULTIPLY", t, 0.35, (650, -700))
+    t = b.math("ADD", t, 0.5, (750, -700))
+    seg = b.range(b.noise(rp, seg_scale, (650, -500), detail=2), b.math("SUBTRACT", t, 0.04, (850, -650)),
+                  b.math("ADD", t, 0.04, (850, -760)), (1000, -550))
+    bite = b.range(b.noise(rp, bite_scale, (650, -900), detail=8, rough=0.7), 0.35, 0.75, (1000, -850))
+    reach = b.math("MULTIPLY", b.math("MULTIPLY", bite, seg, (1200, -700)),
+                   gi.outputs["Chip Reach"], (1380, -700))
+    chip = b.range(b.math("SUBTRACT", reach, dd, (1550, -500)), 0.0, soft, (1720, -500))
+    prof = b.range(dd, 0.0, gi.outputs["Chip Reach"], (1550, -800), 1.0, prof_end)
+    return chip, prof
+
+
+def _rejoin(b, moved, sep, go, x0, weld_dist):
+    """Rejoin the displaced band with the untouched interior and weld the seam."""
+    join = b.n("GeometryNodeJoinGeometry", (x0, 0))
+    b.L(moved, join.inputs[0])
+    b.L(sep.outputs["Inverted"], join.inputs[0])
+    weld = b.n("GeometryNodeMergeByDistance", (x0 + 130, 0))
+    weld.inputs["Distance"].default_value = weld_dist
+    b.L(join.outputs[0], weld.inputs["Geometry"])
+    b.L(weld.outputs["Geometry"], go.inputs["Geometry"])
+
+
 def edge_wear_group(name="Edge Wear + Chips", band=0.08, level=3, chip_reach=0.045,
                     chip_depth=0.018, chipped_share=0.55, sharp_deg=30.0, chips=True,
-                    bite_scale=22.0, segment_scale=2.2):
-    """Geometry Nodes modifier: edge field for every point, real chips in the arris band."""
+                    bite_scale=22.0, segment_scale=2.2, seed=(0.0, 0.0, 0.0)):
+    """Geometry Nodes modifier: edge field for every point, real chips in the arris band.
+    Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern."""
     ng = bpy.data.node_groups.get(name)
     if ng:
         bpy.data.node_groups.remove(ng)
@@ -115,28 +120,15 @@ def edge_wear_group(name="Edge Wear + Chips", band=0.08, level=3, chip_reach=0.0
     _input(ng, "Chip Reach", "NodeSocketFloat", chip_reach, "DISTANCE")
     _input(ng, "Chip Depth", "NodeSocketFloat", chip_depth if chips else 0.0, "DISTANCE")
     _input(ng, "Chipped Share", "NodeSocketFloat", chipped_share, "FACTOR")
+    _input(ng, "Seed", "NodeSocketVector", seed)
     ng.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
     b = _GN(ng)
     L = b.L
     gi = b.n("NodeGroupInput", (-1400, 0))
     go = b.n("NodeGroupOutput", (2700, 0))
 
-    # 1. distance to the nearest convex arris. Measured on these meshes (outward normals):
-    #    convex arrises give a POSITIVE signed angle, the L-wall's inner corner a negative one.
-    ang = b.n("GeometryNodeInputMeshEdgeAngle", (-1400, -300))
-    cmp = b.n("FunctionNodeCompare", (-1200, -300), data_type="FLOAT", operation="GREATER_THAN")
-    L(ang.outputs["Signed Angle"], sock(cmp.inputs, "A"))
-    L(gi.outputs["Sharp Angle"], sock(cmp.inputs, "B"))
-    m2c = b.n("GeometryNodeMeshToCurve", (-1000, -200))
-    L(gi.outputs["Geometry"], m2c.inputs["Mesh"])
-    L(cmp.outputs[0], m2c.inputs["Selection"])
-    c2m = b.n("GeometryNodeCurveToMesh", (-800, -200))
-    L(m2c.outputs["Curve"], c2m.inputs["Curve"])
-    prox = b.n("GeometryNodeProximity", (-600, -200), target_element="EDGES")
-    L(c2m.outputs["Mesh"], prox.inputs["Geometry"])
-    pos = b.n("GeometryNodeInputPosition", (-600, -450))
-    g = b.store(gi.outputs["Geometry"], "edge_dist", "FLOAT", prox.outputs["Distance"], (-350, 0))
-    g = b.store(g, "rest_pos", "FLOAT_VECTOR", pos.outputs["Position"], (-150, 0))
+    # 1. distance to the nearest convex arris
+    g = _edge_field(b, gi, -1400)
 
     # 2. split off the arris band, densify only that
     in_band = b.n("FunctionNodeCompare", (50, -300), data_type="FLOAT", operation="LESS_THAN")
@@ -152,17 +144,7 @@ def edge_wear_group(name="Edge Wear + Chips", band=0.08, level=3, chip_reach=0.0
     # 3. chip field on the dense band
     rp = b.named("rest_pos", "FLOAT_VECTOR", (450, -400))
     dd = b.named("edge_dist", "FLOAT", (450, -250))
-    # Noise Texture clusters around 0.5 (sd ~0.1), so map the share to a threshold near 0.5
-    t = b.math("SUBTRACT", 0.5, gi.outputs["Chipped Share"], (500, -700))
-    t = b.math("MULTIPLY", t, 0.35, (650, -700))
-    t = b.math("ADD", t, 0.5, (750, -700))
-    seg = b.range(b.noise(rp, segment_scale, (650, -500), detail=2), b.math("SUBTRACT", t, 0.04, (850, -650)),
-                  b.math("ADD", t, 0.04, (850, -760)), (1000, -550))
-    bite = b.range(b.noise(rp, bite_scale, (650, -900), detail=8, rough=0.7), 0.35, 0.75, (1000, -850))
-    reach = b.math("MULTIPLY", b.math("MULTIPLY", bite, seg, (1200, -700)),
-                   gi.outputs["Chip Reach"], (1380, -700))
-    chip = b.range(b.math("SUBTRACT", reach, dd, (1550, -500)), 0.0, 0.002, (1720, -500))
-    prof = b.range(dd, 0.0, gi.outputs["Chip Reach"], (1550, -800), 1.0, 0.35)
+    chip, prof = _chip_field(b, gi, rp, dd, segment_scale, bite_scale, 0.002, 0.35)
     frac = b.range(b.noise(rp, 140.0, (1380, -1000), detail=4), 0.3, 0.7, (1550, -1000), 0.6, 1.0)
     depth = b.math("MULTIPLY", b.math("MULTIPLY", chip, prof, (1900, -650)),
                    b.math("MULTIPLY", frac, gi.outputs["Chip Depth"], (1900, -900)), (2050, -750))
@@ -176,13 +158,7 @@ def edge_wear_group(name="Edge Wear + Chips", band=0.08, level=3, chip_reach=0.0
     L(off.outputs["Vector"], setp.inputs["Offset"])
 
     # 4. rejoin with the untouched interior and weld the seam
-    join = b.n("GeometryNodeJoinGeometry", (2450, 0))
-    L(setp.outputs["Geometry"], join.inputs[0])
-    L(sep.outputs["Inverted"], join.inputs[0])
-    weld = b.n("GeometryNodeMergeByDistance", (2580, 0))
-    weld.inputs["Distance"].default_value = 1e-5
-    L(join.outputs[0], weld.inputs["Geometry"])
-    L(weld.outputs["Geometry"], go.inputs["Geometry"])
+    _rejoin(b, setp.outputs["Geometry"], sep, go, 2450, 1e-5)
     return ng
 
 
@@ -207,37 +183,19 @@ def add_edge_wear(obj, group, **inputs):
 # --- shading ----------------------------------------------------------------------------
 
 def _attr(g, name, loc, frame, out="Fac"):
-    n = g.node("ShaderNodeAttribute", loc, frame, label="attr: " + name)
-    n.attribute_name = name
-    return n.outputs[out]
+    return g.attr(name, loc, frame, out)
 
 
 def _noise(g, vec, scale, loc, frame, detail=6.0, rough=0.6, label=None):
-    n = g.node("ShaderNodeTexNoise", loc, frame, label=label, Scale=scale, Detail=detail,
-               Roughness=rough)
-    g.link(vec, n.inputs["Vector"])
-    return n.outputs[0]
+    return g.noise(vec, scale, loc, frame, detail, rough, label)
 
 
 def _range(g, val, fmin, fmax, loc, frame, tmin=0.0, tmax=1.0, label=None, smooth=False):
-    n = g.node("ShaderNodeMapRange", loc, frame, label=label)
-    if smooth:
-        n.interpolation_type = "SMOOTHSTEP"
-    n.inputs["From Min"].default_value, n.inputs["From Max"].default_value = fmin, fmax
-    n.inputs["To Min"].default_value, n.inputs["To Max"].default_value = tmin, tmax
-    g.link(val, n.inputs["Value"])
-    return n.outputs["Result"]
+    return g.range(val, fmin, fmax, loc, tmin, tmax, frame, label, smooth)
 
 
 def _math(g, op, a, b, loc, frame, clamp=False):
-    n = g.node("ShaderNodeMath", loc, frame)
-    n.operation, n.use_clamp = op, clamp
-    for i, v in enumerate((a, b)):
-        if isinstance(v, (int, float)):
-            n.inputs[i].default_value = v
-        else:
-            g.link(v, n.inputs[i])
-    return n.outputs[0]
+    return g.math(op, a, b, loc, frame, clamp)
 
 
 def weathered_concrete(name="CONCRETE_WEATHERED", dirt_band=0.035, dirt_amount=0.85,
@@ -245,8 +203,7 @@ def weathered_concrete(name="CONCRETE_WEATHERED", dirt_band=0.035, dirt_amount=0
     """concrete_study base (tone, maps, round edges, leak stain) + procedural dirty edges from
     the GN `edge_dist` field + a fresh-break material where GN cut a chip (`chip` > 0)."""
     mat = sm.concrete_study(name=name, edge_dark=False, stain=stain, bevel_chips=False)
-    g = G.__new__(G)
-    g.nt, g.frames = mat.node_tree, {}
+    g = G(mat.node_tree)                      # add to the existing tree
     nt = mat.node_tree
     mix = next(n for n in nt.nodes if n.label == "Wear Layered (BRDFLayered)")
     stain_node = next((n for n in nt.nodes if n.label == "stain (vertical faces)"), None)

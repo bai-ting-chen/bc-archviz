@@ -32,5 +32,6 @@ for o in sc.doc.Objects:
             yr = -x * math.sin(yaw) + y * math.cos(yaw)        # depth
             pts.append(None if yr < 0.2 else (cx + f * xr / yr, hor - f * z / yr))
         lines.append([lay, pts])
-json.dump(lines, open(c["out"], "w"))
+with open(c["out"], "w") as f:
+    json.dump(lines, f)
 print("edges", len(lines))

@@ -21,7 +21,9 @@ and expensive; Bevel-vs-shading-normal is thin and expensive. **Use GN Edge Angl
 3. `weathered_concrete()`: dirt = smoothstep over the dirt band x grime noise x (1 − chip) → a
    grimier, rougher BSDF; chips → a fresh-break BSDF, slightly lighter and rougher with its own
    bump. The dirt band is wider than the chip reach — grime spreads past where material is gone.
-4. Per object: `add_edge_wear(obj, group, …)` → `set_input()`.
+4. Per object: `add_edge_wear(obj, group, …)` → `set_input()`. Repeated objects (a row of
+   identical beams or boards) get their own chips with `Seed=(x, y, z)` — it offsets the noise
+   lookups; Seed 0 is the group's default pattern.
 
 **Size in this order**, each following from the one before rather than guessing all four: chip
 reach from the shot → band wide enough to contain it → subdivision fine enough that a chip spans
@@ -71,5 +73,5 @@ floor is doing visible work; one that moves it *by* the noise floor is not insta
 good the node tree looks. Record the ratios in the study.
 
 ## Open
-Per-object seeds (offset `rest_pos`). Adaptive displacement for chips is a memory risk on a
+Adaptive displacement for chips is a memory risk on a
 small-VRAM GPU — the band-subdivision approach exists because of that.

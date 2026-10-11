@@ -15,6 +15,7 @@ from wear import set_input
 
 
 def scatter_group(name="SCATTER"):
+    """GN group: distribute points below a height and inside a noise patch, instance with random rotation/scale."""
     ng = bpy.data.node_groups.get(name)
     if ng:
         return ng

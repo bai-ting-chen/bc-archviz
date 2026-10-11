@@ -48,7 +48,8 @@ def pair(render, ref, out, overlay=False):
 
 
 def patches(ref, regions_path, renders):
-    regions = json.load(open(regions_path, encoding="utf-8"))
+    with open(regions_path, encoding="utf-8") as f:
+        regions = json.load(f)
     regions.setdefault("frame", [0, 0, 1, 1])
     size = load(ref).size
     for path in [ref, *renders]:

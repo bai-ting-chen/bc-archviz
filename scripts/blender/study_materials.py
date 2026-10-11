@@ -8,16 +8,27 @@ import os
 
 import bpy
 
-from archviz import library
+from archviz import dielectric, library, read_meta, sock  # noqa: F401 (sock re-exported)
 
 
 class G:
-    """Tiny node-graph builder: frames, images on a named UV map, links."""
+    """The node-graph builder for shader and Geometry Nodes trees: frames, nodes (inputs by
+    keyword, or properties with n()), images on a named UV map, links, and the math / map range /
+    noise / named-attribute shorthands. G(material) starts the material's tree empty; G(node_tree)
+    adds to an existing tree (a GN group). wear._GN and the wear._math/_range/_noise/_attr
+    functions are thin aliases of this class."""
 
-    def __init__(self, mat):
-        mat.use_nodes = True
-        self.nt = mat.node_tree
-        self.nt.nodes.clear()
+    def __init__(self, target, clear=None):
+        if isinstance(target, bpy.types.Material):
+            target.use_nodes = True
+            nt = target.node_tree
+            clear = True if clear is None else clear
+        else:
+            nt = target
+        if clear:
+            nt.nodes.clear()
+        self.nt = nt
+        self.L = nt.links.new
         self.frames = {}
 
     def frame(self, label, color=None):
@@ -55,15 +66,62 @@ class G:
     def link(self, a, b):
         self.nt.links.new(a, b)
 
+    def n(self, kind, loc, **props):
+        """Node with properties (operation, data_type, domain...) set by keyword."""
+        node = self.nt.nodes.new(kind)
+        node.location = loc
+        for k, v in props.items():
+            setattr(node, k, v)
+        return node
 
-def sock(sockets, name):
-    """Active socket by name (Mix nodes keep hidden same-named sockets per data type)."""
-    return next(s for s in sockets if s.name == name and s.enabled)
+    def _in(self, sockt, v):
+        if isinstance(v, (int, float, tuple, list)):
+            sockt.default_value = v
+        else:
+            self.L(v, sockt)
+
+    def math(self, op, a, b, loc, frame=None, clamp=False):
+        node = self.node("ShaderNodeMath", loc, frame)
+        node.operation, node.use_clamp = op, clamp
+        for i, v in enumerate((a, b)):
+            self._in(node.inputs[i], v)
+        return node.outputs[0]
+
+    def range(self, v, fmin, fmax, loc, tmin=0.0, tmax=1.0, frame=None, label=None, smooth=False):
+        node = self.node("ShaderNodeMapRange", loc, frame, label)
+        if smooth:
+            node.interpolation_type = "SMOOTHSTEP"
+        for k, x in (("From Min", fmin), ("From Max", fmax), ("To Min", tmin), ("To Max", tmax)):
+            self._in(node.inputs[k], x)
+        self.L(v, node.inputs["Value"])
+        return node.outputs["Result"]
+
+    def noise(self, vec, scale, loc, frame=None, detail=6.0, rough=0.6, label=None):
+        node = self.node("ShaderNodeTexNoise", loc, frame, label, Scale=scale, Detail=detail, Roughness=rough)
+        self.L(vec, node.inputs["Vector"])
+        return node.outputs[0]
+
+    def attr(self, name, loc, frame=None, out="Fac"):
+        node = self.node("ShaderNodeAttribute", loc, frame, label="attr: " + name)
+        node.attribute_name = name
+        return node.outputs[out]
+
+    def store(self, geo, name, dtype, val, loc):
+        st = self.n("GeometryNodeStoreNamedAttribute", loc, data_type=dtype, domain="POINT")
+        st.inputs["Name"].default_value = name
+        self.L(geo, st.inputs["Geometry"])
+        self.L(val, sock(st.inputs, "Value"))
+        return st.outputs["Geometry"]
+
+    def named(self, name, dtype, loc):
+        node = self.n("GeometryNodeInputNamedAttribute", loc, data_type=dtype)
+        node.inputs["Name"].default_value = name
+        return node.outputs[0]
 
 
 def _ph_maps(tex_id):
     folder = library("polyhaven", "textures", tex_id)
-    meta = json.load(open(os.path.join(folder, "meta.json"), encoding="utf-8"))
+    meta = read_meta(folder)
     return {k: os.path.join(folder, v) for k, v in meta["maps"].items()}, meta
 
 
@@ -337,18 +395,12 @@ def coated_wood(name="COATED_PINE", tex_id="coated_pine", coat=0.2, coat_rough=0
 
 
 def clear_glass(name="GLASS", ior=1.52):
-    mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    g = G(mat)
-    b = g.node("ShaderNodeBsdfPrincipled", (-300, 0), label="Soda-lime glass", IOR=ior,
-               Roughness=0.0)
-    b.inputs["Transmission Weight"].default_value = 1.0
-    b.inputs["Base Color"].default_value = (1, 1, 1, 1)
-    out = g.node("ShaderNodeOutputMaterial", (0, 0))
-    g.link(b.outputs["BSDF"], out.inputs["Surface"])
-    return mat
+    """Soda-lime glass via archviz.dielectric (white, IOR 1.52 by default)."""
+    return dielectric(name, ior, label="Soda-lime glass")
 
 
 def white_backdrop(name="WHITE_BACKDROP", albedo=0.85):
+    """Matte white backdrop of a measured albedo (product/studio shots)."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     g = G(mat)
     b = g.node("ShaderNodeBsdfPrincipled", (-300, 0), Roughness=0.9)

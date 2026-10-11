@@ -16,7 +16,7 @@ import bpy
 
 import study_materials as sm
 from study_materials import sock
-from wear import _GN, _input, _attr, _noise, _range, _math
+from wear import _GN, _input, _attr, _noise, _range, _math, _edge_field, _chip_field, _rejoin
 
 
 # --- geometry ---------------------------------------------------------------------------
@@ -62,30 +62,15 @@ def wood_wear_group(name="Wood Wear + Breaks", band=0.02, level=3,
     _input(ng, "Chipped Share", "NodeSocketFloat", chipped_share, "FACTOR")
     _input(ng, "Break Share", "NodeSocketFloat", break_share, "FACTOR")
     _input(ng, "Break Depth", "NodeSocketFloat", break_depth, "DISTANCE")
+    _input(ng, "Seed", "NodeSocketVector", seed)
     ng.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
     b = _GN(ng)
     L = b.L
     gi = b.n("NodeGroupInput", (-1600, 0))
     go = b.n("NodeGroupOutput", (3000, 0))
 
-    # 1. edge field (convex arrises are positive signed angles on these meshes)
-    ang = b.n("GeometryNodeInputMeshEdgeAngle", (-1600, -300))
-    cmp = b.n("FunctionNodeCompare", (-1400, -300), data_type="FLOAT", operation="GREATER_THAN")
-    L(ang.outputs["Signed Angle"], sock(cmp.inputs, "A"))
-    L(gi.outputs["Sharp Angle"], sock(cmp.inputs, "B"))
-    m2c = b.n("GeometryNodeMeshToCurve", (-1200, -200))
-    L(gi.outputs["Geometry"], m2c.inputs["Mesh"])
-    L(cmp.outputs[0], m2c.inputs["Selection"])
-    c2m = b.n("GeometryNodeCurveToMesh", (-1000, -200))
-    L(m2c.outputs["Curve"], c2m.inputs["Curve"])
-    prox = b.n("GeometryNodeProximity", (-800, -200), target_element="EDGES")
-    L(c2m.outputs["Mesh"], prox.inputs["Geometry"])
-    pos = b.n("GeometryNodeInputPosition", (-800, -450))
-    seed_v = b.n("ShaderNodeVectorMath", (-650, -450), operation="ADD")
-    L(pos.outputs["Position"], seed_v.inputs[0])
-    seed_v.inputs[1].default_value = seed
-    g = b.store(gi.outputs["Geometry"], "edge_dist", "FLOAT", prox.outputs["Distance"], (-550, 0))
-    g = b.store(g, "rest_pos", "FLOAT_VECTOR", seed_v.outputs["Vector"], (-350, 0))
+    # 1. edge field
+    g = _edge_field(b, gi, -1600)
 
     # 2. densify the arris band and the up-facing faces only
     nrm0 = b.n("GeometryNodeInputNormal", (-350, -500))
@@ -111,15 +96,7 @@ def wood_wear_group(name="Wood Wear + Breaks", band=0.02, level=3,
     dd = b.named("edge_dist", "FLOAT", (450, -250))
 
     # 3. dents along the arrises (same field as the concrete chips, wood-sized)
-    t = b.math("ADD", b.math("MULTIPLY", b.math("SUBTRACT", 0.5, gi.outputs["Chipped Share"],
-                                                (500, -700)), 0.35, (650, -700)), 0.5, (750, -700))
-    seg = b.range(b.noise(rp, 6.0, (650, -500), detail=2), b.math("SUBTRACT", t, 0.04, (850, -650)),
-                  b.math("ADD", t, 0.04, (850, -760)), (1000, -550))
-    bite = b.range(b.noise(rp, 70.0, (650, -900), detail=8, rough=0.7), 0.35, 0.75, (1000, -850))
-    reach = b.math("MULTIPLY", b.math("MULTIPLY", bite, seg, (1200, -700)),
-                   gi.outputs["Chip Reach"], (1380, -700))
-    chip = b.range(b.math("SUBTRACT", reach, dd, (1550, -500)), 0.0, 0.0006, (1720, -500))
-    prof = b.range(dd, 0.0, gi.outputs["Chip Reach"], (1550, -800), 1.0, 0.4)
+    chip, prof = _chip_field(b, gi, rp, dd, 6.0, 70.0, 0.0006, 0.4)
     chip_d = b.math("MULTIPLY", b.math("MULTIPLY", chip, prof, (1900, -650)),
                     gi.outputs["Chip Depth"], (2050, -700))
 
@@ -155,13 +132,7 @@ def wood_wear_group(name="Wood Wear + Breaks", band=0.02, level=3,
     setp = b.n("GeometryNodeSetPosition", (2550, 100))
     L(gb, setp.inputs["Geometry"])
     L(off.outputs["Vector"], setp.inputs["Offset"])
-    join = b.n("GeometryNodeJoinGeometry", (2700, 0))
-    L(setp.outputs["Geometry"], join.inputs[0])
-    L(sep.outputs["Inverted"], join.inputs[0])
-    weld = b.n("GeometryNodeMergeByDistance", (2850, 0))
-    weld.inputs["Distance"].default_value = 1e-6
-    L(join.outputs[0], weld.inputs["Geometry"])
-    L(weld.outputs["Geometry"], go.inputs["Geometry"])
+    _rejoin(b, setp.outputs["Geometry"], sep, go, 2700, 1e-6)
     return ng
 
 
@@ -171,8 +142,7 @@ def weathered_wood(name="PINE_WEATHERED", wear_band=0.012, wear_amount=0.9,
                    inner_tint=(0.80, 0.60, 0.36), inner_mix=0.30, inner_gain=1.7):
     """coated_wood base (levels, satin coat trap) + worn varnish/grime at arrises + inner wood."""
     mat = sm.coated_wood(name=name, round_edge=0)
-    g = sm.G.__new__(sm.G)
-    g.nt, g.frames = mat.node_tree, {}
+    g = sm.G(mat.node_tree)                   # add to the existing tree
     nt = mat.node_tree
     coated = next(n for n in nt.nodes if n.label == "Pine + satin varnish coat")
     out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")

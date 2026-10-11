@@ -27,20 +27,19 @@ async def main():
     else:
         args = json.loads(sys.argv[2]) if len(sys.argv) > 2 else {}
     params = StdioServerParameters(command=SERVER, args=[], env={**os.environ})
-    async with stdio_client(params, errlog=open(os.devnull, "w")) as (r, w):
-        async with ClientSession(r, w) as s:
-            await s.initialize()
-            res = await s.call_tool(tool, args)
-            for c in res.content:
-                if c.type == "text":
-                    print(c.text)
-                elif c.type == "image":
-                    out = os.environ.get("MCP_IMAGE_OUT", os.path.join(os.getcwd(), "mcp_image.png"))
-                    with open(out, "wb") as f:
-                        f.write(base64.b64decode(c.data))
-                    print("image saved:", out)
-            if res.isError:
-                sys.exit(1)
+    with open(os.devnull, "w") as devnull:
+        async with stdio_client(params, errlog=devnull) as (r, w):
+            async with ClientSession(r, w) as s:
+                await s.initialize()
+                res = await s.call_tool(tool, args)
+                for c in res.content:
+                    if c.type == "text":
+                        print(c.text)
+                    elif c.type == "image":
+                        out = os.environ.get("MCP_IMAGE_OUT", os.path.join(os.getcwd(), "mcp_image.png"))
+                        with open(out, "wb") as f:
+                            f.write(base64.b64decode(c.data))
+                        print("image saved:", out)
+                return res.isError
 
-
-asyncio.run(main())
+sys.exit(1 if asyncio.run(main()) else 0)
