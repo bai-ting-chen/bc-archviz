@@ -12,27 +12,27 @@ import argparse
 import hashlib
 import json
 import os
+import sys
 import urllib.parse
 import urllib.request
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "blender"))
+import projectpath  # noqa: E402  (bpy-free; the same resolver archviz.library() uses)
 
 API = "https://api.polyhaven.com"
 UA = {"User-Agent": "ArchvizBlenderPipeline/0.1"}
 
 
 def _project():
-    """env ARCHVIZ_PROJECT, else the nearest folder holding library/ above the working directory,
-    else the working directory (library/ is created there)."""
+    """env ARCHVIZ_PROJECT, else projectpath.find_project from the working directory (a study
+    stops the search at itself), else the working directory (library/ is created there)."""
     if os.environ.get("ARCHVIZ_PROJECT"):
         return os.environ["ARCHVIZ_PROJECT"]
-    d = os.getcwd()
-    while not os.path.isdir(os.path.join(d, "library")):
-        if os.path.dirname(d) == d:
-            return os.getcwd()
-        d = os.path.dirname(d)
-    return d
+    return projectpath.find_project([os.getcwd()]) or os.getcwd()
 
 
-LIB = os.path.join(_project(), "library", "polyhaven")
+PROJECT = _project()
+LIB = os.path.join(PROJECT, "library", "polyhaven")
 
 # Poly Haven map key -> (local suffix, preferred formats). "arm" = AO/Rough/Metal packed in R/G/B.
 TEX_MAPS = {
@@ -128,6 +128,9 @@ def main():
     a = p.parse_args()
     if a.cmd == "search":
         search(a.ids[0], a.ids[1], a.top)
+    elif not projectpath.is_study(PROJECT):
+        print(f"NOTE: downloading into {LIB}, which is not a study's library (RULES 10c). "
+              f"Set ARCHVIZ_PROJECT=<study folder> unless this is meant.")
     for i in a.ids if a.cmd != "search" else ():
         try:
             (fetch_hdri if a.cmd == "hdri" else fetch_tex)(i, a.res or ("4k" if a.cmd == "hdri" else "2k"))

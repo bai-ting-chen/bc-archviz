@@ -97,7 +97,10 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
 - Others in `library/local/<name>/` with a `meta.json` stating the source. Megascans via Fab:
   free items only; download needs the user's own sign-in (their Chrome) — never type passwords.
 - **Where:** the study's own `library/` (RULES 10c) — `ARCHVIZ_PROJECT=<study> polyhaven_fetch.py …`,
-  `archviz.set_project(<study>)` in Blender. Edited HDRIs, baked/generated maps and their
+  `archviz.set_project(<study>)` in Blender. Run from inside a study, both find it without the
+  setting (`projectpath`: the search stops at the study folder); a shared `library/` above is
+  read only by studies listed in its `legacy_studies.txt`, and `polyhaven_fetch` prints a NOTE
+  when it downloads anywhere but a study. Edited HDRIs, baked/generated maps and their
   generator script references go in `<study>/library/local/` with a `meta.json`. Never repoint a
   study at another study's or a shared copy. Choosing a texture: materials.md › Choosing.
 

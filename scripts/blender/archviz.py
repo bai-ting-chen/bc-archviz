@@ -12,31 +12,29 @@ import os
 
 import bpy
 
-# Code lives in the skill; assets live in the current project's library/ (polyhaven/, local/).
-# The project: set_project(path), else env ARCHVIZ_PROJECT, else the nearest folder holding a
-# library/ above the open .blend or the working directory.
+import projectpath
+
+# Code lives in the skill; assets live in a study's (or project's) library/ (polyhaven/, local/).
+# The folder: set_project(path), else env ARCHVIZ_PROJECT, else projectpath.find_project from
+# the open .blend, then the working directory (a study stops the search at itself, RULES 10c).
 _PROJECT = os.environ.get("ARCHVIZ_PROJECT")
 
 
 def set_project(path):
-    """Point library() at a project/study folder (else env ARCHVIZ_PROJECT, else the nearest library/ above)."""
+    """Point library() at a study/project folder (else env ARCHVIZ_PROJECT, else found from the .blend / cwd)."""
     global _PROJECT
     _PROJECT = os.path.abspath(path)
 
 
 def project_root():
-    """The folder whose library/ holds the assets (see set_project)."""
+    """The folder whose library/ holds the assets (see set_project and projectpath)."""
     if _PROJECT:
         return _PROJECT
     starts = [os.path.dirname(bpy.data.filepath)] if bpy.data.filepath else []
-    for d in starts + [os.getcwd()]:
-        while True:
-            if os.path.isdir(os.path.join(d, "library")):
-                return d
-            if os.path.dirname(d) == d:
-                break
-            d = os.path.dirname(d)
-    raise RuntimeError("no project library/ found: call archviz.set_project(<project folder>)")
+    found = projectpath.find_project(starts + [os.getcwd()])
+    if found:
+        return found
+    raise RuntimeError("no project library/ found: call archviz.set_project(<study folder>)")
 
 
 def library(*parts):

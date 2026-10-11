@@ -30,9 +30,11 @@ Windows 10/11.
 - **A project folder** (whichever one the user is working in) holds the data: `studies/`. It
   stays on that machine and is never pushed.
 - **Assets** (RULES 10c): `studies/<yymmdd>_<topic>/library/` (`polyhaven/`, `local/`). Point
-  scripts at the study with `archviz.set_project(<study>)` / env `ARCHVIZ_PROJECT=<study>`;
-  otherwise they take the nearest `library/` above the .blend or working directory, which may
-  be a legacy shared one.
+  scripts at the study with `archviz.set_project(<study>)` / env `ARCHVIZ_PROJECT=<study>`.
+  Without that, `projectpath.find_project` searches up from the .blend / working directory and
+  stops at the study folder (a folder inside `studies/`), so a new study gets its own
+  `library/`; a shared `library/` above is used only for studies listed in its
+  `legacy_studies.txt`.
 - **The Blender MCP server** is a per-machine install in `%LOCALAPPDATA%\BlenderMCP\` (`app\`,
   `venv\`), registered in Claude Code at user scope, like Rook in `%LOCALAPPDATA%\Rook\`.
 

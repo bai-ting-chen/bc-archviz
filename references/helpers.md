@@ -5,8 +5,8 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `archviz` — Archviz helpers that run inside Blender (via the Blender MCP or the Python console).
 
-- `set_project(path)` — Point library() at a project/study folder (else env ARCHVIZ_PROJECT, else the nearest library/ above).
-- `project_root()` — The folder whose library/ holds the assets (see set_project).
+- `set_project(path)` — Point library() at a study/project folder (else env ARCHVIZ_PROJECT, else found from the .blend / cwd).
+- `project_root()` — The folder whose library/ holds the assets (see set_project and projectpath).
 - `library(*parts)` — Path inside the project's library/, e.g. library("polyhaven", "hdris", hdri_id).
 - `read_meta(folder)` — An asset folder's meta.json (Poly Haven fetch or a local/ asset).
 - `write_meta(folder, meta)` — Write an asset folder's meta.json (pair of read_meta).
@@ -97,6 +97,12 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `tidy(objs, unit_scale=0.01)` — Bake transforms, scale Max system units to metres (cm: 0.01), drop loose verts and unused slots.
 - `rebuild_materials(objs, maps_dir, bark_roughness=0.85, leaf_roughness=0.8)` — Rebuild imported V-Ray materials from the vendor maps: leaf cards (opacity map) or opaque PBR.
 - `open_loops(obj, material_index=None)` — Open-edge loops (optionally of one material): z, span, closed, which side the faces are on - holes vs tube ends.
+
+## `projectpath` — Which folder's library/ a script reads and writes assets in (no bpy: also used by host tools).
+
+- `is_study(folder)` — A study folder: its parent folder is named 'studies'.
+- `legacy_studies(project)` — Study folder names listed in <project>/library/legacy_studies.txt (# comments allowed).
+- `find_project(starts)` — Project folder for the first start that resolves (see module doc), else None.
 
 ## `scatter` — Geometry Nodes scatter for small instances: leaf litter, climbers, shrub foliage (run in Blender).
 

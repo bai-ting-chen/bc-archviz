@@ -17,7 +17,8 @@ MCP server's venv python, `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python` (it ha
 
 Data stays in whichever project folder you work in, local to that machine and never pushed:
 `studies/<yymmdd>_<topic>/`, each with its own `library/` of assets (RULES 10c). Scripts find it
-from the open .blend or working directory (or env `ARCHVIZ_PROJECT` / `archviz.set_project()`). The Blender MCP server is a per-machine install
+from the open .blend or working directory, stopping at the study folder (or env
+`ARCHVIZ_PROJECT` / `archviz.set_project()`; `scripts/blender/projectpath.py`). The Blender MCP server is a per-machine install
 in `%LOCALAPPDATA%\BlenderMCP\`. Setup of Blender, the MCP server and add-ons:
 `references/pipeline.md`.
 

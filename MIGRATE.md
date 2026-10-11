@@ -185,5 +185,21 @@ Do: add that memory (feedback type) from RULES 10d, with its index line.
 Check: no open (unfinished) study folder contains its own `max_import.py`.
 Do: import it from the skill (`scripts/blender` on `sys.path`) and delete the local copy.
 
+## 261011f — Asset lookup stops at the study folder
+`archviz.library()` and `polyhaven_fetch.py` used the nearest `library/` above the working
+folder, so a new study without its own `library/` silently read and downloaded into a shared
+one (against RULES 10c). New `scripts/blender/projectpath.py` (one resolver for both): inside a
+study (a folder in `studies/`) the search stops at the study; a shared `library/` above is used
+only for studies listed in its `legacy_studies.txt`; `polyhaven_fetch` prints a NOTE when it
+downloads outside a study. Tested: resolver cases, fetch destinations, legacy studies loading
+their assets in Blender, helper fingerprints old = new, the three controls.
+
+### 18. List the studies that still read a shared library
+Check: in every project here with a top-level `library/`, each study folder in `studies/` that
+has no `library/` of its own but whose scripts load assets (`archviz.library`, `pbr_material`,
+`world_hdri*`, `study_materials`, `lookdev`) is listed in `<project>/library/legacy_studies.txt`.
+Do: write that file, one study folder name per line (`#` comments allowed). Without it those
+studies resolve to their own empty folder and fail on missing textures. Never list new studies.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.
