@@ -67,6 +67,24 @@ air is still — floor joints and the tops of plinths — and fainter, greyer at
 - A reach of 0.12 m reads as a pencil line from a few metres; judge the width on the full frame,
   not a close-up.
 
+## Runoff streaks, cracks
+- **Runoff** starts where water leaves a surface: eaves, gable rakes, sill corners. The drip
+  edge above every wall point is found by a GN raycast straight up from just inside the wall
+  (`wear.add_leak_field`) -> `leak_d` (m below the edge). Streaks: noise stretched across x14 /
+  down x0.6, each streak its own length (0.8-3 m), a drip band under the edge, patchy along it
+  (RULES 8c), vertical faces only (`wear.add_runoff`). On a sunlit wall streaks need full
+  strength to read at all.
+- **Modifier order:** the leak field goes FIRST, on the clean shell. Run after the chips, rays
+  from under an arris slip through the chip-band seam or hit the chipped underside; the wrong
+  value of one vertex then spreads over a whole coarse dice triangle -> light triangles hanging
+  from the arris. Any raycast/proximity field: before modifiers that crack or move the mesh.
+- **Cracks** (`wear.add_cracks(mat, openings)`): shrinkage cracks start at re-entrant corners -
+  45 deg (+-15) out of opening corners, 0.4-1 m, tapering, two-scale wobble; plus patchy
+  map-cracking from noise-distorted Voronoi cell edges, only some edges, only in patches. A
+  hairline is invisible at room-to-street scale; what reads is a dirt-darkened crack: core
+  ~5 mm, halo ~20 mm at ~5 mm/px, a shallow groove. One crack at every corner looks
+  deliberate - keep a few, not a symmetric set (an opposite pair reads as one line).
+
 ## Proving it
 Each layer gets its own control (RULES 9). A layer that moves the frame a few times the noise
 floor is doing visible work; one that moves it *by* the noise floor is not installed, however

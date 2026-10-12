@@ -8,7 +8,7 @@ description: >-
   in real lumens, physical camera, displacement, caustics, edge wear and chips, recreating a
   reference image, control renders and measurement. Use whenever the user mentions Blender,
   Cycles, shader/geometry nodes, Poly Haven, render, rendering, lookdev, materials, lighting,
-  HDRI, light fixtures, IES or LDT photometric files, lux / illuminance, caustics, LuxCore, glass blocks, patterned glass, water, exposure, texture repetition / stochastic or anti-tiling, randomizing repeated units, dust or grime in corners, fireflies or denoiser blotches, a Render Reference Library image, or wants a photoreal image of
+  HDRI, light fixtures, IES or LDT photometric files, lux / illuminance, caustics, LuxCore, glass blocks, patterned glass, water, exposure, texture repetition / stochastic or anti-tiling, randomizing repeated units, dust or grime in corners, terrain / a hill or landform, grass, lawn or meadow scatter, wet surfaces or dew, fog, mist or volumetric atmosphere, concrete cracks or rain/leak streaks, glass distortion, fireflies or denoiser blotches, a Render Reference Library image, or wants a photoreal image of
   a Rhino model — even without naming Blender. Also use it for bringing 3ds Max (.max) assets
   into Blender — vegetation / tree / plant libraries (Maxtree, Evermotion, Forest Pack meshes),
   furniture or props with V-Ray or Corona materials — even when the user only says "convert my
@@ -67,6 +67,8 @@ must leave for the other machines.
 | Blender | `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` |
 | MCP | server `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\blender-mcp.exe` (user scope, `claude mcp get blender`); add-on `mcp` autostarts on 127.0.0.1:9876 (needs Prefs → *Allow Online Access*) |
 | Helpers (run in Blender) | `scripts\blender\`: `archviz` (import, UVs, HDRI, camera, render), `study_materials`, `interior` (lights in lumens, stone, steel, water), `lookdev` (measured-albedo PBR, vertical boards, long pavers, sheers, glass shells, per-instance tone), `scatter` (GN leaf litter / foliage), `wear`, `wood_wear`, `glassware`, `gn_caustics`, `caustic_photons`, `render_variant`, `lux_materials` (LuxCore: baked corner dust, native Randomized Tiling, per-instance glass tint), `from_passes` (finals from a multilayer passes EXR) |
+| Outdoor | `scripts\blender\`: `terrain` (landform hill around a pad, ground with bare soil), `scatter.meadow_layer_group` (grass on terrain), `vegetation` (grass blades, wet film, dew), `atmosphere` (Mie fog from visibility) |
+| Finals (Cycles) | `scripts\blender\finals.py`: untiled no-limit final in the UI, savers, OIDN from passes, graded PNG |
 | 3ds Max assets | `scripts\blender\max_import.py`: `load` (io_scene_max extension + repairs), `tidy`, `rebuild_materials`, `open_loops` — `references/max-import.md` |
 | Photometry | `scripts\ldt2ies.py in.ldt out.ies` (Eulumdat → IES for Cycles, lumens checked); IES files → `interior.ies_light` |
 | Measure | `scripts\imgstats.py stats|patch|diff`; `scripts\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
@@ -162,6 +164,11 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Imported .max: trunk/twigs missing, leaves rendered as bark, bark squashed | stock io_scene_max import — use `max_import.load` and its checks (max-import.md) |
 | Back-lit leaves glint white | the importer's stored glossiness scalar used instead of the wired glossiness map (max-import.md › Materials) |
 | Render white / exposure ignored | `archviz.render_setup` sets view exposure — call it before `physical_camera` |
+| No-limit final renders only one block ("0/4 tiles") | auto-tiling: tile off + tile size > frame (`finals.setup_unlimited`) |
+| Stopped final is grainy | the stop skipped the denoiser - `finals.py -- denoise` from the passes EXR |
+| Light triangles hanging below an arris | leak/raycast field computed after the chips - leak field first (edge-wear.md) |
+| Grass sinks dark / lawn reads grey when wet | canopy albedo is ~0.05-0.1 (softer AgX look); wet sheen at grazing - darker base (materials.md) |
+| House edge crisp against a soft HDRI backplate | slight DOF in front of the subject (lighting-camera.md > Soft backplate) |
 | Caustics on a wall look like vertical streaks | seen at a grazing angle; judge on a face-on surface (caustics.md) |
 
 More traps: `references/api-traps.md`.

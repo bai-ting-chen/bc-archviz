@@ -44,6 +44,17 @@ cards (foliage).
 4. **UV channel.** Max channel 0 is vertex colour, 1 the UVs bitmaps read by default; the
    importer makes its first layer from whichever channel comes first. Render UV = channel 1.
 
+## Vendor scene files (grass / plant volumes)
+- Some volumes ship models only inside V-Ray scenes (Forest Pack sources): `load` the scene,
+  keep the objects by name pattern, drop the empty Forest Pack templates.
+- **Units differ per volume** (one in mm, another in cm): check a known plant's height.
+- VRay2Sided: the **back** slot often carries the bitmap name and the front none; `tidy()` drops
+  the unused back slots - read the maps first with `max_import.slot_maps(objs, maps_dir)`.
+- Several species in one scene can share material names: the importer's names then cannot say
+  which bitmap is whose - leave such species out rather than guess.
+- Stems without a map come in grey 0.5: colour them from the clump's leaf-map linear mean.
+- `max_import.origin_to_root(obj)` puts a clump's origin at its root for scattering.
+
 ## Checks — run on every new model before look-dev
 - `report[i]`: `final_ids` per slot equal `raw_ids` mapped through `id_to_slot` for the faces
   that are not bands (leaf cards: exact); `restore_failed` 0; no `WARNING_ids_without_material`.

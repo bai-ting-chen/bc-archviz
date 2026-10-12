@@ -132,6 +132,10 @@ file from the shell. Save the .blend first.
 - Tests and previews run headless (`blender -b`), one at a time; tell the user when a CPU-only
   engine leaves the GPU idle — it looks like wasted capacity otherwise.
 
+- Cycles: `scripts/blender/finals.py` does all of this - `start_in_ui(out_dir, res)` (untiled,
+  no limit, savers on complete + cancel, view fitted), `stop_in_ui()`, then `-- denoise` and
+  `-- png` from the saved passes (render-settings.md > Finals with no sample limit).
+
 ## Iteration loop
 `scripts/study_run.py <study> vNN.png [--rebuild] [--pct 50 --spp 128]` does all of this for a
 study holding `scene_geometry.py` + `scene_look.py` (+ `_wip/ref.jpg`, `regions.json`).

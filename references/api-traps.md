@@ -17,6 +17,13 @@
 - Noise Texture values cluster at 0.5 (sd ≈ 0.1): threshold near 0.5.
 - No per-axis Extend: keep once-spanning UVs inside 0..1 with REPEAT.
 
+- Noise Texture `W` input exists only with `noise_dimensions = "4D"` (KeyError otherwise) - set
+  the dimensions first.
+- Random Value (GN) has one output named "Value" in 5.2 (`outputs[1]` is out of range).
+- Volume Scatter `phase = "MIE"` adds the `Diameter` input (um); set the phase first.
+- Node-group menu inputs (e.g. *Scatter on Surface* "Instance Type") take the item name as a
+  string: `node.inputs["Instance Type"].default_value = "Collection"`.
+
 ## Mesh / scene
 - Subdivision adaptive: `use_adaptive_subdivision`, `adaptive_space='PIXEL'`, `adaptive_pixel_size`.
 - After changing modifier inputs in background scripts: `obj.update_tag()` +
@@ -66,6 +73,13 @@
   `archviz.render_setup` turns OptiX on when no compute device is set —
   and gives new worlds a grey 0.05 background (+π·0.05 W/m² on every surface) — set the
   Background Strength to 0 for a black test world).
+
+- A multilayer EXR loaded as an image reports `size == (0, 0)` until its pixels load: read the
+  size with OpenImageIO (a compositor render sized from it came out 4x4).
+- `Render Result` cannot be saved while a render runs ("could not be saved"); snapshots of a
+  running Cycles final are not possible from Python.
+- `bpy.ops.render.view_cancel()` (viewer stop) fires render_complete - yet the denoiser had not
+  run; see render-settings.md > Finals with no sample limit.
 
 ## Windows shell
 - Pass Blender output paths with forward slashes from bash.

@@ -199,10 +199,10 @@ def _math(g, op, a, b, loc, frame, clamp=False):
 
 
 def weathered_concrete(name="CONCRETE_WEATHERED", dirt_band=0.035, dirt_amount=0.85,
-                       dirt_noise_scale=9.0, stain=True):
+                       dirt_noise_scale=9.0, stain=True, tex_id="concrete_wall_009"):
     """concrete_study base (tone, maps, round edges, leak stain) + procedural dirty edges from
     the GN `edge_dist` field + a fresh-break material where GN cut a chip (`chip` > 0)."""
-    mat = sm.concrete_study(name=name, edge_dark=False, stain=stain, bevel_chips=False)
+    mat = sm.concrete_study(name=name, tex_id=tex_id, edge_dark=False, stain=stain, bevel_chips=False)
     g = G(mat.node_tree)                      # add to the existing tree
     nt = mat.node_tree
     mix = next(n for n in nt.nodes if n.label == "Wear Layered (BRDFLayered)")
@@ -289,4 +289,192 @@ def mask_material(name, method, radius=0.035):
     g.link(val, em.inputs["Color"])
     o = g.node("ShaderNodeOutputMaterial", (0, 0))
     g.link(em.outputs["Emission"], o.inputs["Surface"])
+    return mat
+
+
+# --- runoff leaks, grunge, splash, cracks (on a weathered_concrete material) ------------------
+
+def leak_field_group(name="LEAK FIELD", inset=0.02, reach=6.0):
+    """GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`."""
+    ng = bpy.data.node_groups.get(name)
+    if ng:
+        bpy.data.node_groups.remove(ng)
+    ng = bpy.data.node_groups.new(name, "GeometryNodeTree")
+    ng.is_modifier = True
+    ng.interface.new_socket("Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
+    ng.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
+    b = G(ng, clear=True)
+    gi = b.n("NodeGroupInput", (-800, 0)); go = b.n("NodeGroupOutput", (900, 0))
+    pos = b.n("GeometryNodeInputPosition", (-800, -300)).outputs[0]
+    nrm = b.n("GeometryNodeInputNormal", (-800, -450)).outputs[0]
+    ins = b.n("ShaderNodeVectorMath", (-600, -400), operation="SCALE")
+    b.L(nrm, ins.inputs[0]); ins.inputs["Scale"].default_value = -inset
+    src = b.n("ShaderNodeVectorMath", (-450, -350), operation="ADD")
+    b.L(pos, src.inputs[0]); b.L(ins.outputs[0], src.inputs[1])
+    ray = b.n("GeometryNodeRaycast", (-250, -250), data_type="FLOAT")
+    b.L(gi.outputs[0], ray.inputs["Target Geometry"]); b.L(src.outputs[0], ray.inputs["Source Position"])
+    ray.inputs["Ray Direction"].default_value = (0, 0, 1)
+    ray.inputs["Ray Length"].default_value = reach
+    hz = b.n("ShaderNodeSeparateXYZ", (-50, -300)); b.L(ray.outputs["Hit Position"], hz.inputs[0])
+    pz = b.n("ShaderNodeSeparateXYZ", (-50, -450)); b.L(pos, pz.inputs[0])
+    d = b.math("SUBTRACT", hz.outputs["Z"], pz.outputs["Z"], (150, -350))
+    geo = b.store(gi.outputs[0], "leak_d", "FLOAT", d, (350, 0))
+    geo = b.store(geo, "leak_ok", "FLOAT", ray.outputs["Is Hit"], (600, 0))
+    b.L(geo, go.inputs[0])
+    return ng
+
+
+def add_leak_field(obj):
+    """Add LEAK FIELD as the FIRST modifier: run after chips, rays slip through the chip-band seam and a wrong leak_d spreads over whole coarse triangles (light triangles under an arris)."""
+    mod = obj.modifiers.new("LEAK FIELD", "NODES")
+    mod.node_group = leak_field_group()
+    obj.modifiers.move(obj.modifiers.find(mod.name), 0)
+    return mod
+
+
+LEAK = dict(streak_w=14.0, streak_len=0.6, max_len=(0.8, 3.2), top_band=0.2, top=0.9, amount=1.0,
+            streak_band=(0.42, 0.58), presence=(0.28, 0.5), fade_pow=1.15)
+CRACK = dict(core=0.005, halo=0.02, wobble=0.03, jag=0.006, len=(0.4, 1.0), jitter=14.0, seed=3,
+             net_scale=1.6, net_dist=0.22, net_keep=0.4, net_patch=(0.52, 0.6), depth=0.003, halo_dirt=0.6)
+
+
+def _frame(mat, label):
+    g = G(mat.node_tree)
+    g.frame(label, (0.18, 0.26, 0.30))
+    return g, label
+
+
+def add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7)):
+    """On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash at the foot; all into its grime mask."""
+    L_ = dict(LEAK, **(leak or {}))
+    g, F = _frame(mat, "Runoff streaks, grunge, splash")
+    nt = mat.node_tree
+    geo = g.node("ShaderNodeNewGeometry", (-2600, -3400), F)
+    sepn = g.node("ShaderNodeSeparateXYZ", (-2400, -3700), F); g.link(geo.outputs["Normal"], sepn.inputs[0])
+    vert = g.range(g.math("ABSOLUTE", sepn.outputs["Z"], 0.0, (-2200, -3700), F), 0.25, 0.1, (-2000, -3700), frame=F)
+    sepp = g.node("ShaderNodeSeparateXYZ", (-2400, -3950), F); g.link(geo.outputs["Position"], sepp.inputs[0])
+    along = g.math("ADD", sepp.outputs["X"], sepp.outputs["Y"], (-2200, -3950), F)
+    sv = g.node("ShaderNodeCombineXYZ", (-2000, -4100), F)
+    g.link(g.math("MULTIPLY", along, L_["streak_w"], (-2150, -4100), F), sv.inputs["X"])
+    g.link(g.math("MULTIPLY", sepp.outputs["Z"], L_["streak_len"], (-2150, -4250), F), sv.inputs["Y"])
+    streak = g.range(g.noise(sv.outputs[0], 1.0, (-1850, -4100), F, detail=4, rough=0.55), *L_["streak_band"],
+                     (-1650, -4100), frame=F, smooth=True)
+    lv = g.node("ShaderNodeCombineXYZ", (-2000, -4400), F)
+    g.link(g.math("MULTIPLY", along, 2.5, (-2150, -4400), F), lv.inputs["X"])
+    llen = g.range(g.noise(lv.outputs[0], 1.0, (-1850, -4400), F, detail=2), 0.35, 0.65, (-1650, -4400),
+                   L_["max_len"][0], L_["max_len"][1], F)
+    d = g.attr("leak_d", (-1850, -4650), F)
+    ok = g.attr("leak_ok", (-1850, -4800), F)
+    fade = g.math("SUBTRACT", 1.0, g.math("DIVIDE", d, llen, (-1450, -4500), F), (-1300, -4500), F, clamp=True)
+    fade = g.math("POWER", fade, L_["fade_pow"], (-1150, -4500), F)
+    top = g.range(d, 0.0, L_["top_band"], (-1450, -4700), L_["top"], 0.0, F, smooth=True)
+    pv = g.node("ShaderNodeCombineXYZ", (-2000, -4950), F)
+    g.link(g.math("MULTIPLY", along, 0.7, (-2150, -4950), F), pv.inputs["X"])
+    presence = g.range(g.noise(pv.outputs[0], 1.0, (-1850, -4950), F, detail=3), *L_["presence"], (-1650, -4950), frame=F)
+    leak = g.math("MAXIMUM", g.math("MULTIPLY", streak, fade, (-1000, -4300), F), top, (-850, -4400), F)
+    leak = g.math("MULTIPLY", leak, presence, (-700, -4400), F)
+    leak = g.math("MULTIPLY", leak, g.math("MULTIPLY", ok, vert, (-850, -4700), F), (-550, -4500), F)
+    gate = g.range(d, -0.02, 0.0, (-1450, -4850), frame=F)
+    leak = g.math("MULTIPLY", g.math("MULTIPLY", leak, gate, (-400, -4500), F), L_["amount"], (-250, -4500), F)
+    leak.node.label = "leak streak mask"
+    ps, hs, lo, hi, amt = grunge
+    patch = g.math("ADD", g.noise(geo.outputs["Position"], ps, (-1850, -5200), F, detail=3),
+                   g.math("MULTIPLY", g.math("SUBTRACT", g.noise(geo.outputs["Position"], hs, (-1850, -5400), F, detail=6), 0.5,
+                                             (-1650, -5400), F), 0.35, (-1500, -5400), F), (-1350, -5250), F)
+    grg = g.range(patch, lo, hi, (-1200, -5250), 0.0, amt, F)
+    grg.node.label = "grunge patches"
+    foot = g.math("ADD", sepp.outputs["Z"], g.math("MULTIPLY", g.math("SUBTRACT", g.noise(geo.outputs["Position"], 6.0, (-1850, -5650), F), 0.5,
+                                                                      (-1650, -5650), F), 0.25, (-1500, -5650), F), (-1350, -5600), F)
+    spl = g.math("MULTIPLY", g.range(foot, splash[0], splash[1], (-1200, -5600), splash[2], 0.0, F, smooth=True), vert, (-1050, -5600), F)
+    spl.node.label = "soil splash"
+    mix = next(n for n in nt.nodes if n.label == "Wear Layered (BRDFLayered)")
+    old = mix.inputs["Fac"].links[0].from_socket
+    m = g.math("MAXIMUM", g.math("MAXIMUM", g.math("MAXIMUM", old, leak, (-100, -4300), F), grg, (50, -4500), F), spl, (200, -4600), F)
+    g.link(m, mix.inputs["Fac"])
+    return mat
+
+
+def _crack_masks(g, F, openings, C):
+    import random
+    rnd = random.Random(C["seed"])
+    geo = g.node("ShaderNodeNewGeometry", (-2600, -6200), F)
+    pos = geo.outputs["Position"]
+    sp = g.node("ShaderNodeSeparateXYZ", (-2400, -6200), F); g.link(pos, sp.inputs[0])
+    wob = g.math("MULTIPLY", g.math("SUBTRACT", g.noise(pos, 6.0, (-2400, -6450), F, detail=4, rough=0.6), 0.5, (-2250, -6450), F),
+                 C["wobble"] * 2, (-2100, -6450), F)
+    jag = g.math("MULTIPLY", g.math("SUBTRACT", g.noise(pos, 40.0, (-2400, -6650), F, detail=2, rough=0.5), 0.5, (-2250, -6650), F),
+                 C["jag"] * 2, (-2100, -6650), F)
+    wob = g.math("ADD", wob, jag, (-1950, -6550), F)
+    core = halo = None
+    y = -6200
+    for op in openings:
+        axis, plane, u0, u1, v0, v1, top_only = op[:7]
+        keep = op[7] if len(op) > 7 else None
+        dist = g.math("ABSOLUTE", g.math("SUBTRACT", sp.outputs["X" if axis == "x" else "Y"], plane, (-2200, y), F), 0.0, (-2050, y), F)
+        on = g.range(dist, 0.03, 0.01, (-1900, y), frame=F)
+        uu = sp.outputs["Y" if axis == "x" else "X"]
+        corners = [(u0, v1, 135), (u1, v1, 45)] + ([] if top_only else [(u0, v0, 225), (u1, v0, 315)])
+        for cu, cv, ang in corners:
+            a = math.radians(ang + rnd.uniform(-C["jitter"], C["jitter"]))
+            L = rnd.uniform(*C["len"])
+            if keep and ang not in keep:          # draws stay, so the other cracks don't move
+                continue
+            du = g.math("SUBTRACT", uu, cu, (-1900, y - 150), F)
+            dv = g.math("SUBTRACT", sp.outputs["Z"], cv, (-1900, y - 300), F)
+            along = g.math("ADD", g.math("MULTIPLY", du, math.cos(a), (-1750, y - 150), F),
+                           g.math("MULTIPLY", dv, math.sin(a), (-1750, y - 300), F), (-1600, y - 200), F)
+            perp = g.math("SUBTRACT", g.math("MULTIPLY", dv, math.cos(a), (-1750, y - 450), F),
+                          g.math("MULTIPLY", du, math.sin(a), (-1750, y - 600), F), (-1600, y - 500), F)
+            perp = g.math("ABSOLUTE", g.math("ADD", perp, wob, (-1450, y - 500), F), 0.0, (-1300, y - 500), F)
+            t = g.range(along, 0.0, L, (-1450, y - 200), 1.0, 0.0, F)
+            t = g.math("MULTIPLY", t, g.math("GREATER_THAN", along, 0.0, (-1300, y - 300), F), (-1150, y - 250), F)
+            tw = g.math("POWER", t, 0.5, (-1000, y - 250), F)
+            wc = g.math("MAXIMUM", g.math("MULTIPLY", tw, C["core"], (-1000, y - 400), F), 1e-5, (-850, y - 400), F)
+            c = g.math("MULTIPLY", g.math("SUBTRACT", 1.0, g.math("DIVIDE", perp, wc, (-700, y - 450), F), (-550, y - 450), F, clamp=True), on, (-400, y - 400), F)
+            h = g.math("SUBTRACT", 1.0, g.math("DIVIDE", perp, C["halo"], (-700, y - 600), F), (-550, y - 600), F, clamp=True)
+            h = g.math("MULTIPLY", h, g.math("MULTIPLY", tw, on, (-550, y - 700), F), (-400, y - 600), F)
+            core = c if core is None else g.math("MAXIMUM", core, c, (-250, y - 400), F)
+            halo = h if halo is None else g.math("MAXIMUM", halo, h, (-250, y - 600), F)
+            y -= 800
+    dis = g.node("ShaderNodeTexNoise", (-2400, y), F, Scale=2.0, Detail=3.0); g.link(pos, dis.inputs["Vector"])
+    off = g.n("ShaderNodeVectorMath", (-2250, y), operation="MULTIPLY_ADD")
+    g.link(dis.outputs["Color"], off.inputs[0]); off.inputs[1].default_value = (C["net_dist"],) * 3; g.link(pos, off.inputs[2])
+    ve = g.node("ShaderNodeTexVoronoi", (-2100, y), F, Scale=C["net_scale"]); ve.feature = "DISTANCE_TO_EDGE"
+    g.link(off.outputs[0], ve.inputs["Vector"])
+    vc = g.node("ShaderNodeTexVoronoi", (-2100, y - 250), F, Scale=C["net_scale"]); g.link(off.outputs[0], vc.inputs["Vector"])
+    vcs = g.node("ShaderNodeSeparateColor", (-1950, y - 250), F); g.link(vc.outputs["Color"], vcs.inputs[0])
+    keep_e = g.math("GREATER_THAN", vcs.outputs["Red"], C["net_keep"], (-1800, y - 250), F)
+    patch = g.range(g.noise(pos, 0.45, (-1950, y - 450), F, detail=3), *C["net_patch"], (-1800, y - 450), frame=F)
+    pres = g.math("MULTIPLY", keep_e, patch, (-1650, y - 350), F)
+    nc = g.math("MULTIPLY", g.math("SUBTRACT", 1.0, g.math("DIVIDE", ve.outputs["Distance"], C["core"] * 0.8, (-1800, y), F), (-1650, y), F, clamp=True), pres, (-1500, y), F)
+    nh = g.math("MULTIPLY", g.math("SUBTRACT", 1.0, g.math("DIVIDE", ve.outputs["Distance"], C["halo"] * 0.7, (-1800, y - 100), F), (-1650, y - 100), F, clamp=True), pres, (-1500, y - 100), F)
+    core = nc if core is None else g.math("MAXIMUM", core, nc, (-250, y), F)
+    halo = nh if halo is None else g.math("MAXIMUM", halo, nh, (-250, y - 100), F)
+    core.node.label = "crack core"; halo.node.label = "crack halo"
+    return core, halo
+
+
+def add_cracks(mat, openings=(), crack=None):
+    """On a weathered_concrete material: shrinkage cracks from opening corners + patchy map-cracking; dark core over everything, grime halo, groove. openings: (axis 'x'|'y', plane, u0, u1, v0, v1, top_only[, keep_angles])."""
+    C = dict(CRACK, **(crack or {}))
+    g, F = _frame(mat, "Cracks")
+    nt = mat.node_tree
+    core, halo = _crack_masks(g, F, openings, C)
+    mix = next(n for n in nt.nodes if n.label == "Wear Layered (BRDFLayered)")
+    old = mix.inputs["Fac"].links[0].from_socket
+    g.link(g.math("MAXIMUM", old, g.math("MULTIPLY", halo, C["halo_dirt"], (350, -4700), F), (500, -4650), F), mix.inputs["Fac"])
+    bev = next(n for n in nt.nodes if n.label == "Round edges (TexEdges)")
+    users = [l.to_socket for l in bev.outputs["Normal"].links]
+    cb = g.node("ShaderNodeBump", (bev.location.x + 200, bev.location.y - 200), F, label="crack groove")
+    cb.invert = True; cb.inputs["Distance"].default_value = C["depth"]
+    g.link(core, cb.inputs["Height"]); g.link(bev.outputs["Normal"], cb.inputs["Normal"])
+    for u in users:
+        g.link(cb.outputs["Normal"], u)
+    out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
+    last = out.inputs["Surface"].links[0].from_socket
+    dark = g.node("ShaderNodeBsdfPrincipled", (out.location.x - 200, out.location.y - 300), F, label="crack interior", Roughness=0.95)
+    dark.inputs["Base Color"].default_value = (0.03, 0.03, 0.028, 1)
+    mx = g.node("ShaderNodeMixShader", (out.location.x - 100, out.location.y - 100), F, label="cracks over surface")
+    g.link(g.math("MULTIPLY", core, 0.9, (out.location.x - 300, out.location.y - 500), F), mx.inputs["Fac"])
+    g.link(last, mx.inputs[1]); g.link(dark.outputs[0], mx.inputs[2]); g.link(mx.outputs[0], out.inputs["Surface"])
     return mat

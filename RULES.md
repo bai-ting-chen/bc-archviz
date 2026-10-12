@@ -63,7 +63,8 @@
 8. **Edge wear = dirty edge (shading). Edge chip = geometry.** The user's definitions; keep
    separate. **Size every feature from the shot, never from a remembered value** — chips, grain,
    joints, ripples and grunge all read by how many pixels they occupy, so the same material wants
-   different numbers on a close-up and on a wall 4 m away. Judge the first render and scale.
+   different numbers on a close-up and on a wall 4 m away. Judge the first render and scale. A feature smaller than a pixel reads only as its aggregate (a wet
+   lawn's sheen, not its drops): model that, and ask before building micro-geometry.
 
 8a. **Natural light = matching HDRI sky first**. Whenever sun, sky or any
    daylight is in the scene, light it with an HDRI whose sky matches the reference (overcast vs

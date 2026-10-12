@@ -201,5 +201,29 @@ has no `library/` of its own but whose scripts load assets (`archviz.library`, `
 Do: write that file, one study folder name per line (`#` comments allowed). Without it those
 studies resolve to their own empty folder and fail on missing textures. Never list new studies.
 
+## 261012 — Outdoor: terrain, meadow, wet lawn, fog; facade runoff, cracks, glass; no-limit finals
+New modules from a house-on-a-hill study (sunny and foggy wet morning): `terrain.py` (landform hill
+around a pad, ground with bare soil), `scatter.meadow_layer_group` (Blender's own Scatter on
+Surface + patch / bare-soil / pad / frustum masks), `vegetation.py` (modelled grass blades, wet
+film, near-camera dew), `atmosphere.py` (Mie fog, density from visibility; control
+`scripts/controls/fog_koschmieder.py` = 1.000), `finals.py` (untiled no-limit Cycles finals,
+savers, OIDN from passes). Added to `wear.py` (raycast leak field - must be the first modifier -,
+runoff/grunge/splash, cracks; `weathered_concrete(tex_id=...)`), `study_materials.retone`,
+`lookdev.glass_distortion`, `max_import.slot_maps` / `origin_to_root`. Smoke test
+`scripts/controls/outdoor_smoke.py` runs all of it on a new scene; regress_helpers: the 35
+existing helpers build identically. RULES 8 gains one sentence (sub-pixel effects = their
+aggregate). Docs: materials (Terrain, Grass and meadow, Wet surfaces and dew, glass distortion),
+edge-wear (Runoff streaks, cracks), lighting-camera (Fog and mist, Soft backplate), render-settings
+(Finals with no sample limit), api-traps, max-import (vendor scene files), pipeline, capabilities,
+SKILL.md.
+
+### 19. Local memory: sub-pixel effects
+Check: the project's memory index has an entry saying a named effect (dew, frost, rain) means how it reads at the shot's distance - model the aggregate, ask before micro-geometry.
+Do: add that memory (feedback type) from RULES 8, with its index line.
+
+### 20. No-limit Cycles finals
+Check: no open (unfinished) study script starts a no-limit Cycles final with auto-tiling on.
+Do: use `finals.start_in_ui(out_dir, res)` (or set `use_auto_tile = False` and `tile_size` above the frame), and after a stop check whether Combined == Noisy Image; if so `finals.py -- denoise` from the passes EXR.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

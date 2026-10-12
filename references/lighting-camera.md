@@ -155,6 +155,15 @@ the manufacturer's file a render's illuminance is the fixture's, not a guess fro
   shown neutral — **lower = cooler**. Setting WB above the lamp temperature keeps warmth in the
   image rather than neutralising it, which is usually what a warm reference wants.
 
+### Soft backplate, crisp model
+An HDRI backplate (trees, hills) is soft - its photo, not only its resolution: a 16k
+camera-ray window over the 8k map (same equirect lookup, registers to 0 px) sharpened a tree
+edge only from 6.2 to 5.7 px at 3200 px. The modelled building then reads cut out. Measure edge
+widths (10-90 % or step/max-gradient) on a model edge against the backplate and on a backplate
+edge, then use a little depth of field: focus slightly in front of the subject (e.g. f/4 at
+~0.6x the subject distance) so the model edge softens ~1.3x and the backplate a bit more. Keep
+EV100 by the shutter.
+
 ## Recreating a reference
 ### Camera
 1. `refmatch.py grid ref.png out.png --step 25` -> read the horizon (where parallel horizontal
@@ -247,6 +256,20 @@ blender()` from a study script). Read the base and top of every repeat at full r
    not the glass.
 6. Exposure last (RULES 7). When every region is off by the same ratio, *that* is the exposure
    step, so take it then.
+
+## Fog and mist (`atmosphere.fog_volume`, control `scripts/controls/fog_koschmieder.py`)
+- Fog/mist droplets 5-20 um: Mie scattering, strongly forward, no absorption (white). Volume
+  Scatter, phase **Mie** (native in 5.2, Cycles) with the droplet diameter.
+- Density = extinction coefficient sigma = 3.912 / V (Koschmieder, V = visibility, 2 %
+  contrast). Control: absorption-only transmission through 29 m = exp(-sigma d) to 1.000.
+  Dense fog V ~150 m: an object at 27 m keeps ~half its contrast, 80 m almost nothing.
+- Shape: full below the fog top, smoothstep to clear air above it, denser in hollows, patchy
+  noise (RULES 8c); a box around the site with the camera inside. Clear the inside of
+  buildings (indoor air has no fog; a fog-filled dark room behind glass is also a noise source).
+- Light: a sunless overcast HDRI (no sun lamp, RULES 8a). `atmosphere.volume_render_settings`:
+  volume bounces ~8 - forward-peaked Mie needs multiple scattering. Cost ~2.5-3.5x a clear scene.
+- Raw noise in the fog falls as 1/sqrt(N); OIDN cleans smooth fog without blotches at a few
+  hundred spp - check a contrast-stretched sky crop.
 
 ## Misc
 - Area-light direction: api-traps › Render (they emit along local −Z); print the world direction

@@ -379,3 +379,31 @@ def open_loops(obj, material_index=None):
                       "faces_side": "below" if all(z < 0 for z in fz) else "above" if all(z > 0 for z in fz) else "mixed"})
     bm.free()
     return sorted(loops, key=lambda l: l["z"])
+
+
+def slot_maps(objs, maps_dir, pattern=r"(MT_[A-Za-z0-9_]+?)_(?:diffuse|albedo)$"):
+    """Bitmap per slot prefix (leaf1, leaf2, seed ...) per object, read BEFORE tidy(): in a VRay2Sided sub the BACK slot often carries the bitmap name and the front none, and tidy() drops the unused back slots."""
+    out = {}
+    for o in objs:
+        d = out.setdefault(o.name, {})
+        for s in o.material_slots:
+            m = re.search(pattern, s.material.name) if s.material else None
+            if not m:
+                continue
+            for ext in (".jpg", ".png", ".tif"):
+                p = os.path.join(maps_dir, m.group(0) + ext)
+                if os.path.exists(p):
+                    d.setdefault(re.sub(r"_.*$", "", s.material.name).rstrip("FB"), p)
+                    break
+    return out
+
+
+def origin_to_root(obj):
+    """Move the mesh so its root (bbox centre in plan, lowest z) sits at the object origin - for scattering clumps on terrain."""
+    vs = [v.co for v in obj.data.vertices]
+    lo = Vector((min(v.x for v in vs), min(v.y for v in vs), min(v.z for v in vs)))
+    hi = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))
+    root = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, lo.z))
+    obj.data.transform(Matrix.Translation(-root))
+    obj.location = (0, 0, 0)
+    return {"height_m": hi.z - lo.z, "width_m": max(hi.x - lo.x, hi.y - lo.y)}

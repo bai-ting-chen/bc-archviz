@@ -95,6 +95,10 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
 - Fresh breaks under direct floods want their tint only *barely* above the surface; a visibly
   lighter paste reads as white paint flecks when lit head-on.
 
+- Rough, weathered concrete from a dark scanned map: `study_materials.retone(mat, target)` -
+  desaturate, then scale the measured mean to the target albedo (the multiply keeps pits and
+  pores). Runoff streaks and cracks: edge-wear.md > Runoff streaks, cracks.
+
 ### Burnished / polished white concrete (microcement, soffits)
 - Reads glossy, not matte: low roughness varied in soft clouds; the plaster relief mostly
   polished off (sub-millimetre bump). Tone clouds at two scales; lighting gradients swallow small
@@ -143,6 +147,53 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
   **The patch threshold is knife-edge** — a hair too low blankets the surface, a hair too high
   clears it. Bisect it against a render rather than reasoning about it.
 
+## Terrain (landform grading)
+`terrain.landform_group(centre, pad_half, fall, run, ...)` + `terrain.add_terrain(group, ground)`.
+- A building on a hill: flat pad just under the slab, an apron, then the fall as a smoothstep in
+  the distance from the pad - a rounded crest **and** a rounded toe (landform grading, natural
+  slopes), never a cone or a linear batter. Warp the distance with a slow noise so contours
+  wander; add a broad roll beyond and pasture hummocks (+-5-10 cm at ~1.5 m).
+- Steepest slope of a smoothstep fall = 1.5 x fall / run. Gentle / mowable: <= 4:1 (25 %);
+  3:1 is the usual limit for maintained grass.
+- To read as a hill, the camera stands down the slope with the crest against the sky; the
+  edge of the generated grid must stay out of frame (the frustum mask hides the rest).
+- `terrain.height(x, y, ...)` is the no-noise twin for placing a camera at eye height.
+
+## Grass and meadow
+- Vendor grass clumps are often real blade geometry (no opacity cards) - check the units of
+  each volume against a known plant height before anything else (one grass volume was in mm
+  where its tree volume was cm; read in cm, clover came out 1 m tall).
+- Scatter: `scatter.meadow_layer_group(scatter.load_scatter_on_surface())` - Blender's own
+  *Scatter on Surface* (native, Poisson/random, collection + Pick Instance) wrapped with mask
+  fields: species patch noise, a **shared** bare-soil noise (the ground shader opens to soil with
+  the same 4D noise, `terrain.BARE_W`, so bare spots show earth), clearance from the pad, and
+  the **camera frustum + distance** (only what the camera can see; the crest hides the rest).
+  One object per species; Align Rotation off (grass grows up, gravitropism), small random lean.
+- Density is set by clump size: a few-blade lawn clump needs ~200 /m2 to close the sward
+  (30 /m2 left mostly soil). ~0.5-1 M instances render fine on 8 GB; unique meshes cost memory,
+  instances barely.
+- Blade material `vegetation.blade_material`: Principled + Translucent added (green leaf
+  R ~0.10-0.15, T ~0.05-0.10 at 550 nm), roughness ~0.45 (waxy cuticle), per-instance value
+  0.8-1.15 and a patchy straw/dry mix on the instance location (RULES 8c, 8d). A grass canopy's
+  visible albedo is only ~0.05-0.1: under a high-contrast AgX look it sinks - choose a softer
+  look rather than brightening the albedo.
+- Mixed species read as pasture: a dense low carpet + tuft drifts + broad-leaf (clover) patches
+  + sparse seed heads/flowers.
+
+## Wet surfaces and dew
+- Wet = darker and more saturated (internal reflection in the film, Lekner-Dorf): albedo ->
+  dry^gamma (1.4 for soil/stone; grass reads better at ~1.7) + a water coat (IOR 1.33).
+- A wet lawn seen from a low camera is mostly grazing angles: the film's Fresnel sheen of a
+  grey sky greys it out (saturation drops). A darker base keeps the "wet" reading; the sheen is
+  physically right (dewy lawns look silvery under fog).
+- Dew beads are sub-pixel beyond a few metres (1 mm at 4 m < 1 px at 2400 px): their sum is the
+  sheen. Near the camera they read only where large - broad waxy leaves (clover) hold 2-5 mm
+  beads. Under an even sky a bead is bright through refraction + total reflection inside it,
+  not its ~4 % surface reflection: a coat-only bead bump was invisible even at 0.4 m. Model
+  them as effective-reflectance glossy beads (declared approximation), faded with camera
+  distance (`vegetation.DEW_GRASS`, `DEW_BROAD`). The denoiser smooths isolated sub-pixel
+  glints, so size and density must carry them.
+
 ## True displacement
 `displaced_ground()` + `enable_true_displacement()`. Displacement Scale = the relief height,
 Midlevel = -shift/scale; method BOTH (Displacement Only once finely diced); Subdivision SIMPLE
@@ -187,6 +238,13 @@ Anisotropic + Tangent.
 - **Liquid in glass**: Cycles has no nested-IOR priority, so model three surfaces — GLASS (1.52),
   INTERFACE below the waterline (1.52/1.333) and WATER_SURFACE (1.333) →
   `glassware.glass_of_water()`. Check normals per wall.
+
+- **Glazing is not optically flat.** Float glass has roller waves (~0.1 mm peak-to-valley over
+  ~0.3 m, ~1 mrad slope); the visible wobble of real windows is insulated-unit **pillowing**
+  (panes bowed a few mm), strongest towards the frame. `lookdev.glass_distortion(mat, obj)`:
+  bump of a sine roller wave + a dome over the pane. 0.25 mm of wave read as blinds; the dome
+  carries the effect. A glass that "looks too reflective" is usually a dark room behind it -
+  Fresnel is physical; distortion and something to reflect make it read.
 
 ## Water (pool)
 - `interior.pool_water()`: Principled transmission 1, IOR 1.333, a shallow ripple bump, and

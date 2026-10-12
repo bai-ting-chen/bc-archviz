@@ -21,6 +21,22 @@ around that, rather than carrying someone else's numbers.
   several pixels and land on the same pixels; fireflies are lone random pixels. Remove fireflies
   *before* the denoiser (clamping; luxcore.md › Fireflies) — OIDN smears them into blotches.
 
+## Finals with no sample limit (`finals.py`, RULES 10b)
+- Estimate before launch from a full-frame test at the final settings: s/sample measured, raw
+  noise in a smooth region at two sample counts; noise ~ 1/sqrt(N). Tell the user the time at
+  which more samples stop showing (raw ~1-2 % on a smooth sky with OIDN, ~0.4 % = one 8-bit
+  step without) - Blender's own countdown is to the 1e6 cap and means nothing.
+- **Auto-tiling:** frames larger than the 2048 px tile render tile by tile; with no limit only
+  the first tile ever renders. Auto-tile off and tile size > frame (a 3200x4000 frame still
+  showed 4 tiles with auto-tile off). The untiled frame must fit VRAM (a 2400x3000 frame +
+  passes + a 0.6 M-instance meadow peaked ~4.4 GB).
+- **Stopping skips the denoiser:** a stop from the viewer fired render_complete but saved
+  Combined == Noisy Image; Esc fires render_cancel and skips the compositor. Save every pass
+  (multilayer EXR with the denoising passes) and rebuild: `finals.py -- denoise` (OIDN from
+  Noisy Image + Albedo + Normal) then `-- png` (the scene's view settings). Means match the raw.
+- A fine speckle seen only in a downscaled 8-bit crop can be scaling; check 1:1 and with
+  `render.dither_intensity = 0` before chasing it in the scene.
+
 ## Biased settings — use knowingly
 Bounce caps (energy beyond is lost), `sample_clamp_indirect` (keep direct at 0), Filter Glossy,
 caustics off, Fast GI, `volume_biased`, shadow-transparent glass. Unbiased: Russian roulette

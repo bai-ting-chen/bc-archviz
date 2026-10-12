@@ -6,6 +6,7 @@
     sheer(name)                             diffuse + translucent curtain
     glass_shell(objs)                       solid Rhino sphere -> thin blown-glass shell
     random_tone_material(name, c0, c1)      per-instance tone (for scattered instances)
+    glass_distortion(mat, obj)              float-glass roller wave + insulated-unit pillowing
 
 Albedo is set from the diff map's measured linear mean (cached in the texture's meta.json as
 "diff_mean_linear"), via a Vector Math gain: a Mix colour socket clamps factors > 1.
@@ -201,3 +202,39 @@ def random_tone_material(name, c0, c1, roughness=0.6, translucent=0.0):
     else:
         L.new(b.outputs[0], o.inputs[0])
     return m
+
+
+def glass_distortion(mat, obj, wave_period=0.30, wave_amp_mm=0.05, pillow_mm=2.0, roughness=0.01):
+    """Bump on a dielectric so reflections wobble like real glazing: roller wave (~0.1 mm p-v over ~0.3 m) + pane bow (pillowing, a few mm) centred on `obj`'s bounding box; thin axis has no dome."""
+    import math
+
+    from mathutils import Vector
+    from study_materials import G
+    pts = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
+    lo = [min(p[i] for p in pts) for i in range(3)]
+    hi = [max(p[i] for p in pts) for i in range(3)]
+    centre = [(a + b) / 2 for a, b in zip(lo, hi)]
+    half = [(b - a) / 2 if (b - a) > 0.2 else 1e3 for a, b in zip(lo, hi)]
+    nt = mat.node_tree
+    p = _principled(mat)
+    p.inputs["Roughness"].default_value = roughness
+    g = G(nt)
+    geo = g.node("ShaderNodeNewGeometry", (-900, -300))
+    sp = g.node("ShaderNodeSeparateXYZ", (-750, -300)); g.link(geo.outputs["Position"], sp.inputs[0])
+    warp = g.noise(geo.outputs["Position"], 0.8, (-750, -550), detail=2)
+    ph = g.math("MULTIPLY", g.math("ADD", sp.outputs["Z"], g.math("MULTIPLY", warp, 0.15, (-600, -550)), (-500, -400)),
+                2 * math.pi / wave_period, (-350, -400))
+    h = g.math("ADD", g.math("SINE", ph, 0.0, (-200, -400)),
+               g.math("MULTIPLY", g.noise(geo.outputs["Position"], 2.5, (-350, -650), detail=3), 1.2, (-200, -650)), (-50, -500))
+    rel = g.n("ShaderNodeVectorMath", (-750, -850), operation="SUBTRACT")
+    g.link(geo.outputs["Position"], rel.inputs[0]); rel.inputs[1].default_value = centre
+    nrm = g.n("ShaderNodeVectorMath", (-600, -850), operation="DIVIDE")
+    g.link(rel.outputs[0], nrm.inputs[0]); nrm.inputs[1].default_value = half
+    r2 = g.n("ShaderNodeVectorMath", (-450, -850), operation="DOT_PRODUCT")
+    g.link(nrm.outputs[0], r2.inputs[0]); g.link(nrm.outputs[0], r2.inputs[1])
+    dome = g.math("MULTIPLY", g.math("SUBTRACT", 1.0, r2.outputs["Value"], (-300, -850)), pillow_mm / wave_amp_mm, (-150, -850))
+    bump = g.node("ShaderNodeBump", (150, -400), label="roller wave + pillowing", Strength=1.0)
+    bump.inputs["Distance"].default_value = wave_amp_mm * 1e-3
+    g.link(g.math("ADD", h, dome, (0, -650)), bump.inputs["Height"])
+    g.link(bump.outputs["Normal"], p.inputs["Normal"])
+    return mat

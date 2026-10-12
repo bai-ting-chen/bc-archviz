@@ -456,3 +456,30 @@ def glazed_tiles(name="POOL_TILES", tile=0.10, grout=0.003, glaze=(0.60, 0.79, 0
     out = g.node("ShaderNodeOutputMaterial", (100, 0))
     g.link(mix.outputs["Shader"], out.inputs["Surface"])
     return mat
+
+
+def retone(mat, target_rgb, saturation=0.25, tex_id=None):
+    """Desaturate a concrete_study map, then scale its measured linear mean to `target_rgb` (a dark brown scan -> light grey concrete keeps its pits and pores); macro-tone and other users stay linked."""
+    import lookdev
+    nt = mat.node_tree
+    diff = next(n for n in nt.nodes if n.label == "diffuse")
+    tone = next(n for n in nt.nodes if n.label == "color_mult (tone match)")
+    if tex_id:
+        mean = lookdev.map_mean(tex_id)
+    else:
+        import numpy as np
+        px = np.empty(diff.image.size[0] * diff.image.size[1] * 4, dtype=np.float32)
+        diff.image.pixels.foreach_get(px)
+        px = px.reshape(-1, 4)[:, :3]
+        mean = list(np.where(px <= 0.04045, px / 12.92, ((px + 0.055) / 1.055) ** 2.4).mean(0))
+    lum = 0.2126 * mean[0] + 0.7152 * mean[1] + 0.0722 * mean[2]
+    desat = [lum * (1 - saturation) + c * saturation for c in mean]
+    g = G(nt)
+    hs = g.node("ShaderNodeHueSaturation", (tone.location.x - 150, tone.location.y + 150), label="desaturate",
+                Saturation=saturation)
+    for l in list(sock(tone.inputs, "A").links):
+        nt.links.remove(l)
+    g.link(diff.outputs["Color"], hs.inputs["Color"])
+    g.link(hs.outputs["Color"], sock(tone.inputs, "A"))
+    sock(tone.inputs, "B").default_value = (*[t / c for t, c in zip(target_rgb, desat)], 1.0)
+    return [t / c for t, c in zip(target_rgb, desat)]
