@@ -63,8 +63,9 @@
 8. **Edge wear = dirty edge (shading). Edge chip = geometry.** The user's definitions; keep
    separate. **Size every feature from the shot, never from a remembered value** — chips, grain,
    joints, ripples and grunge all read by how many pixels they occupy, so the same material wants
-   different numbers on a close-up and on a wall 4 m away. Judge the first render and scale. A feature smaller than a pixel reads only as its aggregate (a wet
-   lawn's sheen, not its drops): model that, and ask before building micro-geometry.
+   different numbers on a close-up and on a wall 4 m away. Judge the first render and scale.
+   A feature smaller than a pixel reads only as its aggregate (a wet lawn's sheen, not its
+   drops): model that, and ask before building micro-geometry.
 
 8a. **Natural light = matching HDRI sky first**. Whenever sun, sky or any
    daylight is in the scene, light it with an HDRI whose sky matches the reference (overcast vs
@@ -90,7 +91,8 @@
     razor-clean corners read as CG. How: materials.md › Randomness, edge-wear.md › Concave corners.
 ## Process
 9. **A control render is the only proof.** Feature OFF + same scene twice (noise floor; same seed
-   for the feature diff); read *changed > 2 %* and look at a diff/crop; verify the control really
+   for the feature diff); read *changed > 2 %*, several times the noise floor, and look at a
+   diff/crop; verify the control really
    removed the feature. Whole-frame averages hide local effects, and a broken control looks like
    "no effect".
 10. Measure on the PNG the renderer wrote (`imgstats.py`, `refmatch.py`) — AgX rolls off whites,

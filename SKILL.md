@@ -1,19 +1,18 @@
 ---
 name: blender-archviz
 description: >-
-  The default for any rendering / visualization work: photoreal archviz in Blender 5.2 + Cycles
-  (LuxCore when detailed caustics through glass or water matter),
-  driven through the Blender Lab MCP, with Rhino (.3dm) as geometry only — materials (Poly Haven
-  PBR, procedural stone/wood/metal/glass/water), daylight (calibrated HDRI) and artificial light
-  in real lumens, physical camera, displacement, caustics, edge wear and chips, recreating a
-  reference image, control renders and measurement. Use whenever the user mentions Blender,
-  Cycles, shader/geometry nodes, Poly Haven, render, rendering, lookdev, materials, lighting,
-  HDRI, light fixtures, IES or LDT photometric files, lux / illuminance, caustics, LuxCore, glass blocks, patterned glass, water, exposure, texture repetition / stochastic or anti-tiling, randomizing repeated units, dust or grime in corners, terrain / a hill or landform, grass, lawn or meadow scatter, wet surfaces or dew, fog, mist or volumetric atmosphere, concrete cracks or rain/leak streaks, glass distortion, fireflies or denoiser blotches, a Render Reference Library image, or wants a photoreal image of
-  a Rhino model — even without naming Blender. Also use it for bringing 3ds Max (.max) assets
-  into Blender — vegetation / tree / plant libraries (Maxtree, Evermotion, Forest Pack meshes),
-  furniture or props with V-Ray or Corona materials — even when the user only says "convert my
-  .max models". Also use it when pulling, editing or pushing this
-  skill itself, so its MIGRATE.md and maintenance rules apply.
+  Default for any rendering or visualization work: photoreal archviz in Blender 5.2 + Cycles
+  (LuxCore for detailed caustics through glass or water), with Rhino
+  (.3dm) as geometry only. Covers materials (Poly Haven PBR, procedural concrete, wood, stone,
+  metal, glass, water; edge wear, chips, cracks, leak streaks, anti-tiling), HDRI
+  daylight and lights in real lumens (IES/LDT), physical camera, caustics, fog and mist,
+  terrain, grass and meadow scatter, wet surfaces, matching a reference image, controls
+  and finals. Use whenever the user mentions Blender, Cycles, LuxCore, shader or geometry nodes,
+  Poly Haven, rendering, lookdev, lighting, HDRI, lux, caustics, fireflies or
+  denoising, a Render Reference Library image, or wants a photoreal image of a Rhino model, even
+  without naming Blender. Also for bringing 3ds Max (.max) assets into Blender (Maxtree,
+  Evermotion, Forest Pack vegetation; V-Ray or Corona props), and for pulling, editing or
+  pushing this skill (MIGRATE.md and maintenance rules).
 ---
 <!-- blender-archviz-skill-loaded-marker -->
 
@@ -101,19 +100,20 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 5. **Light**: daylight (RULES 8a) `archviz.world_hdri_lux`, rotated by its `hdri_analyse` sun
    direction; artificial: the fixture's IES file `interior.ies_light` when it is specified, else `interior.downlight /
    led_strip / lens_luminance` → `references/lighting-camera.md`.
-6. **Camera**: `archviz.physical_camera(cam, iso, f, shutter, focal)`, `straighten_verticals`,
+6. **Camera**: `archviz.render_setup(...)` first (it resets view exposure; step 7), then
+   `archviz.physical_camera(cam, iso, f, shutter, focal)`, `straighten_verticals`,
    white balance if lights are warm. From a reference image: `refmatch.py grid` → solve the
    camera (`refsolve.py` when the image has a repeated element) → `archviz.framing_render(root, path)` +
    `refmatch.py pair --overlay`; then light region by region with `study_run.py`
    (lighting-camera.md › *Recreating a reference*).
-7. **Render**: `archviz.render_setup(...)` → `references/render-settings.md`; LuxCore case
+7. **Render**: settings → `references/render-settings.md`; LuxCore case
    (RULES 2a) → `references/luxcore.md`.
 8. **Look-dev**: headless `render_variant.py` or MCP renders into the study `_wip/`; measure
    with `imgstats`; prove each feature with a control (RULES 9). Reuse the helpers
    (`references/helpers.md` lists them all: `wear.set_input`, `archviz.sock`, `archviz.pbr_material`,
    `study_materials.G`, `lookdev`, `scatter`) instead of re-deriving
    node plumbing — the traps they wrap get hit again otherwise.
-9. **Final** (RULES 10b) → pipeline.md › *Final render in the open UI*; linear EXR + graded
+9. **Final** (RULES 10b) → pipeline.md › *Final render in the open UI* (Cycles: `finals.py`); linear EXR + graded
    PNGs into the study folder.
 10. `studies/<yymmdd>_<topic>/STUDY_NOTES.md`: what, proof numbers, traps, open items.
 
@@ -151,13 +151,13 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Caustics a flat glow on far surfaces / one S-shaped bright line per pattern tile | relief too steep (focal length cm) / single-frequency pattern — size relief slope from receiver distance, randomise (caustics.md › Designing a refractive relief) |
 | Rhino UI frozen by a Rook script | Python loop calling curve queries per element — kill Rhino (unsaved work lost); use closed-form layouts and time each step (pipeline.md) |
 | Edited look script fails to run | a scripted edit put a `#` comment mid-call — syntax-check the scripts in the runner (pipeline) |
-| Water/haze volume murky and dark | `cycles.volume_bounces` defaults to 0 — set 2-4 |
+| Water/haze/fog volume murky and dark | `cycles.volume_bounces` defaults to 0 (api-traps › Render) |
 | Rhino boxes/slabs hang below their datum | `Extrusion.Create` follows the curve normal — `Surface.CreateExtrusion` (pipeline) |
 | Ripples look fake or stretched | noise bump — Ocean geometry on a finer mesh, never stretch (materials › Water) |
 | Numbers match, image doesn't | native-resolution crop pass beside the ref (RULES 8b) |
 | Poly Haven download `HTTP Error 52x` | Cloudflare hiccup — retry the same call |
 | Cloudy blotches on smooth walls/ceiling after OIDN (LuxCore) | fireflies from caustic-bounce paths — radiance clamping, not more time (luxcore.md › Fireflies) |
-| Saved final is grainy although the denoiser ran | the render was cancelled (Esc / status-bar ✕) and the compositor skipped — rebuild with `from_passes.py` |
+| Saved final is grainy after a stop or cancel | the denoiser/compositor was skipped — Cycles: `finals.py -- denoise` from the passes EXR; LuxCore: `from_passes.py` |
 | LuxCore crashes at export, `EXCEPTION_ACCESS_VIOLATION` in pyluxcore | a native mapping's `uvindex` points at a missing UV layer (luxcore.md › Native) |
 | Script works headless, fails in the UI ("Context missing active object") | operators need `temp_override` in a UI startup script (api-traps) |
 | Rook call hangs / "dispatcher busy" / file won't open | long script still running, or a modal dialog (save-changes, crash report) — split calls; pipeline › Rhino |
@@ -165,7 +165,6 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Back-lit leaves glint white | the importer's stored glossiness scalar used instead of the wired glossiness map (max-import.md › Materials) |
 | Render white / exposure ignored | `archviz.render_setup` sets view exposure — call it before `physical_camera` |
 | No-limit final renders only one block ("0/4 tiles") | auto-tiling: tile off + tile size > frame (`finals.setup_unlimited`) |
-| Stopped final is grainy | the stop skipped the denoiser - `finals.py -- denoise` from the passes EXR |
 | Light triangles hanging below an arris | leak/raycast field computed after the chips - leak field first (edge-wear.md) |
 | Grass sinks dark / lawn reads grey when wet | canopy albedo is ~0.05-0.1 (softer AgX look); wet sheen at grazing - darker base (materials.md) |
 | House edge crisp against a soft HDRI backplate | slight DOF in front of the subject (lighting-camera.md > Soft backplate) |

@@ -2,7 +2,12 @@
 
 Code: `study_materials.py` (concrete, gravel, coated wood, glass, glazed tiles), `interior.py`
 (granite, stone tiles, steel, pool water, steam, emitters), `lookdev.py` (measured-albedo PBR,
-vertical boards, long pavers, sheers, glass shells), `wear.py` / `wood_wear.py` (edge-wear.md).
+vertical boards, long pavers, sheers, glass shells, glass distortion), `wear.py` / `wood_wear.py`
+(edge-wear.md), `terrain.py` + `scatter.py` (hill, ground, meadow), `vegetation.py` (grass, wet, dew).
+
+Contents: Physical ranges · Choosing and scaling a texture · Concrete · Exposed aggregate, pavers,
+litter · Terrain · Grass and meadow · Wet surfaces and dew · True displacement · Wood · Stone ·
+Metal · Glass · Water · Randomness and anti-tiling.
 
 The recipes below are *shapes* — which nodes, wired which way, and why. Their tuned values live
 in whichever study last used them (RULES 0); read the recipe here, then set the numbers from the
@@ -148,7 +153,7 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
   clears it. Bisect it against a render rather than reasoning about it.
 
 ## Terrain (landform grading)
-`terrain.landform_group(centre, pad_half, fall, run, ...)` + `terrain.add_terrain(group, ground)`.
+`terrain.landform_group(centre=…, pad_half=…, fall=…, run=…)` + `terrain.add_terrain(group, ground)`.
 - A building on a hill: flat pad just under the slab, an apron, then the fall as a smoothstep in
   the distance from the pad - a rounded crest **and** a rounded toe (landform grading, natural
   slopes), never a cone or a linear batter. Warp the distance with a slow noise so contours
@@ -173,7 +178,7 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
   (30 /m2 left mostly soil). ~0.5-1 M instances render fine on 8 GB; unique meshes cost memory,
   instances barely.
 - Blade material `vegetation.blade_material`: Principled + Translucent added (green leaf
-  R ~0.10-0.15, T ~0.05-0.10 at 550 nm), roughness ~0.45 (waxy cuticle), per-instance value
+  R ~0.10-0.15, T ~0.05-0.10 at the 550 nm green peak, lower across the rest of the visible), roughness ~0.45 (waxy cuticle), per-instance value
   0.8-1.15 and a patchy straw/dry mix on the instance location (RULES 8c, 8d). A grass canopy's
   visible albedo is only ~0.05-0.1: under a high-contrast AgX look it sinks - choose a softer
   look rather than brightening the albedo.

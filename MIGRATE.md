@@ -239,5 +239,17 @@ unsaved .blend and takes the view-layer name. Smoke test extended to cover each.
 Check: no open (unfinished) study script calls `study_materials.retone` with the old argument order (target, saturation, tex_id=...).
 Do: call `retone(mat, target_rgb, tex_id, saturation=0.25)`.
 
+## 261012c — Skill review: description, consistency, rule pointers
+Pull-only. SKILL.md description cut to 999 characters (spec limit 1024) with every trigger kept;
+Workflow: `render_setup` before `physical_camera` (it resets exposure - the old order rendered
+white); glassware caustics follow RULES 2a (LuxCore; `caustic_photons` = Cycles-only fallback);
+finals denoise with OIDN on the GPU (`finals.setup_unlimited`); one volume-bounce statement
+(api-traps: 2-4 water/haze, ~8 Mie fog); one grainy-after-stop troubleshooting row per engine;
+EV table sunny-16 fixed (f/16 1/125); RULES 9 control criterion = > 2 % and several x the noise
+floor; rule restatements in render-settings, lighting-camera, pipeline, edge-wear replaced by
+pointers; materials.md has a contents line; study layout names `scene_geometry.py` +
+`scene_look.py`; one-scene numbers removed from render-settings and lighting-camera.
+Re-read RULES 9 and SKILL.md › Workflow.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

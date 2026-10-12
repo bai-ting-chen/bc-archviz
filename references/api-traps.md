@@ -48,7 +48,8 @@
 
 ## Render / images
 - `cycles.volume_bounces` defaults to **0**: Volume Scatter then only removes light (murky,
-  dark water/haze). Set 2-4 whenever a volume scatters.
+  dark water/haze). 2-4 for absorbing water and light haze; ~8 for dense forward-peaked Mie fog,
+  which needs multiple scattering (`atmosphere.volume_render_settings`).
 - Ray visibility (`visible_diffuse / visible_transmission …`) follows the type of the LAST bounce.
 - Changing `light.type` (POINT → SPOT) keeps the datablock but the Python handle keeps the old
   subclass (`'PointLight' object has no attribute 'spot_size'`): re-fetch `bpy.data.lights[name]`.
@@ -76,8 +77,8 @@
 
 - A multilayer EXR loaded as an image reports `size == (0, 0)` until its pixels load: read the
   size with OpenImageIO (a compositor render sized from it came out 4x4).
-- `Render Result` cannot be saved while a render runs ("could not be saved"); snapshots of a
-  running Cycles final are not possible from Python.
+- Cycles only: `Render Result` cannot be saved while a render runs ("could not be saved") - no
+  mid-render snapshots from Python. LuxCore allows them (luxcore.md › Final in the open UI).
 - `bpy.ops.render.view_cancel()` (viewer stop) fires render_complete - yet the denoiser had not
   run; see render-settings.md > Finals with no sample limit.
 

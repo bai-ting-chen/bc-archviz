@@ -49,7 +49,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `finals` — Cycles finals in the open UI with no sample/time limit (RULES 10b), and post-processing from the saved passes. LuxCore finals: from_passes.py. pipeline.md > Final render in the open UI.
 
-- `setup_unlimited(res, samples=1000000, denoiser='OPTIX')` — Final settings: full res, untiled (tile > frame), no adaptive/time limit, denoiser + its passes stored, multilayer EXR.
+- `setup_unlimited(res, samples=1000000, denoiser='OPENIMAGEDENOISE')` — Final settings: full res, untiled (tile > frame), no adaptive/time limit, denoiser + its passes stored, multilayer EXR.
 - `remove_handlers()` — Unregister the final's save handlers (do this before cancelling a final you do not want saved).
 - `start_in_ui(out_dir, res, stem=None, samples=1000000)` — Open UI: save the .blend, register savers (complete + cancel), render INVOKE_DEFAULT, fit the render view.
 - `stop_in_ui()` — Stop the running render from its viewer (savers fire; the stop is asynchronous - wait for the passes file). Check afterwards whether the denoiser ran.

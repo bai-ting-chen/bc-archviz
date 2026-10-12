@@ -6,7 +6,7 @@
 | Large light source, any refractor | Cycles path tracing | unbiased; converges when the key subtends a real angle, never for a sun-sized source |
 | Lamps above calm water, submerged surfaces | **MNEE** | cheap and clean, but under-delivers energy and ignores volumes on the light leg |
 | Sun through a rippled pool | **GN wavefront** `gn_caustics.add_caustic_sheet()` | native, exact, noise-free; MNEE fails outright on real ripples |
-| Sun through glassware | `caustic_photons.py` (external, CPU) | the most faithful of the three on a measured shadow/lit ratio; MNEE and path tracing both fall short |
+| Sun through glassware (glass, glass of water) | LuxCore, as the row below (RULES 2a); `caustic_photons.py` (external, CPU) only when the scene must stay in Cycles | photons were the most faithful of the Cycles-side options on a measured shadow/lit ratio; MNEE and path tracing fall short |
 | **Sun through patterned glass / glass block / several interfaces, room-scale receivers** | **LuxCore PATH + light tracing**, GPU camera paths + CPU light tracing (luxcore.md, RULES 2a) | unbiased and energy-correct; the only engine that converged |
 
 Measured on sun (0.53°) → 4 glass interfaces with a wavy relief → diffuse floor, equal 120 s,

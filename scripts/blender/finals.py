@@ -26,7 +26,7 @@ import bpy
 _STATE = {}
 
 
-def setup_unlimited(res, samples=1_000_000, denoiser="OPTIX"):
+def setup_unlimited(res, samples=1_000_000, denoiser="OPENIMAGEDENOISE"):
     """Final settings: full res, untiled (tile > frame), no adaptive/time limit, denoiser + its passes stored, multilayer EXR."""
     sc = bpy.context.scene
     sc.render.resolution_x, sc.render.resolution_y = res
@@ -39,6 +39,7 @@ def setup_unlimited(res, samples=1_000_000, denoiser="OPTIX"):
     c.time_limit = 0.0
     c.use_denoising = True
     c.denoiser = denoiser
+    c.denoising_use_gpu = True                             # final denoising defaults to CPU
     c.use_auto_tile = False
     c.tile_size = max(4096, *res)                          # > frame: one tile even if Cycles tiles anyway
     sc.view_layers[0].cycles.denoising_store_passes = True

@@ -61,7 +61,7 @@ schedule gives you.
 | Point | bulbs, **any IES fixture** | W for the full sphere; Radius = bulb/lens size (softness only) |
 | Spot | downlights/spots without an IES | same power as a point, the cone only masks; Blend softens the edge, not the shadow |
 | Area (rect/square/disk/ellipse) | panels, troffers, coves, light boxes, backlit sheers | Lambert emitter, P = flux; *Spread* narrows like a louvre/honeycomb; *Portal* in windows only samples the HDRI (no light of its own) |
-| Sun | tests and controls only, never with an HDRI | W/m² |
+| Sun | tests and controls only (RULES 8a) | W/m² |
 | Emissive mesh | visible lenses, LED lines, screens, signage | luminance cd/m² (`interior.emitter`); count once with the analytic light (`lit_once`) |
 
 Per-light Cycles settings: *Max Bounces*, *Cast Shadow*, *Multiple Importance* (keep on for
@@ -124,7 +124,7 @@ the manufacturer's file a render's illuminance is the fixture's, not a guess fro
   texture relief and falloff; size them from the fixture or the reference. A row of spots on a
   wall gives scallops; use spots only when scallops are intended.
 - Recessed fixture: `visible_camera = False` on the light (it sits in a slot).
-- **Count each fixture once.** Either the lens is the source (luminance from lumens, visible to
+- **Count each fixture once** (RULES 5). Either the lens is the source (luminance from lumens, visible to
   all rays) or the lens is decor for an analytic light → `interior.lit_once()` = `visible_diffuse`
   AND `visible_transmission` off. Visibility follows the LAST bounce: a diffuse ray through water
   arrives as *transmission*, so turning diffuse off alone still leaks.
@@ -139,7 +139,7 @@ the manufacturer's file a render's illuminance is the fixture's, not a guess fro
 
   | Condition | EV100 | A workable triple |
   |---|---|---|
-  | Bright sun | 15 | ISO 100, f/11, 1/125 |
+  | Bright sun | 15 | ISO 100, f/16, 1/125 |
   | Overcast exterior | 12-13 | ISO 100, f/8, 1/60 |
   | Studio / product | 10-11 | ISO 100, f/8, 1/15 |
   | Daylit interior | 9 | ISO 200, f/5.6, 1/30 |
@@ -156,9 +156,9 @@ the manufacturer's file a render's illuminance is the fixture's, not a guess fro
   image rather than neutralising it, which is usually what a warm reference wants.
 
 ### Soft backplate, crisp model
-An HDRI backplate (trees, hills) is soft - its photo, not only its resolution: a 16k
-camera-ray window over the 8k map (same equirect lookup, registers to 0 px) sharpened a tree
-edge only from 6.2 to 5.7 px at 3200 px. The modelled building then reads cut out. Measure edge
+An HDRI backplate (trees, hills) is soft - in its photo, not only its resolution: a
+higher-resolution camera-ray window over the lighting map (same equirect lookup, registers
+exactly) barely sharpens it. The modelled building then reads cut out. Measure edge
 widths (10-90 % or step/max-gradient) on a model edge against the backplate and on a backplate
 edge, then use a little depth of field: focus slightly in front of the subject (e.g. f/4 at
 ~0.6x the subject distance) so the model edge softens ~1.3x and the backplate a bit more. Keep
@@ -267,7 +267,7 @@ blender()` from a study script). Read the base and top of every repeat at full r
   noise (RULES 8c); a box around the site with the camera inside. Clear the inside of
   buildings (indoor air has no fog; a fog-filled dark room behind glass is also a noise source).
 - Light: a sunless overcast HDRI (no sun lamp, RULES 8a). `atmosphere.volume_render_settings`:
-  volume bounces ~8 - forward-peaked Mie needs multiple scattering. Cost ~2.5-3.5x a clear scene.
+  volume bounces (api-traps › Render). Cost ~2.5-3.5x a clear scene.
 - Raw noise in the fog falls as 1/sqrt(N); OIDN cleans smooth fog without blotches at a few
   hundred spp - check a contrast-stretched sky crop.
 

@@ -9,7 +9,8 @@ and band from the shot and judge the first render (RULES 8).
 ## Mask: distance to the arris
 Compared on one test: Pointiness tracks mesh density and comes out blurry; AO Inside is grainy
 and expensive; Bevel-vs-shading-normal is thin and expensive. **Use GN Edge Angle → Proximity →
-`edge_dist`** — exact metres, clean, cheap and EEVEE-safe.
+`edge_dist`** — exact metres, clean, cheap and EEVEE-safe. Exception: a *faint* dirty arris on
+huge meshes that would need dicing - the shader Bevel-normal mask (materials.md › Burnished).
 
 ## Concrete recipe
 1. `dice(obj, …)` — Rhino meshes are too coarse to carry an edge band.
@@ -86,9 +87,8 @@ air is still — floor joints and the tops of plinths — and fainter, greyer at
   deliberate - keep a few, not a symmetric set (an opposite pair reads as one line).
 
 ## Proving it
-Each layer gets its own control (RULES 9). A layer that moves the frame a few times the noise
-floor is doing visible work; one that moves it *by* the noise floor is not installed, however
-good the node tree looks. Record the ratios in the study.
+Each layer gets its own control (RULES 9): one that moves the frame only *by* the noise floor
+is not installed, however good the node tree looks. Record the ratios in the study.
 
 ## Open
 Adaptive displacement for chips is a memory risk on a

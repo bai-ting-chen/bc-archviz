@@ -129,7 +129,7 @@ file from the shell. Save the .blend first.
   Only one Blender may hold the MCP port: quit an idle finished-final window first.
 - Before proposing the final, estimate how long the expected quality takes from a measured
   preview (noise ∝ 1/√(samples/px)), so the user knows when stopping is reasonable.
-- Tests and previews run headless (`blender -b`), one at a time; tell the user when a CPU-only
+- Tests and previews headless (RULES 10b), one at a time; tell the user when a CPU-only
   engine leaves the GPU idle — it looks like wasted capacity otherwise.
 
 - Cycles: `scripts/blender/finals.py` does all of this - `start_in_ui(out_dir, res)` (untiled,
@@ -156,7 +156,7 @@ each version's reason lives as a comment next to the value it changed.
 - When patch scripts pile up, fold them back into the scene scripts before the study is reused.
 
 ## Study layout
-`studies/<yymmdd>_<topic>/`: Rhino build script, `*.3dm`, scene script (rebuilds from the .3dm via
-MCP), `.blend`, finals, `STUDY_NOTES.md`, `library/` (`polyhaven/`, `local/` — every asset the
+`studies/<yymmdd>_<topic>/`: Rhino build script, `*.3dm`, `scene_geometry.py` + `scene_look.py`
+(rebuild from the .3dm via MCP; the names `study_run.py` expects), `.blend`, finals, `STUDY_NOTES.md`, `library/` (`polyhaven/`, `local/` — every asset the
 study uses, RULES 10c), `_wip/` (controls, boards, test scripts, crops, measurements,
 downloads — everything the study produces, RULES 10d). Delete `*.blend1` / `*.3dmbak`.

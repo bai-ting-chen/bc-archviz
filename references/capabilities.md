@@ -17,11 +17,11 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Edge chips (geometry) | GN band subdivision + Set Position; per-object `Seed` | solid |
 | Displacement | Displacement + adaptive subdivision | solid, fast |
 | Tiling by real height | `height_span_uv` + REPEAT | solid |
-| Caustics | `caustic_photons.py` (glassware), GN wavefront (pools) | solid |
+| Caustics | GN wavefront (pools); glassware → LuxCore (RULES 2a), `caustic_photons.py` as the Cycles-only fallback | solid |
 | Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH, GPU + CPU light tracing (luxcore.md), energy-checked (caustics.md) | solid |
 | Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh (materials › Glass block) | solid |
 | Baked procedural textures for LuxCore (terrazzo, smooth concrete, sand mortar) | numpy seamless colour + roughness maps | test |
-| Tangled glass-block caustics across units | long-wave relief at higher slope (Wave/Iceberg mix), sized by a thin-lens sim (caustics.md › Designing a relief) | test |
+| Tangled glass-block caustics across units | long-wave relief at higher slope (Wave/Iceberg mix), sized by a thin-lens sim (caustics.md › Designing a refractive relief) | test |
 | Clean caustic renders without OIDN blotches | LuxCore radiance clamping (camera paths only) | solid, measured |
 | Concave-corner dust | AO band × noise × height; Cycles live or baked for LuxCore (`lux_materials.bake_dust`) | test |
 | Anti-tiling | LuxCore Randomized Tiling (native); Cycles: noise-mixed lookups / hex tiling built from nodes | LuxCore test, Cycles untested |
