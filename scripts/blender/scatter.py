@@ -113,20 +113,21 @@ def load_scatter_on_surface():
     ng = bpy.data.node_groups.get("Scatter on Surface")
     if ng:
         return ng
-    path = os.path.join(os.path.dirname(bpy.app.binary_path), "%d.%d" % bpy.app.version[:2], "datafiles",
-                        "assets", "nodes", "geometry_nodes_essentials.blend")
+    path = os.path.join(bpy.utils.system_resource("DATAFILES"), "assets", "nodes", "geometry_nodes_essentials.blend")
     with bpy.data.libraries.load(path, link=False) as (src, dst):
         dst.node_groups = ["Scatter on Surface"]
     return bpy.data.node_groups["Scatter on Surface"]
 
 
-def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=(0.35, 0.62, 0.69)):
-    """GN group: Scatter on Surface on a terrain object, masked by species patch noise, shared bare-soil noise, pad clearance and the camera frustum."""
+def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=None):
+    """GN group: Scatter on Surface on a terrain object, masked by species patch noise, shared bare-soil noise, pad clearance and the camera frustum. Reused if it exists (layers point at it)."""
     from study_materials import G
     from terrain import BARE_W
     ng = bpy.data.node_groups.get(name)
     if ng:
-        bpy.data.node_groups.remove(ng)
+        return ng
+    from terrain import BARE
+    bare = bare or BARE
     ng = bpy.data.node_groups.new(name, "GeometryNodeTree")
     ng.is_modifier = True
     it = ng.interface

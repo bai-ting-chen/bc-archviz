@@ -17,7 +17,8 @@ import bpy
 
 from study_materials import G, sock
 
-BARE_W = 11.0   # 4D-noise W shared by the bare-soil mask in the meadow scatter and the ground shader
+BARE_W = 11.0                   # 4D-noise W shared by the meadow's bare-soil mask and the ground shader
+BARE = (0.35, 0.62, 0.69)       # that noise: scale (1/m), full sward below, bare soil above
 
 
 def _sock(ng, name, typ, io="INPUT", default=None):
@@ -118,32 +119,28 @@ def add_terrain(group, material, name="TERRAIN", collection=None):
     return ob
 
 
-def ground_material(thatch_tex, soil_tex, name="GROUND", bare=(0.35, 0.60, 0.69), wet_gamma=None, wet_rough=0.6):
+def ground_material(thatch_tex, soil_tex, name="GROUND", bare=BARE, wet_gamma=None, wet_rough=0.6):
     """Ground under a meadow: a dead-grass/thatch texture, soil only where the bare-soil noise
     (same 4D noise and W as scatter.meadow_layer_group) opens the sward. wet_gamma (e.g. 1.4):
     wet ground = dry^gamma (darker, more saturated) and roughness x wet_rough."""
-    import os
-
-    import archviz
+    from study_materials import _ph_maps
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     g = G(mat)
     out = g.n("ShaderNodeOutputMaterial", (1300, 0))
     bsdf = g.n("ShaderNodeBsdfPrincipled", (1000, 0)); g.link(bsdf.outputs[0], out.inputs[0])
     geo = g.n("ShaderNodeNewGeometry", (-1200, 0))
     bn = _noise4(g, geo.outputs["Position"], bare[0], BARE_W, (-900, 600), 4.0, 0.5)
-    bm = g.range(bn, bare[1] - 0.02, bare[2], (-700, 600), smooth=True, label="bare soil")
+    bm = g.range(bn, bare[1], bare[2], (-700, 600), smooth=True, label="bare soil")
     sets = []
     for i, tex in enumerate((thatch_tex, soil_tex)):
-        folder = archviz.library("polyhaven", "textures", tex)
-        meta = archviz.read_meta(folder)
+        maps, meta = _ph_maps(tex)
         mp = g.n("ShaderNodeMapping", (-900, -400 * i))
-        w = meta["dimensions_mm"][0] / 1000
-        mp.inputs["Scale"].default_value = (1 / w,) * 3
+        mp.inputs["Scale"].default_value = (1000 / meta["dimensions_mm"][0],) * 3
         g.link(geo.outputs["Position"], mp.inputs["Vector"])
-        d = archviz._img(mat.node_tree.nodes, os.path.join(folder, meta["maps"]["diff"]), "sRGB", (-600, -400 * i))
-        a = archviz._img(mat.node_tree.nodes, os.path.join(folder, meta["maps"]["arm"]), "Non-Color", (-600, -400 * i - 200))
+        d = g.img(maps["diff"], "sRGB", (-600, -400 * i), None, mp.outputs[0])
+        a = g.img(maps["arm"], "Non-Color", (-600, -400 * i - 200), None, mp.outputs[0])
         for n in (d, a):
-            g.link(mp.outputs[0], n.inputs["Vector"])
+            n.projection, n.projection_blend = "BOX", 0.2   # world-space box mapping, no UVs
         sep = g.n("ShaderNodeSeparateColor", (-300, -400 * i - 200)); g.link(a.outputs["Color"], sep.inputs[0])
         sets.append((d.outputs["Color"], sep.outputs["Green"]))
     mc = g.n("ShaderNodeMix", (300, 200), data_type="RGBA")

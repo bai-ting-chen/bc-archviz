@@ -46,7 +46,7 @@ wear.add_leak_field(hut)                                   # first, on the clean
 wear.add_edge_wear(hut, wear.edge_wear_group("SMOKE WEAR", band=0.08, level=3), Seed=(1.0, 2.0, 3.0))
 assert hut.modifiers[0].name == "LEAK FIELD", [m.name for m in hut.modifiers]
 conc = wear.weathered_concrete("SMOKE_CONCRETE", stain=False, tex_id="concrete_wall_006")
-study_materials.retone(conc, (0.28, 0.28, 0.28), 0.25, tex_id="concrete_wall_006")
+study_materials.retone(conc, (0.28, 0.28, 0.28), "concrete_wall_006")
 wear.add_runoff(conc)
 wv = [v.co for v in hut.data.vertices if abs(v.co.y + 1.45) < 0.01]    # recessed window face
 xs, zs = [v.x for v in wv], [v.z for v in wv]
@@ -58,6 +58,26 @@ bmesh.ops.scale(bm, vec=(max(xs) - min(xs), 0.02, max(zs) - min(zs)), verts=bm.v
 bmesh.ops.translate(bm, vec=(0, -1.48, (min(zs) + max(zs)) / 2), verts=bm.verts)
 bm.to_mesh(pane.data); bm.free(); sc.collection.objects.link(pane)
 pane.data.materials.append(lookdev.glass_distortion(archviz.dielectric("SMOKE_GLASS"), pane))
+
+# review regressions: a 2nd wall sharing the leak field, a pane rotated in plan, '.001' names
+shed = bpy.data.objects.new("SHED", bpy.data.meshes.new("SHED"))
+bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0); bmesh.ops.translate(bm, vec=(6, 3, 0.5), verts=bm.verts)
+bm.to_mesh(shed.data); bm.free(); sc.collection.objects.link(shed)
+wear.add_leak_field(shed)
+assert hut.modifiers["LEAK FIELD"].node_group is not None, "first wall lost its leak field"
+rot = pane.copy(); rot.data = pane.data.copy(); rot.rotation_euler.z = math.radians(30); rot.location.x += 8
+sc.collection.objects.link(rot)
+lookdev.glass_distortion(rot.data.materials[0], rot)
+import max_import  # noqa: E402
+tm = bpy.data.materials.new("leaf1B_MT_Tree01_diffuse.001"); probe = bpy.data.objects.new("PROBE", bpy.data.meshes.new("PROBE"))
+probe.data.materials.append(tm)
+import tempfile  # noqa: E402
+tmpd = tempfile.mkdtemp(); open(os.path.join(tmpd, "MT_Tree01_diffuse.jpg"), "wb").close()
+sm_ = max_import.slot_maps([probe], tmpd)
+import shutil  # noqa: E402
+shutil.rmtree(tmpd)
+assert sm_["PROBE"].get("leaf1"), sm_
+bpy.data.objects.remove(probe)
 
 # hill + ground
 topo = terrain.landform_group("SMOKE_LAND", centre=C, pad_half=HALF, size=120, verts=241, fall=4, run=25)

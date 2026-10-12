@@ -95,7 +95,7 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
 - Fresh breaks under direct floods want their tint only *barely* above the surface; a visibly
   lighter paste reads as white paint flecks when lit head-on.
 
-- Rough, weathered concrete from a dark scanned map: `study_materials.retone(mat, target)` -
+- Rough, weathered concrete from a dark scanned map: `study_materials.retone(mat, target, tex_id)` -
   desaturate, then scale the measured mean to the target albedo (the multiply keeps pits and
   pores). Runoff streaks and cracks: edge-wear.md > Runoff streaks, cracks.
 

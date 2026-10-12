@@ -208,13 +208,13 @@ def glass_distortion(mat, obj, wave_period=0.30, wave_amp_mm=0.05, pillow_mm=2.0
     """Bump on a dielectric so reflections wobble like real glazing: roller wave (~0.1 mm p-v over ~0.3 m) + pane bow (pillowing, a few mm) centred on `obj`'s bounding box; thin axis has no dome."""
     import math
 
-    from mathutils import Vector
     from study_materials import G
-    pts = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
-    lo = [min(p[i] for p in pts) for i in range(3)]
-    hi = [max(p[i] for p in pts) for i in range(3)]
-    centre = [(a + b) / 2 for a, b in zip(lo, hi)]
-    half = [(b - a) / 2 if (b - a) > 0.2 else 1e3 for a, b in zip(lo, hi)]
+    # dome over the pane in its own Generated coordinates (0..1 over the local bounding box, so it
+    # follows any rotation/position and works on every pane sharing the material); the thinnest
+    # local axis is the glass thickness - masked out
+    dims = obj.dimensions
+    thin = min(range(3), key=lambda i: dims[i])
+    mask = [0.0 if i == thin else 2.0 for i in range(3)]
     nt = mat.node_tree
     p = _principled(mat)
     p.inputs["Roughness"].default_value = roughness
@@ -226,10 +226,11 @@ def glass_distortion(mat, obj, wave_period=0.30, wave_amp_mm=0.05, pillow_mm=2.0
                 2 * math.pi / wave_period, (-350, -400))
     h = g.math("ADD", g.math("SINE", ph, 0.0, (-200, -400)),
                g.math("MULTIPLY", g.noise(geo.outputs["Position"], 2.5, (-350, -650), detail=3), 1.2, (-200, -650)), (-50, -500))
+    tc = g.node("ShaderNodeTexCoord", (-900, -850))
     rel = g.n("ShaderNodeVectorMath", (-750, -850), operation="SUBTRACT")
-    g.link(geo.outputs["Position"], rel.inputs[0]); rel.inputs[1].default_value = centre
-    nrm = g.n("ShaderNodeVectorMath", (-600, -850), operation="DIVIDE")
-    g.link(rel.outputs[0], nrm.inputs[0]); nrm.inputs[1].default_value = half
+    g.link(tc.outputs["Generated"], rel.inputs[0]); rel.inputs[1].default_value = (0.5, 0.5, 0.5)
+    nrm = g.n("ShaderNodeVectorMath", (-600, -850), operation="MULTIPLY")
+    g.link(rel.outputs[0], nrm.inputs[0]); nrm.inputs[1].default_value = mask
     r2 = g.n("ShaderNodeVectorMath", (-450, -850), operation="DOT_PRODUCT")
     g.link(nrm.outputs[0], r2.inputs[0]); g.link(nrm.outputs[0], r2.inputs[1])
     dome = g.math("MULTIPLY", g.math("SUBTRACT", 1.0, r2.outputs["Value"], (-300, -850)), pillow_mm / wave_amp_mm, (-150, -850))

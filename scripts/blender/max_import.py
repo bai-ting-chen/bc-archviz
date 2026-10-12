@@ -381,19 +381,23 @@ def open_loops(obj, material_index=None):
     return sorted(loops, key=lambda l: l["z"])
 
 
-def slot_maps(objs, maps_dir, pattern=r"(MT_[A-Za-z0-9_]+?)_(?:diffuse|albedo)$"):
-    """Bitmap per slot prefix (leaf1, leaf2, seed ...) per object, read BEFORE tidy(): in a VRay2Sided sub the BACK slot often carries the bitmap name and the front none, and tidy() drops the unused back slots."""
+def slot_maps(objs, maps_dir, exts=(".jpg", ".png", ".tif")):
+    """Bitmap per slot prefix (leaf1, leaf2, seed ...) per object, read BEFORE tidy(): in a VRay2Sided sub the BACK slot often carries the bitmap name and the front none, and tidy() drops the unused back slots. The map is the longest tail of '<max name>_<bitmap stem>' that exists in maps_dir (a Blender '.001' suffix is ignored)."""
     out = {}
     for o in objs:
         d = out.setdefault(o.name, {})
         for s in o.material_slots:
-            m = re.search(pattern, s.material.name) if s.material else None
-            if not m:
+            if not s.material:
                 continue
-            for ext in (".jpg", ".png", ".tif"):
-                p = os.path.join(maps_dir, m.group(0) + ext)
-                if os.path.exists(p):
-                    d.setdefault(re.sub(r"_.*$", "", s.material.name).rstrip("FB"), p)
+            stem = re.sub(r"\.\d+$", "", s.material.name)
+            if not re.search(r"_(?:diffuse|albedo)$", stem):
+                continue
+            parts = stem.split("_")
+            for k in range(1, len(parts)):
+                hit = next((os.path.join(maps_dir, "_".join(parts[k:]) + e) for e in exts
+                            if os.path.exists(os.path.join(maps_dir, "_".join(parts[k:]) + e))), None)
+                if hit:
+                    d.setdefault(parts[0].rstrip("FB"), hit)
                     break
     return out
 

@@ -225,5 +225,19 @@ Do: add that memory (feedback type) from RULES 8, with its index line.
 Check: no open (unfinished) study script starts a no-limit Cycles final with auto-tiling on.
 Do: use `finals.start_in_ui(out_dir, res)` (or set `use_auto_tile = False` and `tile_size` above the frame), and after a stop check whether Combined == Noisy Image; if so `finals.py -- denoise` from the passes EXR.
 
+## 261012b — Code review fixes to the outdoor helpers
+Pull-only. Fixed: `wear.leak_field_group` / `scatter.meadow_layer_group` no longer delete a group
+other objects use (a 2nd wall lost its leak streaks); `study_materials.retone(mat, target, tex_id,
+saturation)` desaturates by a luminance mix (Hue/Saturation came out ~25 % too bright) and
+needs tex_id; `lookdev.glass_distortion` uses the pane's own coordinates (rotated or shared panes);
+`max_import.slot_maps` matches the longest existing tail and ignores `.001`; `wear.add_runoff`
+measures along any wall orientation and takes `ground_z`; one `terrain.BARE` constant; dew beads
+offset per instance; essentials path via `bpy.utils.system_resource`; `finals` guards an
+unsaved .blend and takes the view-layer name. Smoke test extended to cover each.
+
+### 21. Callers of retone
+Check: no open (unfinished) study script calls `study_materials.retone` with the old argument order (target, saturation, tex_id=...).
+Do: call `retone(mat, target_rgb, tex_id, saturation=0.25)`.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

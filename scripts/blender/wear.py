@@ -295,10 +295,10 @@ def mask_material(name, method, radius=0.035):
 # --- runoff leaks, grunge, splash, cracks (on a weathered_concrete material) ------------------
 
 def leak_field_group(name="LEAK FIELD", inset=0.02, reach=6.0):
-    """GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`."""
+    """GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`. Reused if it exists (other objects' modifiers point at it)."""
     ng = bpy.data.node_groups.get(name)
     if ng:
-        bpy.data.node_groups.remove(ng)
+        return ng
     ng = bpy.data.node_groups.new(name, "GeometryNodeTree")
     ng.is_modifier = True
     ng.interface.new_socket("Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
@@ -344,8 +344,8 @@ def _frame(mat, label):
     return g, label
 
 
-def add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7)):
-    """On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash at the foot; all into its grime mask."""
+def add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0):
+    """On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask."""
     L_ = dict(LEAK, **(leak or {}))
     g, F = _frame(mat, "Runoff streaks, grunge, splash")
     nt = mat.node_tree
@@ -353,7 +353,13 @@ def add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08
     sepn = g.node("ShaderNodeSeparateXYZ", (-2400, -3700), F); g.link(geo.outputs["Normal"], sepn.inputs[0])
     vert = g.range(g.math("ABSOLUTE", sepn.outputs["Z"], 0.0, (-2200, -3700), F), 0.25, 0.1, (-2000, -3700), frame=F)
     sepp = g.node("ShaderNodeSeparateXYZ", (-2400, -3950), F); g.link(geo.outputs["Position"], sepp.inputs[0])
-    along = g.math("ADD", sepp.outputs["X"], sepp.outputs["Y"], (-2200, -3950), F)
+    # metres along the wall: position . horizontal tangent (normal x Z) - any wall orientation
+    tan = g.n("ShaderNodeVectorMath", (-2400, -4050), operation="CROSS_PRODUCT")
+    g.link(geo.outputs["Normal"], tan.inputs[0]); tan.inputs[1].default_value = (0.0, 0.0, 1.0)
+    tn = g.n("ShaderNodeVectorMath", (-2250, -4050), operation="NORMALIZE"); g.link(tan.outputs[0], tn.inputs[0])
+    dot = g.n("ShaderNodeVectorMath", (-2100, -4050), operation="DOT_PRODUCT")
+    g.link(geo.outputs["Position"], dot.inputs[0]); g.link(tn.outputs[0], dot.inputs[1])
+    along = dot.outputs["Value"]
     sv = g.node("ShaderNodeCombineXYZ", (-2000, -4100), F)
     g.link(g.math("MULTIPLY", along, L_["streak_w"], (-2150, -4100), F), sv.inputs["X"])
     g.link(g.math("MULTIPLY", sepp.outputs["Z"], L_["streak_len"], (-2150, -4250), F), sv.inputs["Y"])
@@ -383,7 +389,7 @@ def add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08
                                              (-1650, -5400), F), 0.35, (-1500, -5400), F), (-1350, -5250), F)
     grg = g.range(patch, lo, hi, (-1200, -5250), 0.0, amt, F)
     grg.node.label = "grunge patches"
-    foot = g.math("ADD", sepp.outputs["Z"], g.math("MULTIPLY", g.math("SUBTRACT", g.noise(geo.outputs["Position"], 6.0, (-1850, -5650), F), 0.5,
+    foot = g.math("ADD", g.math("SUBTRACT", sepp.outputs["Z"], ground_z, (-1500, -5750), F), g.math("MULTIPLY", g.math("SUBTRACT", g.noise(geo.outputs["Position"], 6.0, (-1850, -5650), F), 0.5,
                                                                       (-1650, -5650), F), 0.25, (-1500, -5650), F), (-1350, -5600), F)
     spl = g.math("MULTIPLY", g.range(foot, splash[0], splash[1], (-1200, -5600), splash[2], 0.0, F, smooth=True), vert, (-1050, -5600), F)
     spl.node.label = "soil splash"

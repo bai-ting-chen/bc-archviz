@@ -458,28 +458,25 @@ def glazed_tiles(name="POOL_TILES", tile=0.10, grout=0.003, glaze=(0.60, 0.79, 0
     return mat
 
 
-def retone(mat, target_rgb, saturation=0.25, tex_id=None):
-    """Desaturate a concrete_study map, then scale its measured linear mean to `target_rgb` (a dark brown scan -> light grey concrete keeps its pits and pores); macro-tone and other users stay linked."""
+def retone(mat, target_rgb, tex_id, saturation=0.25):
+    """Desaturate a concrete_study map toward its luminance, then scale its measured linear mean to `target_rgb` (a dark brown scan -> light grey concrete keeps its pits and pores)."""
     import lookdev
     nt = mat.node_tree
     diff = next(n for n in nt.nodes if n.label == "diffuse")
     tone = next(n for n in nt.nodes if n.label == "color_mult (tone match)")
-    if tex_id:
-        mean = lookdev.map_mean(tex_id)
-    else:
-        import numpy as np
-        px = np.empty(diff.image.size[0] * diff.image.size[1] * 4, dtype=np.float32)
-        diff.image.pixels.foreach_get(px)
-        px = px.reshape(-1, 4)[:, :3]
-        mean = list(np.where(px <= 0.04045, px / 12.92, ((px + 0.055) / 1.055) ** 2.4).mean(0))
+    mean = lookdev.map_mean(tex_id)
+    # a luminance mix (RGB to BW, Mix at `saturation`) - exactly what the gain below assumes
+    # (Hue/Saturation scales HSV saturation and pulls channels toward the max: ~25 % too bright)
     lum = 0.2126 * mean[0] + 0.7152 * mean[1] + 0.0722 * mean[2]
     desat = [lum * (1 - saturation) + c * saturation for c in mean]
     g = G(nt)
-    hs = g.node("ShaderNodeHueSaturation", (tone.location.x - 150, tone.location.y + 150), label="desaturate",
-                Saturation=saturation)
+    bw = g.node("ShaderNodeRGBToBW", (tone.location.x - 300, tone.location.y + 250), label="luminance")
+    ds = g.n("ShaderNodeMix", (tone.location.x - 150, tone.location.y + 150), data_type="RGBA", label="desaturate")
+    ds.inputs["Factor"].default_value = saturation
     for l in list(sock(tone.inputs, "A").links):
         nt.links.remove(l)
-    g.link(diff.outputs["Color"], hs.inputs["Color"])
-    g.link(hs.outputs["Color"], sock(tone.inputs, "A"))
+    g.link(diff.outputs["Color"], bw.inputs["Color"])
+    g.link(bw.outputs["Val"], sock(ds.inputs, "A")); g.link(diff.outputs["Color"], sock(ds.inputs, "B"))
+    g.link(sock(ds.outputs, "Result"), sock(tone.inputs, "A"))
     sock(tone.inputs, "B").default_value = (*[t / c for t, c in zip(target_rgb, desat)], 1.0)
     return [t / c for t, c in zip(target_rgb, desat)]

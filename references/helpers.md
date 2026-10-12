@@ -52,8 +52,8 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `setup_unlimited(res, samples=1000000, denoiser='OPTIX')` — Final settings: full res, untiled (tile > frame), no adaptive/time limit, denoiser + its passes stored, multilayer EXR.
 - `remove_handlers()` — Unregister the final's save handlers (do this before cancelling a final you do not want saved).
 - `start_in_ui(out_dir, res, stem=None, samples=1000000)` — Open UI: save the .blend, register savers (complete + cancel), render INVOKE_DEFAULT, fit the render view.
-- `stop_in_ui()` — Stop the running render from its viewer (savers fire). Check afterwards whether the denoiser ran.
-- `denoise_from_passes(src, out)` — OIDN (compositor Denoise, accurate prefilter, HDR) on a passes EXR's Noisy Image + albedo + normal -> linear EXR.
+- `stop_in_ui()` — Stop the running render from its viewer (savers fire; the stop is asynchronous - wait for the passes file). Check afterwards whether the denoiser ran.
+- `denoise_from_passes(src, out, layer='ViewLayer')` — OIDN (compositor Denoise, accurate prefilter, HDR) on a passes EXR's Noisy Image + albedo + normal -> linear EXR.
 - `png_from_exr(exr, base)` — 16-bit PNG graded with the open scene's view transform, look, exposure and white balance.
 
 ## `glassware` — Glass of water built for correct refraction in Cycles (no nested-IOR priority there).
@@ -113,7 +113,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `tidy(objs, unit_scale=0.01)` — Bake transforms, scale Max system units to metres (cm: 0.01), drop loose verts and unused slots.
 - `rebuild_materials(objs, maps_dir, bark_roughness=0.85, leaf_roughness=0.8)` — Rebuild imported V-Ray materials from the vendor maps: leaf cards (opacity map) or opaque PBR.
 - `open_loops(obj, material_index=None)` — Open-edge loops (optionally of one material): z, span, closed, which side the faces are on - holes vs tube ends.
-- `slot_maps(objs, maps_dir, pattern='(MT_[A-Za-z0-9_]+?)_(?:diffuse|albedo)$')` — Bitmap per slot prefix (leaf1, leaf2, seed ...) per object, read BEFORE tidy(): in a VRay2Sided sub the BACK slot often carries the bitmap name and the front none, and tidy() drops the unused back slots.
+- `slot_maps(objs, maps_dir, exts=('.jpg', '.png', '.tif'))` — Bitmap per slot prefix (leaf1, leaf2, seed ...) per object, read BEFORE tidy(): in a VRay2Sided sub the BACK slot often carries the bitmap name and the front none, and tidy() drops the unused back slots. The map is the longest tail of '<max name>_<bitmap stem>' that exists in maps_dir (a Blender '.001' suffix is ignored).
 - `origin_to_root(obj)` — Move the mesh so its root (bbox centre in plan, lowest z) sits at the object origin - for scattering clumps on terrain.
 
 ## `projectpath` — Which folder's library/ a script reads and writes assets in (no bpy: also used by host tools).
@@ -128,7 +128,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `leaf_proto(name, length, width, curl, material)` — A small curled elliptical leaf (10-gon) in a hidden PROTOS collection; reused if present.
 - `scatter(objs, instance, density, scale=1.0, z_max=10000.0, seed=0, keep_source=True, patch=0.0)` — Add (or update) the SCATTER modifier on each object.
 - `load_scatter_on_surface()` — Append Blender's essentials 'Scatter on Surface' node group (native, 5.x).
-- `meadow_layer_group(scatter_ng, name='MEADOW_LAYER', bare=(0.35, 0.62, 0.69))` — GN group: Scatter on Surface on a terrain object, masked by species patch noise, shared bare-soil noise, pad clearance and the camera frustum.
+- `meadow_layer_group(scatter_ng, name='MEADOW_LAYER', bare=None)` — GN group: Scatter on Surface on a terrain object, masked by species patch noise, shared bare-soil noise, pad clearance and the camera frustum. Reused if it exists (layers point at it).
 - `frustum_tangents(cam, res, margin=1.15)` — Half-tangents (x, y) of a camera's view incl. vertical lens shift, for the meadow frustum mask.
 - `meadow_layer(name, group, terrain, collection, camera, target_collection=None, **inputs)` — One meadow layer object (empty mesh + MEADOW_LAYER modifier); inputs by name, '_' for spaces.
 
@@ -143,7 +143,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `clear_glass(name='GLASS', ior=1.52)` — Soda-lime glass via archviz.dielectric (white, IOR 1.52 by default).
 - `white_backdrop(name='WHITE_BACKDROP', albedo=0.85)` — Matte white backdrop of a measured albedo (product/studio shots).
 - `glazed_tiles(name='POOL_TILES', tile=0.1, grout=0.003, glaze=(0.6, 0.79, 0.83), glaze_var=0.06, grout_col=(0.5, 0.51, 0.5), uv='BoxUV')` — Procedural glazed ceramic tiles (Poly Haven has no pool mosaic): Brick Texture with zero offset = square grid at real size (UVs in metres), per-tile colour variation, glossy glaze, rough grout, rounded tile edges as bump from the mortar mask.
-- `retone(mat, target_rgb, saturation=0.25, tex_id=None)` — Desaturate a concrete_study map, then scale its measured linear mean to `target_rgb` (a dark brown scan -> light grey concrete keeps its pits and pores); macro-tone and other users stay linked.
+- `retone(mat, target_rgb, tex_id, saturation=0.25)` — Desaturate a concrete_study map toward its luminance, then scale its measured linear mean to `target_rgb` (a dark brown scan -> light grey concrete keeps its pits and pores).
 
 ## `terrain` — Topography around a building pad, and the ground under a meadow (run in Blender).
 
@@ -151,7 +151,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `landform_group(name='LANDFORM', centre=(0.0, 0.0), pad_half=(4.0, 4.0), size=300.0, verts=601, pad_z=-0.03, crest=1.5, fall=6.0, run=40.0, warp=7.0, roll=2.5, hummock=0.12)` — GN group: grid -> hill around a pad (landform grading), stores `pad_d`; plan metres.
 - `height(x, y, centre, pad_half, pad_z=-0.03, crest=1.5, fall=6.0, run=40.0)` — Python twin of landform_group without the noise terms (e.g. to set a camera's eye height).
 - `add_terrain(group, material, name='TERRAIN', collection=None)` — An empty mesh object carrying the landform modifier (the GN group makes the geometry).
-- `ground_material(thatch_tex, soil_tex, name='GROUND', bare=(0.35, 0.6, 0.69), wet_gamma=None, wet_rough=0.6)` — Ground under a meadow: a dead-grass/thatch texture, soil only where the bare-soil noise (same 4D noise and W as scatter.meadow_layer_group) opens the sward. wet_gamma (e.g. 1.4): wet ground = dry^gamma (darker, more saturated) and roughness x wet_rough.
+- `ground_material(thatch_tex, soil_tex, name='GROUND', bare=BARE, wet_gamma=None, wet_rough=0.6)` — Ground under a meadow: a dead-grass/thatch texture, soil only where the bare-soil noise (same 4D noise and W as scatter.meadow_layer_group) opens the sward. wet_gamma (e.g. 1.4): wet ground = dry^gamma (darker, more saturated) and roughness x wet_rough.
 
 ## `vegetation` — Grass and herb materials for modelled blades (no opacity cards): thin translucent blade, per-instance tone and dryness, optional wet film and near-camera dew (run in Blender).
 
@@ -165,9 +165,9 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `add_edge_wear(obj, group, **inputs)` — Add the modifier; per-object overrides by input name, e.g. add_edge_wear(o, g, Band=0.1).
 - `weathered_concrete(name='CONCRETE_WEATHERED', dirt_band=0.035, dirt_amount=0.85, dirt_noise_scale=9.0, stain=True, tex_id='concrete_wall_009')` — concrete_study base (tone, maps, round edges, leak stain) + procedural dirty edges from the GN `edge_dist` field + a fresh-break material where GN cut a chip (`chip` > 0).
 - `mask_material(name, method, radius=0.035)` — Emission view of one edge-detection method, for side-by-side comparison.
-- `leak_field_group(name='LEAK FIELD', inset=0.02, reach=6.0)` — GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`.
+- `leak_field_group(name='LEAK FIELD', inset=0.02, reach=6.0)` — GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`. Reused if it exists (other objects' modifiers point at it).
 - `add_leak_field(obj)` — Add LEAK FIELD as the FIRST modifier: run after chips, rays slip through the chip-band seam and a wrong leak_d spreads over whole coarse triangles (light triangles under an arris).
-- `add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7))` — On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash at the foot; all into its grime mask.
+- `add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0)` — On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask.
 - `add_cracks(mat, openings=(), crack=None)` — On a weathered_concrete material: shrinkage cracks from opening corners + patchy map-cracking; dark core over everything, grime halo, groove. openings: (axis 'x'|'y', plane, u0, u1, v0, v1, top_only[, keep_angles]).
 
 ## `wood_wear` — Weathered varnished wood: worn edges (shading), dents along arrises and torn-off varnished skin on the top surface that exposes the pale inner wood (both real geometry).

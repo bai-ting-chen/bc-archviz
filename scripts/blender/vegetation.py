@@ -50,8 +50,12 @@ def _dew(g, shader, D):
     """Effective-reflectance dew beads mixed over `shader`: Voronoi beads in the object's own
     space (they stay on their blade), hemispherical lens normal, up-facing surfaces, near camera."""
     tc = g.n("ShaderNodeTexCoord", (-900, -1100))
+    oi = g.n("ShaderNodeObjectInfo", (-1100, -1250))                 # per-instance offset (RULES 8d)
+    off = g.n("ShaderNodeVectorMath", (-850, -1250), operation="MULTIPLY_ADD")
+    g.link(oi.outputs["Random"], off.inputs[0]); off.inputs[1].default_value = (97.0, 61.0, 43.0)
+    g.link(tc.outputs["Object"], off.inputs[2])
     vor = g.n("ShaderNodeTexVoronoi", (-700, -1100)); vor.inputs["Scale"].default_value = 1.0 / D["cell"]
-    g.link(tc.outputs["Object"], vor.inputs["Vector"])
+    g.link(off.outputs[0], vor.inputs["Vector"])
     sep = g.n("ShaderNodeSeparateColor", (-500, -1250)); g.link(vor.outputs["Color"], sep.inputs[0])
     r = g.math("ADD", g.math("MULTIPLY", sep.outputs["Red"], D["r"][1] - D["r"][0], (-350, -1250)), D["r"][0], (-200, -1250))
     d = vor.outputs["Distance"]

@@ -78,6 +78,8 @@ def remove_handlers():
 
 def start_in_ui(out_dir, res, stem=None, samples=1_000_000):
     """Open UI: save the .blend, register savers (complete + cancel), render INVOKE_DEFAULT, fit the render view."""
+    if not bpy.data.filepath:
+        raise RuntimeError("save the .blend first: the final saves it and names its outputs after it")
     sc = setup_unlimited(res, samples)
     _STATE["out_dir"] = out_dir
     _STATE["stem"] = stem or os.path.splitext(os.path.basename(bpy.data.filepath))[0]
@@ -98,16 +100,15 @@ def start_in_ui(out_dir, res, stem=None, samples=1_000_000):
 
 
 def stop_in_ui():
-    """Stop the running render from its viewer (savers fire). Check afterwards whether the denoiser ran."""
+    """Stop the running render from its viewer (savers fire; the stop is asynchronous - wait for the passes file). Check afterwards whether the denoiser ran."""
     for w in bpy.context.window_manager.windows:
         for area in w.screen.areas:
             if area.type == "IMAGE_EDITOR":
                 with bpy.context.temp_override(window=w, area=area):
                     bpy.ops.render.view_cancel()
-    return not bpy.app.is_job_running("RENDER")
 
 
-def denoise_from_passes(src, out):
+def denoise_from_passes(src, out, layer="ViewLayer"):
     """OIDN (compositor Denoise, accurate prefilter, HDR) on a passes EXR's Noisy Image + albedo + normal -> linear EXR."""
     import OpenImageIO as oiio
     sc = bpy.context.scene
@@ -117,7 +118,7 @@ def denoise_from_passes(src, out):
     tree = bpy.data.node_groups.new("DENOISE", "CompositorNodeTree")
     tree.interface.new_socket("Image", in_out="OUTPUT", socket_type="NodeSocketColor")
     N, L = tree.nodes, tree.links
-    node = N.new("CompositorNodeImage"); node.image = img; node.layer = "ViewLayer"
+    node = N.new("CompositorNodeImage"); node.image = img; node.layer = layer
     dn = N.new("CompositorNodeDenoise")
     for k, v in (("prefilter", "ACCURATE"), ("use_hdr", True), ("quality", "HIGH")):
         if hasattr(dn, k):
