@@ -78,13 +78,13 @@ Keep one builder per job (one dielectric, one node-graph builder `study_material
 against this file, RULES.md and api-traps.md, and prints the findings.
 
 **Codex's code → a fresh Claude subagent.** Start a general-purpose subagent with only: the task
-brief, the diff (`git diff` or the changed files), and "review against RULES.md, maintaining.md
+brief, the complete change (`git show <sha>` once committed; before that `git diff HEAD` plus
+the new files listed by `git status --short`), and "review against RULES.md, maintaining.md
 and api-traps.md: correctness bugs, rule breaks, docs out of date; findings only, most severe
 first, with file:line". Only its verdict enters the main session.
 
 Check each finding against the code before acting, fix what holds in a new commit, and list for
-the user what was rejected and why. One model only (the other out of tokens or not installed):
-review in a fresh session of the same model and say the cross-check was same-model.
+the user what was rejected and why. One model only: RULES 14.
 
 ## Handing work to Codex (RULES 15)
 For detail work, from the project folder:
