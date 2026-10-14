@@ -277,5 +277,11 @@ files to one agent at a time. Re-read RULES.md › Agents.
 Check: each project used by both agents has `CLAUDE.md`/`AGENTS.md` lines naming `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (RULES 16) and none naming a project-root `AGENT_LOCK`; or Codex is not installed.
 Do: add those lines; replace any project-root lock instruction.
 
+## 261014 — Cross-check, roles as a guide, modular code
+Pull-only. RULES 14 now cross-checks all code with the other model (Codex's code reviewed by a
+fresh Claude subagent); RULES 15 is a guide (Claude steers, Codex does detail work, either can
+take over alone); new RULES 17: modular code and docs, no god scripts. maintaining.md › Review and
+› Handing work to Codex. Re-read RULES.md › Agents and RULES 17.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

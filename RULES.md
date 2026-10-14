@@ -125,20 +125,32 @@
     one — a small scene isolates the cause in minutes where the full scene hides it.
 
 ## Agents
-14. **Writer runs, a second agent reviews.** When the machine has Codex, the agent that writes
-    skill code proves it runs (syntax, one run, the control render of RULES 9) but does not
-    review its own code; Codex reviews every skill change before it is pushed
-    (`scripts/codex_review.py`, maintaining.md › Review). The writer weighs each finding, fixes
-    what holds, and tells the user what it rejected and why.
-15. **Claude develops, Codex executes.** New techniques, research, tests and every change to
-    this skill are Claude's. Codex runs only workflows already done before: a helper in this
-    skill that a finished study used. Codex never edits the skill; what failed or was unclear
-    goes into the study's `STUDY_NOTES.md` for Claude to fold in.
+14. **Cross-check all code with the other model.** Code Claude writes is reviewed by Codex
+    (`scripts/codex_review.py`); code Codex writes is reviewed by a fresh Claude subagent that
+    sees only the task and the diff (maintaining.md › Review). A new technique also gets its
+    control render (RULES 9). The writer weighs each finding, fixes what holds, and tells the
+    user what it rejected and why. With only one model available, the review runs in a fresh
+    session of that model, and the user is told the cross-check was same-model.
+15. **Claude steers, Codex minds the details** (a guide, not a fence). Claude takes the big
+    decisions: method and research conclusions, proof renders, look judgement, the shape of the
+    skill. Codex suits detail work: scripts from a short brief, gathering sources into a brief,
+    measurement runs (numbers table + one contact sheet), past workflows. Long output goes to a
+    file with a short summary back. Skill changes reach the repo through Claude as a diff it
+    commits. Either model may take over alone when the other is out of tokens; this skill and
+    the project files are the whole handover, so nothing lives only in one agent's memory.
 16. **One agent at a time on Blender and on a file.** There is one Blender and one MCP port per
     machine, shared by every project. Before driving Blender or editing a study's files, check
-    `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (machine-wide, beside the MCP server): absent → create it (`<agent> | <what: Blender, study or files> | <start, ISO time>`), work, delete it
+    `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (machine-wide, beside the MCP server): absent →
+    create it (`<agent> | <what: Blender, study or files> | <start, ISO time>`), work, delete it
     when done; present and not yours → stop and tell the user, never take it over. A
     render left running keeps the lock until it ends.
+
+17. **Modular code and docs, no god scripts.** Either model must be able to pick up any file
+    cold. One module per job, functions that do one thing with real-unit arguments and a
+    one-line docstring, no hidden global state; extend by adding a function or module, not by
+    growing one file. A module that gathers unrelated jobs, or that cannot be changed without
+    reading all of it, gets split. Docs the same: one topic per reference, short sections,
+    pointers instead of repeats.
 
 ## Safety
 12. MCP code runs unguarded in the user's Blender: save first, rebuild-from-script study files,

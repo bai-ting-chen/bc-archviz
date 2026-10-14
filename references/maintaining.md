@@ -72,12 +72,27 @@ Keep one builder per job (one dielectric, one node-graph builder `study_material
 `archviz.read_meta`, `archviz.use_gpu`); extend it rather than writing a second.
 
 ## Review (RULES 14)
-After committing a change and before pushing it, with the MCP venv python:
-`python scripts/codex_review.py --commit <sha>` (or `--base origin/main` for everything not yet
-pushed, `--uncommitted` for the working tree). It runs `codex exec` read-only at high
-reasoning effort with a prompt built from this file, RULES.md and api-traps.md, and prints the findings.
-Check each finding against the code before acting on it, fix what holds in a new commit, and
-list for the user what was rejected and why. A machine without Codex skips this step and says so.
+**Claude's code → Codex.** After committing, before pushing, with the MCP venv python:
+`python scripts/codex_review.py --commit <sha>` (`--base origin/main` for everything unpushed,
+`--uncommitted` for the working tree). It runs `codex exec` read-only at high reasoning effort
+against this file, RULES.md and api-traps.md, and prints the findings.
+
+**Codex's code → a fresh Claude subagent.** Start a general-purpose subagent with only: the task
+brief, the diff (`git diff` or the changed files), and "review against RULES.md, maintaining.md
+and api-traps.md: correctness bugs, rule breaks, docs out of date; findings only, most severe
+first, with file:line". Only its verdict enters the main session.
+
+Check each finding against the code before acting, fix what holds in a new commit, and list for
+the user what was rejected and why. One model only (the other out of tokens or not installed):
+review in a fresh session of the same model and say the cross-check was same-model.
+
+## Handing work to Codex (RULES 15)
+For detail work, from the project folder:
+`codex exec -s workspace-write "<brief>" < NUL > <study>\_wip\codex\<task>.log`
+(stdin closed, or it waits). Put the brief in a file when it is longer than a few lines. The
+brief names the goal, the helpers to reuse (`helpers.md`), the interface in real units, where
+outputs go (the study's `_wip/`) and asks for a report file with a summary of at most 20 lines.
+Read the summary, not the log. Codex takes the agent lock (RULES 16) when it drives Blender.
 
 ## Commit and push
 Commit messages say what changed and why. End them with the session's attribution line, if
