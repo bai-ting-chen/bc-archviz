@@ -74,7 +74,7 @@ must leave for the other machines.
 | Measure | `scripts\imgstats.py stats|patch|diff`; `scripts\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `scripts\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
-| Maintenance | `scripts\helper_index.py` (writes references/helpers.md), `scripts\regress_helpers.py` (old vs new helper output) |
+| Maintenance | `scripts\helper_index.py` (writes references/helpers.md), `scripts\regress_helpers.py` (old vs new helper output), `scripts\codex_review.py` (Codex reviews a change before push, RULES 14) |
 | Controls | `scripts\controls\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension (`references/luxcore.md`): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
 | Assets | `scripts\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); others `<study>\library\local\` with a `meta.json` |
