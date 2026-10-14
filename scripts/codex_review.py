@@ -52,16 +52,17 @@ def main():
     ap.add_argument("--extra", default="", help="extra review instructions appended to the prompt")
     a = ap.parse_args()
 
-    cmd = [codex_exe(), "review",
-           "-c", f'model_reasoning_effort="{a.effort}"',
-           "-c", 'sandbox_mode="read-only"']
     if a.commit:
-        cmd += ["--commit", a.commit]
+        what = f"the commit {a.commit} (`git show {a.commit}`)"
     elif a.uncommitted:
-        cmd += ["--uncommitted"]
+        what = "the uncommitted changes (`git diff HEAD` and `git status --short` for new files)"
     else:
-        cmd += ["--base", a.base]
-    cmd.append(PROMPT + ("\n" + a.extra if a.extra else ""))
+        what = f"every commit since {a.base} (`git log {a.base}..HEAD` and `git diff {a.base}..HEAD`)"
+    # `codex review` takes no custom instructions together with --commit/--base, so run
+    # `codex exec` in its read-only sandbox and let it read the diff itself
+    cmd = [codex_exe(), "exec", "-s", "read-only",
+           "-c", f'model_reasoning_effort="{a.effort}"',
+           f"Review {what} in this git repository.\n" + PROMPT + ("\n" + a.extra if a.extra else "")]
     # stdin closed: codex otherwise waits for more input
     r = subprocess.run(cmd, cwd=SKILL, stdin=subprocess.DEVNULL)
     sys.exit(r.returncode)

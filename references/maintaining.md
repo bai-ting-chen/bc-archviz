@@ -74,8 +74,8 @@ Keep one builder per job (one dielectric, one node-graph builder `study_material
 ## Review (RULES 14)
 After committing a change and before pushing it, with the MCP venv python:
 `python scripts/codex_review.py --commit <sha>` (or `--base origin/main` for everything not yet
-pushed, `--uncommitted` for the working tree). It runs `codex review` read-only at high reasoning
-effort with a prompt built from this file, RULES.md and api-traps.md, and prints the findings.
+pushed, `--uncommitted` for the working tree). It runs `codex exec` read-only at high
+reasoning effort with a prompt built from this file, RULES.md and api-traps.md, and prints the findings.
 Check each finding against the code before acting on it, fix what holds in a new commit, and
 list for the user what was rejected and why. A machine without Codex skips this step and says so.
 
