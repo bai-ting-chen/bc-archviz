@@ -134,9 +134,9 @@
     this skill are Claude's. Codex runs only workflows already done before: a helper in this
     skill that a finished study used. Codex never edits the skill; what failed or was unclear
     goes into the study's `STUDY_NOTES.md` for Claude to fold in.
-16. **One agent at a time on Blender and on a file.** There is one Blender and one MCP port. Before
-    driving Blender or editing a study's files, check `AGENT_LOCK` in the project root: absent
-    → create it (`<agent> | <what: Blender, study or files> | <start, ISO time>`), work, delete it
+16. **One agent at a time on Blender and on a file.** There is one Blender and one MCP port per
+    machine, shared by every project. Before driving Blender or editing a study's files, check
+    `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (machine-wide, beside the MCP server): absent → create it (`<agent> | <what: Blender, study or files> | <start, ISO time>`), work, delete it
     when done; present and not yours → stop and tell the user, never take it over. A
     render left running keeps the lock until it ends.
 

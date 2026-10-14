@@ -259,7 +259,7 @@ Do steps 22–23 only on a machine where Codex is installed (`%USERPROFILE%\.cod
 ### 22. Codex sees the live skill
 Check: `%USERPROFILE%\.agents\skills\blender-archviz` is a junction to `%USERPROFILE%\.claude\skills\blender-archviz` (`dir %USERPROFILE%\.agents\skills` shows `<JUNCTION>`), or Codex is not installed.
 Do: delete the copy that is there, then
-`mklink /J %USERPROFILE%\.agents\skills\blender-archviz %USERPROFILE%\.claude\skills\blender-archviz`.
+`mklink /J "%USERPROFILE%\.agents\skills\blender-archviz" "%USERPROFILE%\.claude\skills\blender-archviz"`.
 
 ### 23. Blender MCP in Codex, AGENTS.md per project
 Check: `codex mcp list` shows `blender`, and each project used from Codex has an `AGENTS.md` that points at its `CLAUDE.md`, the user `CLAUDE.md` and the project's memory folder; or Codex is not installed.
@@ -270,11 +270,11 @@ Claude→Codex term table (pipeline.md › Install), never a copy of their rules
 ## 261013b — Codex reviews, Claude develops, one agent at a time
 New RULES 14-16: the writer of skill code runs it but Codex reviews it before a push
 (`scripts/codex_review.py`, maintaining.md › Review); Codex only executes workflows done before
-and never edits the skill; an `AGENT_LOCK` file in the project root keeps Blender and study files
-to one agent at a time. Re-read RULES.md › Agents.
+and never edits the skill; a machine-wide `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` file keeps Blender and study
+files to one agent at a time. Re-read RULES.md › Agents.
 
 ### 24. Projects carry the lock rule
-Check: each project used by both agents has `AGENT_LOCK` in its `.gitignore` (if it has one) and its `CLAUDE.md`/`AGENTS.md` point to RULES 16; or Codex is not installed.
+Check: each project used by both agents has `CLAUDE.md`/`AGENTS.md` lines pointing to RULES 16 and its lock file; or Codex is not installed.
 Do: add those lines.
 
 ### Last. Delete this file

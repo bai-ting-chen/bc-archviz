@@ -18,7 +18,7 @@
   overrides it — don't keep one. Tools load at session start. Server env: `BLENDER_MCP_HOST/PORT`, `BLENDER_PATH`.
 - Codex (OpenAI) on the same machine: its user skills folder is `~/.agents/skills`. Link the
   skill there as a directory junction, not a copy, so a `git pull` updates both agents:
-  `mklink /J %USERPROFILE%\.agents\skills\blender-archviz %USERPROFILE%\.claude\skills\blender-archviz`.
+  `mklink /J "%USERPROFILE%\.agents\skills\blender-archviz" "%USERPROFILE%\.claude\skills\blender-archviz"`.
   A Codex skill import can leave a stale copy there; replace it. Register the MCP in
   `~/.codex/config.toml` as `[mcp_servers.blender]` with the same command and an
   `[mcp_servers.blender.env]` table; check with `codex mcp list`. Codex reads `AGENTS.md`, not

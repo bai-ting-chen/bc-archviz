@@ -1,7 +1,6 @@
 """Second-opinion review of a skill change by Codex (read-only), before the change is pushed.
 
-The agent that writes the code runs it once (syntax, one run, the control render) and does
-not review it; Codex reads it against the skill's own rules (references/maintaining.md).
+When and why: RULES 14; how: references/maintaining.md › Review.
 
     python scripts/codex_review.py --commit <sha>      # one commit
     python scripts/codex_review.py --uncommitted       # working tree
