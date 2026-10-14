@@ -274,8 +274,8 @@ and never edits the skill; a machine-wide `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK`
 files to one agent at a time. Re-read RULES.md › Agents.
 
 ### 24. Projects carry the lock rule
-Check: each project used by both agents has `CLAUDE.md`/`AGENTS.md` lines pointing to RULES 16 and its lock file; or Codex is not installed.
-Do: add those lines.
+Check: each project used by both agents has `CLAUDE.md`/`AGENTS.md` lines naming `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (RULES 16) and none naming a project-root `AGENT_LOCK`; or Codex is not installed.
+Do: add those lines; replace any project-root lock instruction.
 
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.
