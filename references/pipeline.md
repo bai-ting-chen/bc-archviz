@@ -16,6 +16,15 @@
   '{"type":"stdio","command":"<LOCALAPPDATA>/BlenderMCP/venv/Scripts/blender-mcp.exe","env":{...}}'
   --scope user`; check with `claude mcp get blender`. A project `.mcp.json` named `blender`
   overrides it — don't keep one. Tools load at session start. Server env: `BLENDER_MCP_HOST/PORT`, `BLENDER_PATH`.
+- Codex (OpenAI) on the same machine: its user skills folder is `~/.agents/skills`. Link the
+  skill there as a directory junction, not a copy, so a `git pull` updates both agents:
+  `mklink /J %USERPROFILE%\.agents\skills\blender-archviz %USERPROFILE%\.claude\skills\blender-archviz`.
+  A Codex skill import can leave a stale copy there; replace it. Register the MCP in
+  `~/.codex/config.toml` as `[mcp_servers.blender]` with the same command and an
+  `[mcp_servers.blender.env]` table; check with `codex mcp list`. Codex reads `AGENTS.md`, not
+  `CLAUDE.md` or Claude Code's memory, so a project used from Codex gets an `AGENTS.md` that points
+  at those sources and translates Claude-only terms (tool names, "save a memory"). Git operations
+  on the skill go through the `~/.claude` path.
 - download.blender.org can answer winget with **403**. Fetch the same MSI from an official
   mirror (`mirrors.ocf.berkeley.edu/blender/release/…`, `mirror.clarkson.edu/blender/…`) and
   check its SHA256 against `winget show --id BlenderFoundation.Blender --version <v> --exact`

@@ -251,5 +251,21 @@ pointers; materials.md has a contents line; study layout names `scene_geometry.p
 `scene_look.py`; one-scene numbers removed from render-settings and lighting-camera.
 Re-read RULES 9 and SKILL.md › Workflow.
 
+## 261013 — Using the skill from Codex
+Codex reads the same SKILL.md format from `~/.agents/skills`. A Codex skill import had left a
+stale partial copy there (no scripts, old rules). Setup is in `references/pipeline.md` › Install.
+Do steps 22–23 only on a machine where Codex is installed (`%USERPROFILE%\.codex` exists).
+
+### 22. Codex sees the live skill
+Check: `%USERPROFILE%\.agents\skills\blender-archviz` is a junction to `%USERPROFILE%\.claude\skills\blender-archviz` (`dir %USERPROFILE%\.agents\skills` shows `<JUNCTION>`), or Codex is not installed.
+Do: delete the copy that is there, then
+`mklink /J %USERPROFILE%\.agents\skills\blender-archviz %USERPROFILE%\.claude\skills\blender-archviz`.
+
+### 23. Blender MCP in Codex, AGENTS.md per project
+Check: `codex mcp list` shows `blender`, and each project used from Codex has an `AGENTS.md` that points at its `CLAUDE.md`, the user `CLAUDE.md` and the project's memory folder; or Codex is not installed.
+Do: add `[mcp_servers.blender]` (same command and env as `claude mcp get blender`) to
+`~/.codex/config.toml`; write the project's `AGENTS.md` as a map to those sources plus a
+Claude→Codex term table (pipeline.md › Install), never a copy of their rules.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.
