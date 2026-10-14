@@ -267,5 +267,15 @@ Do: add `[mcp_servers.blender]` (same command and env as `claude mcp get blender
 `~/.codex/config.toml`; write the project's `AGENTS.md` as a map to those sources plus a
 Claude→Codex term table (pipeline.md › Install), never a copy of their rules.
 
+## 261013b — Codex reviews, Claude develops, one agent at a time
+New RULES 14-16: the writer of skill code runs it but Codex reviews it before a push
+(`scripts/codex_review.py`, maintaining.md › Review); Codex only executes workflows done before
+and never edits the skill; an `AGENT_LOCK` file in the project root keeps Blender and study files
+to one agent at a time. Re-read RULES.md › Agents.
+
+### 24. Projects carry the lock rule
+Check: each project used by both agents has `AGENT_LOCK` in its `.gitignore` (if it has one) and its `CLAUDE.md`/`AGENTS.md` point to RULES 16; or Codex is not installed.
+Do: add those lines.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

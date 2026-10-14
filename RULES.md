@@ -124,6 +124,22 @@
 11. Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real
     one — a small scene isolates the cause in minutes where the full scene hides it.
 
+## Agents
+14. **Writer runs, a second agent reviews.** When the machine has Codex, the agent that writes
+    skill code proves it runs (syntax, one run, the control render of RULES 9) but does not
+    review its own code; Codex reviews every skill change before it is pushed
+    (`scripts/codex_review.py`, maintaining.md › Review). The writer weighs each finding, fixes
+    what holds, and tells the user what it rejected and why.
+15. **Claude develops, Codex executes.** New techniques, research, tests and every change to
+    this skill are Claude's. Codex runs only workflows already done before: a helper in this
+    skill that a finished study used. Codex never edits the skill; what failed or was unclear
+    goes into the study's `STUDY_NOTES.md` for Claude to fold in.
+16. **One agent at a time on Blender and on a file.** There is one Blender and one MCP port. Before
+    driving Blender or editing a study's files, check `AGENT_LOCK` in the project root: absent
+    → create it (`<agent> | <what: Blender, study or files> | <start, ISO time>`), work, delete it
+    when done; present and not yours → stop and tell the user, never take it over. A
+    render left running keeps the lock until it ends.
+
 ## Safety
 12. MCP code runs unguarded in the user's Blender: save first, rebuild-from-script study files,
     never delete user data blocks without asking.

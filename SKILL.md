@@ -46,6 +46,7 @@ must leave for the other machines.
 ```
 - [ ] Read RULES.md and the references/ file for the task — both live in THIS skill folder,
       not the project; skim api-traps.md before writing node/GN code
+- [ ] `AGENT_LOCK` in the project root absent or mine (RULES 16); create it before driving Blender
 - [ ] Blender open, MCP on 9876 (get_blendfile_summary_datablocks)
 - [ ] Rhino: which document is open, is it modified? A user's file stays untouched — write
       the study geometry with File3dm (pipeline.md)
