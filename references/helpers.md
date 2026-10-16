@@ -153,6 +153,33 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `add_terrain(group, material, name='TERRAIN', collection=None)` — An empty mesh object carrying the landform modifier (the GN group makes the geometry).
 - `ground_material(thatch_tex, soil_tex, name='GROUND', bare=BARE, wet_gamma=None, wet_rough=0.6)` — Ground under a meadow: a dead-grass/thatch texture, soil only where the bare-soil noise (same 4D noise and W as scatter.meadow_layer_group) opens the sward. wet_gamma (e.g. 1.4): wet ground = dry^gamma (darker, more saturated) and roughness x wet_rough.
 
+## `tile_damage` — Warped, tile-local Voronoi fracture cells, coating loss and rigid piece planes.
+
+- `damage_group(name='TileDamage')` — Build four shared Voronoi evaluations, preserving matching links on v6 upgrade.
+- `damage_bsdfs(a, i, intact, color, height, d)` — Shade exposed clay, engobe and dirt independently of the coated glaze.
+
+## `tile_layout` — Metre-based tile layout shader maths; see references/materials.md > Tiles.
+
+- `reference(u, v, tile_w, tile_h, joint, row_offset=0.0, rotation=0.0, origin=(0.0, 0.0), corner_radius=0.0, jitter_offset=0.0, jitter_rotation=0.0)` — Return layout truth in metres; row_offset accepts any real value and wraps.
+- `layout_group(name='TileLayout')` — Create the metre-based shader layout group or reuse its matching version.
+- `add_layout(node_tree, vector_socket, loc=(0, 0), **inputs)` — Add a metre/radian layout group; row_offset accepts any real value and wraps.
+
+## `tile_mapping` — World-metre UV coordinates for planar and cylindrical tile surfaces.
+
+- `planar_uv(obj, origin=(0.0, 0.0), name='TileUV', facing=None)` — UVs baked in world space: map after placing the object; tilted faces foreshorten by cos(theta), so use cylinder_uv for curved walls.
+- `cylinder_uv(obj, center_xy, radius, origin=(0.0, 0.0), name='TileUV', inward=None, seam_angle=None)` — UVs baked in world space: map after placing the object; write oriented arc-length/Z UVs.
+- `annulus_uv(obj, center_xy, radius, origin=(0.0, 0.0), name='TileUV', seam_angle=None, sign=None, like=None)` — Polar metre UVs for a flat ring: wall-radius arc length U and absolute radial offset V.
+- `layout_vector(node_tree, name='TileUV', loc=(0, 0), obj=None)` — Add a named UV Map node and return its layout vector output socket.
+
+## `tile_surface` — Independent tile layout, glazed face, rounded shoulder and grout shading.
+
+- `tile_material(name, uv='TileUV', tile_w=0.045, tile_h=0.145, joint=0.003, row_offset=0.0, rotation=0.0, origin=(0.0, 0.0), face=None, map_size=None, body_albedo=(0.65, 0.64, 0.61), coat_ior=1.5, coat_rough=0.25, edge_radius=0.002, recess=0.0015, grout_albedo=(0.36, 0.36, 0.35), grout_rough=0.9, dust=0.5, dust_width=0.004, tint_var=0.03, rough_var=0.05, tilt_deg=0.4, wave_amp=0.0001, specks=0.3, macro=0.05, off=(), corner_radius=0.003, speck_size=0.001, lippage=0.0003, jitter_offset=0.0, jitter_rotation_deg=0.0, face_contrast=1.0, face_saturation=1.0, damage=0.05, crack_share=0.45, chip_share=0.35, step_height=0.00015, piece_tilt=0.0035, crack_width=0.00018, crack_depth=0.0008, chip_size=0.004, chip_depth=0.0008, spall_size=0.001, spall_density=0.25, glaze_thickness=0.0003, engobe_thickness=0.0002, glaze_lip_width=0.0002, engobe_ring=0.0003, force_kind=0, displacement=False, pixel_size=1.0, shell_exponent=0.6, crack_dirt=0.85, dirt_width=0.004, warp=0.004, warp_scale=0.02, crack_cell=0.03, crack_density=0.35, chip_density=0.5)` — Build metre-scale tiles with rotation in radians, tilt/jitter_rotation_deg in degrees and lippage in metres.
+- `set_param(mat, name, value)` — Set any tile_material keyword, rebuilding structural options in the same material.
+- `toggle(mat, feature, on)` — Enable or remove a finish feature, preserving its parameter values.
+- `use_displacement(mat, objects, pixel_size=1.0)` — Opt into world-metre displacement using the shared adaptive subdivision helper.
+- `use_damage_displacement(mat, objects, pixel_size=1.0)` — Displace only chips, cracks and piece steps; tile profile and joints stay bump, so wall edges never move.
+- `use_bump(mat)` — Restore height bump shading and disconnect geometric displacement.
+
 ## `vegetation` — Grass and herb materials for modelled blades (no opacity cards): thin translucent blade, per-instance tone and dryness, optional wet film and near-camera dew (run in Blender).
 
 - `blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dew=None, dry_patch=0.55)` — Thin blade: Principled + Translucent (Add); per-instance value 0.8-1.15 and a patchy straw mix; optional wet film / dew.

@@ -1,30 +1,35 @@
-"""Metre-valued brittle ceramic fracture fields in each tile's rotated frame."""
-import math
+"""Warped, tile-local Voronoi fracture cells, coating loss and rigid piece planes.
 
+Cracks (network, pieces, spalls, dirt band) are look-approved; chips and edge flakes are WORK IN
+PROGRESS (shape still under look-dev, controls report them as WIP) — see materials.md › Tiles.
+"""
+import math
 import bpy
 from tile_nodes import _Graph, _socket, _replace_group_users
 
-_VERSION = 6
-PARAMS = dict(damage='Fraction', crack_share='Crack Share', chip_share='Chip Share',
-              branch_share='Branch Share', step_height='Step Height', piece_tilt='Piece Tilt',
-              crack_width='Crack Width', crack_depth='Crack Depth', kink_size='Kink Size',
-              kink_amp='Kink Amp', chip_size='Chip Size', chip_depth='Chip Depth',
-              spall_size='Spall Size', spall_density='Spall Density', glaze_thickness='Glaze Thickness',
-              engobe_thickness='Engobe Thickness', glaze_lip_width='Glaze Lip Width',
-              engobe_ring='Engobe Ring', force_kind='Force Kind', shell_exponent='Shell Exponent',
-              crack_dirt='Crack Dirt', dirt_width='Dirt Width')
-DEFAULTS = (.05, .45, .35, .35, .00006, .0035, .00018, .0008, .0015, .0002, .004, .0008,
-            .001, .25, .0003, .0002, .0002, .0003, 0, .6, .6, .002)
-_LAYOUT_INPUTS = ('Tile ID','Cell','Tile UV','Edge','Tile Size')
-_OUTPUTS = ('Chip Depth Out','Piece Height','Piece','Crack','Crack Depth Out',
-            'Glaze Lip','Engobe','Body','Damaged','Kind','Dirt')
+_VERSION = 7
+_REVISION = 1
+PIECE_BINS = 65536
+PARAMS = dict(damage='Fraction',crack_share='Crack Share',chip_share='Chip Share',
+              step_height='Step Height',piece_tilt='Piece Tilt',crack_width='Crack Width',
+              crack_depth='Crack Depth',chip_size='Chip Size',chip_depth='Chip Depth',
+              spall_size='Spall Size',spall_density='Spall Density',glaze_thickness='Glaze Thickness',
+              engobe_thickness='Engobe Thickness',glaze_lip_width='Glaze Lip Width',engobe_ring='Engobe Ring',
+              force_kind='Force Kind',shell_exponent='Shell Exponent',crack_dirt='Crack Dirt',
+              dirt_width='Dirt Width',warp='Warp',warp_scale='Warp Scale',crack_cell='Crack Cell',
+              crack_density='Crack Density',chip_density='Chip Density')
+DEFAULTS=(.05,.45,.35,.00015,.0035,.00018,.0008,.004,.0008,.001,.25,.0003,.0002,
+          .0002,.0003,0,.6,.85,.004,.004,.02,.03,.35,.5)
+_LAYOUT_INPUTS=('Tile ID','Cell','Tile UV','Edge','Tile Size')
+_OUTPUTS=('Chip Depth Out','Piece Height','Piece','Crack','Crack Depth Out','Glaze Lip','Engobe',
+          'Body','Damaged','Kind','Dirt','Chip','Picked','Crack Distance','Chip Cell','Chip Site Edge')
 
 
 def _is_current(tree):
-    """Require the complete v6 interface as well as the implementation stamp."""
-    if tree is None or tree.get('tile_damage_version') != _VERSION or tree.get('tile_damage_revision') != 2:
+    """Require the full v7 contract, not only the version stamp."""
+    if tree is None or tree.get('tile_damage_version')!=_VERSION or tree.get('tile_damage_revision')!=_REVISION:
         return False
-    sockets = {(item.in_out,item.name) for item in tree.interface.items_tree if item.item_type=='SOCKET'}
+    sockets={(s.in_out,s.name) for s in tree.interface.items_tree if s.item_type=='SOCKET'}
     return (all(('INPUT',label) in sockets for label in (*_LAYOUT_INPUTS,*PARAMS.values(),'On')) and
             all(('OUTPUT',label) in sockets for label in _OUTPUTS))
 
@@ -147,226 +152,86 @@ def _rand(a, cell, seed):
     return a.m('FRACT', a.mad(value,1+(seed%29)*1.61803398875,seed*.037))
 
 
-def _signed(a, value):
-    """Map a uniform unit draw onto a signed unit interval."""
-    return a.mad(value,2,-1)
+def _voronoi(a,q,cell,phase):
+    """Share one 2D edge/F1 pair; return metre distance, cell colour and metre site."""
+    vector=a.v('ADD',a.v('DIVIDE',q,a.xyz(cell,cell,1)),phase)
+    edge=a.node('ShaderNodeTexVoronoi',voronoi_dimensions='2D',feature='DISTANCE_TO_EDGE')
+    first=a.node('ShaderNodeTexVoronoi',voronoi_dimensions='2D',feature='F1',distance='EUCLIDEAN')
+    for node in (edge,first):
+        a.put(vector,node.inputs['Vector'])
+        node.inputs['Scale'].default_value=1
+        node.inputs['Randomness'].default_value=1
+    site=a.v('MULTIPLY',a.v('SUBTRACT',first.outputs['Position'],phase),a.xyz(cell,cell,0))
+    return a.m('MULTIPLY',edge.outputs['Distance'],cell),a.split(first.outputs['Color']),site
 
 
-def _kink(a, t, size, amp, seed):
-    """Linearly interpolate independent knots at two physical arc-length scales."""
-    m, draws = a.m, []
-    frequency = m('DIVIDE',1,m('MAXIMUM',size,1e-9))
-    base = a.mad(t,frequency,seed)
-    for octave in (1, 3):
-        q = base if octave==1 else a.mad(base,3,37)
-        knot = m('FLOOR',q); next_knot=m('ADD',knot,1)
-        first, second = a.knot(knot), a.knot(next_knot)
-        draws.append(_signed(a,a.interval(q,knot,next_knot,first,second)))
-    return m('MULTIPLY',amp,a.mad(draws[1],1/3,draws[0]))
+def _warp(a,i,p):
+    """Warp metres by one RGB noise field and share the per-tile hash offset."""
+    offset=a.v('MULTIPLY',a.xyz(*a.hash_vector(i['Cell'])),(100,100,0))
+    scale=a.m('MAXIMUM',i['Warp Scale'],1e-9)
+    vector=a.v('ADD',a.v('DIVIDE',p,a.xyz(scale,scale,1)),offset)
+    noise=a.noise(vector,1,detail=2).node.outputs['Color']
+    q=a.v('ADD',p,a.v('MULTIPLY',a.v('SUBTRACT',noise,(.5,.5,.5)),a.xyz(i['Warp'],i['Warp'],0)))
+    return q,offset
 
 
-def _jagged_distance(a, p, p0, d, n, length, bow, kink_size, kink_amp, seed):
-    """Return signed distance to a bowed chord with piecewise-linear arc-length kinks."""
-    m = a.m
-    delta = a.v('SUBTRACT', p, p0)
-    t = a.v('DOT_PRODUCT', delta, d)
-    # Hold the bow at its chord endpoints outside the finite line length; extrapolating
-    # the quadratic would create a second shell far beyond a corner chip.
-    u = a.clamp(m('DIVIDE',t,m('MAXIMUM',length,1e-9)),-.5,.5)
-    shape = m('SUBTRACT', 1/3, m('MULTIPLY', 4, m('MULTIPLY',u,u)))
-    curve = m('MULTIPLY', m('MULTIPLY', bow, length), shape)
-    return m('SUBTRACT', a.v('DOT_PRODUCT', delta, n),
-             m('ADD', curve, _kink(a, t, kink_size, kink_amp, seed)))
+def _piece_fields(a,i,p,site,colours,picked):
+    """Give each picked F1 cell one rigid plane about its constant metre site."""
+    m=a.m
+    red,green,blue=colours
+    lift=m('MULTIPLY',i['Step Height'],m('MULTIPLY',a.mad(green,2,-1),a.mad(blue,.7,.3)))
+    slope=m('TANGENT',m('MULTIPLY',i['Piece Tilt'],a.mad(blue,2,-1)))
+    angle=m('MULTIPLY',math.tau,green)
+    delta=a.v('SUBTRACT',p,site)
+    tilt=m('MULTIPLY',slope,a.v('DOT_PRODUCT',delta,a.xyz(m('COSINE',angle),m('SINE',angle))))
+    height=m('MULTIPLY',picked,m('ADD',lift,tilt))
+    identity=m('DIVIDE',m('ADD',1,m('FLOOR',m('MULTIPLY',red,PIECE_BINS-1))),PIECE_BINS)
+    return height,m('MULTIPLY',picked,identity)
 
 
-def _radial_distance(a, tangent, normal, radius, i, seed, arc=math.pi):
-    """Use the same jagged primitive in unwrapped radial and arc-length coordinates."""
-    m = a.m
-    theta = m('ARCTAN2', normal, tangent)
-    t = m('MULTIPLY', radius, theta)
-    rho = a.length(a.xyz(tangent,normal))
-    distance = m('SUBTRACT',m('SUBTRACT',rho,radius),_kink(a,t,i['Kink Size'],i['Kink Amp'],seed))
-    return distance, t
-
-
-def _cracks(a, i, p, w, h):
-    """Anchor C1 on both long edges, with a closed-form endpoint-centred C2."""
-    m = a.m
-    x, y, _ = a.split(p)
-    rand = lambda seed: _rand(a, i['Cell'], seed)
-    # Endpoints reserve eight percent of the long edge at either end, including
-    # squares. The field is a graph over x, so endpoint anchoring needs no solver.
-    limit = m('MINIMUM', math.radians(25), m('ARCTANGENT',m('DIVIDE',m('MULTIPLY',.24,h),w)))
-    angle = m('MULTIPLY',_signed(a,rand(201)),limit)
-    co, slope = m('COSINE',angle), m('TANGENT',angle)
-    py = m('MULTIPLY',h,m('ADD',.2,m('MULTIPLY',.6,rand(203))))
-    half_w = m('MULTIPLY',w,.5)
-    length = m('DIVIDE',w,co)
-    bow = m('MULTIPLY',.05,_signed(a,rand(205)))
-    phase = m('MULTIPLY',97,rand(207))
-
-    def line_at(xx):
-        """Evaluate the anchored bow and piecewise-linear, endpoint-bounded kinks."""
-        u = a.clamp(m('DIVIDE',xx,w),0,1)
-        mid = m('SUBTRACT',u,.5)
-        t = m('MULTIPLY',mid,length)
-        # The raw midpoint-coordinate bow is symmetric and zero-mean. Subtract
-        # its equal endpoint value to place that chord ON the chosen endpoints.
-        shape = m('SUBTRACT',1/3,m('MULTIPLY',4,m('MULTIPLY',mid,mid)))
-        curve = m('MULTIPLY',m('MULTIPLY',bow,length),m('ADD',shape,2/3))
-        knots = _kink(a,t,i['Kink Size'],i['Kink Amp'],phase)
-        envelope = m('MULTIPLY',m('MULTIPLY',4,i['Kink Amp']),m('MINIMUM',u,m('SUBTRACT',1,u)))
-        knots = a.clamp(knots,m('MULTIPLY',-1,envelope),envelope)
-        base = a.mad(m('SUBTRACT',xx,half_w),slope,py)
-        yy = m('ADD',base,m('DIVIDE',m('ADD',curve,knots),co))
-        return a.clamp(yy,m('MULTIPLY',.08,h),m('MULTIPLY',.92,h))
-
-    s1 = m('MULTIPLY',co,m('SUBTRACT',y,line_at(x)))
-    t1 = m('DIVIDE',m('SUBTRACT',x,half_w),co)
-
-    def point1(t):
-        """Place spall centres directly on the actual anchored C1 graph."""
-        xx = m('ADD',half_w,m('MULTIPLY',t,co))
-        return a.xyz(xx,line_at(xx))
-
-    right = m('GREATER_THAN',rand(211),.5)
-    cx = m('MULTIPLY',right,w)
-    cy = m('ADD',py,m('MULTIPLY',m('SUBTRACT',cx,half_w),slope))
-    direction = a.mix(right,1.,-1.)
-    side = a.mix(m('GREATER_THAN',rand(213),.5),-1.,1.)
-    inward = m('MULTIPLY',m('SUBTRACT',x,cx),direction)
-    dy = m('MULTIPLY',side,m('SUBTRACT',y,cy))
-    radius = m('MULTIPLY',w,m('ADD',.3,m('MULTIPLY',.5,rand(217))))
-    phase2 = m('MULTIPLY',97,rand(219))
-    s2,t2 = _radial_distance(a,inward,dy,radius,i,phase2,math.pi/2)
-
-    def point2(t):
-        """Place the C2 spall centre on the kinked circle in tile coordinates."""
-        theta = m('DIVIDE',t,m('MAXIMUM',radius,1e-9))
-        r = m('ADD',radius,_kink(a,t,i['Kink Size'],i['Kink Amp'],phase2))
-        xx = m('ADD',cx,m('MULTIPLY',direction,m('MULTIPLY',r,m('COSINE',theta))))
-        yy = m('ADD',cy,m('MULTIPLY',side,m('MULTIPLY',r,m('SINE',theta))))
-        return a.xyz(xx,yy)
-
-    active2 = m('MULTIPLY',m('LESS_THAN',rand(223),i['Branch Share']),
-                m('MULTIPLY',m('GREATER_THAN',inward,-1e-8),m('GREATER_THAN',m('MULTIPLY',side,s1),0)))
-    piece = m('ADD',m('GREATER_THAN',s1,0),m('MULTIPLY',2,m('MULTIPLY',active2,m('LESS_THAN',s2,0))))
-    half = m('MULTIPLY',i['Crack Width'],.5)
-    gap = m('MAXIMUM',m('LESS_THAN',m('ABSOLUTE',s1),half),
-            m('MULTIPLY',active2,m('LESS_THAN',m('ABSOLUTE',s2),half)))
-    return gap,piece,((s1,t1,1.,point1),(s2,t2,active2,point2))
-
-
-def _piece_height(a, i, p, w, h, piece):
-    """Give each nonzero piece a rigid plane through the tile centre plus a signed lift."""
-    m = a.m
-    cell = a.v('ADD', i['Cell'], a.xyz(0, 0, m('MULTIPLY', piece, 17)))
-    lift = m('MULTIPLY', i['Step Height'], _signed(a, _rand(a, cell, 301)))
-    slope = m('TANGENT', m('MULTIPLY', i['Piece Tilt'], _signed(a, _rand(a, cell, 307))))
-    axis = m('MULTIPLY', math.tau, _rand(a, cell, 311))
-    offset = a.v('SUBTRACT', p, a.xyz(m('MULTIPLY', w, .5), m('MULTIPLY', h, .5)))
-    tilt = m('MULTIPLY', slope, a.v('DOT_PRODUCT', offset, a.xyz(m('COSINE', axis), m('SINE', axis))))
-    return m('MULTIPLY', m('GREATER_THAN', piece, 0), m('ADD', lift, tilt))
-
-
-def _corner_frame(a, i, p, w, h):
-    """Fold the selected corner to the origin without changing physical units."""
-    m = a.m
-    x,y,_ = a.split(p)
-    corner = m('FLOOR',m('MULTIPLY',4,_rand(a,i['Cell'],401)))
-    return (a.mix(m('MODULO',corner,2),x,m('SUBTRACT',w,x)),
-            a.mix(m('GREATER_THAN',corner,1.5),y,m('SUBTRACT',h,y)))
-
-
-def _flake_frame(a, i, p, w, h, rand):
-    """Express an edge flake in tangent/normal coordinates about its edge centre."""
-    m = a.m
-    x,y,_ = a.split(p)
-    edge = m('FLOOR',m('MULTIPLY',4,rand(0)))
-    vertical,second = m('LESS_THAN',edge,2),m('MODULO',edge,2)
-    normal = a.mix(vertical,a.mix(second,y,m('SUBTRACT',h,y)),a.mix(second,x,m('SUBTRACT',w,x)))
-    tangent = m('SUBTRACT',a.mix(vertical,x,y),m('MULTIPLY',rand(2),a.mix(vertical,w,h)))
-    return tangent,normal
-
-
-def _shells(a, i, p, w, h, size, spall_size, corner_kind):
-    """Union 2-4 corner scars or 1-3 edge flakes, sharing the four radial primitives."""
-    m = a.m
-    x,y = _corner_frame(a,i,p,w,h)
-    flip = m('GREATER_THAN',_rand(a,i['Cell'],419),.5)
-    count = a.mix(corner_kind,
-                  m('ADD',1,m('FLOOR',m('MULTIPLY',3,_rand(a,i['Cell'],501)))),
-                  m('ADD',2,m('FLOOR',m('MULTIPLY',3,_rand(a,i['Cell'],405)))))
-    inward,flake_depth,rings = -1e10,0.,0.
-    # A shared uniform tile radius keeps neighbouring scars visible instead of
-    # letting one large disc swallow the small one; every radius stays U(.25,.45).
-    chip_radius=m('MULTIPLY',size,a.mad(_rand(a,i['Cell'],515),.2,.25))
-    flake_bias=m('MULTIPLY',spall_size,.5)
-    ripple_frequency=m('DIVIDE',math.tau*6,m('MAXIMUM',size,1e-9))
-    # Centres run along a chord just outside either edge at its ends. The middle
-    # scar contains the corner; adjacent scars overlap, making small cusp joins.
-    for index,position in enumerate((.5,0.,1.,.25)):
-        rand = lambda offset: _rand(a,i['Cell'],511+index*40+offset)
-        f = a.mix(flip,position,1-position)
-        cx = m('MULTIPLY',size,a.mad(f,-.5,.37))
-        cy = m('MULTIPLY',size,a.mad(f,.5,-.13))
-        xx,yy = m('SUBTRACT',x,cx),m('SUBTRACT',y,cy)
-        radius=chip_radius
-        if index<3:
-            tangent,normal = _flake_frame(a,i,p,w,h,rand)
-            xx,yy = a.mix(corner_kind,tangent,xx),a.mix(corner_kind,normal,yy)
-            radius=a.mix(corner_kind,a.mad(rand(4),spall_size,flake_bias),chip_radius)
-        radial,arc = _radial_distance(a,xx,yy,radius,i,m('MULTIPLY',97,rand(6)))
-        e = a.mix(m('LESS_THAN',index,count),-1e10,m('MULTIPLY',-1,radial))
-        # Each scar has concentric ripples about its own disc centre. Pick the
-        # exposed scar at each point, rather than summing unrelated ripple sets.
-        rho = a.length(a.xyz(xx,yy))
-        wave = m('SINE',m('MULTIPLY',ripple_frequency,rho))
-        rings = a.mix(m('GREATER_THAN',e,inward),rings,wave)
-        inward = m('MAXIMUM',inward,e)
-        if index<3:
-            stack = a.mad(i['Engobe Thickness'],m('LESS_THAN',rand(8),.3),i['Glaze Thickness'])
-            flake_depth = m('MAXIMUM',flake_depth,m('MULTIPLY',m('GREATER_THAN',e,0),stack))
-    # Normalise between the nearest free arris and the union outline: ratio=1
-    # on the arris, 0 on the outline. No depth floor beyond the glaze is added.
-    arris = m('MAXIMUM',m('MINIMUM',x,y),0)
-    ratio = a.clamp(m('DIVIDE',m('MAXIMUM',inward,0),m('MAXIMUM',m('ADD',inward,arris),1e-9)),0,1)
-    profile = m('MULTIPLY',i['Chip Depth'],m('POWER',ratio,i['Shell Exponent']))
-    ripple = m('MULTIPLY',m('MULTIPLY',.05,i['Chip Depth']),m('MULTIPLY',m('SUBTRACT',1,ratio),rings))
-    depth = m('MAXIMUM',i['Glaze Thickness'],m('ADD',profile,ripple))
-    return inward,a.mix(corner_kind,flake_depth,depth)
-
-
-def _crack_dirt(a, i, paths):
-    """Patchy, coating-only darkening along both actual fracture paths."""
-    m = a.m
-    value = 0.
-    phase = m('MULTIPLY',37,_rand(a,i['Cell'],809))
-    for distance,t,active,_ in paths:
-        band = m('SUBTRACT',1,a.smooth(m('ABSOLUTE',distance),0,m('MAXIMUM',i['Dirt Width'],1e-9)))
-        patches = a.smooth(a.noise(a.xyz(t,phase),1/.008,detail=0),.4,.6)
-        value = m('MAXIMUM',value,m('MULTIPLY',active,m('MULTIPLY',band,patches)))
-    return m('MULTIPLY',i['Crack Dirt'],m('MULTIPLY',m('GREATER_THAN',i['Dirt Width'],0),value))
-
-
-def _spalls(a, i, s, t, active, size, seed, p, point_on_crack):
-    """Place tile-space half-discs centred on the actual fracture in physical arc-length cells."""
-    m = a.m
-    pitch = m('MAXIMUM', m('MULTIPLY', 3, size), 1e-9)
-    cell = m('FLOOR', m('DIVIDE', t, pitch))
-    hash_cell = a.v('ADD', i['Cell'], a.xyz(0, 0, cell))
-    rand = lambda offset: _rand(a, hash_cell, seed + offset)
-    # Mid-cell centres keep a radius <= Spall Size inside its 3*Spall Size cell.
-    center = m('MULTIPLY', m('ADD', cell, .5), pitch)
-    delta = a.v('SUBTRACT', p, point_on_crack(center))
-    radius = m('MULTIPLY', size, m('ADD', .3, m('MULTIPLY', .7, rand(3))))
-    e = m('SUBTRACT',radius,a.length(delta))
-    active = m('MULTIPLY', active, m('MULTIPLY', m('LESS_THAN', rand(5), i['Spall Density']),
-               m('GREATER_THAN', m('MULTIPLY', s, a.mix(m('LESS_THAN', rand(7), .5), -1., 1.)), 0)))
-    # The diameter borders the crack, not intact glaze; the coating lip follows the arc.
-    e = a.mix(active, -1e10, e)
-    depth = m('ADD', i['Glaze Thickness'], m('MULTIPLY', i['Engobe Thickness'], m('LESS_THAN', rand(9), .25)))
-    return e, m('MULTIPLY', m('GREATER_THAN', e, 0), depth)
+def _fine_fields(a,i,p,distance,colours,site,cell,w,h):
+    """Pick outline-adjacent chip cells and assign coating-only or conchoidal depth."""
+    m=a.m
+    x,y,_=a.split(site)
+    edge=m('MINIMUM',m('MINIMUM',m('ABSOLUTE',x),m('ABSOLUTE',m('SUBTRACT',w,x))),
+           m('MINIMUM',m('ABSOLUTE',y),m('ABSOLUTE',m('SUBTRACT',h,y))))
+    red,green,blue=colours
+    rnd=lambda k: m('FRACT',m('MULTIPLY',red,k))              # further per-cell draws from the same hash
+    # Arris chips: the tile outline must cut the cell (site within 0.35 cell of it), never an island.
+    at_edge=m('LESS_THAN',edge,m('MULTIPLY',.35,cell))
+    edge_pick=m('MULTIPLY',at_edge,m('LESS_THAN',red,i['Chip Density']))
+    # Face pop-outs: a few interior cells become small glaze spalls (impact chips are rarely all on edges).
+    face_pick=m('MULTIPLY',m('SUBTRACT',1,at_edge),m('LESS_THAN',rnd(29.3),m('MULTIPLY',.1,i['Chip Density'])))
+    # Size per chip, heavy-tailed (most small, few big): shrinks the chip inward from the arris and along it.
+    size=a.mad(m('MULTIPLY',rnd(13.7),rnd(13.7)),.75,.25)
+    # Half-disc proportions (~2:1 along the arris : inward): size trims the length along the edge (inset from the
+    # cell sides) more than the depth into the tile, so small chips do not become slivers.
+    # Rounded inner edge: a disc about the cell site, reaching past the arris (radius = site's distance to the
+    # outline + the chip's depth), clipped by the cell's own irregular sides -> a curved shell bite, not a strip.
+    # Kept inside the cell (a pixel only sees its own cell, so a larger disc would be clipped to straight sides).
+    radius=m('ADD',edge,m('MULTIPLY',m('MULTIPLY',.35,cell),a.mad(size,.6,.4)))
+    band=m('SUBTRACT',radius,a.length(a.v('SUBTRACT',p,site)))
+    e_edge=m('MINIMUM',m('SUBTRACT',distance,m('MULTIPLY',m('MULTIPLY',.35,cell),m('SUBTRACT',1,size))),band)
+    face_size=a.mad(rnd(41.1),.25,.1)
+    e_face=m('SUBTRACT',distance,m('MULTIPLY',m('MULTIPLY',.25,cell),m('SUBTRACT',1,face_size)))
+    e_shell=a.mix(face_pick,e_edge,e_face)
+    selected=m('MAXIMUM',edge_pick,face_pick)
+    # Conchoidal shell: deepest at the arris (layout Edge = metres to the tile outline), shallowing inward,
+    # with a short ramp up from the chip's own outline.
+    # Glaze breaks with a steep wall: the depth ramps up over 5 % of the chip, so the wall casts a shadow.
+    rim=a.clamp(m('DIVIDE',e_shell,m('MULTIPLY',m('MULTIPLY',.05,cell),size)),0,1)
+    inward=a.clamp(m('DIVIDE',i['Edge'],m('MULTIPLY',1.2,radius)),0,1)   # falloff over the chip's own reach
+    deep=m('MULTIPLY',i['Chip Depth'],m('MULTIPLY',a.mad(blue,.6,.4),a.mad(size,.5,.5)))
+    wave=m('SINE',m('DIVIDE',m('MULTIPLY',math.tau*6,a.length(a.v('SUBTRACT',p,site))),cell))
+    ripple=m('MULTIPLY',m('MULTIPLY',.05,deep),m('MULTIPLY',rim,wave))
+    shape=m('MULTIPLY',m('POWER',rim,i['Shell Exponent']),m('POWER',m('SUBTRACT',1,inward),.4))
+    profile=m('MAXIMUM',i['Glaze Thickness'],a.mad(deep,shape,ripple))
+    edge_depth=a.mix(m('LESS_THAN',green,.25),profile,i['Glaze Thickness'])   # 25 % glaze-only arris flakes
+    # Pop-outs never reach the clay: glaze only, or into (not through) the slip.
+    face_depth=a.mad(m('MULTIPLY',.5,i['Engobe Thickness']),m('LESS_THAN',green,.35),i['Glaze Thickness'])
+    depth=a.mix(face_pick,edge_depth,face_depth)
+    identity=m('DIVIDE',m('ADD',1,m('FLOOR',m('MULTIPLY',red,PIECE_BINS-1))),PIECE_BINS)
+    return selected,depth,identity,edge,e_shell
 
 
 def _layers(a, i, e, depth, deep, p):
@@ -392,76 +257,80 @@ def _layers(a, i, e, depth, deep, p):
 
 
 def damage_group(name='TileDamage'):
-    """Build versioned fracture-network fields while preserving material users on upgrade."""
-    old = bpy.data.node_groups.get(name)
+    """Build four shared Voronoi evaluations, preserving matching links on v6 upgrade."""
+    old=bpy.data.node_groups.get(name)
     if old is not None:
-        if old.bl_idname != 'ShaderNodeTree' or 'tile_damage_version' not in old:
+        if old.bl_idname!='ShaderNodeTree' or 'tile_damage_version' not in old:
             raise ValueError(f'Refusing to replace unrelated group {name!r}')
-        if _is_current(old):
-            return old
-    tree = bpy.data.node_groups.new(name, 'ShaderNodeTree')
+        if _is_current(old): return old
+    tree=bpy.data.node_groups.new(name,'ShaderNodeTree')
     for label in _LAYOUT_INPUTS:
-        _socket(tree, label, kind='NodeSocketVector' if label in ('Cell', 'Tile UV', 'Tile Size') else 'NodeSocketFloat')
-    for (key, label), default in zip(PARAMS.items(), DEFAULTS):
-        socket = _socket(tree, label, default=default)
-        socket.min_value = 0
-        if key in ('damage', 'chip_share', 'crack_share', 'branch_share', 'spall_density', 'crack_dirt'):
-            socket.max_value = 1
-        elif key == 'shell_exponent':
-            socket.min_value, socket.max_value = .2, 2
-        elif key == 'force_kind':
-            socket.max_value = 3
-        elif key == 'piece_tilt':
-            socket.subtype = 'ANGLE'
-    _socket(tree, 'On', default=1.)
-    labels = _OUTPUTS
-    for label in labels:
-        _socket(tree, label, 'OUTPUT')
-    a = _DamageGraph(tree); m = a.m
-    i = a.node('NodeGroupInput').outputs
-    out = a.node('NodeGroupOutput'); out.is_active_output = True
-    damaged = m('MULTIPLY', i['On'], m('LESS_THAN', _rand(a, i['Cell'], 101), i['Fraction']))
-    draw = _rand(a, i['Cell'], 103)
-    kind = m('SUBTRACT', 3, m('ADD', m('LESS_THAN', draw, i['Crack Share']),
-                       m('LESS_THAN', draw, m('ADD', i['Crack Share'], i['Chip Share']))))
-    kind = a.mix(m('GREATER_THAN', i['Force Kind'], 0), kind, i['Force Kind'])
-    inside = m('MULTIPLY', damaged, m('GREATER_THAN', i['Edge'], 0))
-    crack_tile = m('MULTIPLY', inside, m('COMPARE', kind, 1))
-    chip_tile = m('MULTIPLY', m('MULTIPLY', inside, m('COMPARE', kind, 2)),
-                  m('GREATER_THAN', i['Chip Size'], 0))
-    flake_tile = m('MULTIPLY', m('MULTIPLY', inside, m('COMPARE', kind, 3)),
-                   m('GREATER_THAN', i['Spall Size'], 0))
-    x, y, _ = a.split(a.v('MULTIPLY', i['Tile UV'], i['Tile Size']))
-    w0, h0, _ = a.split(i['Tile Size'])
-    swap = m('GREATER_THAN', w0, h0)
-    w, h = a.mix(swap, w0, h0), a.mix(swap, h0, w0)
-    p = a.xyz(a.mix(swap, x, y), a.mix(swap, y, x))
-    chip_size = m('MINIMUM', i['Chip Size'], m('MULTIPLY', .8, w))
-    spall_size = m('MINIMUM', i['Spall Size'], m('MULTIPLY', .4/1.5, w))
-    gap, piece, paths = _cracks(a, i, p, w, h)
-    piece_height = m('MULTIPLY', crack_tile, _piece_height(a, i, p, w, h, piece))
-    crack = m('MULTIPLY', crack_tile, gap)
-    e_shell,d_shell = _shells(a,i,p,w,h,chip_size,spall_size,chip_tile)
-    shell_tile = m('MAXIMUM',chip_tile,flake_tile)
-    e_spall, d_spall = -1e10, 0.
-    for index, (s, t, active, point_on_crack) in enumerate(paths):
-        e, depth = _spalls(a, i, s, t, active, spall_size, 701 + index * 40, p, point_on_crack)
-        e_spall = m('MAXIMUM', e_spall, e)
-        d_spall = m('MAXIMUM', d_spall, depth)
-    e = m('MAXIMUM',a.mix(shell_tile,-1e10,e_shell),a.mix(crack_tile,-1e10,e_spall))
-    depth = m('ADD',m('MULTIPLY',shell_tile,d_shell),m('MULTIPLY',crack_tile,d_spall))
-    depth, lip, engobe, body = _layers(a, i, e, depth, chip_tile, p)
-    stack = m('ADD', i['Glaze Thickness'], i['Engobe Thickness'])
-    crack_depth = m('MULTIPLY', crack, m('ADD', stack, i['Crack Depth']))
-    values = (depth, piece_height, m('MULTIPLY', crack_tile, m('DIVIDE', piece, 4)), crack,
-              crack_depth, lip, engobe, body, damaged, m('MULTIPLY', damaged, m('DIVIDE', kind, 3)),m('MULTIPLY',crack_tile,_crack_dirt(a,i,paths)))
-    for label, value in zip(labels, values):
-        a.put(value, out.inputs[label])
-    # Fused multiply-add and common expressions may leave temporary build nodes.
-    # Remove only unreachable nodes of this newly-created group.
-    live = set()
+        _socket(tree,label,kind='NodeSocketVector' if label in ('Cell','Tile UV','Tile Size') else 'NodeSocketFloat')
+    for (key,label),default in zip(PARAMS.items(),DEFAULTS):
+        socket=_socket(tree,label,default=default); socket.min_value=0
+        if key in ('damage','crack_share','chip_share','spall_density','crack_dirt','crack_density','chip_density'):
+            socket.max_value=1
+        elif key=='force_kind': socket.max_value=3
+        elif key=='shell_exponent': socket.min_value,socket.max_value=.2,2
+        elif key in ('warp_scale','crack_cell'): socket.min_value=1e-8
+        elif key=='piece_tilt': socket.subtype='ANGLE'
+    _socket(tree,'On',default=1.)
+    for label in _OUTPUTS: _socket(tree,label,'OUTPUT')
+    a=_DamageGraph(tree); m=a.m
+    i=a.node('NodeGroupInput').outputs
+    out=a.node('NodeGroupOutput'); out.is_active_output=True
+    damaged=m('MULTIPLY',i['On'],m('LESS_THAN',_rand(a,i['Cell'],101),i['Fraction']))
+    draw=_rand(a,i['Cell'],103)
+    kind=m('SUBTRACT',3,m('ADD',m('LESS_THAN',draw,i['Crack Share']),m('LESS_THAN',draw,m('ADD',i['Crack Share'],i['Chip Share']))))
+    kind=a.mix(m('GREATER_THAN',i['Force Kind'],0),kind,i['Force Kind'])
+    inside=m('MULTIPLY',damaged,m('GREATER_THAN',i['Edge'],0))
+    crack_tile=m('MULTIPLY',inside,m('COMPARE',kind,1))
+    chip_tile=m('MULTIPLY',inside,m('MAXIMUM',m('COMPARE',kind,2),m('MULTIPLY',m('COMPARE',kind,1),
+                          m('LESS_THAN',_rand(a,i['Cell'],901),m('MULTIPLY',i['Chip Share'],.5)))))
+    chip_tile=m('MULTIPLY',chip_tile,m('GREATER_THAN',i['Chip Size'],0))
+    flake_tile=m('MULTIPLY',inside,m('COMPARE',kind,3))
+    flake_tile=m('MULTIPLY',flake_tile,m('GREATER_THAN',i['Chip Size'],0))
+    p=a.v('MULTIPLY',i['Tile UV'],i['Tile Size'])
+    w,h,_=a.split(i['Tile Size'])
+    q,phase=_warp(a,i,p)
+    crack_cell=m('MAXIMUM',m('MULTIPLY',i['Crack Cell'],a.mad(_rand(a,i['Cell'],903),1.,.6)),1e-8)
+    # SPEC v7 calls for a per-tile network origin as well as a warp offset. Phase
+    # is subtracted from Position so sites/tilt pivots remain in tile-frame metres.
+    distance,colours,site=_voronoi(a,q,crack_cell,phase)
+    picked=m('LESS_THAN',colours[0],i['Crack Density'])
+    patch=a.smooth(a.noise(p,m('DIVIDE',1,m('MULTIPLY',2,crack_cell)),detail=2),.35,.55)
+    keep=m('MULTIPLY',picked,patch)
+    width_noise=a.noise(a.v('ADD',q,a.v('MULTIPLY',phase,a.xyz(crack_cell,crack_cell,0))),
+                       m('DIVIDE',1,crack_cell),detail=2)
+    half=m('MULTIPLY',m('MULTIPLY',.5,i['Crack Width']),a.mad(width_noise,1.5,.5))
+    crack=m('MULTIPLY',crack_tile,m('MULTIPLY',keep,m('LESS_THAN',distance,half)))
+    ph,piece=_piece_fields(a,i,p,site,colours,m('MULTIPLY',crack_tile,picked))
+    r=_rand(a,i['Cell'],907)
+    chip_cell=m('MAXIMUM',m('MULTIPLY',i['Chip Size'],a.mad(m('MULTIPLY',r,r),.65,.35)),1e-8)
+    fine,fine_colours,fine_site=_voronoi(a,q,chip_cell,a.v('ADD',phase,(31,47,0)))
+    selected,chip_depth,chip_identity,site_edge,e_shell=_fine_fields(a,i,p,fine,fine_colours,fine_site,chip_cell,w,h)
+    chip=m('MULTIPLY',selected,m('MAXIMUM',chip_tile,flake_tile))
+    e_chip=a.mix(chip,-1e10,e_shell)
+    depth=m('MULTIPLY',selected,m('ADD',m('MULTIPLY',chip_tile,chip_depth),m('MULTIPLY',flake_tile,i['Glaze Thickness'])))
+    spall=m('MULTIPLY',crack_tile,m('MULTIPLY',m('GREATER_THAN',i['Spall Size'],0),
+            m('MULTIPLY',m('GREATER_THAN',keep,0),m('LESS_THAN',fine_colours[0],i['Spall Density']))))
+    spall_e=m('MINIMUM',fine,m('SUBTRACT',i['Spall Size'],distance))
+    e=m('MAXIMUM',e_chip,a.mix(spall,-1e10,spall_e))
+    # Crack spalls flake glaze, at most into the slip; glaze+slip exactly would count as clay.
+    spall_depth=a.mad(m('MULTIPLY',.5,i['Engobe Thickness']),m('LESS_THAN',fine_colours[1],.25),i['Glaze Thickness'])
+    depth=m('MAXIMUM',depth,m('MULTIPLY',m('MULTIPLY',spall,m('GREATER_THAN',spall_e,0)),spall_depth))
+    depth,lip,engobe,body=_layers(a,i,e,depth,chip_tile,p)
+    stack=m('ADD',i['Glaze Thickness'],i['Engobe Thickness'])
+    crack_depth=m('MULTIPLY',crack,m('ADD',stack,i['Crack Depth']))
+    dirt=m('MULTIPLY',crack_tile,m('MULTIPLY',i['Crack Dirt'],m('MULTIPLY',keep,
+           m('MULTIPLY',m('GREATER_THAN',i['Dirt Width'],0),m('SUBTRACT',1,a.smooth(distance,0,m('MAXIMUM',i['Dirt Width'],1e-9)))))))
+    values=(depth,ph,piece,crack,crack_depth,lip,engobe,body,damaged,m('MULTIPLY',damaged,m('DIVIDE',kind,3)),dirt,
+            m('MULTIPLY',chip,chip_identity),m('MULTIPLY',crack_tile,picked),m('MULTIPLY',crack_tile,distance),
+            m('MULTIPLY',inside,chip_cell),m('MULTIPLY',chip,site_edge))
+    for label,value in zip(_OUTPUTS,values): a.put(value,out.inputs[label])
+    live=set()
     def visit(node):
-        """Trace the generated output graph backwards."""
+        """Prune only unreachable expressions in this newly built group."""
         if node in live: return
         live.add(node)
         for socket in node.inputs:
@@ -469,11 +338,10 @@ def damage_group(name='TileDamage'):
     visit(out)
     for node in list(tree.nodes):
         if node not in live: tree.nodes.remove(node)
-    tree['tile_damage_version'] = _VERSION
-    tree['tile_damage_revision'] = 2
+    tree['tile_damage_version']=_VERSION; tree['tile_damage_revision']=_REVISION
     if old is not None:
-        _replace_group_users(old, tree)
-        old.user_remap(tree); bpy.data.node_groups.remove(old); tree.name = name
+        _replace_group_users(old,tree)
+        old.user_remap(tree); bpy.data.node_groups.remove(old); tree.name=name
     return tree
 
 

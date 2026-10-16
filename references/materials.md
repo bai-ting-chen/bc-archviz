@@ -3,7 +3,8 @@
 Code: `study_materials.py` (concrete, gravel, coated wood, glass, glazed tiles), `interior.py`
 (granite, stone tiles, steel, pool water, steam, emitters), `lookdev.py` (measured-albedo PBR,
 vertical boards, long pavers, sheers, glass shells, glass distortion), `wear.py` / `wood_wear.py`
-(edge-wear.md), `terrain.py` + `scatter.py` (hill, ground, meadow), `vegetation.py` (grass, wet, dew).
+(edge-wear.md), `terrain.py` + `scatter.py` (hill, ground, meadow), `vegetation.py` (grass, wet, dew),
+`tile_mapping.py` / `tile_layout.py` / `tile_surface.py` / `tile_damage.py` (› Tiles).
 
 Contents: Physical ranges · Choosing and scaling a texture · Concrete · Exposed aggregate, pavers,
 litter · Terrain · Grass and meadow · Wet surfaces and dew · True displacement · Wood · Stone ·
@@ -117,6 +118,37 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
   normal** as the edge mask (no dicing needed) — GN `edge_dist` would need the mesh diced.
   "Very faint" sits just above visibility: set the darkening with a control (RULES 9), since a
   value that looks faint in the shader can vanish entirely in the render.
+
+### Tiles: layout, mapping, surface, cracks
+Real tiles never match a downloaded map, so layout, joint and face are separate real-unit knobs:
+- `tile_mapping.planar_uv / cylinder_uv / annulus_uv` write metre UVs on Rhino meshes (arc length on
+  curved walls; `annulus_uv(like=wall)` continues a wall's columns onto a ring). Which way joints
+  run on returns and soffits is a per-project decision — keep it a switch.
+- `tile_layout.add_layout` turns the metre coordinate into Tile ID, Tile UV, signed Edge (m), Joint,
+  Cell, Tile Size (stack/running bond, rotation, origin, corner radius, per-tile jitter).
+- `tile_surface.tile_material(...)` is the material: glaze coat over any PBR face (albedo
+  normalised, each tile its own patch of the map) or a procedural glaze, rounded shoulder + recess
+  as metre height, grout, patchy joint dust, per-tile tint/gloss/tilt, waviness, specks; every
+  knob on the `TileLayout` / `TileFinish` / `TileDamage` group nodes (`set_param`, `toggle`).
+- **Cracks** (`tile_damage`, kind 1): a noise-warped Voronoi *Distance to Edge* network in each
+  tile's own frame (per-tile offset and cell size), drawn only around cells picked by their hash
+  and under a patch mask — 0-3 runs per tile, any position and angle, Y-junctions, varying width.
+  Hand-placed chords (one line across, mid-tile) read as stamped. Crack cells **longer than the
+  tile's short side** give long gentle curves; cells about the tile width give crazing-like
+  closed cells. Picked cells are rigid pieces (own lift and tilt), so the reflection breaks across
+  the crack. A hairline is sub-pixel at room distance: what reads is the patchy dirt band (dirt
+  and limescale wick into the crack and the porous body) — `Crack Dirt`, `Dirt Width`.
+- **Chips / edge flakes:** in development — not yet a method.
+- **Relief:** in the main frame displace only the damage (`tile_surface.use_damage_displacement`;
+  piece steps and cuts become geometry, profile and joints stay bump). Displacing the full tile
+  height pulls the wall's boundary edges inward along the joint recess and opens bright slits to
+  the sky at floor and ceiling junctions. A macro view can displace everything, but only on the
+  objects in frame with a high offscreen dicing scale (every wall diced from a macro camera runs
+  an 8 GB GPU out of memory).
+- **Tune on a flat pattern sheet first:** render the damage masks (emission, 1 sample) on a flat
+  wall of the real tile size with the joints drawn, several parameter sets side by side — seconds
+  per sheet. Then confirm in the final view (RULES 8). Use the scene's own depth/width values on the
+  sheet: defaults differ, and a sheet without joints makes edge damage look like islands.
 
 ### Tiled maps with joints
 - Formwork and panel textures carry joint lines at their tile edges. Box UVs computed from world

@@ -283,5 +283,31 @@ fresh Claude subagent); RULES 15 is a guide (Claude steers, Codex does detail wo
 take over alone); new RULES 17: modular code and docs, no god scripts. maintaining.md › Review and
 › Handing work to Codex. Re-read RULES.md › Agents and RULES 17.
 
+## 261016 — Tile system, Voronoi cracks, final-view rule, Codex handoff
+New modules `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` (+ controls in `scripts/controls/`):
+real-unit tile layout, glazed tile material, and cracks as a noise-warped Voronoi network per tile with
+rigid pieces, spalls and a patchy dirt band; damage-only displacement (`tile_surface.use_damage_displacement`).
+Chips/edge flakes are work in progress (controls report them as WIP). Controls render on the GPU
+(`controls/_scene.black_scene` calls `archviz.use_gpu`). Rules: RULES 8 (keep the final view in sight), RULES 3
+(read a source's pictures at full resolution), RULES 15 (reference analysis and Rhino stay with Claude; stop
+Codex at a clean point). Docs: materials.md › Tiles, edge-wear.md, api-traps.md, maintaining.md (Codex runs
+Blender tests, run budget, same-model review), SKILL.md, helpers.md.
+
+### 25. Local memory for the new rules
+Check: the project's memory index has entries for (a) sizing detail features in the final view first, and
+(b) lean headless controls (small packed probes, `--only`/`--full`, a run cap in every Codex brief).
+Do: add those memory files (feedback type) from RULES 8 and maintaining.md › Handing work to Codex.
+
+### 26. Codex can run Blender tests
+Check: Codex is not installed, or the project's memory/AGENTS.md says Codex jobs that run headless Blender
+start with `--sandbox danger-full-access` and own a listed set of files while they run.
+Do: add that line to the project's `AGENTS.md` term table or memory.
+
+### 27. Tile controls pass here
+Check: `blender -b --factory-startup --python scripts/controls/tile_damage_check.py -- --output <study>/_wip/tile_damage_check`
+ends with `TILE_DAMAGE_PASS` (chip sections may print `TILE_DAMAGE_SECTION_WIP`), and the layout,
+mapping and surface checks print PASS.
+Do: if a check fails on this machine, report it to the user before using the tile modules.
+
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.

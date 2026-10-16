@@ -85,6 +85,7 @@ air is still — floor joints and the tops of plinths — and fainter, greyer at
   hairline is invisible at room-to-street scale; what reads is a dirt-darkened crack: core
   ~5 mm, halo ~20 mm at ~5 mm/px, a shallow groove. One crack at every corner looks
   deliberate - keep a few, not a symmetric set (an opposite pair reads as one line).
+- **Cracks in glazed tiles:** a per-tile Voronoi network, not hand-placed lines — materials.md › Tiles.
 
 ## Proving it
 Each layer gets its own control (RULES 9): one that moves the frame only *by* the noise floor

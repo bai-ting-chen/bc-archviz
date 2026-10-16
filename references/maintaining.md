@@ -84,7 +84,9 @@ and api-traps.md: correctness bugs, rule breaks, docs out of date; findings only
 first, with file:line". Only its verdict enters the main session.
 
 Check each finding against the code before acting, fix what holds in a new commit, and list for
-the user what was rejected and why. One model only: RULES 14.
+the user what was rejected and why. One model only (out of tokens, or the user asks for a fresh
+session of the same model as reviewer): a fresh session reviews, and the user is told the
+cross-check was same-model (RULES 14).
 
 ## Handing work to Codex (RULES 15)
 For detail work, from the project folder:
@@ -93,6 +95,16 @@ For detail work, from the project folder:
 brief names the goal, the helpers to reuse (`helpers.md`), the interface in real units, where
 outputs go (the study's `_wip/`) and asks for a report file with a summary of at most 20 lines.
 Read the summary, not the log. Codex takes the agent lock (RULES 16) when it drives Blender.
+- **Codex runs the headless Blender tests itself:** launch with `--sandbox danger-full-access`
+  (the unelevated Windows sandbox cannot spawn Blender) and list in the brief the files it owns;
+  the other agent keeps off them until it ends. A fix round resumes the writer's session
+  (`codex exec resume <id>`); a review is a new session, read-only.
+- **Budget the runs in the brief:** a control that builds its own scene renders on the GPU
+  (api-traps), probes are small and packed (several outputs in R/G/B of one render), sections run
+  alone (`--only`), slow convergence comparisons sit behind `--full`. Cap: one fail-first run,
+  one run per real fix, one final pass; never rerun controls of modules the task did not touch.
+- **Codex low on tokens:** stop it between steps and take over (RULES 15) rather than let it die
+  mid-edit; its report and the brief are the handover.
 
 ## Commit and push
 Commit messages say what changed and why. End them with the session's attribution line, if

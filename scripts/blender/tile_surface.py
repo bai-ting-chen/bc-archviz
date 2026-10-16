@@ -21,7 +21,7 @@ _LAYOUT = dict(tile_w="Tile W", tile_h="Tile H", joint="Joint", corner_radius="C
                jitter_rotation_deg="Jitter Rotation")
 _OPTIONAL_LAYOUT = ("jitter_offset", "jitter_rotation_deg")
 _REMOVED_DAMAGE = ('chip_reach', 'flake_margin', 'crack_wander', 'crack_branch_share',
-                   'spall_share', 'spall_reach')
+                   'spall_share', 'spall_reach', 'kink_size', 'kink_amp', 'branch_share')
 _FINISH = dict(body_albedo="Body Albedo", coat_ior="Coat IOR", coat_rough="Coat Rough",
                edge_radius="Edge Radius", recess="Recess", grout_albedo="Grout Albedo",
                grout_rough="Grout Rough", dust="Dust", dust_width="Dust Width",
@@ -345,13 +345,14 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
                   tilt_deg=0.4, wave_amp=0.0001, specks=0.3, macro=0.05, off=(),
                   corner_radius=0.003, speck_size=0.001, lippage=0.0003,
                   jitter_offset=0.0, jitter_rotation_deg=0.0, face_contrast=1.0, face_saturation=1.0,
-                  damage=0.05, crack_share=0.45, chip_share=0.35, branch_share=0.35,
-                  step_height=0.00006, piece_tilt=0.0035, crack_width=0.00018, crack_depth=0.0008,
-                  kink_size=0.0015, kink_amp=0.0002, chip_size=0.004, chip_depth=0.0008,
+                  damage=0.05, crack_share=0.45, chip_share=0.35,
+                  step_height=0.00015, piece_tilt=0.0035, crack_width=0.00018, crack_depth=0.0008,
+                  chip_size=0.004, chip_depth=0.0008,
                   spall_size=0.001, spall_density=0.25, glaze_thickness=0.0003,
                   engobe_thickness=0.0002, glaze_lip_width=0.0002, engobe_ring=0.0003,
                   force_kind=0, displacement=False, pixel_size=1.0,
-                  shell_exponent=0.6, crack_dirt=0.6, dirt_width=0.002):
+                  shell_exponent=0.6, crack_dirt=0.85, dirt_width=0.004,
+                  warp=0.004, warp_scale=0.02, crack_cell=0.03, crack_density=0.35, chip_density=0.5):
     """Build metre-scale tiles with rotation in radians, tilt/jitter_rotation_deg in degrees and lippage in metres."""
     values = locals().copy()
     if face is not None:
@@ -454,6 +455,7 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
     a.put(finish.outputs['damage On'], damage_node.inputs['On'])
     d = damage_node.outputs
     piece_height = a.m('MULTIPLY', d['Piece Height'], a.m('GREATER_THAN', params['Edge'], 0))
+    undamaged = height
     height = a.m('ADD', height, piece_height)
     face_height = a.m('ADD', face_height, piece_height)
     missing = a.m('ADD', d['Chip Depth Out'], d['Crack Depth Out'])
@@ -463,14 +465,25 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
     marker = a.node('ShaderNodeMath', operation='ADD'); marker.name = 'TileTotalHeight'
     a.put(height, marker.inputs[0]); marker.inputs[1].default_value = 0
     height = marker.outputs[0]
-    shader = _bsdfs(a, params, color, grout_color, dust_mask, macro_delta, height, joint_mix)
-    shader = tile_damage.damage_bsdfs(a, params, shader, color, height, d)
+    # Damage-only relief (piece steps + chip/crack cuts): what use_damage_displacement turns into geometry.
+    # Bump then shades the rest (profile, joints, waviness), so the displaced part is not counted twice.
+    damage_height = a.node('ShaderNodeMath', operation='SUBTRACT'); damage_height.name = 'TileDamageHeight'
+    a.put(height, damage_height.inputs[0]); a.put(undamaged, damage_height.inputs[1])
+    displaced_share = a.node('ShaderNodeValue'); displaced_share.name = 'DamageDisplacementOn'
+    displaced_share.outputs[0].default_value = 0.
+    bump_height = a.m('SUBTRACT', height, a.m('MULTIPLY', damage_height.outputs[0], displaced_share.outputs[0]))
+    shader = _bsdfs(a, params, color, grout_color, dust_mask, macro_delta, bump_height, joint_mix)
+    shader = tile_damage.damage_bsdfs(a, params, shader, color, bump_height, d)
     out = a.node('ShaderNodeOutputMaterial'); out.location = (900, 300)
     a.put(shader, out.inputs['Surface'])
     disp = a.node('ShaderNodeDisplacement'); disp.label = 'Metres; optional displacement'; disp.space = 'WORLD'
     disp.inputs['Midlevel'].default_value = 0; disp.inputs['Scale'].default_value = 1
     a.put(height, disp.inputs['Height'])
     disp.name = 'TileDisplacement'
+    ddisp = a.node('ShaderNodeDisplacement'); ddisp.label = 'Metres; damage-only displacement'; ddisp.space = 'WORLD'
+    ddisp.inputs['Midlevel'].default_value = 0; ddisp.inputs['Scale'].default_value = 1
+    a.put(damage_height.outputs[0], ddisp.inputs['Height'])
+    ddisp.name = 'DamageDisplacement'
     mat.displacement_method = 'BUMP'
     for feature in off:
         toggle(mat, feature, False)
@@ -484,7 +497,7 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
 def set_param(mat, name, value):
     """Set any tile_material keyword, rebuilding structural options in the same material."""
     if name in _REMOVED_DAMAGE:
-        raise ValueError(f'{name} was removed; v6 parameters: {", ".join(tile_damage.PARAMS)}')
+        raise ValueError(f'{name} was removed; v7 parameters: {", ".join(tile_damage.PARAMS)}')
     settings = _settings(mat)
     if name not in settings:
         raise KeyError(name)
@@ -558,8 +571,10 @@ def _validate_damage(key, value):
     """Reject negative/nonfinite metre parameters and invalid probabilities."""
     if not math.isfinite(value) or value < 0:
         raise ValueError(f'{key} must be finite and nonnegative')
-    if key in ('damage', 'chip_share', 'crack_share', 'branch_share', 'spall_density', 'crack_dirt') and value > 1:
+    if key in ('damage', 'chip_share', 'crack_share', 'branch_share', 'spall_density', 'crack_dirt', 'crack_density', 'chip_density') and value > 1:
         raise ValueError(f'{key} must lie in [0, 1]')
+    if key in ('warp_scale','crack_cell') and value <= 0:
+        raise ValueError(f'{key} must be positive')
     if key == 'force_kind' and value not in (0, 1, 2, 3):
         raise ValueError('force_kind must be 0, 1, 2 or 3')
     if key == 'shell_exponent' and not .2 <= value <= 2:
@@ -586,6 +601,23 @@ def use_displacement(mat, objects, pixel_size=1.0):
     return mat
 
 
+def use_damage_displacement(mat, objects, pixel_size=1.0):
+    """Displace only chips, cracks and piece steps; tile profile and joints stay bump, so wall edges never move."""
+    from study_materials import enable_true_displacement
+    if not math.isfinite(pixel_size) or pixel_size <= 0:
+        raise ValueError('pixel_size must be positive and finite')
+    tree = mat.node_tree
+    out = next(n for n in tree.nodes if n.type == 'OUTPUT_MATERIAL' and n.is_active_output)
+    tree.links.new(tree.nodes['DamageDisplacement'].outputs['Displacement'], out.inputs['Displacement'])
+    tree.nodes['DamageDisplacementOn'].outputs[0].default_value = 1.
+    for name in ('TileBump', 'DamageBump'):
+        tree.nodes[name].inputs['Strength'].default_value = 1
+    mat.displacement_method = 'BOTH'
+    for obj in objects:
+        enable_true_displacement(obj, pixel_size)
+    return mat
+
+
 def use_bump(mat):
     """Restore height bump shading and disconnect geometric displacement."""
     tree = mat.node_tree
@@ -593,6 +625,8 @@ def use_bump(mat):
         if node.type == 'OUTPUT_MATERIAL':
             for link in list(node.inputs['Displacement'].links):
                 tree.links.remove(link)
+    if 'DamageDisplacementOn' in tree.nodes:
+        tree.nodes['DamageDisplacementOn'].outputs[0].default_value = 0.
     for name in ('TileBump', 'DamageBump'):
         tree.nodes[name].inputs['Strength'].default_value = 1
     mat.displacement_method = 'BUMP'

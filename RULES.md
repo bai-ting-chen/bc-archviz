@@ -35,7 +35,9 @@
    concrete darken? Lekner–Dorf: internal reflection in the water film, non-linear in albedo);
    (b) how others implement it: manual/API, forums, papers' renderers, YouTube (`yt_learn.py`);
    (c) map the model onto native nodes and say which terms are kept and which approximated.
-   Compare 2–4 workflows, choose by 1–2, cite sources, then build and prove. More and more
+   Compare 2–4 workflows, choose by 1–2, cite sources, then build and prove. Read a source's own
+   pictures and video frames at full resolution, not a summary of its text: the method is often
+   only in the images, and a near-copy built from the summary misses it. More and more
    requests will be things few people have done in Blender or archviz: a
    tutorial can only copy a look, the science lets you build a new method and know its limits.
    Videos are evidence, not authority.
@@ -65,7 +67,10 @@
    joints, ripples and grunge all read by how many pixels they occupy, so the same material wants
    different numbers on a close-up and on a wall 4 m away. Judge the first render and scale.
    A feature smaller than a pixel reads only as its aggregate (a wet lawn's sheen, not its
-   drops): model that, and ask before building micro-geometry.
+   drops): model that, and ask before building micro-geometry. **Keep the final view in sight:**
+   size a detail feature in the final camera first, and pair every close-up shown to the user
+   with a native-resolution crop of the final view — a feature tuned in a macro view can vanish
+   in the shot.
 
 8a. **Natural light = matching HDRI sky first**. Whenever sun, sky or any
    daylight is in the scene, light it with an HDRI whose sky matches the reference (overcast vs
@@ -136,8 +141,10 @@
     skill. Codex suits detail work: scripts from a short brief, gathering sources into a brief,
     measurement runs (numbers table + one contact sheet), past workflows. Long output goes to a
     file with a short summary back. Skill changes reach the repo through Claude as a diff it
-    commits. Either model may take over alone when the other is out of tokens; this skill and
-    the project files are the whole handover, so nothing lives only in one agent's memory.
+    commits. Reference-image analysis and all Rhino modelling stay with Claude. Either model may
+    take over alone when the other is out of tokens (stop it at a clean point, not mid-edit);
+    this skill and the project files are the whole handover, so nothing lives only in one
+    agent's memory.
 16. **One agent at a time on Blender and on a file.** There is one Blender and one MCP port per
     machine, shared by every project. Before driving Blender or editing a study's files, check
     `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (machine-wide, beside the MCP server): absent →

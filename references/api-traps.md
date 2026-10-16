@@ -71,7 +71,9 @@
 - `render.render("INVOKE_DEFAULT")` from a startup-script timer renders but may open no render
   window: switch the largest area to `IMAGE_EDITOR` showing `Render Result` to watch it.
 - Headless runs load user prefs unless `--factory-startup` (which disables add-ons, CPU device —
-  `archviz.render_setup` turns OptiX on when no compute device is set —
+  `archviz.render_setup` turns OptiX on when no compute device is set; a control that builds its
+  own scene must call `archviz.use_gpu()` (`controls/_scene.black_scene` does), or it silently
+  renders on the CPU at ~10x the time —
   and gives new worlds a grey 0.05 background (+π·0.05 W/m² on every surface) — set the
   Background Strength to 0 for a black test world).
 
