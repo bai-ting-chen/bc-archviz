@@ -1,15 +1,69 @@
-"""Metre-based tile layout shader maths; see references/materials.md > Tiles."""
-import numpy as np
+"""Metre-based tile layout shader maths; see references/materials.md > Tiles.
 
-_VERSION = 3
+Jitter is contained per cell: cap |angle| at max(joint/2 - 1e-5, 0) /
+half-diagonal, then each offset amplitude at max(joint/2 - |angle| *
+half-diagonal - 1e-5, 0). Zero/tiny joints safely collapse jitter to zero.
+"""
+import numpy as np
+from tile_nodes import _replace_group_users
+
+_VERSION = 4
 _INPUTS = {
     "tile_w": "Tile W", "tile_h": "Tile H", "joint": "Joint", "corner_radius": "Corner Radius",
+    "jitter_offset": "Jitter Offset", "jitter_rotation": "Jitter Rotation",
     "row_offset": "Row Offset", "rotation": "Rotation", "origin": "Origin",
 }
 
 
+# Separate 3D White Noise seeds for X, Y and angle; Tile ID keeps (0.5, 0.5, 0.5).
+_JITTER_SEEDS = ((0.5, 0.5, 11.5), (0.5, 0.5, 23.5), (0.5, 0.5, 37.5))
+
+
+def _white_noise(col, row, seed):
+    """Mirror Cycles hash_float3_to_float (Jenkins lookup3, float32 input bits)."""
+    # Algorithm (Apache-2.0):
+    # https://github.com/blender/blender/blob/main/intern/cycles/util/hash.h
+    x, y = np.broadcast_arrays(np.asarray(col, dtype=np.float32),
+                               np.asarray(row, dtype=np.float32))
+    keys = ((x + np.float32(seed[0])).view(np.uint32),
+            (y + np.float32(seed[1])).view(np.uint32),
+            np.full(x.shape, seed[2], dtype=np.float32).view(np.uint32))
+    mask = np.uint64(0xffffffff)
+    a, b, c = [(key.astype(np.uint64) + np.uint64(0xdeadbeef + 12 + 13)) & mask
+               for key in keys]
+
+    def rot(value, bits):
+        return ((value << np.uint64(bits)) | (value >> np.uint64(32 - bits))) & mask
+
+    # uint64 plus explicit masking gives uint32 wrap without overflow warnings.
+    def sub(value, other):
+        return (value + np.uint64(0x100000000) - other) & mask
+
+    c = sub(c ^ b, rot(b, 14))
+    a = sub(a ^ c, rot(c, 11))
+    b = sub(b ^ a, rot(a, 25))
+    c = sub(c ^ b, rot(b, 16))
+    a = sub(a ^ c, rot(c, 4))
+    b = sub(b ^ a, rot(a, 14))
+    c = sub(c ^ b, rot(b, 24))
+    return (c.astype(np.float32) * np.float32(1.0 / 4294967296.0)).astype(float)
+
+
+def _jitter_transform(col, row, tile_w, tile_h, joint, jitter_offset, jitter_rotation):
+    """Return per-cell X/Y shifts and angle conservatively contained inside the cell."""
+    diagonal_half = np.hypot(tile_w, tile_h) / 2
+    clearance = max(joint / 2 - 1e-5, 0.0)
+    random = [(_white_noise(col, row, seed) - 0.5) * 2 for seed in _JITTER_SEEDS]
+    angle = random[2] * min(abs(jitter_rotation), clearance / diagonal_half)
+    # Rotation displaces any point by at most |a| * half-diagonal.
+    # Thus each axis shift <= joint/2 - |a| * half-diagonal - 1e-5.
+    limit = np.minimum(abs(jitter_offset), np.maximum(clearance - np.abs(angle) * diagonal_half, 0))
+    return random[0] * limit, random[1] * limit, angle
+
+
 def reference(u, v, tile_w, tile_h, joint, row_offset=0.0, rotation=0.0,
-              origin=(0.0, 0.0), corner_radius=0.0):
+              origin=(0.0, 0.0), corner_radius=0.0, jitter_offset=0.0,
+              jitter_rotation=0.0):
     """Return layout truth in metres; row_offset accepts any real value and wraps."""
     u, v = np.broadcast_arrays(np.asarray(u, dtype=float), np.asarray(v, dtype=float))
     x, y = u - origin[0], v - origin[1]
@@ -21,6 +75,11 @@ def reference(u, v, tile_w, tile_h, joint, row_offset=0.0, rotation=0.0,
     xp = qx - (offset - np.floor(offset)) * pw
     col = np.floor(xp / pw)
     tx, ty = xp - col * pw - joint / 2, qy - row * ph - joint / 2
+    ox, oy, angle = _jitter_transform(col, row, tile_w, tile_h, joint,
+                                       jitter_offset, jitter_rotation)
+    cx, cy = tx - tile_w / 2 - ox, ty - tile_h / 2 - oy
+    ca, sa = np.cos(angle), np.sin(angle)
+    tx, ty = ca * cx + sa * cy + tile_w / 2, -sa * cx + ca * cy + tile_h / 2
     rc = np.clip(corner_radius, 0, min(tile_w, tile_h) / 2)
     dx = np.abs(tx - tile_w / 2) - (tile_w / 2 - rc)
     dy = np.abs(ty - tile_h / 2) - (tile_h / 2 - rc)
@@ -35,51 +94,6 @@ def _interface_signature(group):
     """Read ordered socket names, directions and types without instance identifiers."""
     return [(item.name, item.in_out, item.socket_type)
             for item in group.interface.items_tree if item.item_type == "SOCKET"]
-
-
-def _replace_group_users(old, new):
-    """Retarget shader group instances while preserving values and links by name."""
-    import bpy
-
-    trees = list(bpy.data.node_groups)
-    for collection in (bpy.data.materials, bpy.data.worlds, bpy.data.lights):
-        trees.extend(owner.node_tree for owner in collection if owner.node_tree is not None)
-    seen = set()
-    for tree in trees:
-        if tree.as_pointer() in seen:
-            continue
-        seen.add(tree.as_pointer())
-        users = [node for node in tree.nodes
-                 if getattr(node, "node_tree", None) == old]
-        if not users:
-            continue
-        # Snapshot the whole affected link set before changing any instance, so
-        # links between two old-group instances also survive socket recreation.
-        links = [(link.from_node,
-                  link.from_socket.name if link.from_node in users else link.from_socket,
-                  link.to_node,
-                  link.to_socket.name if link.to_node in users else link.to_socket)
-                 for link in tree.links
-                 if link.from_node in users or link.to_node in users]
-        for link in list(tree.links):
-            if link.from_node in users or link.to_node in users:
-                tree.links.remove(link)
-        for node in users:
-            values = {}
-            for socket in node.inputs:
-                if hasattr(socket, "default_value"):
-                    value = socket.default_value
-                    values[socket.name] = tuple(value) if hasattr(value, "__len__") else value
-            node.node_tree = new
-            for label, value in values.items():
-                target = node.inputs.get(label)
-                if target is not None and hasattr(target, "default_value"):
-                    target.default_value = value
-        for source, output, target, input_name in links:
-            src = source.outputs.get(output) if source in users else output
-            dst = target.inputs.get(input_name) if target in users else input_name
-            if src is not None and dst is not None:
-                tree.links.new(src, dst)
 
 
 def layout_group(name="TileLayout"):
@@ -113,6 +127,8 @@ def layout_group(name="TileLayout"):
     socket("Tile H", "INPUT", default=0.1, minimum=1e-6)
     socket("Joint", "INPUT", default=0.003, minimum=0)
     socket("Corner Radius", "INPUT", default=0, minimum=0)
+    socket("Jitter Offset", "INPUT", default=0, minimum=0)
+    socket("Jitter Rotation", "INPUT", default=0, minimum=0).subtype = "ANGLE"
     offset_socket = socket("Row Offset", "INPUT", default=0)
     offset_socket.description = "Any real value wraps; usual range 0 to 1"
     # Bundled 5.2 RNA documents no soft bounds on interface float sockets.
@@ -180,6 +196,34 @@ def layout_group(name="TileLayout"):
     tx = math("SUBTRACT", math("SUBTRACT", xp, math("MULTIPLY", col, pw)), half_joint)
     ty = math("SUBTRACT", math("SUBTRACT", qy, math("MULTIPLY", row, ph)), half_joint)
     hx, hy = math("MULTIPLY", ins["Tile W"], 0.5), math("MULTIPLY", ins["Tile H"], 0.5)
+    cell = combine(col, row, (1050, -500))
+
+    def random_signed(seed_offset, slot):
+        seed_node = g.n("ShaderNodeVectorMath", (900, -1100 - slot * 220), operation="ADD")
+        g.link(cell, seed_node.inputs[0])
+        seed_node.inputs[1].default_value = seed_offset
+        noise_node = g.n("ShaderNodeTexWhiteNoise", (1100, -1100 - slot * 220), noise_dimensions="3D")
+        g.link(seed_node.outputs["Vector"], noise_node.inputs["Vector"])
+        return math("MULTIPLY", math("SUBTRACT", noise_node.outputs["Value"], 0.5), 2)
+
+    rx, ry, ra = [random_signed(seed, slot) for slot, seed in enumerate(_JITTER_SEEDS)]
+    diag_vector = combine(hx, hy, (900, -1850))
+    diagonal = g.n("ShaderNodeVectorMath", (1100, -1850), operation="LENGTH")
+    g.link(diag_vector, diagonal.inputs[0])
+    diagonal_half = diagonal.outputs["Value"]
+    clearance = math("MAXIMUM", math("SUBTRACT", half_joint, 1e-5), 0)
+    # Cap angle first; then cap each shift at joint/2 - |a|*half-diagonal - 1e-5.
+    angle_limit = math("MINIMUM", math("ABSOLUTE", ins["Jitter Rotation"]),
+                       math("DIVIDE", clearance, diagonal_half))
+    angle = math("MULTIPLY", ra, angle_limit)
+    remaining = math("MAXIMUM", math("SUBTRACT", clearance,
+                     math("MULTIPLY", math("ABSOLUTE", angle), diagonal_half)), 0)
+    offset_limit = math("MINIMUM", math("ABSOLUTE", ins["Jitter Offset"]), remaining)
+    cx = math("SUBTRACT", math("SUBTRACT", tx, hx), math("MULTIPLY", rx, offset_limit))
+    cy = math("SUBTRACT", math("SUBTRACT", ty, hy), math("MULTIPLY", ry, offset_limit))
+    ca, sa = math("COSINE", angle), math("SINE", angle)
+    tx = math("ADD", hx, math("ADD", math("MULTIPLY", ca, cx), math("MULTIPLY", sa, cy)))
+    ty = math("ADD", hy, math("SUBTRACT", math("MULTIPLY", ca, cy), math("MULTIPLY", sa, cx)))
     rc = math("MINIMUM", math("MAXIMUM", ins["Corner Radius"], 0), math("MINIMUM", hx, hy))
     dx = math("SUBTRACT", math("ABSOLUTE", math("SUBTRACT", tx, hx)), math("SUBTRACT", hx, rc))
     dy = math("SUBTRACT", math("ABSOLUTE", math("SUBTRACT", ty, hy)), math("SUBTRACT", hy, rc))
@@ -191,7 +235,6 @@ def layout_group(name="TileLayout"):
     joint = math("LESS_THAN", edge, -1e-7)
     uv = combine(math("DIVIDE", tx, ins["Tile W"], clamp=True),
                  math("DIVIDE", ty, ins["Tile H"], clamp=True), (1400, 500))
-    cell = combine(col, row, (1050, -500))
     tile_size = combine(ins["Tile W"], ins["Tile H"], (1400, 800))
     seed = g.n("ShaderNodeVectorMath", (1250, -500), operation="ADD")
     g.link(cell, seed.inputs[0])

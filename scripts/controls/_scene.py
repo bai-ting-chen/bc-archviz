@@ -7,16 +7,23 @@ pixel = albedo * E / pi.
 """
 import os
 import shutil
+import sys
 import tempfile
 
 import bpy
 import numpy as np
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
+import archviz
 
-def black_scene(samples=256, res=64):
+
+def black_scene(samples=256, res=64, gpu=True):
+    """Empty Cycles scene, black world; on the GPU (--factory-startup alone renders on the CPU)."""
     bpy.ops.wm.read_homefile(use_empty=True)
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
+    if gpu:
+        archviz.use_gpu()
     sc.cycles.samples, sc.cycles.use_denoising = samples, False
     sc.cycles.use_adaptive_sampling = False
     sc.render.resolution_x = sc.render.resolution_y = res
