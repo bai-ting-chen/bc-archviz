@@ -137,6 +137,17 @@ def boundary(mask):
     return mask & ~(p[:-2,1:-1]&p[2:,1:-1]&p[1:-1,:-2]&p[1:-1,2:])
 
 
+def disk_dilate(mask,radius):
+    """Euclidean pixel neighbourhood for the physical dirt-width bound."""
+    p=np.pad(mask,radius)
+    out=np.zeros_like(mask)
+    for dy in range(-radius,radius+1):
+        for dx in range(-radius,radius+1):
+            if dx*dx+dy*dy<=radius*radius:
+                out |= p[radius+dy:radius+dy+mask.shape[0],radius+dx:radius+dx+mask.shape[1]]
+    return out
+
+
 def components(mask):
     """Count connected eight-neighbour pixel bands."""
     remaining = set(zip(*np.nonzero(mask))); sizes = []
@@ -155,9 +166,9 @@ def components(mask):
 def check_crack(folder):
     """Compare identical cells with and without C2, including its actual crack band."""
     sc, ob, mat = tile_rig(force_kind=1, branch_share=0, spall_density=0, crack_width=.0005)
-    first = probe_rgb(mat, folder, 'c1', ('Crack','Piece',None))
+    first = probe_rgb(mat, folder, 'c1', ('Crack','Piece','Dirt'))
     tile_surface.set_param(mat, 'branch_share', 1)
-    second = probe_rgb(mat, folder, 'c2', ('Crack','Piece',None))
+    second = probe_rgb(mat, folder, 'c2', ('Crack','Piece','Dirt'))
     c1, c2 = first[...,0]>.5, second[...,0]>.5
     for index, face, x0, X, Y in tiles(c1.shape):
         line = c1 & face
@@ -180,6 +191,12 @@ def check_crack(folder):
         inner = boundary(small) & (X>x0+2*PX)&(X<x0+W-2*PX)&~dilate(line,2)
         assert inner.any() and np.mean(dilate(c2,2)[inner])>=.8, f'{index}: arc misses inner piece boundary'
         assert len(np.unique(ids[face&~dilate(c2)])) == 3, f'{index}: piece count'
+    for data in (first,second):
+        crack=data[...,0]>.5; dirt=data[...,2]
+        assert not ((dirt>1e-6)&~disk_dilate(crack,round(.002/PX)+1)).any(), 'Dirt beyond Dirt Width + 1 px'
+        assert (dirt[crack]<.1).any() and (dirt[crack]>.5).any(), 'Dirt must include clean and dark patches'
+    tile_surface.set_param(mat,'crack_dirt',0)
+    assert np.max(probe_rgb(mat,folder,'dirt_zero',('Dirt',None,None)))<1e-8
 
 
 def check_pieces(folder):
@@ -266,7 +283,82 @@ def check_chips(folder):
     tile_surface.set_param(mat,'chip_depth',0)
     zero=probe_rgb(mat,folder,'zero_depth_chip',('Body','Chip Depth Out',None),(1,.001,1))
     assert np.max(zero[...,0])<1e-6 and np.max(zero[...,1])<=GLAZE+1e-8
-    return {'edge_transition_max_m': max(widths)}
+    return {'edge_transition_max_m': max(widths),**check_chip_look(folder)}
+
+
+def chip_cells(data,width=.0375):
+    """Locate each of three corner chips and return its folded metre coordinates."""
+    Y,X=np.meshgrid((np.arange(data.shape[0])+.5)*PX,(np.arange(data.shape[1])+.5)*PX,indexing='ij')
+    for index in range(NT):
+        x0=index*(width+J)+J/2
+        face=(X>x0)&(X<x0+width)&(Y>J/2)&(Y<J/2+H)
+        shell=face&(data[...,0]>1e-6)
+        assert shell.any(), f'{index}: empty chip'
+        cx=x0 if X[shell].mean()<x0+width/2 else x0+width
+        cy=J/2 if Y[shell].mean()<J/2+H/2 else J/2+H
+        yield index,face,shell,np.abs(X-cx),np.abs(Y-cy),(cx,cy,x0)
+
+
+def scallop_measure(x,y,outline,size):
+    """Measure line deviation or two curvature sign changes after smoothing kink scale."""
+    points=np.c_[x[outline],y[outline]]
+    assert len(points)>=8, 'Too few outline samples'
+    centre=points.mean(axis=0)
+    _,_,axes=np.linalg.svd(points-centre,full_matrices=False)
+    deviation=float(np.max(np.abs((points-centre)@axes[1])))
+    points=points[np.argsort(np.arctan2(points[:,1],points[:,0]))]
+    # A 1.75 mm average suppresses the 1.5 mm kink knots, retaining the scar arcs.
+    smooth=np.stack([np.convolve(np.pad(points[:,k],3,mode='edge'),np.ones(7)/7,mode='valid') for k in (0,1)],axis=1)
+    left=smooth[3:-3]-smooth[:-6]; right=smooth[6:]-smooth[3:-3]
+    cross=left[:,0]*right[:,1]-left[:,1]*right[:,0]
+    signs=np.sign(cross[np.abs(cross)>(.1*PX)**2])
+    changes=int(np.count_nonzero(signs[1:]!=signs[:-1]))
+    assert deviation>=.15*size or changes>=2, f'No scalloped arcs: deviation {deviation:.6g} m, changes {changes}'
+    return deviation,changes
+
+
+def check_chip_look(folder):
+    """Measure slip width, clay coverage, scallops and the room-distance size clamp."""
+    width=.0375
+    def rig(size,label):
+        """Pack the full three-chip look rig at the topology pixel scale."""
+        sc,ob,mat=setup(NT*(width+J),H+J,round(NT*(width+J)/PX),round((H+J)/PX),
+                        tile_w=width,force_kind=2,chip_size=size,chip_depth=.0015)
+        return probe_rgb(mat,folder,label,('Chip Depth Out','Body','Engobe'),(.002,1,1))
+    data=rig(.01,'scalloped_10mm')
+    coverage=[]; deviations=[]; changes=[]; selected=None
+    for index,face,shell,x,y,corner in chip_cells(data):
+        fraction=float(np.mean(data[...,1][shell]>.5))
+        assert fraction>=.4, f'{index}: Body covers only {fraction:.3f} of shell'
+        coverage.append(fraction)
+        outline=boundary(shell)&(np.minimum(x,y)>2*PX)
+        deviation,count=scallop_measure(x,y,outline,.01)
+        deviations.append(deviation); changes.append(count)
+        if selected is None: selected=corner
+    cx,cy,x0=selected
+    origin=(cx if cx==x0 else cx-.008,cy if cy==J/2 else cy-.008)
+    sc,ob,mat=setup(.008,.008,160,160,origin=origin,tile_w=width,force_kind=2,chip_size=.01,chip_depth=.0015)
+    layers=probe_rgb(mat,folder,'slip_width_50um',('Glaze Lip','Engobe','Body'))>.5
+    outer=layers[...,1]&dilate(layers[...,0])
+    outer[:3]=outer[-3:]=False; outer[:,:3]=outer[:,-3:]=False
+    outer_points=np.argwhere(outer); body_points=np.argwhere(layers[...,2])
+    assert len(outer_points) and len(body_points), 'Missing slip/body band'
+    widths=[]
+    for points in np.array_split(outer_points,max(1,math.ceil(len(outer_points)/128))):
+        distances=np.sqrt(np.min(np.sum((points[:,None,:]-body_points[None,:,:])**2,axis=-1),axis=1))
+        widths.extend((distances+1)*.00005)
+    median=float(np.median(widths))
+    assert median<=.0006, f'Slip band median {median:.6g} m > 0.6 mm'
+    large=rig(.03,'room_distance_30mm')
+    reaches=[]; faces=[]
+    for index,face,shell,x,y,_ in chip_cells(large):
+        reach=float(np.hypot(x[shell],y[shell]).max())
+        assert reach<=.03*1.15+.0005, f'{index}: chip exceeds corner clamp ({reach} m)'
+        reaches.append(reach); faces.append(face)
+    assert max(reaches)>=.02, f'30 mm chips only reach {max(reaches):.6g} m'
+    assert not ((large[...,0]>1e-6)&~np.logical_or.reduce(faces)).any(), 'Large chip leaves tile faces'
+    return dict(slip_median_width_m=median,body_shell_fraction_min=min(coverage),
+                scallop_deviation_m=deviations,scallop_curvature_changes=changes,large_chip_reaches_m=reaches)
 
 
 def check_flakes(folder):
@@ -292,7 +384,7 @@ def check_spalls(folder):
 
 
 def check_square(folder):
-    """Twenty square cells touch both long edges; mosaics retain the size clamp."""
+    """Twenty square cells touch both long edges; mosaics retain the 0.8-side clamp."""
     pitch=.102
     sc,ob,mat=setup(4*pitch,5*pitch,round(4*pitch/PX),round(5*pitch/PX),tile_w=.1,tile_h=.1,
                     joint=.002,force_kind=1,branch_share=0,spall_density=0,crack_width=.001)
@@ -308,7 +400,7 @@ def check_square(folder):
     data=probe_rgb(mat,folder,'mosaic',('Chip Depth Out','UV X','UV Y'),(.001,1,1))
     lx,ly=data[...,1]*.01,data[...,2]*.01
     r=np.hypot(np.minimum(lx,.01-lx),np.minimum(ly,.01-ly))
-    assert r[data[...,0]>1e-6].max()<.4*.01*1.15+.0005
+    assert r[data[...,0]>1e-6].max()<.8*.01*1.15+.0005
 
 
 def check_rotated(folder):
@@ -358,9 +450,10 @@ def check_upgrade(folder):
     group=tile_damage.damage_group()
     legacy=bpy.data.node_groups.new('LegacyTileDamage','ShaderNodeTree')
     legacy['tile_damage_version']=5
-    missing={'Branch Share','Step Height','Piece Tilt','Kink Size','Kink Amp','Chip Size','Spall Density','Force Kind'}
+    missing={'Branch Share','Step Height','Piece Tilt','Kink Size','Kink Amp','Chip Size','Spall Density','Force Kind',
+             'Shell Exponent','Crack Dirt','Dirt Width'}
     for item in group.interface.items_tree:
-        if item.item_type=='SOCKET' and item.name not in missing|{'Piece Height','Piece'}:
+        if item.item_type=='SOCKET' and item.name not in missing|{'Piece Height','Piece','Dirt'}:
             sock=legacy.interface.new_socket(name=item.name,in_out=item.in_out,socket_type=item.socket_type)
             if hasattr(item,'default_value'): sock.default_value=item.default_value
     node=mat.node_tree.nodes['TileDamage']; node.node_tree=legacy
@@ -385,6 +478,27 @@ def check_upgrade(folder):
     first=tile_damage.damage_group()
     tile_surface.tile_material('DamageControl'); tile_surface.tile_material('DamageControl')
     assert tile_damage.damage_group()==first
+    check_shared_upgrade()
+
+
+def check_shared_upgrade():
+    """A sibling remapped to the new group still needs its material shader rebuilt."""
+    first=tile_surface.tile_material('OldFirst',damage=.31)
+    second=tile_surface.tile_material('OldSibling',damage=.47)
+    old=first.node_tree.nodes['TileDamage'].node_tree
+    old['tile_damage_revision']=1
+    for item in list(old.interface.items_tree):
+        if item.item_type=='SOCKET' and item.name in {'Shell Exponent','Crack Dirt','Dirt Width','Dirt'}:
+            old.interface.remove(item)
+    tile_surface.set_param(first,'crack_dirt',.55)
+    remapped=second.node_tree.nodes['TileDamage']
+    assert tile_damage._is_current(remapped.node_tree)
+    assert not remapped.outputs['Dirt'].is_linked, 'Fixture did not reproduce missing sibling wiring'
+    tile_surface.set_param(second,'crack_dirt',.5)
+    node=second.node_tree.nodes['TileDamage']
+    assert node.outputs['Dirt'].is_linked and node.outputs['Piece Height'].is_linked
+    assert abs(node.inputs['Fraction'].default_value-.47)<1e-6
+    assert abs(node.inputs['Crack Dirt'].default_value-.5)<1e-6
 
 
 def displacement_case(folder,kind,whole=False):

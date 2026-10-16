@@ -11,17 +11,18 @@ PARAMS = dict(damage='Fraction', crack_share='Crack Share', chip_share='Chip Sha
               kink_amp='Kink Amp', chip_size='Chip Size', chip_depth='Chip Depth',
               spall_size='Spall Size', spall_density='Spall Density', glaze_thickness='Glaze Thickness',
               engobe_thickness='Engobe Thickness', glaze_lip_width='Glaze Lip Width',
-              engobe_ring='Engobe Ring', force_kind='Force Kind')
+              engobe_ring='Engobe Ring', force_kind='Force Kind', shell_exponent='Shell Exponent',
+              crack_dirt='Crack Dirt', dirt_width='Dirt Width')
 DEFAULTS = (.05, .45, .35, .35, .00006, .0035, .00018, .0008, .0015, .0002, .004, .0008,
-            .001, .25, .0003, .0002, .0002, .0003, 0)
+            .001, .25, .0003, .0002, .0002, .0003, 0, .6, .6, .002)
 _LAYOUT_INPUTS = ('Tile ID','Cell','Tile UV','Edge','Tile Size')
 _OUTPUTS = ('Chip Depth Out','Piece Height','Piece','Crack','Crack Depth Out',
-            'Glaze Lip','Engobe','Body','Damaged','Kind')
+            'Glaze Lip','Engobe','Body','Damaged','Kind','Dirt')
 
 
 def _is_current(tree):
     """Require the complete v6 interface as well as the implementation stamp."""
-    if tree is None or tree.get('tile_damage_version') != _VERSION or tree.get('tile_damage_revision') != 1:
+    if tree is None or tree.get('tile_damage_version') != _VERSION or tree.get('tile_damage_revision') != 2:
         return False
     sockets = {(item.in_out,item.name) for item in tree.interface.items_tree if item.item_type=='SOCKET'}
     return (all(('INPUT',label) in sockets for label in (*_LAYOUT_INPUTS,*PARAMS.values(),'On')) and
@@ -44,6 +45,10 @@ class _DamageGraph(_Graph):
 
     def m(self, op, x, y=0):
         """Fold identities and share repeated scalar expressions."""
+        if isinstance(x,(int,float)) and isinstance(y,(int,float)):
+            folded = {'MULTIPLY':lambda:x*y,'ADD':lambda:x+y,'SUBTRACT':lambda:x-y,
+                      'DIVIDE':lambda:x/y if y else 0.,'MINIMUM':lambda:min(x,y),'MAXIMUM':lambda:max(x,y)}
+            if op in folded: return folded[op]()
         if op == 'MULTIPLY':
             if isinstance(x,(int,float)) and x == 0 or isinstance(y,(int,float)) and y == 0: return 0.
             if isinstance(x,(int,float)) and x == 1: return y
@@ -73,6 +78,8 @@ class _DamageGraph(_Graph):
 
     def mix(self, factor, x, y):
         """Interpolate floats with one native Mix node, without clamping values."""
+        if x == y: return x
+        if isinstance(factor,(int,float)) and factor in (0,1): return y if factor else x
         def build():
             """Use the float sockets of Blender's multi-type Mix node."""
             n = self.node('ShaderNodeMix',data_type='FLOAT',clamp_factor=False)
@@ -123,6 +130,15 @@ class _DamageGraph(_Graph):
             return n.outputs['Value']
         return self.cached(('length',vector),build)
 
+    def interval(self,value,lo,hi,first,second):
+        """Interpolate adjacent knots directly over their integer interval."""
+        def build():
+            """Fuse fraction extraction and linear interpolation in one Map Range."""
+            n=self.node('ShaderNodeMapRange',interpolation_type='LINEAR',clamp=False)
+            for value_,socket in zip((value,lo,hi,first,second),n.inputs[:5]): self.put(value_,socket)
+            return n.outputs[0]
+        return self.cached(('interval',value,lo,hi,first,second),build)
+
 
 def _rand(a, cell, seed):
     """Derive reproducible draws from shared hash components with scale-and-fract."""
@@ -140,11 +156,12 @@ def _kink(a, t, size, amp, seed):
     """Linearly interpolate independent knots at two physical arc-length scales."""
     m, draws = a.m, []
     frequency = m('DIVIDE',1,m('MAXIMUM',size,1e-9))
+    base = a.mad(t,frequency,seed)
     for octave in (1, 3):
-        q = a.mad(t,m('MULTIPLY',frequency,octave),m('ADD',seed,17*octave))
-        knot, f = m('FLOOR', q), m('FRACT', q)
-        first, second = a.knot(knot), a.knot(m('ADD',knot,1))
-        draws.append(_signed(a,a.mix(f,first,second)))
+        q = base if octave==1 else a.mad(base,3,37)
+        knot = m('FLOOR',q); next_knot=m('ADD',knot,1)
+        first, second = a.knot(knot), a.knot(next_knot)
+        draws.append(_signed(a,a.interval(q,knot,next_knot,first,second)))
     return m('MULTIPLY',amp,a.mad(draws[1],1/3,draws[0]))
 
 
@@ -252,57 +269,84 @@ def _piece_height(a, i, p, w, h, piece):
     return m('MULTIPLY', m('GREATER_THAN', piece, 0), m('ADD', lift, tilt))
 
 
-def _corner_chip(a, i, p, w, h, size):
-    """Cut a corner-side shell with a jagged chord and an arris-deep conchoidal profile."""
+def _corner_frame(a, i, p, w, h):
+    """Fold the selected corner to the origin without changing physical units."""
     m = a.m
-    rand = lambda seed: _rand(a, i['Cell'], seed)
-    x, y, _ = a.split(p)
-    corner = m('FLOOR', m('MULTIPLY', 4, rand(401)))
-    x = a.mix(m('MODULO', corner, 2), x, m('SUBTRACT', w, x))
-    y = a.mix(m('GREATER_THAN', corner, 1.5), y, m('SUBTRACT', h, y))
-    ca = m('MULTIPLY', size, m('ADD', .4, m('MULTIPLY', .6, rand(403))))
-    cb = m('MULTIPLY', size, m('ADD', .4, m('MULTIPLY', .6, rand(409))))
-    length = m('MAXIMUM',a.length(a.xyz(ca,cb)),1e-9)
-    d = a.xyz(m('DIVIDE', m('MULTIPLY', -1, ca), length), m('DIVIDE', cb, length))
-    n = a.xyz(m('DIVIDE', m('MULTIPLY', -1, cb), length), m('DIVIDE', m('MULTIPLY', -1, ca), length))
-    p0 = a.xyz(m('MULTIPLY', ca, .5), m('MULTIPLY', cb, .5))
-    bow = m('MULTIPLY', .05, _signed(a, rand(419)))
-    phase = m('MULTIPLY', 97, rand(421))
-    inward = _jagged_distance(a, a.xyz(x, y), p0, d, n, length,
-                              bow, i['Kink Size'], i['Kink Amp'], phase)
-    maximum = m('MAXIMUM', _jagged_distance(a, (0, 0, 0), p0, d, n, length,
-                                          bow, i['Kink Size'], i['Kink Amp'], phase), 1e-9)
-    ratio = a.clamp(m('DIVIDE',inward,maximum),0,1)
-    s = m('SUBTRACT', maximum, inward)
-    ripple = m('MULTIPLY', m('MULTIPLY', .05, i['Chip Depth']),
-               m('MULTIPLY', m('SUBTRACT', 1, ratio),
-                 m('SINE', m('DIVIDE', m('MULTIPLY', math.tau * 6, s), m('MAXIMUM', size, 1e-9)))))
-    depth = m('MAXIMUM', i['Glaze Thickness'], m('ADD', m('MULTIPLY', i['Chip Depth'], m('POWER', ratio, 1.5)), ripple))
-    return inward, depth
+    x,y,_ = a.split(p)
+    corner = m('FLOOR',m('MULTIPLY',4,_rand(a,i['Cell'],401)))
+    return (a.mix(m('MODULO',corner,2),x,m('SUBTRACT',w,x)),
+            a.mix(m('GREATER_THAN',corner,1.5),y,m('SUBTRACT',h,y)))
 
 
-def _flakes(a, i, p, w, h, size):
-    """Place one to three jagged half-disc coating shells on independently selected edges."""
+def _flake_frame(a, i, p, w, h, rand):
+    """Express an edge flake in tangent/normal coordinates about its edge centre."""
     m = a.m
-    x, y, _ = a.split(p)
-    distance, depth = -1e10, 0.
-    count = m('ADD', 1, m('FLOOR', m('MULTIPLY', 3, _rand(a, i['Cell'], 501))))
-    for index in range(3):
-        rand = lambda offset: _rand(a, i['Cell'], 511 + index * 40 + offset)
-        edge = m('FLOOR', m('MULTIPLY', 4, rand(0)))
-        vertical, second = m('LESS_THAN', edge, 2), m('MODULO', edge, 2)
-        normal = a.mix(vertical, a.mix(second, y, m('SUBTRACT', h, y)),
-                                  a.mix(second, x, m('SUBTRACT', w, x)))
-        tangent = m('SUBTRACT', a.mix(vertical, x, y), m('MULTIPLY', rand(2), a.mix(vertical, w, h)))
-        radius = m('MULTIPLY', size, m('ADD', .5, rand(4)))
-        radial, _ = _radial_distance(a, tangent, normal, radius, i, m('MULTIPLY', 97, rand(6)))
-        e = m('MULTIPLY', -1, radial)
-        active = m('LESS_THAN', index, count)
-        distance = m('MAXIMUM', distance, a.mix(active, -1e10, e))
-        stack = m('ADD', i['Glaze Thickness'],
-                  m('MULTIPLY', i['Engobe Thickness'], m('LESS_THAN', rand(8), .3)))
-        depth = m('MAXIMUM', depth, m('MULTIPLY', m('MULTIPLY', active, m('GREATER_THAN', e, 0)), stack))
-    return distance, depth
+    x,y,_ = a.split(p)
+    edge = m('FLOOR',m('MULTIPLY',4,rand(0)))
+    vertical,second = m('LESS_THAN',edge,2),m('MODULO',edge,2)
+    normal = a.mix(vertical,a.mix(second,y,m('SUBTRACT',h,y)),a.mix(second,x,m('SUBTRACT',w,x)))
+    tangent = m('SUBTRACT',a.mix(vertical,x,y),m('MULTIPLY',rand(2),a.mix(vertical,w,h)))
+    return tangent,normal
+
+
+def _shells(a, i, p, w, h, size, spall_size, corner_kind):
+    """Union 2-4 corner scars or 1-3 edge flakes, sharing the four radial primitives."""
+    m = a.m
+    x,y = _corner_frame(a,i,p,w,h)
+    flip = m('GREATER_THAN',_rand(a,i['Cell'],419),.5)
+    count = a.mix(corner_kind,
+                  m('ADD',1,m('FLOOR',m('MULTIPLY',3,_rand(a,i['Cell'],501)))),
+                  m('ADD',2,m('FLOOR',m('MULTIPLY',3,_rand(a,i['Cell'],405)))))
+    inward,flake_depth,rings = -1e10,0.,0.
+    # A shared uniform tile radius keeps neighbouring scars visible instead of
+    # letting one large disc swallow the small one; every radius stays U(.25,.45).
+    chip_radius=m('MULTIPLY',size,a.mad(_rand(a,i['Cell'],515),.2,.25))
+    flake_bias=m('MULTIPLY',spall_size,.5)
+    ripple_frequency=m('DIVIDE',math.tau*6,m('MAXIMUM',size,1e-9))
+    # Centres run along a chord just outside either edge at its ends. The middle
+    # scar contains the corner; adjacent scars overlap, making small cusp joins.
+    for index,position in enumerate((.5,0.,1.,.25)):
+        rand = lambda offset: _rand(a,i['Cell'],511+index*40+offset)
+        f = a.mix(flip,position,1-position)
+        cx = m('MULTIPLY',size,a.mad(f,-.5,.37))
+        cy = m('MULTIPLY',size,a.mad(f,.5,-.13))
+        xx,yy = m('SUBTRACT',x,cx),m('SUBTRACT',y,cy)
+        radius=chip_radius
+        if index<3:
+            tangent,normal = _flake_frame(a,i,p,w,h,rand)
+            xx,yy = a.mix(corner_kind,tangent,xx),a.mix(corner_kind,normal,yy)
+            radius=a.mix(corner_kind,a.mad(rand(4),spall_size,flake_bias),chip_radius)
+        radial,arc = _radial_distance(a,xx,yy,radius,i,m('MULTIPLY',97,rand(6)))
+        e = a.mix(m('LESS_THAN',index,count),-1e10,m('MULTIPLY',-1,radial))
+        # Each scar has concentric ripples about its own disc centre. Pick the
+        # exposed scar at each point, rather than summing unrelated ripple sets.
+        rho = a.length(a.xyz(xx,yy))
+        wave = m('SINE',m('MULTIPLY',ripple_frequency,rho))
+        rings = a.mix(m('GREATER_THAN',e,inward),rings,wave)
+        inward = m('MAXIMUM',inward,e)
+        if index<3:
+            stack = a.mad(i['Engobe Thickness'],m('LESS_THAN',rand(8),.3),i['Glaze Thickness'])
+            flake_depth = m('MAXIMUM',flake_depth,m('MULTIPLY',m('GREATER_THAN',e,0),stack))
+    # Normalise between the nearest free arris and the union outline: ratio=1
+    # on the arris, 0 on the outline. No depth floor beyond the glaze is added.
+    arris = m('MAXIMUM',m('MINIMUM',x,y),0)
+    ratio = a.clamp(m('DIVIDE',m('MAXIMUM',inward,0),m('MAXIMUM',m('ADD',inward,arris),1e-9)),0,1)
+    profile = m('MULTIPLY',i['Chip Depth'],m('POWER',ratio,i['Shell Exponent']))
+    ripple = m('MULTIPLY',m('MULTIPLY',.05,i['Chip Depth']),m('MULTIPLY',m('SUBTRACT',1,ratio),rings))
+    depth = m('MAXIMUM',i['Glaze Thickness'],m('ADD',profile,ripple))
+    return inward,a.mix(corner_kind,flake_depth,depth)
+
+
+def _crack_dirt(a, i, paths):
+    """Patchy, coating-only darkening along both actual fracture paths."""
+    m = a.m
+    value = 0.
+    phase = m('MULTIPLY',37,_rand(a,i['Cell'],809))
+    for distance,t,active,_ in paths:
+        band = m('SUBTRACT',1,a.smooth(m('ABSOLUTE',distance),0,m('MAXIMUM',i['Dirt Width'],1e-9)))
+        patches = a.smooth(a.noise(a.xyz(t,phase),1/.008,detail=0),.4,.6)
+        value = m('MAXIMUM',value,m('MULTIPLY',active,m('MULTIPLY',band,patches)))
+    return m('MULTIPLY',i['Crack Dirt'],m('MULTIPLY',m('GREATER_THAN',i['Dirt Width'],0),value))
 
 
 def _spalls(a, i, s, t, active, size, seed, p, point_on_crack):
@@ -361,8 +405,10 @@ def damage_group(name='TileDamage'):
     for (key, label), default in zip(PARAMS.items(), DEFAULTS):
         socket = _socket(tree, label, default=default)
         socket.min_value = 0
-        if key in ('damage', 'chip_share', 'crack_share', 'branch_share', 'spall_density'):
+        if key in ('damage', 'chip_share', 'crack_share', 'branch_share', 'spall_density', 'crack_dirt'):
             socket.max_value = 1
+        elif key == 'shell_exponent':
+            socket.min_value, socket.max_value = .2, 2
         elif key == 'force_kind':
             socket.max_value = 3
         elif key == 'piece_tilt':
@@ -390,27 +436,25 @@ def damage_group(name='TileDamage'):
     swap = m('GREATER_THAN', w0, h0)
     w, h = a.mix(swap, w0, h0), a.mix(swap, h0, w0)
     p = a.xyz(a.mix(swap, x, y), a.mix(swap, y, x))
-    chip_size = m('MINIMUM', i['Chip Size'], m('MULTIPLY', .4, w))
+    chip_size = m('MINIMUM', i['Chip Size'], m('MULTIPLY', .8, w))
     spall_size = m('MINIMUM', i['Spall Size'], m('MULTIPLY', .4/1.5, w))
     gap, piece, paths = _cracks(a, i, p, w, h)
     piece_height = m('MULTIPLY', crack_tile, _piece_height(a, i, p, w, h, piece))
     crack = m('MULTIPLY', crack_tile, gap)
-    e_chip, d_chip = _corner_chip(a, i, p, w, h, chip_size)
-    e_flake, d_flake = _flakes(a, i, p, w, h, spall_size)
+    e_shell,d_shell = _shells(a,i,p,w,h,chip_size,spall_size,chip_tile)
+    shell_tile = m('MAXIMUM',chip_tile,flake_tile)
     e_spall, d_spall = -1e10, 0.
     for index, (s, t, active, point_on_crack) in enumerate(paths):
         e, depth = _spalls(a, i, s, t, active, spall_size, 701 + index * 40, p, point_on_crack)
         e_spall = m('MAXIMUM', e_spall, e)
         d_spall = m('MAXIMUM', d_spall, depth)
-    e = m('MAXIMUM', a.mix(chip_tile, -1e10, e_chip),
-          m('MAXIMUM', a.mix(flake_tile, -1e10, e_flake), a.mix(crack_tile, -1e10, e_spall)))
-    depth = m('ADD', m('MULTIPLY', chip_tile, d_chip),
-              m('ADD', m('MULTIPLY', flake_tile, d_flake), m('MULTIPLY', crack_tile, d_spall)))
+    e = m('MAXIMUM',a.mix(shell_tile,-1e10,e_shell),a.mix(crack_tile,-1e10,e_spall))
+    depth = m('ADD',m('MULTIPLY',shell_tile,d_shell),m('MULTIPLY',crack_tile,d_spall))
     depth, lip, engobe, body = _layers(a, i, e, depth, chip_tile, p)
     stack = m('ADD', i['Glaze Thickness'], i['Engobe Thickness'])
     crack_depth = m('MULTIPLY', crack, m('ADD', stack, i['Crack Depth']))
     values = (depth, piece_height, m('MULTIPLY', crack_tile, m('DIVIDE', piece, 4)), crack,
-              crack_depth, lip, engobe, body, damaged, m('MULTIPLY', damaged, m('DIVIDE', kind, 3)))
+              crack_depth, lip, engobe, body, damaged, m('MULTIPLY', damaged, m('DIVIDE', kind, 3)),m('MULTIPLY',crack_tile,_crack_dirt(a,i,paths)))
     for label, value in zip(labels, values):
         a.put(value, out.inputs[label])
     # Fused multiply-add and common expressions may leave temporary build nodes.
@@ -426,7 +470,7 @@ def damage_group(name='TileDamage'):
     for node in list(tree.nodes):
         if node not in live: tree.nodes.remove(node)
     tree['tile_damage_version'] = _VERSION
-    tree['tile_damage_revision'] = 1
+    tree['tile_damage_revision'] = 2
     if old is not None:
         _replace_group_users(old, tree)
         old.user_remap(tree); bpy.data.node_groups.remove(old); tree.name = name
@@ -436,12 +480,18 @@ def damage_group(name='TileDamage'):
 def damage_bsdfs(a, i, intact, color, height, d):
     """Shade exposed clay, engobe and dirt independently of the coated glaze."""
     m, v = a.m, a.v
+    # The face Principled is the first input of tile_surface's face/grout mix.
+    # Change only its pigment: all coat inputs and the grout shader stay intact.
+    face = intact.node.inputs[1].links[0].from_node
+    attenuation = m('SUBTRACT',1,d['Dirt'])
+    a.put(v('MULTIPLY',color,a.xyz(attenuation,attenuation,attenuation)),face.inputs['Base Color'])
     grain = a.amplitude(a.v('ADD', i['World'], a.rand(i['Cell'], (563, 569, 571), True)), 1/.00045)
     grog = m('GREATER_THAN', a.noise(i['World'], 1/.0005), .7)
     iron = m('LESS_THAN', a.noise(a.v('ADD', i['World'], (17, 23, 31)), 1/.0004), .28)
     tone = m('MULTIPLY', m('ADD', .85, m('MULTIPLY', .3, a.rand(i['Cell'], (521, 541, 557)))),
              m('ADD', 1, m('MULTIPLY', .2, grain)))
-    clay_color = v('MULTIPLY', (.34, .16, .07), a.xyz(tone, tone, tone))
+    # Linear terracotta, 25 % toward its own luminance: measured red body read too saturated (user).
+    clay_color = v('MULTIPLY', (.30, .17, .10), a.xyz(tone, tone, tone))
     specks = m('MULTIPLY', m('ADD', 1, m('MULTIPLY', .4, grog)), m('SUBTRACT', 1, m('MULTIPLY', .35, iron)))
     clay_color = v('MULTIPLY', clay_color, a.xyz(specks, specks, specks))
     # The existing dust colour is the same physical deposit inside the deepest bowls.
@@ -466,7 +516,7 @@ def damage_bsdfs(a, i, intact, color, height, d):
         for value, socket in zip((mask, first, second), node.inputs):
             a.put(value, socket)
         return node.outputs[0]
-    shader = mix(d['Engobe'], intact, material((.85, .85, .85), .9, bump.outputs['Normal']))
+    shader = mix(d['Engobe'], intact, material((.70, .70, .70), .9, bump.outputs['Normal']))
     shader = mix(d['Body'], shader, material(clay_color, .9, fine.outputs['Normal']))
     dark = v('MULTIPLY', color, (.25, .25, .25))
     return mix(d['Crack'], shader, material(dark, .9, bump.outputs['Normal']))

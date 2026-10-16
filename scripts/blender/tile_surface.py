@@ -326,8 +326,9 @@ def _settings(mat):
     values['off'] = [f for f in FEATURES if not mat.node_tree.nodes['TileFinish'].inputs[f + ' On'].default_value]
     damage = mat.node_tree.nodes.get('TileDamage')
     piece = damage.outputs.get('Piece Height') if damage else None
+    dirt = damage.outputs.get('Dirt') if damage else None
     needs_upgrade = (damage is None or not tile_damage._is_current(damage.node_tree) or
-                     piece is None or not piece.is_linked)
+                     piece is None or not piece.is_linked or dirt is None or not dirt.is_linked)
     if needs_upgrade:
         try:
             tile_material(**values)
@@ -349,7 +350,8 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
                   kink_size=0.0015, kink_amp=0.0002, chip_size=0.004, chip_depth=0.0008,
                   spall_size=0.001, spall_density=0.25, glaze_thickness=0.0003,
                   engobe_thickness=0.0002, glaze_lip_width=0.0002, engobe_ring=0.0003,
-                  force_kind=0, displacement=False, pixel_size=1.0):
+                  force_kind=0, displacement=False, pixel_size=1.0,
+                  shell_exponent=0.6, crack_dirt=0.6, dirt_width=0.002):
     """Build metre-scale tiles with rotation in radians, tilt/jitter_rotation_deg in degrees and lippage in metres."""
     values = locals().copy()
     if face is not None:
@@ -556,10 +558,12 @@ def _validate_damage(key, value):
     """Reject negative/nonfinite metre parameters and invalid probabilities."""
     if not math.isfinite(value) or value < 0:
         raise ValueError(f'{key} must be finite and nonnegative')
-    if key in ('damage', 'chip_share', 'crack_share', 'branch_share', 'spall_density') and value > 1:
+    if key in ('damage', 'chip_share', 'crack_share', 'branch_share', 'spall_density', 'crack_dirt') and value > 1:
         raise ValueError(f'{key} must lie in [0, 1]')
     if key == 'force_kind' and value not in (0, 1, 2, 3):
         raise ValueError('force_kind must be 0, 1, 2 or 3')
+    if key == 'shell_exponent' and not .2 <= value <= 2:
+        raise ValueError('shell_exponent must lie in [0.2, 2]')
 
 
 def use_displacement(mat, objects, pixel_size=1.0):
