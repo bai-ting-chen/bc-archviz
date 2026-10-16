@@ -258,7 +258,8 @@ adaptive 1 px, last in the stack; `cycles.dicing_camera` = the render camera.
 
 ## Metal
 `interior.polished_steel()`: Metallic BSDF F82, low roughness, shade smooth. Brushed:
-Anisotropic + Tangent.
+Anisotropic + Tangent. Brushed anodised metal with water marks, stains and rounded edges, sized
+for the final view: water-features.md › Materials around water.
 
 ## Glass
 - Principled transmission 1, IOR 1.52, roughness 0. Thin Film for coated glazing (to try).
@@ -286,6 +287,7 @@ Anisotropic + Tangent.
   Fresnel is physical; distortion and something to reflect make it read.
 
 ## Water (pool)
+Films down walls/glass, overflow edges, whitewater and choppy pools: `water-features.md`.
 - `interior.pool_water()`: Principled transmission 1, IOR 1.333, a shallow ripple bump, and
   **Volume Absorption** for the tint — depth does the colour work, so a pool reads green in the
   deep end and clear at the step without any gradient map.

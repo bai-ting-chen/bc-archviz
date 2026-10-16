@@ -48,5 +48,10 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Runoff / leak streaks below drip edges | GN raycast drip-edge field + streak shader (`wear.add_leak_field`, `add_runoff`) | solid, control-proved |
 | Concrete cracks | corner shrinkage cracks + patchy Voronoi map-cracking (`wear.add_cracks`) | solid, control-proved |
 | Glazing distortion | roller wave + IGU pillowing bump (`lookdev.glass_distortion`) | solid |
+| Water film down a wall / textured glass | height field from a raycast of the surface + Nusselt film, ropes, roll waves; glass/water interface IOR 1.14 (water-features.md) | test (one study, no control yet) |
+| Overflow edge into a trench | rim strip: draw-down → roll over the crest → clinging film down the wall (water-features.md) | test |
+| Whitewater / plunge foam | opaque milky subsurface surface + soft marbled foam + milky body below + splash drops (water-features.md) | test |
+| Choppy pool hiding the floor | shared geometry wave field (64 cosines + gust envelope) + dark floor + absorption (water-features.md) | test |
+| Fluid simulation (splash, plunge) | Mantaflow with spray/foam/bubbles, or FLIP Fluids (GPL/MIT source) — researched, not yet tried | research |
 | Soft backplate vs crisp model | measured edge widths + slight DOF in front of the subject | solid |
 | No-limit Cycles final in the UI | `finals.py` (untiled, savers, OIDN from passes) | solid |

@@ -1,0 +1,104 @@
+# Water features: films, cascades, overflows, whitewater, choppy pools
+
+Stills of water running down a wall or glass, spilling into a trench or pool, and the pool around
+it. Physics first (RULES 3), then how to build each part as geometry + shading in Cycles. Pool
+water basics (absorption, ripples as geometry): materials.md › Water.
+
+## Method: procedural or simulation?
+| Approach | Use | Notes |
+|---|---|---|
+| Height fields / procedural geometry (numpy or GN) | stills; any film, sheet, pool surface | fast, sized to the shot, exact control; animate by a time input |
+| Ocean modifier | open-water wind waves | cannot react to objects |
+| Dynamic Paint *Waves* | ripples from objects touching water | stack after Ocean |
+| Mantaflow (native FLIP) | splashes, plunges, fountains in motion | built in; has **spray / foam / bubble** secondary particles (domain › Particles); memory-hungry at high velocity |
+| FLIP Fluids add-on | same, more robust whitewater, sheeting, surface tension | add-on GPL + engine MIT on GitHub (`rlguy/Blender-FLIP-Fluids`, Blender 4.5–5.2), free to build from source (C++/CMake); paid build ~USD 76 |
+| GN simulation zones | no shipped fluid solver in 5.2 (cloth/hair XPBD only; fluid in progress) | community GN FLIP exists, slow |
+
+- **A grid simulation cannot resolve a mm film on a wall of metres** (1 mm cells over 6 m is
+  6 000 cells tall), and one-particle-thick layers are FLIP's known weak case. Films and sheets
+  stay procedural.
+- **Where simulation pays:** the plunge zone (splash, foam clumps, spray). Hybrid: simulate a
+  short stretch (~1 m domain, 3–5 mm cells) with secondary particles, instance it along the line
+  with random offsets/flips; keep film, crest and pool procedural.
+- Houdini Apprentice is non-commercial and watermarked — not for client work.
+
+## Falling film on a wall or glass
+- **Thickness:** laminar (Nusselt) h = (3·ν·q / g)^(1/3), q = flow per metre width. At fountain
+  flows (Re = q/ν ~ 10²–10³) the film is wavy: roll waves (horizontal-ish crests, λ several cm)
+  and rivulet **ropes** (thicker vertical streaks that meander). Mean ~0.5–1.5 mm, ropes several
+  mm. The "volumetric" look of a good reference = wide glossy ropes refracting the wall behind
+  into vertical streaks, plus trapped bubbles and aeration at the foot.
+- **Build as a height field on the wall plane:** raycast the front-most surface along −N on a
+  (u, z) grid (~3 mm across, ~6 mm down — ropes are vertical), per row/surface run: depth
+  low-passed at the capillary scale + thickness, kept ≥ surface + 0.3 mm so the two never touch.
+  Shared-row quads only, so the sheet ends cleanly at each lip.
+- **The film follows broad relief, fills only the fine one.** A ~1 mm film over folds of λ ≫ film
+  keeps their full distortion (air/water 0.33 + water/glass 0.19 ≈ dry glass 0.52); it smooths
+  only crinkle and creases at the capillary scale (low-pass σ ≈ 5 mm). Wet patterned glass is
+  *not* generally clearer than dry.
+- **Glass under water in Cycles** (no nested IOR): the wetted glass face gets IOR 1.52/1.333 =
+  1.14, the film surface 1.333 (as `glassware.glass_of_water`).
+- **Check the section before choosing the flow.** Shingled or tilted units decide what water can
+  do: a lip standing in front of the unit below (set-back) makes a strong flow leave the first lip
+  and fall as one free sheet in front of everything below; a moderate flow wraps under a sharp
+  lip (teapot effect) and rejoins the face below. A face leaning out a few degrees still holds a
+  moving film. Measure the depth profile down one vertical line (raycast) before modelling.
+- **Character traps:** fine relief + roll waves draw squiggly contour-like highlights; keep roll
+  waves ~0.2 mm and ropes λ 2–9 cm. Judge at native resolution (RULES 8b).
+
+## Overflow edge into a trench
+- **Spill:** head h over a sharp crest → q ≈ 1.84·h^1.5 (m²/s); brink depth ≈ 0.715 × critical
+  depth (2h/3); brink speed ≈ √(g·2h/3) — a few mm of head gives ~0.2 m/s, so the sheet **clings**
+  round the edge and down the trench wall as a thin roped film.
+- **Model the crest at the water line.** A slot drawn as a hole in the water surface, or a slot
+  whose rim sits below the pond level, is a flooded channel, not an overflow. Ask which is meant.
+- **Sight lines:** the visible depth into a gap = gap width × tan(camera depression angle). A low
+  camera sees only the top centimetres of a narrow trench, so its white water must run high
+  (tens of mm under the crest) and boil up in bursts to show — check this before tuning foam.
+- A wide curb top under a few mm of water reads as a dark frame: knife edge (~10 mm), buried
+  under the broken sheet and foam.
+- One strip mesh round the rim (pond band with draw-down → roll over a rounded edge → film down
+  the wall) parameterised by (perimeter s, distance d); square offset contours at the corners so
+  it meets a rectangular hole in the far pond.
+
+## Whitewater (plunge zones, trenches)
+- **Optics:** a bubble cloud scatters σ_s ≈ 1.5·α / r (void fraction α, bubble radius r): 10 %,
+  1 mm → 150 /m; 30 %, 0.5 mm → ~900 /m. Ten centimetres is optically thick — the floor of a
+  churning trench never shows.
+- **Render it as an opaque milky surface, not a volume.** A scattering volume in a shaded slot
+  renders dark grey and slow. Use Burley subsurface (radius 3–4 cm) under a wet sheen (IOR 1.33,
+  rough ~0.06), base around 0.35–0.45 albedo; foam (0.8, rougher, short radius) blended in as
+  soft marbled streaks and lace; a few darker, less aerated streaks — never clear holes.
+- **Never a hard foam switch.** Opaque white beside clear water over a dark trench reads as
+  snow with black holes.
+- **Rounded, not spiky.** Chop λ 4–15 cm, boils as domes (positive part^1.5) of 5–12 cm;
+  short boils at large amplitude on a fine grid draw cones.
+- **Fill below the surface.** An open water sheet over a void lets sight lines bent through
+  adjacent glass end on the dark floor → a black band at the waterline. Put an opaque milky body
+  just under the wave troughs.
+- **Bursts, not a uniform band:** one along-line "scallop" field (bursts every 0.15–0.6 m)
+  drives foam width, boil height and splash density together (cf. the scalloped impact line of
+  large memorial waterfalls).
+- **Splash:** drops from each plunge line, height exponential (mean 2–5 cm; max ≈ v²/2g ≈ 0.2 m
+  at 2 m/s), elongated with speed, a share flung back over the crest; none left sitting in the
+  surface. In soft light clear drops read **dark**, and dense low drops form a black band; drops
+  sparkle only where they catch a bright reflection (sun or a bright sky direction).
+
+## Choppy pool that hides the floor
+- Geometry wavelets everywhere (λ 3–25 cm, steepness ~0.09), rougher within ~0.4 m of a plunge,
+  under a slow gust envelope (0.3–1.6, λ 0.6–2.5 m) — 28 cosines read as a cross-hatch, use ~64.
+- **One wave field object shared by every mesh touching the pond**, so near grid, crest band and
+  far plane meet without seams; the far plane gets a hole matching the near region.
+- At grazing view (~70°) water reflects only 6–10 %: the **floor sets the pool's tone**. Polished
+  near-black stone (albedo 0.02–0.05) + absorption ~1.5 /m + chop removes the floor from view.
+
+## Materials around water (sized for the final view, RULES 8)
+- **Brushed anodised metal:** Metallic BSDF F82 (edge tint brighter, warmer than base),
+  anisotropy ~0.75 with the tangent from a directional UV along the part's length, brush streaks
+  in roughness (noise stretched ~400:1); bevel 1–2 mm with hardened normals. Water marks as
+  coffee rings (rim stronger), tide lines of dried puddles on tops, drip/tea streaks on verticals,
+  AO dust in joints, ±6 % per-part tone. Spots under ~3 px vanish: at ~3 mm/px they need 8–25 mm.
+- **Cast glass relief:** multi-scale (soft folds λ 8–40 cm + ridged creases + very weak
+  crinkle), each tile its own cast, faded flat over ~30 mm at the border so the grid meets the
+  untouched body; strong fine crinkle reads as squiggles. A slight roughness (~0.05) on the dry
+  faces gives the satin haze of cast glass.

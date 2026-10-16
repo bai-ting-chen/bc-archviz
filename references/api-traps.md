@@ -21,6 +21,9 @@
   the dimensions first.
 - Random Value (GN) has one output named "Value" in 5.2 (`outputs[1]` is out of range).
 - Volume Scatter `phase = "MIE"` adds the `Diameter` input (um); set the phase first.
+- Vector Rotate `rotation_type` for an arbitrary axis is `"AXIS_ANGLE"` (not `"AXIS"`).
+- Principled `subsurface_method = "BURLEY"` works on open sheets (water surfaces); Random Walk
+  needs closed meshes.
 - Node-group menu inputs (e.g. *Scatter on Surface* "Instance Type") take the item name as a
   string: `node.inputs["Instance Type"].default_value = "Collection"`.
 

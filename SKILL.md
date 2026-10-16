@@ -171,6 +171,10 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Grass sinks dark / lawn reads grey when wet | canopy albedo is ~0.05-0.1 (softer AgX look); wet sheen at grazing - darker base (materials.md) |
 | House edge crisp against a soft HDRI backplate | slight DOF in front of the subject (lighting-camera.md > Soft backplate) |
 | Caustics on a wall look like vertical streaks | seen at a grazing angle; judge on a face-on surface (caustics.md) |
+| Foam reads as snow cones with black holes | spiky short boils + a hard foam switch over a dark trench — rounded chop, milky subsurface whitewater, soft foam mask (water-features.md) |
+| Black band at a waterline seen through glass | open water sheet over a void: sight lines end on the dark floor — opaque milky body under the troughs (water-features.md) |
+| Splash drops read as a dark band | clear drops in soft light refract the dark surroundings — fewer, higher, spread (water-features.md) |
+| Camera from a Rhino named view frames wider/narrower | Rhino's lens length refers to the frame's short side on a square view — match the frustum (pipeline.md) |
 
 More traps: `references/api-traps.md`.
 
@@ -191,3 +195,4 @@ More traps: `references/api-traps.md`.
 | `references/helpers.md` | Every public helper in `scripts/blender/` with signature and purpose (generated) |
 | `references/learning-from-video.md` | `yt_learn.py` use and rules |
 | `references/capabilities.md` | What the pipeline can do and which technique does it |
+| `references/water-features.md` | Water down walls and glass, overflow edges, whitewater, choppy pools; procedural vs simulation (Mantaflow, FLIP Fluids); brushed metal and cast glass beside water |

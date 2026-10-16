@@ -92,6 +92,10 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   the definition's mesh lives in the definition's collection, not its layer's — assign materials
   by object name. For variety, a handful of definitions placed at random (+ random turns/flips)
   stays instanced; one unique mesh per element does not.
+- **Matching a Rhino named view exactly:** read its frustum (`ViewInfo.Viewport.GetFrustum()` →
+  FOV = 2·atan(right/near)) and aspect. Rhino's `Camera35mmLensLength` on a square view equals
+  the FOV of a 24 mm frame side, so Blender takes the same lens with `sensor_width = 24` and a
+  square render; check dir/up/location/FOV against Rhino after import.
 - `archviz.import_rhino` options: layers as collections, instances, named views → cameras, hidden
   objects/layers skipped, merge by distance; materials removed; mm → m. Delete any leftover `V-Ray Infinite Plane` object (older .3dm files carry one).
 - Always start from `read_homefile(use_empty=True)`; importing into an edited factory scene is unreliable.
