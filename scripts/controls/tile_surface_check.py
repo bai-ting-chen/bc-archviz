@@ -217,6 +217,11 @@ for f in (*tile_surface.FEATURES, "lippage"):
 tmp = tempfile.mkdtemp(prefix="archviz_tile_")
 try:
     mat = check_face_maps(tmp, fails)
+except Exception:                       # Blender exits 0 after an uncaught script error: fail explicitly
+    import traceback
+    traceback.print_exc()
+    print("TILE_SURFACE_CHECK\n  FAIL\n  exception in check_face_maps")
+    sys.exit(1)
 finally:
     shutil.rmtree(tmp, ignore_errors=True)
 # no required socket left unlinked on the output

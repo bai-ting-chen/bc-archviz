@@ -140,11 +140,13 @@ Real tiles never match a downloaded map, so layout, joint and face are separate 
   and limescale wick into the crack and the porous body) — `Crack Dirt`, `Dirt Width`.
 - **Chips / edge flakes:** in development — not yet a method.
 - **Relief:** in the main frame displace only the damage (`tile_surface.use_damage_displacement`;
-  piece steps and cuts become geometry, profile and joints stay bump). Displacing the full tile
-  height pulls the wall's boundary edges inward along the joint recess and opens bright slits to
-  the sky at floor and ceiling junctions. A macro view can displace everything, but only on the
-  objects in frame with a high offscreen dicing scale (every wall diced from a macro camera runs
-  an 8 GB GPU out of memory).
+  piece steps and cuts become geometry, profile and joints stay bump, so mesh edges move only
+  where damage reaches them). Displacing the full tile height pulls the wall's boundary edges
+  inward along the joint recess and opens bright slits to the sky at floor and ceiling junctions.
+  A macro view can displace everything, but only on the objects in frame with a high offscreen
+  dicing scale (dicing every wall from a macro camera can exhaust VRAM, RULES 13). The mode and its
+  objects are stored in the material, so a structural `set_param` re-applies them; `use_bump`
+  undoes the shader side but leaves the subdivision modifiers. `piece_tilt` is in radians.
 - **Tune on a flat pattern sheet first:** render the damage masks (emission, 1 sample) on a flat
   wall of the real tile size with the joints drawn, several parameter sets side by side — seconds
   per sheet. Then confirm in the final view (RULES 8). Use the scene's own depth/width values on the

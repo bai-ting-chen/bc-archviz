@@ -84,7 +84,8 @@ def probe_rgb(mat, folder, label, outputs, divisors=(1., 1., 1.)):
     combine = node('ShaderNodeCombineXYZ')
     offsets = []
     for index, (name, divisor) in enumerate(zip(outputs, divisors)):
-        signed = name in ('Piece Height', 'World Z', 'Normal X', 'Normal Y', 'Normal Z', 'Total Height')
+        signed = name in ('Piece Height', 'World Z', 'Normal X', 'Normal Y', 'Normal Z', 'Total Height',
+                          'Damage Height')
         offsets.append(.5 if signed else 0.)
         if name is None: continue
         if name == 'World Z' or name.startswith('Normal '):
@@ -95,6 +96,8 @@ def probe_rgb(mat, folder, label, outputs, divisors=(1., 1., 1.)):
             socket = separate.outputs['Z' if name == 'World Z' else name[-1]]
         elif name == 'Total Height':
             socket = tree.nodes['TileTotalHeight'].outputs[0]
+        elif name == 'Damage Height':
+            socket = tree.nodes['TileDamageHeight'].outputs[0]
         elif name in ('UV X', 'UV Y'):
             separate = node('ShaderNodeSeparateXYZ')
             tree.links.new(tree.nodes['TileLayout'].outputs['Tile UV'], separate.inputs[0])
@@ -193,9 +196,9 @@ def local_directions(mask,radius=4):
 
 
 def check_crack(folder):
-    """Occurrence, per-segment direction spread and height coverage of the Voronoi network on 12 tiles.
-    A network spans the whole tile, so per-tile centroids/PCA always read 'mid-tile, along the tile';
-    variety is measured on the local direction of each crack pixel and on the heights the cracks reach."""
+    """Crack occurrence, local-direction spread, height coverage, depth on the line and width response."""
+    # A network spans the whole tile, so per-tile centroid/PCA always reads 'mid-tile, along the tile':
+    # variety is measured per crack pixel (local direction) and by the heights the cracks reach.
     sc,ob,mat=grid_rig(12,6,force_kind=1,chip_share=0,spall_density=0)
     data=probe_rgb(mat,folder,'network_12',('Crack','Dirt','Crack Distance'),(1,1,.05))
     directions=[]; heights=[]; multiple=0; present=0
@@ -223,6 +226,18 @@ def check_crack(folder):
     tile_surface.set_param(mat,'crack_dirt',0)
     assert np.max(probe_rgb(mat,folder,'dirt_zero',('Dirt',None,None)))<1e-8
     assert present>=10 and direction_bins>=4 and height_bands>=7 and multiple>=1, summary
+    # Depth on the line = glaze + slip + Crack Depth (defaults), and the drawn width follows Crack Width.
+    tile_surface.set_param(mat,'crack_dirt',.85)
+    depth=probe_rgb(mat,folder,'crack_depth',('Crack','Crack Depth Out',None),(1,.002,1))
+    line=depth[...,0]>.2                                   # Crack fades with the patch mask; depth fades with it
+    expected=.0003+.0002+.0008
+    per_unit=np.median(depth[...,1][line]/depth[...,0][line])
+    assert line.any() and abs(per_unit-expected)<.05*expected, float(per_unit)
+    tile_surface.set_param(mat,'crack_width',.00054)
+    wide=probe_rgb(mat,folder,'crack_wide',('Crack',None,None))[...,0]>.02
+    ratio=wide.sum()/max(crack.sum(),1)
+    assert ratio>1.8, f'crack width does not follow Crack Width (x3 -> pixels x{ratio:.2f})'
+    summary['crack_width_x3_pixel_ratio']=float(ratio)
     return summary
 
 
@@ -536,6 +551,43 @@ def check_displacement(folder,full=False):
     return metrics
 
 
+def check_damage_displacement(folder,full=False):
+    """Damage-only displacement moves the mesh by the damage height alone, survives a rebuild, use_bump undoes it."""
+    kw=dict(force_kind=1,chip_share=0,spall_density=0,joint=0,step_height=.0003)
+    sc,ob,mat=setup(3*W,H,round(3*W/PX),round(H/PX),**kw)
+    data=probe_rgb(mat,folder,'damage_locate',('Crack','Piece Height',None),(1,.002,1))
+    yy,xx=np.nonzero(data[...,0]>.02); assert len(yy), 'no crack for window location'
+    at=len(yy)//2; centre=((xx[at]+.5)*PX,(yy[at]+.5)*PX)
+    tile_x=math.floor(centre[0]/W)*W
+    origin=(min(max(centre[0]-.004,tile_x),tile_x+W-.008),min(max(centre[1]-.004,0),H-.008))
+    sc,ob,mat=setup(.008,.008,400,400,origin=origin,**kw)
+    before=probe_rgb(mat,folder,'damage_expected',('Damage Height','Crack',None),(.002,1,1))
+    tile_surface.use_damage_displacement(mat,[ob],pixel_size=.5)
+    nodes=mat.node_tree.nodes
+    linked=lambda: [l.from_node.name for l in next(n for n in nodes if n.type=='OUTPUT_MATERIAL').inputs['Displacement'].links]
+    assert linked()==['DamageDisplacement'] and nodes['DamageDisplacementOn'].outputs[0].default_value==1
+    after=probe_rgb(mat,folder,'damage_positions',('World Z',None,None),(.02,1,1))[...,0]
+    # Exclude steep steps (crack cuts and piece steps where the line has faded): dicing cannot follow a vertical wall.
+    hgt=before[...,0]; step=np.zeros(hgt.shape,bool)
+    step[1:]|=np.abs(np.diff(hgt,axis=0))>5e-6; step[:,1:]|=np.abs(np.diff(hgt,axis=1))>5e-6
+    cut=dilate((before[...,1]>.02)|step,3); cut[:3]=cut[-3:]=True; cut[:,:3]=cut[:,-3:]=True   # also skip the border
+    damaged=(np.abs(before[...,0])>1e-6)&~cut; still=(np.abs(before[...,0])<1e-9)&~cut
+    assert damaged.any(), 'no displaced piece in window'
+    err=np.abs(after-before[...,0])[~cut]
+    metrics=dict(damage_disp_mean_m=float(err.mean()),damage_disp_max_m=float(err.max()),
+                 damage_disp_still_max_m=float(np.abs(after[still]).max()) if still.any() else 0.)
+    assert err.mean()<5e-6 and err.max()<1e-4, metrics
+    assert metrics['damage_disp_still_max_m']<1e-6, metrics     # profile, joints and undamaged face stay put
+    mat=tile_surface.set_param(mat,'uv','TileUV')                 # structural rebuild keeps mode and objects
+    settings=json.loads(mat['tile_surface_settings'])
+    assert settings['displacement']=='damage' and settings['displaced_objects']==[ob.name], settings
+    assert linked()==['DamageDisplacement']
+    tile_surface.use_bump(mat)
+    assert linked()==[] and nodes['DamageDisplacementOn'].outputs[0].default_value==0
+    assert json.loads(mat['tile_surface_settings'])['displacement'] is False
+    return metrics
+
+
 def check_chip_displacement(folder,full=False):
     """Chips: strict window case; the optional whole-tile comparison is evidence only."""
     metrics=displacement_case(folder,2)
@@ -545,7 +597,8 @@ def check_chip_displacement(folder,full=False):
 
 SECTIONS=dict(rate=check_rate,crack=check_crack,pieces=check_pieces,chips=check_chips,
               flakes=check_flakes,spalls=check_spalls,square=check_square,rotated=check_rotated,
-              onoff=check_onoff,displacement=check_displacement,chip_displacement=check_chip_displacement,
+              onoff=check_onoff,displacement=check_displacement,damage_displacement=check_damage_displacement,
+              chip_displacement=check_chip_displacement,
               upgrade=check_upgrade)
 # Chip look is still in development (not approved): these sections report WIP warnings, never a failure.
 WIP=('chips','flakes','chip_displacement','rotated')   # rotated = chip containment under rotation/jitter

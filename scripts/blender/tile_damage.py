@@ -305,6 +305,9 @@ def damage_group(name='TileDamage'):
     half=m('MULTIPLY',m('MULTIPLY',.5,i['Crack Width']),a.mad(width_noise,1.5,.5))
     crack=m('MULTIPLY',crack_tile,m('MULTIPLY',keep,m('LESS_THAN',distance,half)))
     ph,piece=_piece_fields(a,i,p,site,colours,m('MULTIPLY',crack_tile,picked))
+    # Where the patch mask fades the crack out, its piece must not step either: scale lift and tilt by the
+    # mask at the cell site (one value per cell, so each piece stays a plane).
+    ph=m('MULTIPLY',ph,a.smooth(a.noise(site,m('DIVIDE',1,m('MULTIPLY',2,crack_cell)),detail=2),.35,.55))
     r=_rand(a,i['Cell'],907)
     chip_cell=m('MAXIMUM',m('MULTIPLY',i['Chip Size'],a.mad(m('MULTIPLY',r,r),.65,.35)),1e-8)
     fine,fine_colours,fine_site=_voronoi(a,q,chip_cell,a.v('ADD',phase,(31,47,0)))
@@ -358,7 +361,7 @@ def damage_bsdfs(a, i, intact, color, height, d):
     iron = m('LESS_THAN', a.noise(a.v('ADD', i['World'], (17, 23, 31)), 1/.0004), .28)
     tone = m('MULTIPLY', m('ADD', .85, m('MULTIPLY', .3, a.rand(i['Cell'], (521, 541, 557)))),
              m('ADD', 1, m('MULTIPLY', .2, grain)))
-    # Linear terracotta, 25 % toward its own luminance: measured red body read too saturated (user).
+    # Red-firing body, linear; slip and body colours become knobs with the chip work (chips are WIP).
     clay_color = v('MULTIPLY', (.30, .17, .10), a.xyz(tone, tone, tone))
     specks = m('MULTIPLY', m('ADD', 1, m('MULTIPLY', .4, grog)), m('SUBTRACT', 1, m('MULTIPLY', .35, iron)))
     clay_color = v('MULTIPLY', clay_color, a.xyz(specks, specks, specks))

@@ -352,8 +352,9 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
                   engobe_thickness=0.0002, glaze_lip_width=0.0002, engobe_ring=0.0003,
                   force_kind=0, displacement=False, pixel_size=1.0,
                   shell_exponent=0.6, crack_dirt=0.85, dirt_width=0.004,
-                  warp=0.004, warp_scale=0.02, crack_cell=0.03, crack_density=0.35, chip_density=0.5):
-    """Build metre-scale tiles with rotation in radians, tilt/jitter_rotation_deg in degrees and lippage in metres."""
+                  warp=0.004, warp_scale=0.02, crack_cell=0.03, crack_density=0.35, chip_density=0.5,
+                  displaced_objects=None):
+    """Build tiles in metres; rotation/piece_tilt radians, tilt/jitter_rotation_deg degrees; displacement False|True|'damage'."""
     values = locals().copy()
     if face is not None:
         values['face'] = face = str(face)
@@ -488,9 +489,13 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
     for feature in off:
         toggle(mat, feature, False)
     if displacement:
-        objects = [o for o in bpy.data.objects if o.type == 'MESH' and
-                   any(slot.material == mat for slot in o.material_slots)]
-        use_displacement(mat, objects, pixel_size)
+        # Re-apply only to the objects it was set on (a macro may displace one wall); legacy: every user.
+        if displaced_objects is not None:
+            objects = [bpy.data.objects[n] for n in displaced_objects if n in bpy.data.objects]
+        else:
+            objects = [o for o in bpy.data.objects if o.type == 'MESH' and
+                       any(slot.material == mat for slot in o.material_slots)]
+        (use_damage_displacement if displacement == 'damage' else use_displacement)(mat, objects, pixel_size)
     return mat
 
 
@@ -507,7 +512,7 @@ def set_param(mat, name, value):
             raise ValueError(f'Material {value!r} already exists')
         mat.name = value
         settings['name'] = mat.name
-    elif name in ('displacement', 'pixel_size'):
+    elif name in ('displacement', 'pixel_size', 'displaced_objects'):
         if name == 'pixel_size' and (not math.isfinite(value) or value <= 0):
             raise ValueError('pixel_size must be positive and finite')
         settings[name] = value
@@ -571,7 +576,7 @@ def _validate_damage(key, value):
     """Reject negative/nonfinite metre parameters and invalid probabilities."""
     if not math.isfinite(value) or value < 0:
         raise ValueError(f'{key} must be finite and nonnegative')
-    if key in ('damage', 'chip_share', 'crack_share', 'branch_share', 'spall_density', 'crack_dirt', 'crack_density', 'chip_density') and value > 1:
+    if key in ('damage', 'chip_share', 'crack_share', 'spall_density', 'crack_dirt', 'crack_density', 'chip_density') and value > 1:
         raise ValueError(f'{key} must lie in [0, 1]')
     if key in ('warp_scale','crack_cell') and value <= 0:
         raise ValueError(f'{key} must be positive')
@@ -593,16 +598,22 @@ def use_displacement(mat, objects, pixel_size=1.0):
     mat.displacement_method = 'BOTH'
     for name in ('TileBump', 'DamageBump'):
         tree.nodes[name].inputs['Strength'].default_value = 0
-    settings = json.loads(mat['tile_surface_settings'])
-    settings.update(displacement=True, pixel_size=pixel_size)
-    mat['tile_surface_settings'] = json.dumps(settings)
+    _store_displacement(mat, True, objects, pixel_size)
     for obj in objects:
         enable_true_displacement(obj, pixel_size)
     return mat
 
 
+def _store_displacement(mat, mode, objects, pixel_size):
+    """Record the displacement mode and its objects so a structural rebuild re-applies exactly that."""
+    settings = json.loads(mat['tile_surface_settings'])
+    settings.update(displacement=mode, pixel_size=pixel_size,
+                    displaced_objects=None if mode is False else [o.name for o in objects])
+    mat['tile_surface_settings'] = json.dumps(settings)
+
+
 def use_damage_displacement(mat, objects, pixel_size=1.0):
-    """Displace only chips, cracks and piece steps; tile profile and joints stay bump, so wall edges never move."""
+    """Displace only damage (piece steps, chip/crack cuts); profile and joints stay bump (edges move only through damage)."""
     from study_materials import enable_true_displacement
     if not math.isfinite(pixel_size) or pixel_size <= 0:
         raise ValueError('pixel_size must be positive and finite')
@@ -613,6 +624,7 @@ def use_damage_displacement(mat, objects, pixel_size=1.0):
     for name in ('TileBump', 'DamageBump'):
         tree.nodes[name].inputs['Strength'].default_value = 1
     mat.displacement_method = 'BOTH'
+    _store_displacement(mat, 'damage', objects, pixel_size)
     for obj in objects:
         enable_true_displacement(obj, pixel_size)
     return mat
@@ -630,7 +642,5 @@ def use_bump(mat):
     for name in ('TileBump', 'DamageBump'):
         tree.nodes[name].inputs['Strength'].default_value = 1
     mat.displacement_method = 'BUMP'
-    settings = json.loads(mat['tile_surface_settings'])
-    settings['displacement'] = False
-    mat['tile_surface_settings'] = json.dumps(settings)
-    return mat
+    _store_displacement(mat, False, (), json.loads(mat['tile_surface_settings']).get('pixel_size', 1.0))
+    return mat   # adaptive-subdivision modifiers stay on the objects: remove them to drop the dicing cost

@@ -303,11 +303,10 @@ Check: Codex is not installed, or the project's memory/AGENTS.md says Codex jobs
 start with `--sandbox danger-full-access` and own a listed set of files while they run.
 Do: add that line to the project's `AGENTS.md` term table or memory.
 
-### 27. Tile controls pass here
-Check: `blender -b --factory-startup --python scripts/controls/tile_damage_check.py -- --output <study>/_wip/tile_damage_check`
-ends with `TILE_DAMAGE_PASS` (chip sections may print `TILE_DAMAGE_SECTION_WIP`), and the layout,
-mapping and surface checks print PASS.
-Do: if a check fails on this machine, report it to the user before using the tile modules.
+### 27. Tile crack controls pass here
+Check: `blender -b --factory-startup --python scripts/controls/tile_damage_check.py -- --output <study>/_wip/tile_damage_check --only crack`
+(and `--only pieces`) each end with `TILE_DAMAGE_PASS` (about 10 s each on a GPU).
+Do: if either fails on this machine, report it to the user before using the tile modules.
 
 ### Last. Delete this file
 Only after the steps above changed something here: delete MIGRATE.md, commit, pull --rebase, push.
