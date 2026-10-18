@@ -194,5 +194,6 @@ More traps: `references/api-traps.md`.
 | `references/max-import.md` | 3ds Max assets: io_scene_max install, the four importer faults and their repair, per-model checks, rebuilding V-Ray materials (leaf cards) |
 | `references/helpers.md` | Every public helper in `scripts/blender/` with signature and purpose (generated) |
 | `references/learning-from-video.md` | `yt_learn.py` use and rules |
+| `references/research-loop.md` | Running research, studies and experiments alone (user away / other model out of tokens): the loop, what to decide alone, what never |
 | `references/capabilities.md` | What the pipeline can do and which technique does it |
 | `references/water-features.md` | Water down walls and glass, overflow edges, whitewater, choppy pools; procedural vs simulation (Mantaflow, FLIP Fluids); brushed metal and cast glass beside water |

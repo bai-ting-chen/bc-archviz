@@ -143,7 +143,7 @@
     file with a short summary back. Skill changes reach the repo through Claude as a diff it
     commits. Reference-image analysis and all Rhino modelling stay with Claude. Either model may
     take over alone when the other is out of tokens (stop it at a clean point, not mid-edit);
-    this skill and the project files are the whole handover, so nothing lives only in one
+    this skill and the project files are the whole handover (`references/research-loop.md`), so nothing lives only in one
     agent's memory.
 16. **One agent at a time on Blender and on a file.** There is one Blender and one MCP port per
     machine, shared by every project. Before driving Blender or editing a study's files, check
