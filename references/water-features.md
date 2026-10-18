@@ -11,7 +11,7 @@ water basics (absorption, ripples as geometry): materials.md › Water.
 | Ocean modifier | open-water wind waves | cannot react to objects |
 | Dynamic Paint *Waves* | ripples from objects touching water | stack after Ocean |
 | Mantaflow (native FLIP) | splashes, plunges, fountains in motion | built in; has **spray / foam / bubble** secondary particles (domain › Particles); memory-hungry at high velocity |
-| FLIP Fluids add-on | same, more robust whitewater, sheeting, surface tension | add-on GPL + engine MIT on GitHub (`rlguy/Blender-FLIP-Fluids`, Blender 4.5–5.2), free to build from source (C++/CMake); paid build ~USD 76 |
+| FLIP Fluids add-on | same, whitewater, sheeting, surface tension | verify the selected release/source edition: public v1.8.8 is Demo with mesh watermarks; full marketplace edition differs; see upstream README |
 | GN simulation zones | no shipped fluid solver in 5.2 (cloth/hair XPBD only; fluid in progress) | community GN FLIP exists, slow |
 
 - **A grid simulation cannot resolve a mm film on a wall of metres** (1 mm cells over 6 m is
@@ -21,6 +21,37 @@ water basics (absorption, ripples as geometry): materials.md › Water.
   short stretch (~1 m domain, 3–5 mm cells) with secondary particles, instance it along the line
   with random offsets/flips; keep film, crest and pool procedural.
 - Houdini Apprentice is non-commercial and watermarked — not for client work.
+
+### Thin-sheet inlets and hybrid boundaries
+- Compute liquid thickness before choosing a domain: `delta = q / V`, q in m²/s per unit
+  width, V normal to the cross-section in m/s. If delta is below one voxel, a fully occupied
+  one-cell source cannot preserve both speed and discharge. A q-matched source slows to
+  `V' = q / dx`; a speed-matched source over-discharges by `dx / delta`. State the momentum
+  and energy deficit or flow excess; neither is a matched-physics benchmark.
+- An oblique velocity also emits through side faces of a source box. For a rectangular prism
+  spanning width w in X, velocity in YZ gives ideal projected discharge
+  `Q = w * (abs(vz)*dy + abs(vy)*dz)`. Align its source extrusion axis with velocity while
+  keeping width transverse to flow; use its normal cross-section when nominally matching q.
+  Geometry × speed is not a measurement of
+  the solver's injected volume; sample or instrument that separately when making a flux claim.
+- Open domain sides drain a finite pool. Measure far-field level drift. A perimeter reserve
+  held at the desired level approximates the surrounding pool; refilling the entire submerged
+  domain also fills impact cavities and changes their dynamics. Record that boundary bias.
+- A stitched simulation slice needs an actual pool opening. Extract the near-waterline
+  boundary separately from the tall inlet curtain and detached spray before building an apron.
+  Clip particles to the same per-slice footprint as their water surface; overlapping mirrored
+  particle copies can make a false dense foam seam. Inspect joins in both wide and close views.
+- Matching a nonlinear wave function at shared grid vertices is insufficient after refining
+  just one side: intermediate points must interpolate the unchanged neighbor's boundary
+  polyline, or both sides must be refined together. Check the saved meshes, not only formulas.
+- Bake completion alone does not prove settled flow. Check stabilization over multiple frames,
+  including a truncated bake that might already be steady. Keep failed pilots and costs explicit;
+  promote a simulation hybrid only after a matched inlet and boundary comparison.
+
+Sources: [upstream inflow requirements and emission settings](https://github.com/rlguy/Blender-FLIP-Fluids/wiki/Inflow-Object-Settings),
+[domain grid and open boundaries](https://github.com/rlguy/Blender-FLIP-Fluids/wiki/Domain-Simulation-Settings),
+[v1.8.8 Demo limitations](https://github.com/rlguy/Blender-FLIP-Fluids/tree/v1.8.8#readme).
+The projected-area and delta formulas above are continuity geometry, not solver guarantees.
 
 ## Falling film on a wall or glass
 - **Thickness:** laminar (Nusselt) h = (3·ν·q / g)^(1/3), q = flow per metre width. At fountain

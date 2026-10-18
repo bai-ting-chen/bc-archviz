@@ -52,6 +52,6 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Overflow edge into a trench | rim strip: draw-down → roll over the crest → clinging film down the wall (water-features.md) | test |
 | Whitewater / plunge foam | opaque milky subsurface surface + soft marbled foam + milky body below + splash drops (water-features.md) | test |
 | Choppy pool hiding the floor | shared geometry wave field (64 cosines + gust envelope) + dark floor + absorption (water-features.md) | test |
-| Fluid simulation (splash, plunge) | Mantaflow with spray/foam/bubbles, or FLIP Fluids (GPL/MIT source) — researched, not yet tried | research |
+| Fluid simulation (splash, plunge) | FLIP source/Demo bakes and hybrid slice integration tested; sub-voxel inlet flux/momentum and pool boundaries require validation (water-features.md); Mantaflow alternative | research; no matched-physics superiority established |
 | Soft backplate vs crisp model | measured edge widths + slight DOF in front of the subject | solid |
 | No-limit Cycles final in the UI | `finals.py` (untiled, savers, OIDN from passes) | solid |

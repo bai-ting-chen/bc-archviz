@@ -339,6 +339,9 @@ tiling (5.2 manual: no such texture node); build it from nodes.
   Tiling); Voronoi-cell offsets are cheap but seam at cell edges unless blended there. Any UV
   rotation breaks a tangent-space normal map — drive relief from the height map through a Bump
   node instead. Free add-on to compare against: Patchwork (MIT).
+- Offset lookup copies keep the original Image Texture projection, blend, interpolation and
+  image colour space. Vary both coordinates used by that projection: zero Z offsets leave
+  front-wall XZ texture rows in the same phase even when X/Y offsets differ.
 - **Box projection** (Image Texture › Box, Blend 0.1–0.2) for Rhino geometry without UVs; again
   Bump from height, not the normal map.
 - **LuxCore:** native Image › Randomized Tiling and 2D Mapping › Randomized UV; Object Info ›
