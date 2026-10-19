@@ -151,41 +151,21 @@
     take over alone when the other is out of tokens (stop it at a clean point, not mid-edit);
     this skill and the project files are the whole handover (`references/research-loop.md`), so nothing lives only in one
     agent's memory.
-15a. **Two work modes; the user names the mode, normal is the default.**
-    - **Normal mode:** the split above.
-      - Claude:
-        - plans and decides;
-        - does Rhino modelling;
-        - does the detailed research itself (papers, manual, forums, online, YouTube via
-          `yt_learn.py`) and summarises it;
-        - reviews Codex's code.
-      - Codex builds from briefs and reviews Claude's code (RULES 14).
-    - **Codex priority mode (CPM)** (Claude's budget is low): Claude takes the user's seat as director,
-      and all hard labour goes to Codex.
-      - Claude: the big decisions, directional guidance and aesthetic opinions.
-        - Reads Codex's research notes and turns them into the method decision.
-        - Judges the look against the reference.
-        - Writes short briefs that command Codex.
-        - Still brings the user gates (10a, 10b) to the user.
-      - Codex: everything else, done by hand:
-        - all coding and test runs;
-        - Rhino modelling (through Rook);
-        - detailed research, online and YouTube included, written as separate notes in the
-          study's `_wip/research/` with sources and full-resolution evidence (RULES 3);
-        - measurements, crops and comparison sheets for Claude to judge.
-      - A **Codex builder** session writes and runs the code (and does the modelling and research
-        stages).
-      - A **parallel Codex reviewer** session (fresh, read-only) cross-checks each stage's diff
-        against the brief.
-      - The builder weighs the findings, as in RULES 14.
-      - At most two Codex sessions at once: one builder and one reviewer. Never two builders: the
-        builder holds the machine-wide `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (RULES 16), so a
-        second builder must stop.
-      - This replaces the other-model review for the duration, and the user is told the review was
-        same-model.
-    - The mode lasts until the user switches back, or the round ends. Then return to normal mode:
-      if Claude's tokens refilled, the code made during the mode also gets its Claude review.
-    - How to launch both modes: maintaining.md › Handing work to Codex.
+15a. **Two work modes; the user names the mode, normal is the default.** Stage-by-stage split,
+    handoff documents and what Claude reads: `references/work-modes.md`.
+    - **Normal mode:** Claude plans, does the detailed research (papers, manual, forums, YouTube),
+      models in Rhino, judges the look and decides; Codex builds from briefs, runs, measures and
+      reviews Claude's code (RULES 14).
+    - **Codex priority mode (CPM)** (Claude's budget is low): Claude takes the user's seat as
+      director — the big decisions, direction, taste, short briefs, and the user gates (10a, 10b).
+      Codex does every hands-on task: coding and test runs, Rhino modelling through Rook, research
+      written as notes in the study's `_wip/research/` (RULES 3), measurements, crops and sheets.
+      - One **Codex builder** (holds the machine-wide `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK`,
+        RULES 16) and at most one **parallel Codex reviewer** (fresh, read-only) per stage; never
+        two builders. The builder weighs the findings as in RULES 14.
+      - This replaces the other-model review for the duration; the user is told it was same-model.
+    - The mode lasts until the user switches back, or the round ends. Back in normal mode with
+      Claude's tokens refilled, the code made during CPM gets its Claude review.
 15b. **Train Codex towards Claude's judgement.** The goal is for Codex to make the same render calls
     Claude would.
     - Every Codex stage report ends with Codex's own self-judgement against the reference and the
@@ -194,8 +174,8 @@
       - working and judging habits go in `references/codex-coaching.md`;
       - craft goes in the topic reference.
     - A kind of decision moves to Codex once its self-judgement keeps matching Claude's.
-    - **Normal mode only.** Training costs extra tokens on both sides, so CPM (15a) skips the
-      self-judgement and the lesson writing.
+    - **Normal mode by default.** Training costs extra tokens on both sides, so CPM (15a) skips the
+      self-judgement and the lesson writing unless the user asks for training in CPM.
 16. **One agent at a time on Blender and on a file.** There is one Blender and one MCP port per
     machine, shared by every project. Before driving Blender or editing a study's files, check
     `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (machine-wide, beside the MCP server): absent →

@@ -61,6 +61,16 @@ Docs only. Codex training (self-judgement + lessons) runs only in normal mode; C
 Check: this machine's session knows training runs only in normal mode.
 Do: read RULES 15b.
 
+## 261019 — Work modes spelled out: references/work-modes.md
+Docs only. RULES 15a now points to `references/work-modes.md`: a stage-by-stage table of who does
+what in normal mode and CPM, the brief / stage report / research note / review formats in
+`_wip/codex/`, and what Claude reads in CPM. RULES 15b: training is normal-mode by default, and
+runs in CPM too when the user asks.
+
+### 8. Read work-modes.md and the revised RULES 15a/15b
+Check: this machine's session has read references/work-modes.md.
+Do: read it; Codex briefs on this machine follow its brief and report formats.
+
 ### Last. Delete this file only after this machine carried out a required migration
 If the checks already pass, leave this file for the other machines. Otherwise follow
 references/maintaining.md after carrying out the step.
