@@ -114,8 +114,7 @@ Read the summary, not the log. Codex takes the agent lock (RULES 16) when it dri
     - Output: `_wip/codex/review_<stage>.md`.
   - The next builder stage starts by weighing that review and fixing what holds.
   - Claude reads only the reports and reviews, and steers by writing the next brief.
-  - At most two Codex sessions at once (builder + reviewer). Plan usage limits are small, so keep
-    briefs lean.
+  - Session cap: RULES 15a. Plan usage limits are small, so keep briefs lean.
 - **Codex low on tokens:** stop it between steps and take over (RULES 15) rather than let it die
   mid-edit; its report and the brief are the handover.
 
