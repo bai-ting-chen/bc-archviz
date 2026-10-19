@@ -74,7 +74,7 @@ must leave for the other machines.
 | Measure | `scripts\imgstats.py stats|patch|diff`; `scripts\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `scripts\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
-| Maintenance | `scripts\helper_index.py` (writes references/helpers.md), `scripts\regress_helpers.py` (old vs new helper output), `scripts\codex_review.py` (Codex reviews a change before push, RULES 14) |
+| Maintenance | `scripts\helper_index.py` (writes references/helpers.md), `scripts\regress_helpers.py` (old vs new helper output), `scripts\codex_review.py` (Codex reviews a change before push, RULES 14), `scripts\study_close.py` (close a study: keep milestones, delete the rest, RULES 10e) |
 | Tiles | `scripts\blender\`: `tile_mapping` (metre UVs: planar, cylinder, annulus), `tile_layout` (tile id/UV/edge/joint node group), `tile_surface` (tile material, `use_damage_displacement`), `tile_damage` (Voronoi crack network; chips WIP) — materials.md › Tiles |
 | Controls | `scripts\controls\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension (`references/luxcore.md`): PATH, GPU + *Use CPUs*, *Add Light Tracing* |

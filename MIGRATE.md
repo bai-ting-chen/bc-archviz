@@ -9,6 +9,16 @@ materials.md's offset-projection note, and the fluid-simulation capability state
 Do: read those sections before planning a sheet-fed simulation or duplicating scan lookups.
 Verify the selected FLIP edition's upstream README; public Demo caches contain mesh watermarks.
 
+## 261018 — Closing a study cleans it (RULES 10e)
+New `scripts/study_close.py` + `scripts/blender/blend_refs.py`: on close, keep the milestone scenes
+listed under `## Milestones` in STUDY_NOTES.md, make them self-contained, delete `_wip/`, other .blend,
+unused library files and vendor/cache folders, verify references. Linked-library image paths resolve
+from their library .blend. No installs.
+
+### 2. Read RULES 10e
+Check: this machine's session has read RULES 10e (or the user says so).
+Do: read it; run the tool (plan first) when the user next closes a study.
+
 ### Last. Delete this file only after this machine carried out a required migration
 If the checks already pass, leave this file for the other machines. Otherwise follow
 references/maintaining.md after carrying out the step.

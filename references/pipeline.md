@@ -173,3 +173,4 @@ each version's reason lives as a comment next to the value it changed.
 (rebuild from the .3dm via MCP; the names `study_run.py` expects), `.blend`, finals, `STUDY_NOTES.md`, `library/` (`polyhaven/`, `local/` — every asset the
 study uses, RULES 10c), `_wip/` (controls, boards, test scripts, crops, measurements,
 downloads — everything the study produces, RULES 10d). Delete `*.blend1` / `*.3dmbak`.
+Closing a study: `## Milestones` list in STUDY_NOTES, then `study_close.py` (RULES 10e).

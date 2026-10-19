@@ -40,6 +40,13 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `fog_volume(centre=(0.0, 0.0), visibility_m=150.0, diameter_um=15.0, box=(500.0, 500.0, -25.0, 130.0), top=(25.0, 85.0), valley=(0.0, -8.0, 0.5), patch=(0.012, 0.6), clear_boxes=(), name='FOG_VOLUME', collection=None)` — Box of heterogeneous Mie fog: sigma(V) x height fade (full below top[0], clear at top[1]) x valley boost x patch noise; zero in clear_boxes [(xmin,xmax,ymin,ymax,zmax)].
 - `volume_render_settings(bounces=8, max_bounces=16)` — Forward-peaked Mie fog needs multiple scattering: volume bounces 8 (default 0 = murky/dark).
 
+## `blend_refs` — Inside Blender: list a .blend's external files and optionally copy outside-study files into the study.
+
+- `references()` — Yield (datablock, attribute, absolute path) for every external file the .blend needs.
+- `relink(study)` — Repath missing references to a file of the same name found inside the study (outside _wip).
+- `localise(study)` — Copy outside-study (and _wip) references into <study>/library/local/<parent>/ and repath them.
+- `main()` — Dump references (after optional localising) to JSON.
+
 ## `caustic_photons` — Forward photon tracing for caustics that Cycles cannot converge (sun-sized sources through glassware). Photons leave the light, refract/reflect through the exact glass/water meshes (Snell + unpolarised Fresnel, Russian roulette, TIR) and land on the table plane. The density becomes an irradiance map (W/m2) that the table's material adds as Lambertian reflected light (rho * E / pi) -- the same thing a renderer's caustic photon map does.
 
 - `export_geometry(path, surfaces=SURFACES, axis=(0.0, 0.0), grid=None)` — `surfaces` {object: eta}; `grid` overrides GRID (receiver plane x0, y0, size, res, z) and is stored with the geometry so the tracer, bake and material all use the same one.

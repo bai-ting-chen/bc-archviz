@@ -126,6 +126,12 @@
     scratchpad or %TEMP% — tell subagents the path too. One place holds all a study produced.
     Software is not study output: Blender extensions and add-ons install into Blender's own
     extension folder through the installer, and the downloaded zip is deleted afterwards.
+10e. **Closing a study cleans it.** When the user calls a study finished, list its milestone
+    scenes (every final plus real turning points) under `## Milestones` in STUDY_NOTES.md, then run
+    `scripts/study_close.py <study>` (plan) and `--apply`: it makes the milestones self-contained
+    (copies outside or `_wip` files they use into `library/local/`), deletes `_wip/`, other .blend
+    files, backups, library files no milestone uses and vendor/cache folders, and verifies every
+    milestone reference still resolves. Finals, notes, scripts and .3dm stay. No asking per file.
 11. Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real
     one — a small scene isolates the cause in minutes where the full scene hides it.
 
