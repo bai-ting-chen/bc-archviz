@@ -25,7 +25,6 @@ topic reference; this file holds **how to look and how to check**.
   - The trap: you cut back a gutter's floor slab and left its end caps hanging 600 mm in the air.
 - **An image that does not answer its question is a failed output**, even if it rendered. Before
   reporting, write one line per image: "this shows X". If you can't, fix the image.
-
 - **Two failed fixes of one technique → change the technique.** Do not try a third variant of
   the same idea.
   - The trap: camera clipping gave an empty section twice. A boolean intersect of each object with
