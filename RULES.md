@@ -179,7 +179,8 @@
         against the brief.
       - The builder weighs the findings, as in RULES 14.
       - At most two Codex sessions at once: one builder and one reviewer. Never two builders: the
-        builder holds the study's AGENT_LOCK (RULES 16), so a second builder must stop.
+        builder holds the machine-wide `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (RULES 16), so a
+        second builder must stop.
       - This replaces the other-model review for the duration, and the user is told the review was
         same-model.
     - The mode lasts until the user switches back, or the round ends. Then return to normal mode:
