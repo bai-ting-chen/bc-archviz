@@ -3,8 +3,8 @@
 How one agent (Claude or Codex) runs research, studies and experiments end to end without a human
 or a second model in the loop: when the user is away, or the other model is out of tokens
 (RULES 15). The rules still hold; this file is the order of work and the decisions you make
-yourself. Stop points that stay: the research gate (RULES 3a), the Rhino model gate (RULES 10a) and the
-final render gate (RULES 10b).
+yourself. Stop points that stay: the research gate (RULES 3a), the Rhino model gate (RULES 10a), the
+material gate (RULES 8e) and the final render gate (RULES 10b).
 A study built from a scripted test scene (no Rhino) has no model gate.
 
 ## The loop (one question at a time)
@@ -39,7 +39,7 @@ end, writing helpers into the skill once they ran on a scene they were not writt
 each with one line of why.
 
 ## Decisions you never make alone
-Closing the research gate, final renders (preview gate), approving Rhino geometry, deleting user data or other studies'
+Closing the research or material gate, final renders (preview gate), approving Rhino geometry, deleting user data or other studies'
 files, writes to GitHub other than this skill's repo, paid purchases or sign-ins, and editing a
 file another agent holds (AGENT_LOCK, RULES 16).
 

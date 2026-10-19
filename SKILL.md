@@ -53,6 +53,7 @@ must leave for the other machines.
 - [ ] Local studies? read `studies/README.md` + the latest STUDY_NOTES.md (open items carry over)
 - [ ] New technique? gather sources (physics first), stop at the research gate for the user's
       links, then analyse and compare workflows (RULES 3, 3a)
+- [ ] First build done? material gate: schedule + first pass + crops, wait (RULES 8e)
 - [ ] Before every "done": native-resolution crop pass of each material vs the ref (RULES 8b)
 - [ ] Look decision? profile the Render Reference Library slice
 - [ ] Study folder set? `archviz.set_project(<study>)`; every asset downloaded/generated into
@@ -99,7 +100,8 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
    terrazzo, mortar, gravel) `archviz.box_uv(obj, size_m)`; directional ones (wood grain, boards,
    brushed metal, vein-cut stone, ribbed sheet, weave, long tiles) `archviz.directional_uv(obj,
    size_m, axis)` so the direction follows the element on every face (materials.md › Choosing).
-4. **Materials** by layer → `references/materials.md`.
+4. **Materials** by layer → `references/materials.md`; after the first full build (step 6), the
+   material gate (RULES 8e) before any look round.
 5. **Light**: daylight (RULES 8a) `archviz.world_hdri_lux`, rotated by its `hdri_analyse` sun
    direction; artificial: the fixture's IES file `interior.ies_light` when it is specified, else `interior.downlight /
    led_strip / lens_luminance` → `references/lighting-camera.md`.

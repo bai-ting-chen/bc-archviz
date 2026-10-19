@@ -45,8 +45,8 @@
    show the user: the question, a source list (one line each: what it is, link or path, what it
    should answer) and the gaps still open. Wait — the user often adds links; read them like any
    other source (RULES 3). Then analyse, compare workflows and choose. A quick lookup during a
-   build (one API detail, one trap) needs no gate. One of three stops in a study: research (3a),
-   model (10a), final preview (10b).
+   build (one API detail, one trap) needs no gate. One of four stops in a study: research (3a),
+   model (10a), materials (8e), final preview (10b).
 
 ## Split
 4. **Rhino = geometry only.** Materials, lights, camera look and render settings live in Blender
@@ -100,6 +100,13 @@
     per unit (tint, roughness, pattern, small tilt), and concave joints get dust, darkest in the
     corner and fading outward. Plan it into the first material pass; perfectly regular units and
     razor-clean corners read as CG. How: materials.md › Randomness, edge-wear.md › Concave corners.
+8e. **Material gate** (both modes). After the first build (camera and light set, first-pass
+    materials on every layer) and before any look round, stop and show the user: a material
+    schedule (per layer: material, source — Poly Haven asset, procedural or own file — real size
+    and direction, target albedo and roughness, the reference it matches), a first-pass render at
+    the final camera, native crops of each material beside the reference (8b), and 2–3 candidates
+    side by side for any material in doubt. Wait for approval; the look rounds only tune approved
+    materials, and a material swap after approval comes back to this gate.
 ## Process
 9. **A control render is the only proof.** Feature OFF + same scene twice (noise floor; same seed
    for the feature diff); read *changed > 2 %*, several times the noise floor, and look at a
@@ -163,14 +170,14 @@
       models in Rhino, judges the look and decides; Codex builds from briefs, runs, measures and
       reviews Claude's code (RULES 14).
     - **Codex priority mode (CPM)** (Claude's budget is low): Claude takes the user's seat as
-      director — the big decisions, direction, taste, short briefs, and the user gates (3a, 10a, 10b).
+      director — the big decisions, direction, taste, short briefs, and the user gates (3a, 10a, 8e, 10b).
       Codex does every hands-on task: coding and test runs, Rhino modelling through Rook, research
       written as notes in the study's `_wip/research/` (RULES 3), measurements, crops and sheets.
       - One **Codex builder** (holds the machine-wide `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK`,
         RULES 16) and at most one **parallel Codex reviewer** (fresh, read-only) per stage; never
         two builders. The builder weighs the findings as in RULES 14.
       - This replaces the other-model review for the duration; the user is told it was same-model.
-    - In both modes, while both models work, Claude talks to the user, brings the gates (3a, 10a, 10b)
+    - In both modes, while both models work, Claude talks to the user, brings the gates (3a, 10a, 8e, 10b)
       and commits skill changes; a model working alone does all of that itself (RULES 15).
     - The mode lasts until the user switches back, or the round ends. Back in normal mode with
       Claude's tokens refilled, the code made during CPM gets its Claude review.

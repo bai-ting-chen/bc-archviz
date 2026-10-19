@@ -80,6 +80,15 @@ show the question, source list and gaps, and wait for the user's links. Stops ar
 Check: this machine's session has read RULES 3a.
 Do: read it and the work-modes.md stages 3–5.
 
+## 261019 — Material gate (RULES 8e)
+Docs only. A fourth stop, both modes: after the first build and before any look round, show the
+material schedule, a first-pass render at the final camera, native crops and candidate sheets;
+wait for approval. Stops: research (3a), model (10a), materials (8e), final preview (10b).
+
+### 10. Read RULES 8e
+Check: this machine's session has read RULES 8e.
+Do: read it and work-modes.md stage 10 and the material schedule format.
+
 ### Last. Delete this file only after this machine carried out a required migration
 If the checks already pass, leave this file for the other machines. Otherwise follow
 references/maintaining.md after carrying out the step.

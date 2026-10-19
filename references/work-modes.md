@@ -9,7 +9,7 @@ rule; this file is the detail. How to launch the sessions: maintaining.md › Ha
   decisions, direction, taste, briefs, user gates. Codex does every hands-on task. Claude reads
   short documents, not logs (below).
 
-While both models work, Claude talks to the user, brings the gates (3a, 10a, 10b) and commits to the
+While both models work, Claude talks to the user, brings the gates (3a, 10a, 8e, 10b) and commits to the
 skill repo (RULES 15a). When one model works alone, it does all of that itself
 (`research-loop.md`).
 
@@ -26,14 +26,15 @@ skill repo (RULES 15a). When one model works alone, it does all of that itself
 | **7. Model gate** (10a) | shows captures + modelled/left-out list, waits for approval | — | same, from Codex's captures | prepares captures and the list |
 | **8. Scene build** (import, UVs, camera, materials, lights) | writes the brief: helpers to reuse, real units, files owned | writes and runs the scripts, syntax-checks, renders the checks | writes the brief | same as normal |
 | **9. Camera from a reference** | reads geometry from the ref, judges the overlay | runs `refsolve.py`, `framing_render`, `refmatch.py pair --overlay` | judges the overlay sheet | also takes the readings |
-| **10. Proof** (RULES 9, 8b) | decides which controls prove the feature | renders controls, writes the numbers table + diff crops | same | same |
-| **11. Look round** | judges final camera + native crops vs ref, names the worst defect, sets the next fix | applies the fix, rerenders | same, from the stage report's sheet | same; adds its self-judgement when training is on |
-| **12. Code review** (RULES 14) | reviews Codex's code via a fresh subagent | reviews Claude's code (`codex_review.py`) | none; reads only the review's findings summary | a fresh read-only Codex reviewer per stage; the builder weighs the findings |
-| **13. Preview + final** (10b) | shows the preview, states resolution/time/noise, launches the final in the open UI | the full-frame test with final settings | shows the preview and asks; tells Codex to launch | full-frame test; launches the UI final (`finals.py`) |
-| **14. Study notes** | writes Decisions, findings, open items | appends numbers and traps to its report | writes the Decisions section and the user's choices | writes findings, numbers, traps, open items |
-| **15. Skill changes** | edits, MIGRATE.md, commits, pushes after Codex's review | reviews | reads Codex's proposed diff, commits and pushes it | drafts the change in the skill folder, uncommitted |
-| **16. Training** (15b) | compares its verdict with Codex's self-judgement, writes lessons | self-judgement at the end of each report | only when the user asks for it in CPM | same |
-| **17. Close a study** (10e) | lists the milestones, runs `study_close.py` | — | lists the milestones | runs `study_close.py`, plan first, then `--apply` |
+| **10. Material gate** (8e) | shows the schedule, first-pass render, native crops, candidate sheets; waits for approval | renders the first pass, crops and candidate sheets | same, from Codex's sheets; passes the choices on | writes the schedule (below), renders the first pass, crops and candidates |
+| **11. Proof** (RULES 9, 8b) | decides which controls prove the feature | renders controls, writes the numbers table + diff crops | same | same |
+| **12. Look round** | tunes only approved materials; judges final camera + native crops vs ref, names the worst defect, sets the next fix | applies the fix, rerenders | same, from the stage report's sheet | same; adds its self-judgement when training is on |
+| **13. Code review** (RULES 14) | reviews Codex's code via a fresh subagent | reviews Claude's code (`codex_review.py`) | none; reads only the review's findings summary | a fresh read-only Codex reviewer per stage; the builder weighs the findings |
+| **14. Preview + final** (10b) | shows the preview, states resolution/time/noise, launches the final in the open UI | the full-frame test with final settings | shows the preview and asks; tells Codex to launch | full-frame test; launches the UI final (`finals.py`) |
+| **15. Study notes** | writes Decisions, findings, open items | appends numbers and traps to its report | writes the Decisions section and the user's choices | writes findings, numbers, traps, open items |
+| **16. Skill changes** | edits, MIGRATE.md, commits, pushes after Codex's review | reviews | reads Codex's proposed diff, commits and pushes it | drafts the change in the skill folder, uncommitted |
+| **17. Training** (15b) | compares its verdict with Codex's self-judgement, writes lessons | self-judgement at the end of each report | only when the user asks for it in CPM | same |
+| **18. Close a study** (10e) | lists the milestones, runs `study_close.py` | — | lists the milestones | runs `study_close.py`, plan first, then `--apply` |
 
 The agent driving Blender holds AGENT_LOCK (RULES 16); in CPM that is the Codex builder.
 
@@ -64,6 +65,10 @@ Every stage starts with a brief and ends with a report; files live in the study'
 - gaps: what no source covers yet;
 - the user's added links, marked as theirs.
 
+**Material schedule** (for the material gate, `_wip/materials_schedule.md`): one row per layer —
+material, source (Poly Haven asset id, procedural, own file), real size and direction, target
+albedo and roughness, the reference crop it matches, and "in doubt" with the candidate sheet.
+
 **Research note** (Codex → Claude in CPM, `_wip/research/<topic>.md`, after the gate):
 - the question; the mechanism with numbers and sources (papers, measured data);
 - 2–4 workflows compared on 1–2 criteria, with cost (time, VRAM, cache);
@@ -79,7 +84,7 @@ To keep Claude's tokens for decisions: the top of each report, the review's find
 images it judges (the final camera plus 2–4 native crops beside the ref, or one sheet). Not:
 logs, study-script diffs, or long research text beyond the note's recommendation and evidence.
 Claude opens a file only when a report leaves a decision unclear. One exception: a proposed skill
-change, whose full diff Claude reads before committing it (stage 15).
+change, whose full diff Claude reads before committing it (stage 16).
 
 ## Switching modes
 The user names the mode; it holds until they switch back or the round ends. Before switching,
