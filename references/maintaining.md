@@ -103,7 +103,7 @@ Read the summary, not the log. Codex takes the agent lock (RULES 16) when it dri
   (api-traps), probes are small and packed (several outputs in R/G/B of one render), sections run
   alone (`--only`), slow convergence comparisons sit behind `--full`. Cap: one fail-first run,
   one run per real fix, one final pass; never rerun controls of modules the task did not touch.
-- **Codex priority mode (RULES 15a):**
+- **Codex priority mode, CPM (RULES 15a):**
   - **Builder:** one `--sandbox danger-full-access` session per stage, owning the stage's files.
     Each stage ends with a commit-sized change and a report in `_wip/codex/`.
   - **Reviewer:** `codex exec -s read-only` started as soon as a stage report lands, while the

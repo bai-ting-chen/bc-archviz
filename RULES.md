@@ -147,7 +147,7 @@
     skill. Codex suits detail work: scripts from a short brief, gathering sources into a brief,
     measurement runs (numbers table + one contact sheet), past workflows. Long output goes to a
     file with a short summary back. Skill changes reach the repo through Claude as a diff it
-    commits. Reference-image analysis and Rhino modelling stay with Claude (Codex priority mode: Rhino goes to Codex, 15a). Either model may
+    commits. Reference-image analysis and Rhino modelling stay with Claude (CPM: Rhino goes to Codex, 15a). Either model may
     take over alone when the other is out of tokens (stop it at a clean point, not mid-edit);
     this skill and the project files are the whole handover (`references/research-loop.md`), so nothing lives only in one
     agent's memory.
@@ -160,24 +160,26 @@
           `yt_learn.py`) and summarises it;
         - reviews Codex's code.
       - Codex builds from briefs and reviews Claude's code (RULES 14).
-    - **Codex priority mode** (Claude's budget is low): Codex does the hands-on work. Claude keeps
-      only the thinking that steers it.
-      - Codex:
-        - does all coding;
-        - does Rhino modelling (through Rook);
-        - does the detailed research, online and YouTube included, and writes it up as separate
-          notes in the study's `_wip/research/`, with sources and full-resolution evidence (RULES 3).
-      - Claude:
-        - reviews and digests those notes into a short summary and the method decision;
-        - writes the briefs that command Codex to code;
-        - analyses the reference images, makes the look decisions and runs the user gates
-          (10a, 10b).
+    - **Codex priority mode (CPM)** (Claude's budget is low): Claude takes the user's seat as director,
+      and all hard labour goes to Codex.
+      - Claude: the big decisions, directional guidance and aesthetic opinions.
+        - Reads Codex's research notes and turns them into the method decision.
+        - Judges the look against the reference.
+        - Writes short briefs that command Codex.
+        - Still brings the user gates (10a, 10b) to the user.
+      - Codex: everything else, done by hand:
+        - all coding and test runs;
+        - Rhino modelling (through Rook);
+        - detailed research, online and YouTube included, written as separate notes in the
+          study's `_wip/research/` with sources and full-resolution evidence (RULES 3);
+        - measurements, crops and comparison sheets for Claude to judge.
       - A **Codex builder** session writes and runs the code (and does the modelling and research
         stages).
       - A **parallel Codex reviewer** session (fresh, read-only) cross-checks each stage's diff
         against the brief.
       - The builder weighs the findings, as in RULES 14.
-      - At most two Codex sessions at once: one builder and one reviewer.
+      - At most two Codex sessions at once: one builder and one reviewer. Never two builders: the
+        builder holds the study's AGENT_LOCK (RULES 16), so a second builder must stop.
       - This replaces the other-model review for the duration, and the user is told the review was
         same-model.
     - The mode lasts until the user switches back, or the round ends. Then return to normal mode:

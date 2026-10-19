@@ -34,7 +34,7 @@ summarises it. Codex priority mode: Codex does coding, Rhino modelling and detai
 `_wip/research/`); Claude digests the notes, decides and commands Codex.
 
 ### 4. Read the revised RULES 15a
-Check: this machine's session has read the RULES 15a that assigns Rhino modelling and research per mode.
+Check: this machine's session has read the RULES 15a that names CPM (Claude as director, Codex all labour, never two builders).
 Do: read RULES 15a and the amended RULES 15 sentence on Rhino modelling.
 
 ### Last. Delete this file only after this machine carried out a required migration
