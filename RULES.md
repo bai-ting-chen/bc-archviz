@@ -186,6 +186,15 @@
     - The mode lasts until the user switches back, or the round ends. Then return to normal mode:
       if Claude's tokens refilled, the code made during the mode also gets its Claude review.
     - How to launch both modes: maintaining.md › Handing work to Codex.
+15b. **Train Codex towards Claude's judgement.** The goal is for Codex to make the same render calls
+    Claude would.
+    - Every Codex stage report ends with Codex's own self-judgement against the reference and the
+      design intent.
+    - Claude compares it with its own verdict and writes each gap as a checkable lesson:
+      - working and judging habits go in `references/codex-coaching.md`;
+      - craft goes in the topic reference.
+    - A kind of decision moves to Codex once its self-judgement keeps matching Claude's.
+    - This applies in both modes.
 16. **One agent at a time on Blender and on a file.** There is one Blender and one MCP port per
     machine, shared by every project. Before driving Blender or editing a study's files, check
     `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (machine-wide, beside the MCP server): absent →

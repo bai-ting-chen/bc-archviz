@@ -46,6 +46,14 @@ taste, research digest, briefs, user gates); Codex does all hands-on work. Never
 Check: this machine's session has read the RULES 15a that names CPM.
 Do: read RULES 15a.
 
+## 261019 — RULES 15b: training Codex; references/codex-coaching.md
+Docs only. Codex stage reports end with a self-judgement; Claude writes each gap between its verdict and
+Codex's as a checkable lesson in references/codex-coaching.md (craft lessons go to topic references).
+
+### 6. Read RULES 15b and codex-coaching.md
+Check: this machine's session has read RULES 15b and references/codex-coaching.md.
+Do: read both; Codex briefs on this machine tell Codex to read codex-coaching.md before reporting.
+
 ### Last. Delete this file only after this machine carried out a required migration
 If the checks already pass, leave this file for the other machines. Otherwise follow
 references/maintaining.md after carrying out the step.
