@@ -164,6 +164,8 @@
         RULES 16) and at most one **parallel Codex reviewer** (fresh, read-only) per stage; never
         two builders. The builder weighs the findings as in RULES 14.
       - This replaces the other-model review for the duration; the user is told it was same-model.
+    - In both modes, while both models work, Claude talks to the user, brings the gates (10a, 10b)
+      and commits skill changes; a model working alone does all of that itself (RULES 15).
     - The mode lasts until the user switches back, or the round ends. Back in normal mode with
       Claude's tokens refilled, the code made during CPM gets its Claude review.
 15b. **Train Codex towards Claude's judgement.** The goal is for Codex to make the same render calls

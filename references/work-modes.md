@@ -7,10 +7,11 @@ rule; this file is the detail. How to launch the sessions: maintaining.md › Ha
   from briefs, runs, measures and reviews Claude's code.
 - **Codex priority mode, CPM** (Claude's budget is low, the user names it): Claude only directs —
   decisions, direction, taste, briefs, user gates. Codex does every hands-on task. Claude reads
-  short documents, never logs or raw diffs.
+  short documents, not logs (below).
 
-In both modes only Claude talks to the user and brings the gates (10a, 10b), and only Claude
-commits to the skill repo (RULES 15).
+While both models work, Claude talks to the user, brings the gates (10a, 10b) and commits to the
+skill repo (RULES 15a). When one model works alone, it does all of that itself
+(`research-loop.md`).
 
 ## Stage by stage
 
@@ -68,8 +69,9 @@ opens the images and checks them against the design intent (codex-coaching.md �
 ## What Claude reads in CPM
 To keep Claude's tokens for decisions: the top of each report, the review's findings, and the
 images it judges (the final camera plus 2–4 native crops beside the ref, or one sheet). Not:
-logs, full diffs, scripts, or long research text beyond the note's recommendation and evidence.
-Claude opens a file only when a report leaves a decision unclear.
+logs, study-script diffs, or long research text beyond the note's recommendation and evidence.
+Claude opens a file only when a report leaves a decision unclear. One exception: a proposed skill
+change, whose full diff Claude reads before committing it (stage 14).
 
 ## Switching modes
 The user names the mode; it holds until they switch back or the round ends. Before switching,
