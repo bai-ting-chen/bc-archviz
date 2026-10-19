@@ -71,6 +71,15 @@ runs in CPM too when the user asks.
 Check: this machine's session has read references/work-modes.md.
 Do: read it; Codex briefs on this machine follow its brief and report formats.
 
+## 261019 — Research gate (RULES 3a)
+Docs only. A third stop in every study, both modes: after gathering sources and before analysing,
+show the question, source list and gaps, and wait for the user's links. Stops are now research
+(3a), model (10a), final preview (10b). work-modes.md table renumbered; new source-list format.
+
+### 9. Read RULES 3a
+Check: this machine's session has read RULES 3a.
+Do: read it and the work-modes.md stages 3–5.
+
 ### Last. Delete this file only after this machine carried out a required migration
 If the checks already pass, leave this file for the other machines. Otherwise follow
 references/maintaining.md after carrying out the step.

@@ -51,7 +51,8 @@ must leave for the other machines.
 - [ ] Rhino: which document is open, is it modified? A user's file stays untouched — write
       the study geometry with File3dm (pipeline.md)
 - [ ] Local studies? read `studies/README.md` + the latest STUDY_NOTES.md (open items carry over)
-- [ ] New technique? research the physics first, then compare workflows (RULES 3)
+- [ ] New technique? gather sources (physics first), stop at the research gate for the user's
+      links, then analyse and compare workflows (RULES 3, 3a)
 - [ ] Before every "done": native-resolution crop pass of each material vs the ref (RULES 8b)
 - [ ] Look decision? profile the Render Reference Library slice
 - [ ] Study folder set? `archviz.set_project(<study>)`; every asset downloaded/generated into

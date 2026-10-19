@@ -41,6 +41,12 @@
    requests will be things few people have done in Blender or archviz: a
    tutorial can only copy a look, the science lets you build a new method and know its limits.
    Videos are evidence, not authority.
+3a. **Research gate** (both modes). After gathering sources and before analysing them, stop and
+   show the user: the question, a source list (one line each: what it is, link or path, what it
+   should answer) and the gaps still open. Wait — the user often adds links; read them like any
+   other source (RULES 3). Then analyse, compare workflows and choose. A quick lookup during a
+   build (one API detail, one trap) needs no gate. One of three stops in a study: research (3a),
+   model (10a), final preview (10b).
 
 ## Split
 4. **Rhino = geometry only.** Materials, lights, camera look and render settings live in Blender
@@ -157,14 +163,14 @@
       models in Rhino, judges the look and decides; Codex builds from briefs, runs, measures and
       reviews Claude's code (RULES 14).
     - **Codex priority mode (CPM)** (Claude's budget is low): Claude takes the user's seat as
-      director — the big decisions, direction, taste, short briefs, and the user gates (10a, 10b).
+      director — the big decisions, direction, taste, short briefs, and the user gates (3a, 10a, 10b).
       Codex does every hands-on task: coding and test runs, Rhino modelling through Rook, research
       written as notes in the study's `_wip/research/` (RULES 3), measurements, crops and sheets.
       - One **Codex builder** (holds the machine-wide `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK`,
         RULES 16) and at most one **parallel Codex reviewer** (fresh, read-only) per stage; never
         two builders. The builder weighs the findings as in RULES 14.
       - This replaces the other-model review for the duration; the user is told it was same-model.
-    - In both modes, while both models work, Claude talks to the user, brings the gates (10a, 10b)
+    - In both modes, while both models work, Claude talks to the user, brings the gates (3a, 10a, 10b)
       and commits skill changes; a model working alone does all of that itself (RULES 15).
     - The mode lasts until the user switches back, or the round ends. Back in normal mode with
       Claude's tokens refilled, the code made during CPM gets its Claude review.
