@@ -19,6 +19,15 @@ from their library .blend. No installs.
 Check: this machine's session has read RULES 10e (or the user says so).
 Do: read it; run the tool (plan first) when the user next closes a study.
 
+## 261018 — Two work modes: normal and Codex priority (RULES 15a)
+Docs only. RULES 15a names two Claude/Codex modes. In Codex priority mode (Claude low on budget,
+the user names it) Codex builds everything and a parallel read-only Codex session reviews it.
+How to launch: maintaining.md > Handing work to Codex. No installs.
+
+### 3. Read RULES 15a
+Check: this machine's session has read RULES 15a (or the user says so).
+Do: read it. Local memories that describe a one-off "Codex does all coding" arrangement can point at it.
+
 ### Last. Delete this file only after this machine carried out a required migration
 If the checks already pass, leave this file for the other machines. Otherwise follow
 references/maintaining.md after carrying out the step.

@@ -103,6 +103,19 @@ Read the summary, not the log. Codex takes the agent lock (RULES 16) when it dri
   (api-traps), probes are small and packed (several outputs in R/G/B of one render), sections run
   alone (`--only`), slow convergence comparisons sit behind `--full`. Cap: one fail-first run,
   one run per real fix, one final pass; never rerun controls of modules the task did not touch.
+- **Codex priority mode (RULES 15a):**
+  - **Builder:** one `--sandbox danger-full-access` session per stage, owning the stage's files.
+    Each stage ends with a commit-sized change and a report in `_wip/codex/`.
+  - **Reviewer:** `codex exec -s read-only` started as soon as a stage report lands, while the
+    builder goes on with the next stage on other files.
+    - Its brief holds only: the stage brief, the diff (or the list of changed files), and "review
+      against RULES.md, api-traps.md and the brief: correctness bugs, rule breaks, wrong units;
+      findings only, most severe first, file:line".
+    - Output: `_wip/codex/review_<stage>.md`.
+  - The next builder stage starts by weighing that review and fixing what holds.
+  - Claude reads only the reports and reviews, and steers by writing the next brief.
+  - At most two Codex sessions at once (builder + reviewer). Plan usage limits are small, so keep
+    briefs lean.
 - **Codex low on tokens:** stop it between steps and take over (RULES 15) rather than let it die
   mid-edit; its report and the brief are the handover.
 

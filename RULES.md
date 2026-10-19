@@ -151,6 +151,21 @@
     take over alone when the other is out of tokens (stop it at a clean point, not mid-edit);
     this skill and the project files are the whole handover (`references/research-loop.md`), so nothing lives only in one
     agent's memory.
+15a. **Two work modes; the user names the mode, normal is the default.**
+    - **Normal mode:** the split above. Claude plans, decides and reviews Codex's code. Codex builds
+      from briefs and reviews Claude's code (RULES 14).
+    - **Codex priority mode** (Claude's budget is low): Codex does all of the coding.
+      - Claude keeps only reference analysis, Rhino modelling, method and look decisions, briefs,
+        and the user gates (10a, 10b).
+      - A **Codex builder** session writes and runs the code.
+      - A **parallel Codex reviewer** session (fresh, read-only) cross-checks each stage's diff
+        against the brief.
+      - The builder weighs the findings, as in RULES 14.
+      - This replaces the other-model review for the duration, and the user is told the review was
+        same-model.
+    - The mode lasts until the user switches back, or the round ends. Then return to normal mode:
+      if Claude's tokens refilled, the code made during the mode also gets its Claude review.
+    - How to launch both modes: maintaining.md › Handing work to Codex.
 16. **One agent at a time on Blender and on a file.** There is one Blender and one MCP port per
     machine, shared by every project. Before driving Blender or editing a study's files, check
     `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (machine-wide, beside the MCP server): absent →
