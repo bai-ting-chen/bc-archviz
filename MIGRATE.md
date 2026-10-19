@@ -26,7 +26,7 @@ How to launch: maintaining.md > Handing work to Codex. No installs.
 
 ### 3. Read RULES 15a
 Check: this machine's session has read RULES 15a (or the user says so).
-Do: read it. Local memories that describe a one-off "Codex does all coding" arrangement can point at it.
+Do: read it (it also splits Rhino modelling and research between the modes). Local memories that describe a one-off "Codex does all coding" arrangement can point at it.
 
 ### Last. Delete this file only after this machine carried out a required migration
 If the checks already pass, leave this file for the other machines. Otherwise follow
