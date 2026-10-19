@@ -42,6 +42,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `blend_refs` — Inside Blender: list a .blend's external files and optionally copy outside-study files into the study.
 
+- `files_of(d, path)` — Concrete files behind a path: every UDIM tile and every frame of an image sequence.
 - `references()` — Yield (datablock, attribute, absolute path) for every external file the .blend needs.
 - `relink(study)` — Repath missing references to a file of the same name found inside the study (outside _wip).
 - `localise(study)` — Copy outside-study (and _wip) references into <study>/library/local/<parent>/ and repath them.

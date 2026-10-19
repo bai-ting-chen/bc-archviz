@@ -61,7 +61,10 @@ def milestones(study, keep, apply=False):
         if os.path.exists(notes):
             m = re.search(r'^## Milestones\s*$(.*?)(?=^## |\Z)', open(notes, encoding='utf-8').read(), re.M | re.S)
             if m:
-                keep = re.findall(r'[\w\-. ]+?\.blend\b', m.group(1))
+                for line in m.group(1).splitlines():
+                    ticked = re.findall(r'`([^`]+?\.blend)`', line)
+                    plain = re.findall(r'(\S.*?\.blend)\b', re.sub(r'^\s*(?:[-*+]|\d+\.)\s+', '', line))
+                    keep += ticked or plain[:1]
     keep = [k.strip() for k in keep]
     if not keep and apply:
         sys.exit('no milestones: list them under "## Milestones" in STUDY_NOTES.md or pass --keep')
@@ -87,9 +90,12 @@ def refs(blend, study, blender, localise):
 
 def plan(study, keep, used):
     """List deletion candidates; nothing a milestone uses is ever listed."""
+    used_dirs = [u for u in used if os.path.isdir(u)]
+
     def holds_used(p):
         p = norm(p)
-        return any(u == p or u.startswith(p + os.sep) for u in used)
+        return any(u == p or u.startswith(p + os.sep) for u in used) or any(
+            p.startswith(d + os.sep) for d in used_dirs)
 
     out = []
     for f in os.listdir(study):
@@ -122,9 +128,16 @@ def main():
     a = ap.parse_args()
     study = norm(a.study)
     keep = [norm(k) for k in milestones(study, a.keep, a.apply)]
-    data = [refs(b, study, a.blender, a.apply) for b in keep]
+    data = [refs(b, study, a.blender, False) for b in keep]  # read-only pass first
     used = {norm(r[1]) for d in data for r in d['refs']}
     outside = sorted({r[1] for d in data for r in d['refs'] if not norm(r[1]).startswith(study + os.sep)})
+    libs = sorted({lib for d in data for lib in d.get('outside_libraries', [])})
+    if libs:
+        sys.exit('milestones link .blend libraries outside the study; make them local or move them in first: '
+                 + ', '.join(libs))
+    if a.apply:  # relink, copy outside/_wip files in, then plan from the updated references
+        data = [refs(b, study, a.blender, True) for b in keep]
+        used = {norm(r[1]) for d in data for r in d['refs']}
     cands = plan(study, set(keep), used)
     total = sum(size(p) for p in cands)
     print('keep:', *[os.path.basename(k) for k in keep], sep='\n  ')
