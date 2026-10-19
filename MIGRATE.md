@@ -26,7 +26,16 @@ How to launch: maintaining.md > Handing work to Codex. No installs.
 
 ### 3. Read RULES 15a
 Check: this machine's session has read RULES 15a (or the user says so).
-Do: read it (it also splits Rhino modelling and research between the modes). Local memories that describe a one-off "Codex does all coding" arrangement can point at it.
+Do: read it. Local memories that describe a one-off "Codex does all coding" arrangement can point at it.
+
+## 261018 — RULES 15a revised: Rhino modelling and research per mode
+Docs only. Normal mode: Claude does Rhino modelling and the detailed research (online, YouTube) and
+summarises it. Codex priority mode: Codex does coding, Rhino modelling and detailed research (notes in
+`_wip/research/`); Claude digests the notes, decides and commands Codex.
+
+### 4. Read the revised RULES 15a
+Check: this machine's session has read the RULES 15a that assigns Rhino modelling and research per mode.
+Do: read RULES 15a and the amended RULES 15 sentence on Rhino modelling.
 
 ### Last. Delete this file only after this machine carried out a required migration
 If the checks already pass, leave this file for the other machines. Otherwise follow
