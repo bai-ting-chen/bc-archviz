@@ -54,6 +54,13 @@ Codex's as a checkable lesson in references/codex-coaching.md (craft lessons go 
 Check: this machine's session has read RULES 15b and references/codex-coaching.md.
 Do: read both; Codex briefs on this machine tell Codex to read codex-coaching.md before reporting.
 
+## 261019 — RULES 15b: training in normal mode only
+Docs only. Codex training (self-judgement + lessons) runs only in normal mode; CPM skips it to save tokens.
+
+### 7. Read RULES 15b (normal mode only)
+Check: this machine's session knows training runs only in normal mode.
+Do: read RULES 15b.
+
 ### Last. Delete this file only after this machine carried out a required migration
 If the checks already pass, leave this file for the other machines. Otherwise follow
 references/maintaining.md after carrying out the step.
