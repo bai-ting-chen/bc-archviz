@@ -42,7 +42,6 @@ topic reference; this file holds **how to look and how to check**.
 - **Aim a camera at the thing.** Use a Track To constraint on an empty placed at the feature's
   real coordinates, rather than guessed rotations. Then check the feature lands inside the frame
   (`world_to_camera_view`) before rendering.
-
 - **A user-named asset or method is fixed, not replaced.** When the asset the user chose causes a
   defect, fix it inside that asset (crop, mask, re-sample, filter) and report; swapping it for
   another source is a user decision — ask through the director.
@@ -77,8 +76,8 @@ topic reference; this file holds **how to look and how to check**.
   standard deviation and the 2–98 % percentile spread of the same crop in ours and the reference
   (a crop free of foliage or other objects). A material whose mean matches but whose SD is several
   times lower reads as a blank, washed-out surface, however correct its pattern is in a macro view.
-  - The trap: board-formed concrete matched the reference's display mean (0.80) with an SD of
-    0.009, against the reference's ~0.1 — grain, joints and pits were invisible in the final view,
+  - The trap: board-formed concrete matched the reference's display mean with an SD ~10× lower
+    than the reference's — grain, joints and pits were invisible in the final view,
     and the self-judgement called it "subtler" instead of failing it.
 - **A patch sheet with no candidate like the reference stops the stage.** Before spending the
   full-view run, ask of the patch sheet: does any candidate share the reference's character? If

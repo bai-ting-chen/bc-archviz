@@ -78,7 +78,9 @@ The projected-area and delta formulas above are continuity geometry, not solver 
   waves ~0.2 mm and ropes λ 2–9 cm. Judge at native resolution (RULES 8b).
 
 ## Free curtain off a lip: 2D ribbon pattern on a ballistic carrier
-A thin curtain thrown off a gutter lip, built without simulation: a carrier surface plus a 2D ribbon
+Once the flow detaches from the lip (check the section first — a low flow clings and wraps
+under it, see *Falling film* › Check the section and *Overflow edge*), a thin curtain thrown off
+the lip can be built without simulation: a carrier surface plus a 2D ribbon
 field in the carrier's own (u, v), unioned into one watertight body (SDF).
 - **Carrier = the trajectory.** Water leaves the lip horizontally, so the section is a parabola with
   its vertex at the lip: x(d) = v0·sqrt(2d/g), standoff growing monotonically with the drop d. Never a
@@ -90,8 +92,9 @@ field in the carrier's own (u, v), unioned into one watertight body (SDF).
   - ropes constant along their length = cylinders mirroring one band of the surroundings → chrome
     flutes. Ribbons must wander, swell, twist, braid and tear along their length;
   - correlation along the flow too short + dense spacing → etched/hammered glass;
-  - a flat sheet of constant thickness is a parallel plate: no deflection, ~2 % reflection →
-    invisible. Calm water needs uneven thickness *between its two faces* to bend the wall behind;
+  - a flat sheet of constant thickness is a parallel plate: no deflection (only a negligible
+    sideways shift), ~4 % reflection at normal incidence from its two faces → invisible. Calm water needs uneven thickness *between its two faces* to
+    bend the wall behind;
   - lenses placed one per grid cell → sprinkled dots; tears at a fixed pitch → slots; fields built
     only from sines and hashed cells read as a pattern;
   - stacking parallel thin layers adds bands, not volume.
