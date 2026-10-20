@@ -106,9 +106,10 @@ choose substitutes by texture, slab-floor variation and joints, honed-stone roug
 floors at low angles. pipeline.md: reusing Enscape/V-Ray materials from a .3dm. lighting-camera.md:
 warming toward a reference (tint ≤ 0, whole-frame hue). work-modes.md: the brief's checks line.
 maintaining.md: Codex fast tier, amending a running stage, a stage cut off by the plan limit.
+RULES 16: a stopped builder's lock is the director's. api-traps.md: white-balance tint neutral at 10.
 
 ### 12. Read the new sections
-Check: this machine's session has read the sections listed above.
+Check: this machine's session has read the sections listed above and RULES 16.
 Do: read them before the next floor, reference-warmth or Codex-led stage.
 
 ### Last. Delete this file only after this machine carried out a required migration

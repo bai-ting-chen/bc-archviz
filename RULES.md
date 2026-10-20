@@ -196,7 +196,8 @@
     `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (machine-wide, beside the MCP server): absent →
     create it (`<agent> | <what: Blender, study or files> | <start, ISO time>`), work, delete it
     when done; present and not yours → stop and tell the user, never take it over. A
-    render left running keeps the lock until it ends.
+    render left running keeps the lock until it ends. A lock taken by a Codex builder that you
+    directed and stopped is yours: once its process is gone, delete it and tell the user.
 
 17. **Modular code and docs, no god scripts.** Either model must be able to pick up any file
     cold. One module per job, functions that do one thing with real-unit arguments and a

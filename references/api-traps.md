@@ -63,7 +63,8 @@
 - Area lights emit along local −Z; with rotation (θ, 0, 0) the beam goes along (0, sin θ, −cos θ).
 - Solidify on a sphere (thin glass shell): `offset` −1 keeps the outer surface where it was,
   so the shell grows inward and the silhouette does not change.
-- `view_settings.white_balance_temperature`: lower = cooler.
+- `view_settings.white_balance_temperature`: lower = cooler. `white_balance_tint` is neutral at
+  its default 10 (daylight), not at 0.
 - `Image.save()` on float images applies view transform + exposure → for data EXRs use
   `img.save_render(path)` with OPEN_EXR 32-bit.
 - Pixel analysis: `img.pixels.foreach_get(np_array)` is linear for **float** images only; 8-bit

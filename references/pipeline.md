@@ -53,7 +53,8 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   `f.Write(path, 7)`. Meshes need no cached render mesh, and `objectsCreated` stays 0 in the
   user's document. Keep the builder as a parameter script in the study, run with
   `exec(open(path).read())` through Rook.
-- **Materials from another renderer on the user's layers** (Enscape, V-Ray): read them read-only
+- **Materials from another renderer on the user's layers** (Enscape, V-Ray; data only, no
+  V-Ray tooling): read them read-only
   with `File3dm`. Enscape keeps its data in the RDK RenderMaterials XML (`parameters-v8`, mirrored
   `parameters`) plus plug-in UserData: texture paths, size, rotation, tint, roughness, normal
   strength. Paths often point at another user's machine (`C:\Users\<other>\Enscape\ImportedTextures\`):

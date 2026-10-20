@@ -41,9 +41,9 @@ These transfer to any scene and any renderer — they are measurements of the wo
   sRGB-encoded (api-traps).
   → `lookdev.albedo_material(tex_id, name, target)` (measures and caches the mean in meta.json).
 - **Tint a scan with a gain, never with a flat-colour Mix.** Mix(MIX) of a flat colour over the
-  map at a high factor replaces the texture: stone floors and a veneer rendered as plain colour.
-  Prove texture survives: high-pass sigma of a native render crop against the reference crop at
-  a matching screen scale.
+  map at a high factor replaces the texture, and the surface renders as plain colour. Prove the
+  texture survives: high-pass sigma (`imgstats`) of a native render crop against the reference
+  crop at a matching screen scale.
 - **A substitute for a missing map is chosen by texture as well as mean.** A "clean" crop of a
   marble scan reads blank at floor distance; compare high-pass sigma, not only colour.
 - Pick from a contact sheet: Poly Haven thumbnails
@@ -289,7 +289,7 @@ adaptive 1 px, last in the stack; `cycles.dicing_camera` = the render camera.
 - **Large tiles** `interior.stone_tiles()`: Brick Texture offset 0 on BoxUV, per-tile tone, cloud
   noise + specks, recessed joints (`bump.invert = True`); floors glossier than walls, with a coat.
 - **Slab floors modelled as separate pieces** (one object per slab or band): per-object random
-  UV offset/rotation inside the map plus a ±3–5 % value shift (Object Info Random), so neighbours
+  per-unit variation by object (RULES 8d; ranges in › Randomness and anti-tiling), so neighbours
   differ as laid stone does. Joints as a material hairline (≤ 1 mm, slightly darker), not a gap.
 - **Honed stone** (lobby limestone/marble) shows soft, blurred reflections of walls and people:
   Cycles roughness ~0.3–0.5 modulated by the map. A roughness exported from another renderer

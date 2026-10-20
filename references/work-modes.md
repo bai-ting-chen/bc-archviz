@@ -58,7 +58,8 @@ they change the look the user approved.
 **Checks line.** A resumed builder carries the proof habits of earlier stages (fingerprints, hash,
 area and readback audits) into simple stages, and a geometry import then takes three times as long.
 For imports, previews and plain look rounds the brief says: "Checks: look at each image, measure
-only what the items name; no audits unless something looks wrong; skip the reviewer."
+only what the items name; no audits unless something looks wrong." The reviewer (RULES 14) is
+skipped only for a stage that leaves no code behind (a preview or render from saved scripts).
 
 **Stage report** (Codex → Claude, `report_<stage>.md`, ≤ 20 lines on top, detail below):
 - what was done, files changed;
