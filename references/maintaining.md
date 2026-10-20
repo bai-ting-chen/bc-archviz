@@ -122,6 +122,16 @@ Read the summary, not the log. Codex takes the agent lock (RULES 16) when it dri
   leave its wait loop alive and start a duplicate builder later: list the surviving processes by
   script name and stop each by PID before relaunching. A lock left by a session that ended stays
   (RULES 16): report it to the user with the check that no Blender or Codex process still runs.
+- **Fast tier:** `service_tier = "fast"` in `~/.codex/config.toml` (or `-c service_tier="fast"`
+  per run) when the user asks for speed. It uses the plan allowance faster. A run already going
+  keeps its tier.
+- **Amending a running stage:** if it has written no outputs yet, stop it, remove the lock it took
+  (first check that no `codex exec` started for it still runs; the desktop app's own `codex.exe`
+  processes started hours earlier are not runs), add the item to the brief and resume with "restart
+  from the amended brief". That is cheaper than a second round afterwards.
+- **Cut off mid-stage** (plan limit): images and the .blend may be saved with no report. Record
+  the state as unreviewed in the study notes, and next time ask for the report from what was saved
+  before any new render.
 - **Codex low on tokens:** stop it between steps and take over (RULES 15) rather than let it die
   mid-edit; its report and the brief are the handover.
 

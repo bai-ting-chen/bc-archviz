@@ -53,6 +53,14 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   `f.Write(path, 7)`. Meshes need no cached render mesh, and `objectsCreated` stays 0 in the
   user's document. Keep the builder as a parameter script in the study, run with
   `exec(open(path).read())` through Rook.
+- **Materials from another renderer on the user's layers** (Enscape, V-Ray): read them read-only
+  with `File3dm`. Enscape keeps its data in the RDK RenderMaterials XML (`parameters-v8`, mirrored
+  `parameters`) plus plug-in UserData: texture paths, size, rotation, tint, roughness, normal
+  strength. Paths often point at another user's machine (`C:\Users\<other>\Enscape\ImportedTextures\`):
+  look for legacy or `_embedded_files` copies on the project drives, copy the found maps into the
+  study's `library/local/<material>/` with a `meta.json`, and report what is missing. Rhino's
+  `rdk$….tiff` cache is a ~512 px preview, not a usable map. Reuse maps and real size; translate
+  gloss/roughness against the reference, never 1:1.
 - **No Rhino open**: `rhino_launch` starts an owned workbench (empty document) — safe to build in.
 - **RhinoCommon traps**: `Extrusion.Create(curve, h, cap)` follows the curve's plane normal, so a
   clockwise outline extrudes *down* (jambs and a canopy hung below their datum). Use

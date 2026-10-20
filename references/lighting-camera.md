@@ -154,6 +154,9 @@ the manufacturer's file a render's illuminance is the fixture's, not a guess fro
 - White balance: `view_settings.use_white_balance`, `white_balance_temperature` = the colour
   shown neutral — **lower = cooler**. Setting WB above the lamp temperature keeps warmth in the
   image rather than neutralising it, which is usually what a warm reference wants.
+- **Warming toward a reference:** move the temperature; keep tint ≤ 0. A magenta tint that makes
+  one floor patch match the photo's hue turns the whole frame pink. Check the hue of the whole
+  frame (walls, background, glass), not one patch.
 
 ### Soft backplate, crisp model
 An HDRI backplate (trees, hills) is soft - in its photo, not only its resolution: a

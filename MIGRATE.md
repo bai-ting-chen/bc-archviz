@@ -100,6 +100,17 @@ asset, whole-frame diff, API lookup); api-traps.md adaptive subdivision lives on
 Check: this machine's session has read the sections listed above.
 Do: read them before the next board-formed concrete, water-curtain or Codex-led stage.
 
+## 261020 — floors from another renderer, scan tinting, warm WB, Codex speed
+Docs only, no installs. materials.md: tint scans with a gain (a flat-colour Mix erases texture),
+choose substitutes by texture, slab-floor variation and joints, honed-stone roughness, dark veneer
+floors at low angles. pipeline.md: reusing Enscape/V-Ray materials from a .3dm. lighting-camera.md:
+warming toward a reference (tint ≤ 0, whole-frame hue). work-modes.md: the brief's checks line.
+maintaining.md: Codex fast tier, amending a running stage, a stage cut off by the plan limit.
+
+### 12. Read the new sections
+Check: this machine's session has read the sections listed above.
+Do: read them before the next floor, reference-warmth or Codex-led stage.
+
 ### Last. Delete this file only after this machine carried out a required migration
 If the checks already pass, leave this file for the other machines. Otherwise follow
 references/maintaining.md after carrying out the step.

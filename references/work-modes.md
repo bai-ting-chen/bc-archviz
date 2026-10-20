@@ -55,6 +55,11 @@ says "retune nothing else; if something else must change, stop and report", and 
 Claude's or the reviewer's other fixes — those go to a later stage. Bundled extras cost rounds:
 they change the look the user approved.
 
+**Checks line.** A resumed builder carries the proof habits of earlier stages (fingerprints, hash,
+area and readback audits) into simple stages, and a geometry import then takes three times as long.
+For imports, previews and plain look rounds the brief says: "Checks: look at each image, measure
+only what the items name; no audits unless something looks wrong; skip the reviewer."
+
 **Stage report** (Codex → Claude, `report_<stage>.md`, ≤ 20 lines on top, detail below):
 - what was done, files changed;
 - one line per image: "this shows X" (codex-coaching.md);
