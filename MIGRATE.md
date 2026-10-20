@@ -89,17 +89,17 @@ wait for approval. Stops: research (3a), model (10a), materials (8e), final prev
 Check: this machine's session has read RULES 8e.
 Do: read it and work-modes.md stage 10 and the material schedule format.
 
-### Last. Delete this file only after this machine carried out a required migration
-If the checks already pass, leave this file for the other machines. Otherwise follow
-references/maintaining.md after carrying out the step.
-
 ## 261020 — board-formed concrete as relief; ballistic curtain; Codex handling
 Docs only, no installs. New: materials.md › Concrete "Board-formed concrete is relief, not a print" (three relief
 scales, grain source map, tone target vs AgX roll-off, build traps); water-features.md "Free curtain off a lip"
 (ballistic carrier, ribbon traps); work-modes.md brief rule for user-requested changes; maintaining.md watching
-and queueing Codex sessions; codex-coaching.md five new lessons (contrast, patch stop, mechanism, user-named
+and queueing Codex sessions; codex-coaching.md six new lessons (contrast, patch stop, mechanism, user-named
 asset, whole-frame diff, API lookup); api-traps.md adaptive subdivision lives on the modifier.
 
 ### 11. Read the new sections
 Check: this machine's session has read the sections listed above.
 Do: read them before the next board-formed concrete, water-curtain or Codex-led stage.
+
+### Last. Delete this file only after this machine carried out a required migration
+If the checks already pass, leave this file for the other machines. Otherwise follow
+references/maintaining.md after carrying out the step.
