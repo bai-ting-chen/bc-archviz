@@ -116,6 +116,12 @@ Read the summary, not the log. Codex takes the agent lock (RULES 16) when it dri
   - The next builder stage starts by weighing that review and fixing what holds.
   - Claude reads only the reports and reviews, and steers by writing the next brief.
   - Session cap: RULES 15a. Plan usage limits are small, so keep briefs lean.
+- **Watching and queueing sessions:** a watcher for the plan limit greps the exact error text
+  ("hit your usage limit"), not "usage limit" — the brief text echoed in the log contains it. Give
+  every launch its own log tag. On Windows, stopping a background shell that queues sessions can
+  leave its wait loop alive and start a duplicate builder later: list the surviving processes by
+  script name and stop each by PID before relaunching; a lock left by a session that ended is
+  removed only after checking no Blender or Codex process still runs.
 - **Codex low on tokens:** stop it between steps and take over (RULES 15) rather than let it die
   mid-edit; its report and the brief are the handover.
 

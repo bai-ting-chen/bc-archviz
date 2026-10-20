@@ -77,6 +77,27 @@ The projected-area and delta formulas above are continuity geometry, not solver 
 - **Character traps:** fine relief + roll waves draw squiggly contour-like highlights; keep roll
   waves ~0.2 mm and ropes λ 2–9 cm. Judge at native resolution (RULES 8b).
 
+## Free curtain off a lip: 2D ribbon pattern on a ballistic carrier
+A thin curtain thrown off a gutter lip, built without simulation: a carrier surface plus a 2D ribbon
+field in the carrier's own (u, v), unioned into one watertight body (SDF).
+- **Carrier = the trajectory.** Water leaves the lip horizontally, so the section is a parabola with
+  its vertex at the lip: x(d) = v0·sqrt(2d/g), standoff growing monotonically with the drop d. Never a
+  bulge that returns to the wall. Let v0 vary slowly and irregularly along the lip (q varies) so the
+  landing line and the light gradient vary. Prove it with true sections against the analytic curve.
+- **The carrier gives the volume.** A standoff of a few cm (often what a reference measures) reads
+  as paint on the wall at a distance; size the standoff from the final view.
+- **Ribbon traps (each seen in a failed round):**
+  - ropes constant along their length = cylinders mirroring one band of the surroundings → chrome
+    flutes. Ribbons must wander, swell, twist, braid and tear along their length;
+  - correlation along the flow too short + dense spacing → etched/hammered glass;
+  - a flat sheet of constant thickness is a parallel plate: no deflection, ~2 % reflection →
+    invisible. Calm water needs uneven thickness *between its two faces* to bend the wall behind;
+  - lenses placed one per grid cell → sprinkled dots; tears at a fixed pitch → slots; fields built
+    only from sines and hashed cells read as a pattern;
+  - stacking parallel thin layers adds bands, not volume.
+- **Change one thing at a time.** Swapping the carrier must not retune the ribbon field; a look that
+  works is kept byte-identical while the geometry under it changes.
+
 ## Overflow edge into a trench
 - **Spill:** head h over a sharp crest → q ≈ 1.84·h^1.5 (m²/s); brink depth ≈ 0.715 × critical
   depth (2h/3); brink speed ≈ √(g·2h/3) — a few mm of head gives ~0.2 m/s, so the sheet **clings**

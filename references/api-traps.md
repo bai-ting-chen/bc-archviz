@@ -28,7 +28,9 @@
   string: `node.inputs["Instance Type"].default_value = "Collection"`.
 
 ## Mesh / scene
-- Subdivision adaptive: `use_adaptive_subdivision`, `adaptive_space='PIXEL'`, `adaptive_pixel_size`.
+- Subdivision adaptive (5.x): the properties live on the **Subdivision Surface modifier** —
+  `mod.use_adaptive_subdivision`, `mod.adaptive_space='PIXEL'`, `mod.adaptive_pixel_size`. The old
+  `obj.cycles.use_adaptive_subdivision` no longer exists and raises AttributeError.
 - After changing modifier inputs in background scripts: `obj.update_tag()` +
   `view_layer.update()` before reading evaluated meshes.
 - `matrix_world` is stale right after a script sets `location`/`rotation_euler`: call

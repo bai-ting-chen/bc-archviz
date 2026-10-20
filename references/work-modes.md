@@ -50,6 +50,11 @@ Every stage starts with a brief and ends with a report; files live in the study'
 - done when: the check or image that answers the question;
 - the report to write, and whether training is on.
 
+A brief for a **user-requested change to an approved state** names that state and the one change,
+says "retune nothing else; if something else must change, stop and report", and carries none of
+Claude's or the reviewer's other fixes — those go to a later stage. Bundled extras cost rounds:
+they change the look the user approved.
+
 **Stage report** (Codex → Claude, `report_<stage>.md`, ≤ 20 lines on top, detail below):
 - what was done, files changed;
 - one line per image: "this shows X" (codex-coaching.md);

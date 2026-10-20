@@ -29,9 +29,25 @@ topic reference; this file holds **how to look and how to check**.
   method before a third variant of the same idea (a habit, not a rule).
   - The trap: camera clipping gave an empty section twice. A boolean intersect of each object with
     a thin slab gives a real solid cut at once.
+- **Look at the whole frame of every ON/OFF pair, not only the feature's crop.** Make the difference
+  image, threshold it, and list every connected region outside the feature's expected area. A
+  displacement, modifier or geometry change can break one element far from where you are looking.
+  - The trap: a relief control was judged on wall crops; one board end, bottom left of the frame,
+    displaced several cm into a wedge on the deck — builder, reviewer and director all missed it.
+- **Look up the API before the one allowed run.** Before writing render or output setup, grep
+  `api-traps.md` for the property and reuse the skill's helpers (`finals.py` savers) or the study's
+  last working script; probe the scene in-process before spending a frame.
+  - The trap: a stage with one launch died on `obj.cycles.use_adaptive_subdivision` (moved to the
+    modifier) and its rerun on the `OPEN_EXR_MULTILAYER` enum — both already in api-traps.md.
 - **Aim a camera at the thing.** Use a Track To constraint on an empty placed at the feature's
   real coordinates, rather than guessed rotations. Then check the feature lands inside the frame
   (`world_to_camera_view`) before rendering.
+
+- **A user-named asset or method is fixed, not replaced.** When the asset the user chose causes a
+  defect, fix it inside that asset (crop, mask, re-sample, filter) and report; swapping it for
+  another source is a user decision — ask through the director.
+  - The trap: a plank scan's own plank ends gave false short joints; the builder replaced the scan
+    with procedural noise, and the grain the user had asked to see disappeared.
 
 ## Making images someone must judge
 - **A geometry check image:**
@@ -57,5 +73,20 @@ topic reference; this file holds **how to look and how to check**.
 - **Name the character, not only the mean:** feature size, edge sharpness, contrast, density,
   orientation, distribution. A metric that passes while the image looks wrong means the metric is
   wrong.
+- **Match the contrast, not only the mean.** Beside every mean you match, report the local
+  standard deviation and the 2–98 % percentile spread of the same crop in ours and the reference
+  (a crop free of foliage or other objects). A material whose mean matches but whose SD is several
+  times lower reads as a blank, washed-out surface, however correct its pattern is in a macro view.
+  - The trap: board-formed concrete matched the reference's display mean (0.80) with an SD of
+    0.009, against the reference's ~0.1 — grain, joints and pits were invisible in the final view,
+    and the self-judgement called it "subtler" instead of failing it.
+- **A patch sheet with no candidate like the reference stops the stage.** Before spending the
+  full-view run, ask of the patch sheet: does any candidate share the reference's character? If
+  none does, report and stop; the full view of a failed patch only confirms the failure.
+  - The trap: every patch showed straight barcode streaks beside the reference's torn ribbons; the
+    best of them still went to a 2400 px view, which read as chrome.
+- **Name the mechanism, not only the symptom.** A self-judgement that says "metallic strands" should
+  also say why (here: ropes constant along their length act as cylinders that mirror one band of
+  the surroundings) — the next step follows from the cause, not from the look.
 - **Show the user the best state after a few rounds** (the study's cap), rather than tuning blind.
   Metric checklists are evidence for a look decision, never a replacement for it.
