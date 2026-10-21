@@ -1,213 +1,167 @@
-# House rules — standing, do not re-litigate
+# House rules
 
-## What belongs in this skill
-0. **Methods, constants, traps and taste — never one scene's numbers.** Scenes, software and
-   parameters all change; what carries you is knowing how to operate, how to experiment and
-   where to get resources. The test for any number: *would it be the same in a different scene?*
-   A chipped edge is 5 mm on one job and 100 mm on the next, so it is a result, not knowledge —
-   size it from the shot (RULES 8) and record it in the project's study notes. Physical
-   constants (albedo, IOR, lm/W, typical EV100), conventions, procedures and taste belong here.
-0a. **Skill is generic, projects are local**. Only the skill goes to GitHub;
-   project folders (data, studies, scenes, renders) stay on their machine and are never pushed.
-   The skill names no project, project path, repo or study. Every machine and every project
-   loads it, so a project name in here is wrong everywhere else. Lessons go in without where they
-   came from. Changing the skill: `references/maintaining.md` (pull first, git identity, and a
-   `MIGRATE.md` with every push).
+## Governance
 
-## Priorities
-1. **Native first.** Blender's own features (Cycles, shader nodes, Geometry Nodes, modifiers, Sky
-   Texture) before self-written external tools — native work stays editable in the .blend and
-   survives Blender updates; external tools are a last resort, and say so when used.
-2. **Unbiased first.** Order: (a) Cycles path tracing; (b) native physically based approximations
-   (MNEE, GN wavefront caustics) only when (a) cannot converge — state why and the bias;
-   (c) external tools only when nothing native works — tell the user. Fakes (light-path tricks,
-   projected patterns) only as a declared fallback. The point of the studies is renders that
-   hold up as physics, so a bias must always be named, never hidden.
-2a. **Renderer: Cycles by default, LuxCore for detailed caustics**. When
-   caustics or heavy refraction carry the shot — sun through patterned glass or glass block,
-   glass-on-water, multi-interface glass — render in LuxCore (BlendLuxCore, path tracing with
-   light tracing: GPU camera paths + CPU light paths). It is the one standing exception to
-   native-first: Cycles path tracing, path guiding and MNEE all fail on specular–diffuse–specular
-   paths from a sun-sized source, while LuxCore light tracing is unbiased and energy-correct there (caustics.md › Decision). Say it is
-   an external engine when you switch.
-3. **Research before anything new — from the physics down, not from tutorials up.** Order:
-   (a) the mechanism: optics/physics papers, measured data, the governing equations (why does wet
-   concrete darken? Lekner–Dorf: internal reflection in the water film, non-linear in albedo);
-   (b) how others implement it: manual/API, forums, papers' renderers, YouTube (`yt_learn.py`);
-   (c) map the model onto native nodes and say which terms are kept and which approximated.
-   Compare 2–4 workflows, choose by 1–2, cite sources, then build and prove. Read a source's own
-   pictures and video frames at full resolution, not a summary of its text: the method is often
-   only in the images, and a near-copy built from the summary misses it. More and more
-   requests will be things few people have done in Blender or archviz: a
-   tutorial can only copy a look, the science lets you build a new method and know its limits.
-   Videos are evidence, not authority.
-3a. **Research gate** (both modes). After gathering sources and before analysing them, stop and
-   show the user: the question, a source list (one line each: what it is, link or path, what it
-   should answer) and the gaps still open. Wait — the user often adds links; read them like any
-   other source (RULES 3). Then analyse, compare workflows and choose. A quick lookup during a
-   build (one API detail, one trap) needs no gate. One of four stops in a study: research (3a),
-   model (10a), materials (8e), final preview (10b).
+When: GOV_01 — recording reusable knowledge.
+Rule: Keep scene-independent methods, constants, traps and taste; scene results belong in study notes.
+Read: references/maintaining.md (before publishing knowledge).
 
-## Split
-4. **Rhino = geometry only.** Materials, lights, camera look and render settings live in Blender
-   (one place to edit the look; Rhino materials don't translate). Layer/block/object names are the
-   hooks; discard .3dm materials. Rhino files are read-only; re-meshing imported meshes is fine.
+When: GOV_02 — working with skill and project files.
+Rule: Publish only generic skill code and method; keep project data local and unnamed here.
+Read: references/maintaining.md (before editing the skill).
 
-## Look
-5. **Real units everywhere.** Daylight: calibrated HDRI in lux, nothing else (8a). Artificial: lumens at
-   683 lm/W — the same constant the camera uses, so a real ISO/f/shutter gives the right exposure
-   without eyeballing. A specified fixture uses the manufacturer's photometric file (IES; LDT
-   converted) at its catalogue output — never a power set by eye (lighting-camera › IES).
-   Model each fixture once (a visible lens *and* an analytic light both lighting
-   double the flux). White balance is a camera setting. Parallel verticals.
-6. Wire every map that applies; real-world UVs; physically plausible albedo/IOR (materials.md) —
-   wrong scale or albedo reads as "CG" faster than any lighting error.
-7. Profile the Render Reference Library slice before a look decision — a tagged image library in a
-   per-machine folder (usually `%USERPROFILE%\PROJECT\Render Reference Library`; ask if it isn't
-   there). Grep its `library.jsonl` to a shortlist of
-   5-10 paths and open only those, never browse. Its `CLAUDE.md` is the facet schema.
-   Recreating a reference: solve its camera first, then balance lights region by region;
-   global exposure is the last knob because it hides which light is wrong.
-8. **Edge wear = dirty edge (shading). Edge chip = geometry.** The user's definitions; keep
-   separate. **Size every feature from the shot, never from a remembered value** — chips, grain,
-   joints, ripples and grunge all read by how many pixels they occupy, so the same material wants
-   different numbers on a close-up and on a wall 4 m away. Judge the first render and scale.
-   A feature smaller than a pixel reads only as its aggregate (a wet lawn's sheen, not its
-   drops): model that, and ask before building micro-geometry. **Keep the final view in sight:**
-   size a detail feature in the final camera first, and pair every close-up shown to the user
-   with a native-resolution crop of the final view — a feature tuned in a macro view can vanish
-   in the shot.
+When: GOV_03 — synchronizing this skill.
+Rule: Pull before editing, use the per-clone identity, and leave outstanding receiving-machine actions with pushes.
+Read: references/maintaining.md (before synchronizing).
 
-8a. **Natural light = matching HDRI sky first**. Whenever sun, sky or any
-   daylight is in the scene, light it with an HDRI whose sky matches the reference (overcast vs
-   clear, sun height and direction, horizon content) before any Sky Texture, sun-only rig or
-   fake. Search Poly Haven by tag/thumbnail for the match; fall back to Sky Texture only when no
-   HDRI fits, and say so. **The HDRI is the sole natural light source**:
-   never a sun lamp alongside it — not "matched", not to boost a weak sun, not after painting the
-   disc out. The HDRI's sun direction (`hdri_analyse`) only guides rotating and placing the map.
-   If its sun is too weak or in the wrong place for the shot, choose another HDRI.
-8b. **Detail pass at native resolution**. Region means match long
-    before the image does. Once they agree, crop each material/effect at full resolution beside
-    the same crop of the reference and judge its *character*: feature size, edge sharpness,
-    contrast, density, orientation, distribution — a feature can match in mean and still read
-    wrong in character. Repeat after every change to that feature; half-res pairs hide it.
-8c. **Nature is patchy, never continuous or uniform**. Wetness, stains,
-    wear, dirt, splashes: large here, small there, absent elsewhere. A constant-width band or a
-    contour ring reads as impossible. Drive extent with a slow noise that can reach zero, and
-    give marks a physical shape (dried splash = blob darker at its rim, not a line).
-8d. **Repetition and imperfection**. Every surface of repeated units or tiled maps (glass block,
-    brick, stone, tile, curtain wall, mortar) gets randomness: no visible texture repeat, variation
-    per unit (tint, roughness, pattern, small tilt), and concave joints get dust, darkest in the
-    corner and fading outward. Plan it into the first material pass; perfectly regular units and
-    razor-clean corners read as CG. How: materials.md › Randomness, edge-wear.md › Concave corners.
-8e. **Material gate** (both modes). After the first build (camera and light set, first-pass
-    materials on every layer) and before any look round, stop and show the user: a material
-    schedule (per layer: material, source — Poly Haven asset, procedural or own file — real size
-    and direction, target albedo and roughness, the reference it matches), a first-pass render at
-    the final camera, native crops of each material beside the reference (8b), and 2–3 candidates
-    side by side for any material in doubt. Wait for approval; the look rounds only tune approved
-    materials, and a material swap after approval comes back to this gate.
-## Process
-9. **A control render is the only proof.** Feature OFF + same scene twice (noise floor; same seed
-   for the feature diff); read *changed > 2 %*, several times the noise floor, and look at a
-   diff/crop; verify the control really
-   removed the feature. Whole-frame averages hide local effects, and a broken control looks like
-   "no effect".
-10. Measure on the PNG the renderer wrote (`imgstats.py`, `refmatch.py`) — AgX rolls off whites,
-    so linear values mislead. Process frames → study `_wip/`.
-10a. **Rhino → Blender gate**. After the Rhino model is finished, stop and
-    show the user (viewport captures + a list of what was modelled and left out); pipe to
-    Blender only after the user approves the geometry. Rework in Rhino is cheap, a look-dev
-    round on wrong geometry is not.
-10b. **Final render gate**. (1) Render a preview, show it, state the final's
-    resolution, time budget and expected noise, and **wait for approval** — the user reviews the
-    preview first; a material or light change after approval means a new preview. (2) Run the
-    final **in the open Blender UI** so the user watches it live; headless renders are for tests,
-    controls and previews. (3) Set **no time or sample limit** on the final: it renders until the
-    user stops it, and saving/denoising run on stop. A halt time is fixed when the session starts
-    and a finished render cannot be resumed, so a limit can only cut the user's choice short.
-    (4) Before any long or unattended final, render a short **full-frame** test with exactly the
-    final's settings (raw and denoised) and look at every surface, not only the one under
-    discussion. Bring known risks and their tested fixes to the user *before* launch; a fix is
-    not withheld because it is not yet approved. Look at the saved result before calling it done
-    or sending it anywhere.
-10c. **Each study owns its assets**. HDRIs, textures, edited HDRIs, generated
-    maps and their `meta.json` live in the study's own `library/`, downloaded again even when
-    another study has the same file, so a study moves, archives or hands over self-contained.
-10d. **Everything a study makes stays in its folder**: crops, comparisons, test renders,
-    measurements, downloads and throwaway scripts go in the study's `_wip/`, never the session
-    scratchpad or %TEMP% — tell subagents the path too. One place holds all a study produced.
-    Software is not study output: Blender extensions and add-ons install into Blender's own
-    extension folder through the installer, and the downloaded zip is deleted afterwards.
-10e. **Closing a study cleans it.** When the user calls a study finished, list its milestone
-    scenes (every final plus real turning points) under `## Milestones` in STUDY_NOTES.md, then run
-    `scripts/study_close.py <study>` (plan) and `--apply`: it makes the milestones self-contained
-    (copies outside or `_wip` files they use into `library/local/`), deletes `_wip/`, other .blend
-    files, backups, library files no milestone uses and vendor/cache folders, and verifies every
-    milestone reference still resolves. Finals, notes, scripts and .3dm stay. No asking per file.
-11. Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real
-    one — a small scene isolates the cause in minutes where the full scene hides it.
+When: GOV_04 — extending code or documents.
+Rule: Keep one module per job and one authority per helper; use focused functions and topic references.
+Read: references/maintaining.md (before extending helpers).
+
+## Renderer
+
+When: REN_01 — choosing an implementation.
+Rule: Prefer editable Blender-native methods; declare external fallbacks, subject to REN_03.
+Read: references/caustics.md (before choosing a method).
+
+When: REN_02 — choosing a transport method.
+Rule: Prefer unbiased transport, then native physical approximations, then external tools; disclose every bias or fake.
+Read: references/caustics.md (before choosing transport).
+
+When: REN_03 — detailed caustics or heavy refraction carries the shot.
+Rule: Use LuxCore PATH with light tracing; otherwise default to Cycles and disclose the external engine.
+Read: references/luxcore.md (before selecting the renderer).
+
+## Research
+
+When: RES_01 — building a new technique.
+Rule: Research physics and full-resolution source evidence, compare workflows, cite and prove the chosen method.
+Read: references/research-loop.md (before building).
+
+When: RES_02 — sources are gathered for a new technique.
+Rule: Show the question, sources and gaps; wait for user links before analysis; quick API lookups are exempt.
+Read: references/work-modes.md (before analysing research).
+
+When: RES_03 — making a look decision or recreating a reference.
+Rule: Shortlist the reference library; solve the reference camera first and adjust exposure last.
+Read: references/reference-library.md (before look decisions).
+
+## Pipeline
+
+When: PIP_01 — transferring Rhino geometry.
+Rule: Keep source Rhino documents read-only; author materials, lighting, camera look and rendering in Blender.
+Read: references/pipeline.md (before importing).
+
+## Lighting and camera
+
+When: LGT_01 — setting lights or camera.
+Rule: Use photometric units and physical camera exposure; count each emitter once, white-balance and keep verticals parallel.
+Read: references/lighting-camera.md (before lighting).
+
+When: LGT_02 — lighting daylight.
+Rule: Use a matching HDRI as the sole natural source; declare Sky Texture fallback only if none fits.
+Read: references/lighting-camera.md (before setting daylight).
+
+## Materials
+
+When: MAT_01 — authoring surface materials.
+Rule: Use all applicable maps, real-scale directional UVs and physically plausible surface ranges.
+Read: references/materials/physical-ranges.md (before authoring materials).
+
+When: MAT_02 — authoring edge damage.
+Rule: Keep dirty-edge shading distinct from geometric chips.
+Read: references/materials/edge-wear.md (before authoring wear).
+
+When: MAT_03 — sizing visible detail.
+Rule: Size from the final shot; pair every close-up with a native final-view crop.
+Read: references/materials/scale.md (before tuning detail).
+
+When: MAT_04 — features are sub-pixel.
+Rule: Model their aggregate appearance and ask before building micro-geometry.
+Read: references/materials/scale.md (before building detail).
+
+When: MAT_05 — authoring natural surface marks.
+Rule: Make marks patchy, able to disappear, with physically shaped extents.
+Read: references/materials/variation.md (before authoring marks).
+
+When: MAT_06 — using repeated units or tiled maps.
+Rule: Add per-unit variation, hide repeats and fade concave-joint dust outward from corners in the first pass.
+Read: references/materials/variation.md (before building repeated surfaces).
+
+## Validation
+
+When: VAL_01 — judging material or effect character.
+Rule: Compare native-resolution crops beside the reference and repeat after changing that feature.
+Read: references/validation.md (before declaring a match).
+
+When: VAL_02 — claiming a feature works.
+Rule: Prove it with feature-off and repeated-baseline renders, noise-floor measurements and inspected diffs.
+Read: references/validation.md (before claiming proof).
+
+When: VAL_03 — measuring the rendered look.
+Rule: Measure renderer-written display PNGs; use linear energy data only for physical calibration controls.
+Read: references/validation.md (before measuring).
+
+When: VAL_04 — diagnosing odd behaviour.
+Rule: Bisect in a minimal control scene before tuning the full scene.
+Read: references/validation.md (before debugging).
+
+## Approval gates
+
+When: GAT_01 — a Rhino study model is ready.
+Rule: Show captures and modelled/omitted items; wait for geometry approval before import.
+Read: references/pipeline.md (before importing the model).
+
+When: GAT_02 — the first full material build is ready.
+Rule: Show schedule, final-camera render, native reference crops and uncertain candidates; wait for approval and re-gate swaps.
+Read: references/work-modes.md (before look rounds).
+
+When: GAT_03 — launching a final.
+Rule: Wait for preview approval; test the full frame, render unlimited in the open UI until stopped, then inspect the saved result.
+Read: references/pipeline.md (before launching finals).
+
+## Assets and lifecycle
+
+When: AST_01 — producing study output.
+Rule: Keep every output in its study folder and process artifacts in its _wip; tell other agents the path.
+Read: references/pipeline.md (before producing output).
+
+When: AST_02 — the user declares a study finished.
+Rule: List milestones, plan then apply checked cleanup, localize dependencies and verify preserved milestone references.
+Read: references/study-lifecycle.md (before closing a study).
+
+When: AST_03 — acquiring study assets.
+Rule: Keep every asset and metadata in that study’s own library for a self-contained handoff.
+Read: references/pipeline.md (before acquiring assets).
+
+When: AST_04 — installing Blender extensions or add-ons.
+Rule: Use Blender’s extension installer and software folders; delete downloaded installer zips afterward.
+Read: references/pipeline.md (before installing software).
 
 ## Agents
-14. **Cross-check all code with the other model.** Code Claude writes is reviewed by Codex
-    (`scripts/codex_review.py`); code Codex writes is reviewed by a fresh Claude subagent that
-    sees only the task and the diff (maintaining.md › Review). A new technique also gets its
-    control render (RULES 9). The writer weighs each finding, fixes what holds, and tells the
-    user what it rejected and why. With only one model available, the review runs in a fresh
-    session of that model, and the user is told the cross-check was same-model.
-15. **Claude steers, Codex minds the details** (a guide, not a fence). Claude takes the big
-    decisions: method and research conclusions, proof renders, look judgement, the shape of the
-    skill. Codex suits detail work: scripts from a short brief, gathering sources into a brief,
-    measurement runs (numbers table + one contact sheet), past workflows. Long output goes to a
-    file with a short summary back. Skill changes reach the repo through Claude as a diff it
-    commits. Reference-image analysis and Rhino modelling stay with Claude (CPM: Rhino goes to Codex, 15a). Either model may
-    take over alone when the other is out of tokens (stop it at a clean point, not mid-edit);
-    this skill and the project files are the whole handover (`references/research-loop.md`), so nothing lives only in one
-    agent's memory.
-15a. **Two work modes; the user names the mode, normal is the default.** Stage-by-stage split,
-    handoff documents and what Claude reads: `references/work-modes.md`.
-    - **Normal mode:** Claude plans, does the detailed research (papers, manual, forums, YouTube),
-      models in Rhino, judges the look and decides; Codex builds from briefs, runs, measures and
-      reviews Claude's code (RULES 14).
-    - **Codex priority mode (CPM)** (Claude's budget is low): Claude takes the user's seat as
-      director — the big decisions, direction, taste, short briefs, and the user gates (3a, 10a, 8e, 10b).
-      Codex does every hands-on task: coding and test runs, Rhino modelling through Rook, research
-      written as notes in the study's `_wip/research/` (RULES 3), measurements, crops and sheets.
-      - One **Codex builder** (holds the machine-wide `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK`,
-        RULES 16) and at most one **parallel Codex reviewer** (fresh, read-only) per stage; never
-        two builders. The builder weighs the findings as in RULES 14.
-      - This replaces the other-model review for the duration; the user is told it was same-model.
-    - In both modes, while both models work, Claude talks to the user, brings the gates (3a, 10a, 8e, 10b)
-      and commits skill changes; a model working alone does all of that itself (RULES 15).
-    - The mode lasts until the user switches back, or the round ends. Back in normal mode with
-      Claude's tokens refilled, the code made during CPM gets its Claude review.
-15b. **Train Codex towards Claude's judgement.** The goal is for Codex to make the same render calls
-    Claude would.
-    - Every Codex stage report ends with Codex's own self-judgement against the reference and the
-      design intent.
-    - Claude compares it with its own verdict and writes each gap as a checkable lesson:
-      - working and judging habits go in `references/codex-coaching.md`;
-      - craft goes in the topic reference.
-    - A kind of decision moves to Codex once its self-judgement keeps matching Claude's.
-    - **Normal mode by default.** Training costs extra tokens on both sides, so CPM (15a) skips the
-      self-judgement and the lesson writing unless the user asks for training in CPM.
-16. **One agent at a time on Blender and on a file.** There is one Blender and one MCP port per
-    machine, shared by every project. Before driving Blender or editing a study's files, check
-    `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` (machine-wide, beside the MCP server): absent →
-    create it (`<agent> | <what: Blender, study or files> | <start, ISO time>`), work, delete it
-    when done; present and not yours → stop and tell the user, never take it over. A
-    render left running keeps the lock until it ends. A lock taken by a Codex builder that you
-    directed and stopped is yours: once its process is gone, delete it and tell the user.
 
-17. **Modular code and docs, no god scripts.** Either model must be able to pick up any file
-    cold. One module per job, functions that do one thing with real-unit arguments and a
-    one-line docstring, no hidden global state; extend by adding a function or module, not by
-    growing one file. A module that gathers unrelated jobs, or that cannot be changed without
-    reading all of it, gets split. Docs the same: one topic per reference, short sections,
-    pointers instead of repeats.
+When: AGT_01 — code is authored.
+Rule: Get a fresh review, weigh findings and disclose rejected findings; disclose same-model review when applicable.
+Read: references/maintaining.md (before accepting code).
+
+When: AGT_02 — dividing work or handing over.
+Rule: Follow the user-selected mode, default normal; keep one builder and the documented handoff and review roles.
+Read: references/work-modes.md (before dividing work).
+
+When: AGT_03 — reporting a Codex stage.
+Rule: Train judgement in normal mode; in CPM perform training only when the user opts in.
+Read: references/codex-coaching.md (before reporting).
+
+When: AGT_04 — driving Blender or editing study files.
+Rule: Hold the exclusive machine/file lock; stop and tell the user if another owner holds it; never clear a live or unknown lock.
+Read: references/agent-lock.md (before driving Blender).
 
 ## Safety
-12. MCP code runs unguarded in the user's Blender: save first, rebuild-from-script study files,
-    never delete user data blocks without asking.
-13. Know the GPU's VRAM before committing to a heavy scene; adaptive subdivision over large
-    diced surfaces is the usual way to exhaust it (render-settings.md › Memory).
+
+When: SAF_01 — operating the user’s Blender.
+Rule: Preserve user datablocks; save first when explicitly authorized, otherwise stop before destructive scene operations; rebuild only owned study files.
+Read: references/pipeline.md (before scene operations).
+
+When: SAF_02 — planning a heavy scene.
+Rule: Check GPU VRAM before allocating heavy geometry, dicing or textures.
+Read: references/render-settings.md (before building a heavy scene).

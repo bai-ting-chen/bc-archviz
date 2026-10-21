@@ -2,10 +2,10 @@
 
     import terrain
     topo = terrain.landform_group(centre=(25, 25), pad_half=(3.5, 4), fall=6, run=40)
-    ter = terrain.add_terrain(topo, terrain.ground_material("grass_ground", "forest_ground_05"))
+    ter = terrain.add_terrain(topo, materials.ground.ground_material("grass_ground", "forest_ground_05"))
     terrain.height(x, y, centre=..., pad_half=..., fall=..., run=...)   # no-noise twin (camera placing)
 
-Landform grading (materials.md › Terrain): a flat pad just under the slab, an apron, then a fall
+Landform grading (references/materials/README.md › Terrain): a flat pad just under the slab, an apron, then a fall
 of `fall` m over `run` m as a smoothstep in the noise-warped distance from the pad - a rounded
 crest *and* a rounded toe, contours that wander instead of a cone - plus a broad roll beyond and
 pasture hummocks. Steepest slope = 1.5 * fall / run (keep < 0.25 = 4:1 for a gentle, mowable
@@ -15,7 +15,8 @@ import math
 
 import bpy
 
-from study_materials import G, sock
+from materials.nodes import G
+from materials.nodes import sock
 
 BARE_W = 11.0                   # 4D-noise W shared by the meadow's bare-soil mask and the ground shader
 BARE = (0.35, 0.62, 0.69)       # that noise: scale (1/m), full sward below, bare soil above
@@ -111,46 +112,9 @@ def height(x, y, centre, pad_half, pad_z=-0.03, crest=1.5, fall=6.0, run=40.0):
 
 def add_terrain(group, material, name="TERRAIN", collection=None):
     """An empty mesh object carrying the landform modifier (the GN group makes the geometry)."""
-    from wear import set_input
+    from materials.edge_wear import set_input
     ob = bpy.data.objects.new(name, bpy.data.meshes.new(name))
     (collection or bpy.context.scene.collection).objects.link(ob)
     mod = ob.modifiers.new("LANDFORM", "NODES"); mod.node_group = group
     set_input(mod, "Material", material)
     return ob
-
-
-def ground_material(thatch_tex, soil_tex, name="GROUND", bare=BARE, wet_gamma=None, wet_rough=0.6):
-    """Ground under a meadow: a dead-grass/thatch texture, soil only where the bare-soil noise
-    (same 4D noise and W as scatter.meadow_layer_group) opens the sward. wet_gamma (e.g. 1.4):
-    wet ground = dry^gamma (darker, more saturated) and roughness x wet_rough."""
-    from study_materials import _ph_maps
-    mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    g = G(mat)
-    out = g.n("ShaderNodeOutputMaterial", (1300, 0))
-    bsdf = g.n("ShaderNodeBsdfPrincipled", (1000, 0)); g.link(bsdf.outputs[0], out.inputs[0])
-    geo = g.n("ShaderNodeNewGeometry", (-1200, 0))
-    bn = _noise4(g, geo.outputs["Position"], bare[0], BARE_W, (-900, 600), 4.0, 0.5)
-    bm = g.range(bn, bare[1], bare[2], (-700, 600), smooth=True, label="bare soil")
-    sets = []
-    for i, tex in enumerate((thatch_tex, soil_tex)):
-        maps, meta = _ph_maps(tex)
-        mp = g.n("ShaderNodeMapping", (-900, -400 * i))
-        mp.inputs["Scale"].default_value = (1000 / meta["dimensions_mm"][0],) * 3
-        g.link(geo.outputs["Position"], mp.inputs["Vector"])
-        d = g.img(maps["diff"], "sRGB", (-600, -400 * i), None, mp.outputs[0])
-        a = g.img(maps["arm"], "Non-Color", (-600, -400 * i - 200), None, mp.outputs[0])
-        for n in (d, a):
-            n.projection, n.projection_blend = "BOX", 0.2   # world-space box mapping, no UVs
-        sep = g.n("ShaderNodeSeparateColor", (-300, -400 * i - 200)); g.link(a.outputs["Color"], sep.inputs[0])
-        sets.append((d.outputs["Color"], sep.outputs["Green"]))
-    mc = g.n("ShaderNodeMix", (300, 200), data_type="RGBA")
-    g.link(bm, mc.inputs["Factor"]); g.link(sets[0][0], sock(mc.inputs, "A")); g.link(sets[1][0], sock(mc.inputs, "B"))
-    mr = g.n("ShaderNodeMix", (300, -100), data_type="FLOAT")
-    g.link(bm, mr.inputs["Factor"]); g.link(sets[0][1], sock(mr.inputs, "A")); g.link(sets[1][1], sock(mr.inputs, "B"))
-    col, rough = sock(mc.outputs, "Result"), sock(mr.outputs, "Result")
-    if wet_gamma:
-        gm = g.n("ShaderNodeGamma", (600, 200)); gm.inputs["Gamma"].default_value = wet_gamma
-        g.link(col, gm.inputs["Color"]); col = gm.outputs[0]
-        rough = g.math("MULTIPLY", rough, wet_rough, (600, -100))
-    g.link(col, bsdf.inputs["Base Color"]); g.link(rough, bsdf.inputs["Roughness"])
-    return mat

@@ -2,11 +2,11 @@
 per-instance tone and dryness, optional wet film and near-camera dew (run in Blender).
 
     import vegetation
-    vegetation.blade_material("GRASS_LEAF", tex=path)                         # dry
-    vegetation.blade_material("GRASS_LEAF", tex=path, wet=vegetation.WET, dew=vegetation.DEW_GRASS)
-    vegetation.blade_material("CLOVER_LEAF", tex=path, wet=..., dew=vegetation.DEW_BROAD)
+    materials.vegetation.blade_material("GRASS_LEAF", tex=path)                         # dry
+    materials.vegetation.blade_material("GRASS_LEAF", tex=path, wet=materials.vegetation.WET, dew=materials.vegetation.DEW_GRASS)
+    materials.vegetation.blade_material("CLOVER_LEAF", tex=path, wet=..., dew=materials.vegetation.DEW_BROAD)
 
-Physics (materials.md > Grass and meadow):
+Physics (references/materials/vegetation.md):
 - A green leaf reflects ~0.10-0.15 and transmits ~0.05-0.10 at 550 nm (Billings & Morris 1951;
   FIFE SE-590 grass leaves): Principled reflection + Translucent transmission added.
 - Wet film: base pulled to dry^gamma (internal reflection in the water film, Lekner-Dorf),
@@ -21,7 +21,8 @@ Physics (materials.md > Grass and meadow):
 """
 import bpy
 
-from study_materials import G, sock
+from .nodes import G
+from .nodes import sock
 
 BLADE = dict(rough=0.45, ior=1.45, trans_gain=0.8)        # waxy cuticle; T a little under R
 WET = dict(gamma=1.7, coat=0.9, coat_rough=0.08, range=(0.75, 1.0), patch_scale=0.15)
@@ -50,7 +51,7 @@ def _dew(g, shader, D):
     """Effective-reflectance dew beads mixed over `shader`: Voronoi beads in the object's own
     space (they stay on their blade), hemispherical lens normal, up-facing surfaces, near camera."""
     tc = g.n("ShaderNodeTexCoord", (-900, -1100))
-    oi = g.n("ShaderNodeObjectInfo", (-1100, -1250))                 # per-instance offset (RULES 8d)
+    oi = g.n("ShaderNodeObjectInfo", (-1100, -1250))                 # per-instance offset (RULES MAT_06)
     off = g.n("ShaderNodeVectorMath", (-850, -1250), operation="MULTIPLY_ADD")
     g.link(oi.outputs["Random"], off.inputs[0]); off.inputs[1].default_value = (97.0, 61.0, 43.0)
     g.link(tc.outputs["Object"], off.inputs[2])
@@ -91,7 +92,7 @@ def blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dew=None
     else:
         rgb = g.n("ShaderNodeRGB", (-900, 200)); rgb.outputs[0].default_value = (*colour, 1.0)
         col = rgb.outputs[0]
-    # per-instance variation (RULES 8d) and dryness patches across the field (8c)
+    # per-instance variation (RULES MAT_06) and dryness patches across the field (MAT_05)
     oi = g.n("ShaderNodeObjectInfo", (-900, -200))
     val = g.range(oi.outputs["Random"], 0.0, 1.0, (-650, -100), 0.8, 1.15)
     nz = g.n("ShaderNodeTexNoise", (-650, -350)); nz.inputs["Scale"].default_value = 0.08; nz.inputs["Detail"].default_value = 3.0

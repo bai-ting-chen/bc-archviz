@@ -10,13 +10,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `library(*parts)` — Path inside the project's library/, e.g. library("polyhaven", "hdris", hdri_id).
 - `read_meta(folder)` — An asset folder's meta.json (Poly Haven fetch or a local/ asset).
 - `write_meta(folder, meta)` — Write an asset folder's meta.json (pair of read_meta).
-- `sock(sockets, name)` — Active socket by name (Mix nodes keep hidden same-named sockets per data type).
 - `use_gpu(force=False)` — Cycles on the GPU. --factory-startup leaves no compute device, so scene "GPU" would silently render on the CPU: pick OptiX then (always, with force=True).
-- `pbr_material(tex_id, name=None, scale=1.0, tint=None)` — Material from a Poly Haven texture folder, box-mapped in world space at real-world size.
-- `dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None)` — The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled, transmission 1. `tint` multiplies every crossing, so keep it within a few % of white.
-- `glass_material(name='Glass_Clear', tint=(0.92, 0.96, 0.97), roughness=0.0)` — Clear glass (IOR 1.52); the default tint is slightly green, for thick panes. An existing material is edited in place (nodes the user added stay); a new one is built by dielectric.
-- `simple_material(name, color, roughness=0.5, metallic=0.0)` — Principled with a flat colour, roughness and metallic -- placeholders and controls.
-- `material_from_spec(spec)` — spec: "ph:<tex_id>" | "glass" | {"type": "ph"|"glass"|"simple", ...kwargs}.
 - `world_hdri(hdri_id, strength=1.0, rotation_deg=0.0, res=None)` — World = equirect HDRI from library/polyhaven/hdris/<id>, Z-rotated; strength is raw (use world_hdri_lux for lux).
 - `import_rhino(path, collection_name=None)` — Import a .3dm as geometry only. Layers -> nested collections, blocks -> instances, named views -> cameras. Any material that rides along is discarded.
 - `apply_material_map(root, mapping)` — mapping: {collection_name: material spec}. Each mesh gets the material of the nearest collection (its layer, a parent layer, or its block definition) that has an entry.
@@ -32,7 +26,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `ev100(iso, fstop, shutter_s)` — EV100 of a camera triple: log2(N^2/t) - log2(ISO/100).
 - `physical_camera(cam_obj, iso, fstop, shutter_s, focal_mm, sensor_mm=36.0, focus_distance=None, dof=True)` — Real camera triple -> Blender. Exposure follows the saturation-based sensor model (pixel = L / (1.2 * 2^EV100), L in cd/m2): stops = log2(683 / 1.2) - EV100. The same f-stop drives depth of field, so brightness and DOF stay in sync.
 - `straighten_verticals(cam_obj)` — Architectural shift lens: level the camera (pitch 90 deg) and recover the framing with vertical lens shift, so verticals stay parallel.
-- `sun_from_direction(direction, strength_lux, angle_deg=0.53, name='Sun_matched')` — Sun lamp pointing along -direction (direction = towards the sun). Strength in lux. Only for scenes WITHOUT an HDRI (tests, controls): with an HDRI sky the map is the sole natural light and its own sun does this job (RULES 8a).
+- `sun_from_direction(direction, strength_lux, angle_deg=0.53, name='Sun_matched')` — Sun lamp pointing along -direction (direction = towards the sun). Strength in lux. Only for scenes WITHOUT an HDRI (tests, controls): with an HDRI sky the map is the sole natural light and its own sun does this job (RULES LGT_02).
 
 ## `atmosphere` — Volumetric fog / mist (run in Blender). lighting-camera.md > Fog and mist.
 
@@ -53,9 +47,9 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `export_geometry(path, surfaces=SURFACES, axis=(0.0, 0.0), grid=None)` — `surfaces` {object: eta}; `grid` overrides GRID (receiver plane x0, y0, size, res, z) and is stored with the geometry so the tracer, bake and material all use the same one.
 - `trace(geom_path, n, seed, source, max_bounce=40)` — Trace n photons from `source` through the exported glass and histogram where they land (background Blender).
 - `bake_irradiance(npy_paths, exr_path, sigma_cells=1.0)` — Merge photon grids, smooth by sigma_cells, write the irradiance EXR (W/m2).
-- `add_caustic_light(mat, exr_path, scale=1.0, albedo_label='Pine + satin varnish coat')` — Adds Emission = albedo * E / pi on up-facing faces, E sampled at world XY from the map. `albedo_label`: label of the receiver's BSDF whose Base Color input carries the albedo (the default is study_materials.coated_wood's).
+- `add_caustic_light(mat, exr_path, scale=1.0, albedo_label='Pine + satin varnish coat')` — Adds Emission = albedo * E / pi on up-facing faces, E sampled at world XY from the map. `albedo_label`: label of the receiver's BSDF whose Base Color input carries the albedo (the default is materials.wood.coated_wood's).
 
-## `finals` — Cycles finals in the open UI with no sample/time limit (RULES 10b), and post-processing from the saved passes. LuxCore finals: from_passes.py. pipeline.md > Final render in the open UI.
+## `finals` — Cycles finals in the open UI with no sample/time limit (RULES GAT_03), and post-processing from the saved passes. LuxCore finals: from_passes.py. pipeline.md > Final render in the open UI.
 
 - `setup_unlimited(res, samples=1000000, denoiser='OPENIMAGEDENOISE')` — Final settings: full res, untiled (tile > frame), no adaptive/time limit, denoiser + its passes stored, multilayer EXR.
 - `remove_handlers()` — Unregister the final's save handlers (do this before cancelling a final you do not want saved).
@@ -64,11 +58,14 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `denoise_from_passes(src, out, layer='ViewLayer')` — OIDN (compositor Denoise, accurate prefilter, HDR) on a passes EXR's Noisy Image + albedo + normal -> linear EXR.
 - `png_from_exr(exr, base)` — 16-bit PNG graded with the open scene's view transform, look, exposure and white balance.
 
+## `from_passes`
+
+- `main()` — Run the command against the supplied files; never save a scene.
+
 ## `glassware` — Glass of water built for correct refraction in Cycles (no nested-IOR priority there).
 
 - `tumbler_profiles(z0=0.73, r_out_b=0.035, r_out_t=0.05, r_in_b=0.03345, r_in_t=0.047, base=0.015, height=0.155, rim_r=0.0015, foot_fillet=0.002, floor_fillet=0.006, water_h=0.095, meniscus=0.002, cap_len=0.0027)` — (r, z) polylines. Returns glass, interface, water-top profiles (each ordered so that the lathed normals face the 'front' medium after `lathe`'s orientation fix).
 - `lathe(name, profile, centre, segments=256, normal_hint=None)` — Revolve an (r, z) polyline about the Z axis through `centre`. Points with r == 0 become a single pole vertex. `normal_hint(p)` -> desired normal direction at point p (to orient).
-- `dielectric(name, ior, tint=(1, 1, 1))` — Kept for existing scripts: archviz.dielectric.
 - `glass_of_water(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256, lift=0.0001)` — Build the three surfaces; returns dict of objects and profile info.
 - `glass_of_water_mnee(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256, lift=0.0001, gap=5e-05)` — Native-caustics build: every refractive surface is an MNEE caster and no sun path crosses more than 4 interfaces (Cycles MNEE limit). Below the waterline the thin wall is merged into the water (a 3 mm parallel wall barely deviates rays: air->glass->water ~= air->water). WATER_BODY IOR 1.333: meniscus top, annulus under the wall, OUTER wall to the base GLASS_SHELL IOR 1.52 : the tumbler wall above the waterline + rounded rim (closed ring) GLASS_BASE IOR 1.52 : the thick foot (closed) Visible to the camera AND casting caustics -- one view layer.
 
@@ -89,31 +86,135 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `lit_once(objs)` — Decorative lenses whose flux is carried by an analytic light: keep them visible to the camera and in reflections, but out of diffuse AND transmission paths -- a diffuse bounce that then passes through water continues as a transmission ray and would see the lens again.
 - `emitter(name, luminance_cd, kelvin=3000, color=None)` — Visible light source surface (LED lens, lit panel) with a luminance in cd/m2. Cycles emission strength S is radiance in W/m2/sr, so S = L / 683.
 - `emitter_dots(name, luminance_cd, n=4, radius=0.22, kelvin=3000, housing=(0.02, 0.02, 0.02))` — Multi-head downlight face: n round LED lenses along the object's long (generated X) axis, black housing around them. Generated coords span 0..1 over the box.
-- `polished_granite(name='GRANITE_POLISHED', grain_m=0.006, roughness=0.04, ior=1.55, base=((0.01, 0.008, 0.007), (0.026, 0.019, 0.015)), flecks=((0.62, (0.055, 0.037, 0.026)), (0.8, (0.13, 0.12, 0.11)), (0.91, (0.34, 0.28, 0.21))))` — Procedural speckled granite in 3-D world space (a solid texture: cut faces and edges agree). Crystals = Voronoi cells of ~grain_m, each coloured by its random value through a constant ramp (black mica / brown feldspar / grey quartz / cream feldspar); a coarse noise drifts the base. Polished = one smooth dielectric (no coat). No Bevel node: the pool lining is a caustic receiver -- round edges come from a geometric Bevel modifier instead.
-- `stone_tiles(name='LIMESTONE', tile=(1.2, 0.6), grout=0.002, albedo=(0.46, 0.41, 0.33), var=0.05, roughness=0.35, coat=0.0, coat_rough=0.08, uv='BoxUV')` — Large-format stone/porcelain on real-metre BoxUV: Brick Texture (offset 0) for the joints, per-tile tone from the brick colour pair, cloudy limestone mottling + fine specks, a soft coat for a honed-and-sealed floor. Grout darker and matte, joints slightly recessed (bump).
-- `polished_steel(name='STEEL_POLISHED', color=(0.67, 0.64, 0.6), edge=(0.8, 0.8, 0.8), roughness=0.05)` — Mirror-polished stainless (physicallybased.info 0.67/0.64/0.60 linear). Metallic BSDF with F82 tint -- the edge colour of the conductor Fresnel.
-- `pool_water(name='POOL_WATER', tint=(0.45, 0.85, 0.72), density=1.0, ripple_scale=2.0, ripple_m=0.0015, ior=1.333)` — Water as a closed volume: refractive surface (IOR 1.333) + Volume Absorption, so colour grows with path length (shallow steps stay clear, depth turns green). Absorption coefficient = density * (1 - tint) per metre. Gentle ripples as bump on the surface only.
-- `smooth_flat(obj, sharp_deg=30.0)` — Shade smooth but keep edges sharper than `sharp_deg` split: a box stays geometrically flat (top normals exactly vertical) while counting as 'smooth normals' -- required by MNEE casters.
-- `water_surface(obj, cell=0.1)` — Turn a closed water box into its top surface, diced to `cell` metres and smooth -- the build MNEE needs (control: scripts/controls/mnee_water.py): a one-quad flat caster delivers NO light, the same plane diced 40x40 does; a closed box adds a degenerate bottom interface. The volume still works: rays enter it crossing the surface downward and leave crossing it upward (opaque basin).
-- `steam(name='STEAM', density=0.6, z0=0.4, height=0.9, scale=3.0)` — Wisps over a hot tub: Principled Volume, density = noise ramp x fade with height above z0.
 
-## `lookdev` — Look-dev helpers distilled from reference-recreation studies (run inside Blender).
+## `materials.concrete` — Concrete material helpers; canonical implementations.
 
-- `map_mean(tex_id)` — Linear mean RGB of a Poly Haven diff map; measured once, then cached in meta.json.
-- `albedo_material(tex_id, name, target, scale=1.0)` — pbr_material whose base colour averages `target` (linear RGB).
+- `concrete_study(name='CONCRETE', tex_id='concrete_wall_009', color_mult=(0.76, 0.82, 0.99), normal_strength=0.6, bump_distance=0.004, round_edge=0.0025, chip_spread=0.05, chip_in=(0.4, 0.9), noise_scale=14.0, noise_band=(0.35, 0.6), edge_dark=True, stain=True, stain_mult=1.15, bevel_chips=True, stain_map=('local', 'leakage_tdlbbd1c', 'Leakage_tdlbbd1c_2K_Opacity.jpg'))` — Cast concrete: tone-matched diffuse, wired roughness/normal/height, round edges combined with the normal map, chipped-edge wear and a leak stain driving a worn BRDF.
+- `retone(mat, target_rgb, tex_id, saturation=0.25)` — Desaturate a concrete_study map toward its luminance, then scale its measured linear mean to `target_rgb` (a dark brown scan -> light grey concrete keeps its pits and pores).
 - `vertical_boards(mat, cylinder=None, strip_m=0.9, strip_tone=(0.9, 1.08), macro=(0.85, 1.1), flatten=0.4)` — Turn a board-formed map 90 deg (marks vertical) on an albedo_material.
-- `long_pavers(tex_id, name, target, row=0.18, length=0.75, mortar=0.008, long_axis='Y', scale=0.5, tone=((0.95, 0.95, 0.95), (0.72, 0.72, 0.71)), mortar_color=(0.22, 0.22, 0.22))` — Running-bond strips over a concrete map. `long_axis` = world axis of the strips' length (read it from the vanishing point the long joints run to). Mortar < 8 mm vanishes at frame scale; joints recessed by bump.
+
+## `materials.displacement` — Displacement material helpers; canonical implementations.
+
+- `enable_true_displacement(obj, pixel_size=1.0)` — Adaptive (camera-dicing) subdivision, the view-dependent edge_length in pixels.
+
+## `materials.edge_wear` — Procedural edge wear (dirty edges, shading only) and edge chips (real geometry).
+
+- `dice(obj, size=0.05)` — Subdivide in place by repeated halving of over-long edges (grid fill keeps quads).
+- `edge_wear_group(name='Edge Wear + Chips', band=0.08, level=3, chip_reach=0.045, chip_depth=0.018, chipped_share=0.55, sharp_deg=30.0, chips=True, bite_scale=22.0, segment_scale=2.2, seed=(0.0, 0.0, 0.0))` — Geometry Nodes modifier: edge field for every point, real chips in the arris band. Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern.
+- `set_input(mod, name, value)` — Blender 5.2: a Geometry Nodes modifier's own input values live at mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the identifier through the group interface. Group defaults are only copied in at creation.
+- `add_edge_wear(obj, group, **inputs)` — Add the modifier; per-object overrides by input name, e.g. add_edge_wear(o, g, Band=0.1).
+- `weathered_concrete(name='CONCRETE_WEATHERED', dirt_band=0.035, dirt_amount=0.85, dirt_noise_scale=9.0, stain=True, tex_id='concrete_wall_009')` — concrete_study base (tone, maps, round edges, leak stain) + procedural dirty edges from the GN `edge_dist` field + a fresh-break material where GN cut a chip (`chip` > 0).
+- `mask_material(name, method, radius=0.035)` — Emission view of one edge-detection method, for side-by-side comparison.
+- `leak_field_group(name='LEAK FIELD', inset=0.02, reach=6.0)` — GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`. Reused if it exists (other objects' modifiers point at it).
+- `add_leak_field(obj)` — Add LEAK FIELD as the FIRST modifier: run after chips, rays slip through the chip-band seam and a wrong leak_d spreads over whole coarse triangles (light triangles under an arris).
+- `add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0)` — On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask.
+- `add_cracks(mat, openings=(), crack=None)` — On a weathered_concrete material: shrinkage cracks from opening corners + patchy map-cracking; dark core over everything, grime halo, groove. openings: (axis 'x'|'y', plane, u0, u1, v0, v1, top_only[, keep_angles]).
+
+## `materials.fabric` — Fabric material helpers; canonical implementations.
+
 - `sheer(name='CURTAIN_SHEER', color=(0.8, 0.78, 0.75), translucency=0.5)` — Sheer curtain: Mix(Diffuse, Translucent) — a lit room behind glows through it.
+
+## `materials.glass` — Glass material helpers; canonical implementations.
+
+- `clear_glass(name='GLASS', ior=1.52)` — Soda-lime glass via materials.pbr.dielectric (white, IOR 1.52 by default).
 - `glass_shell(objs, thickness=0.003)` — Solid Rhino spheres are lens balls: Solidify inward to a thin shell, shade smooth.
-- `random_tone_material(name, c0, c1, roughness=0.6, translucent=0.0)` — Base colour between c0 and c1 per instance (Object Info > Random); optional translucency for leaves.
 - `glass_distortion(mat, obj, wave_period=0.3, wave_amp_mm=0.05, pillow_mm=2.0, roughness=0.01)` — Bump on a dielectric so reflections wobble like real glazing: roller wave (~0.1 mm p-v over ~0.3 m) + pane bow (pillowing, a few mm) centred on `obj`'s bounding box; thin axis has no dome.
 
-## `lux_materials` — LuxCore material helpers: corner dust, anti-tiling, per-instance variation (luxcore.md, edge-wear.md > Concave corners, materials.md > Randomness).
+## `materials.ground` — Ground material helpers; canonical implementations.
+
+- `displaced_ground(name='GRAVEL', tex_id='gray_rocks', relief_m=0.12, shift_m=-0.049)` — Gravel ground with true displacement. Displacement: Scale = relief_m, Midlevel = -shift_m / relief_m.
+- `ground_material(thatch_tex, soil_tex, name='GROUND', bare=BARE, wet_gamma=None, wet_rough=0.6)` — Ground under a meadow: a dead-grass/thatch texture, soil only where the bare-soil noise (same 4D noise and W as scatter.meadow_layer_group) opens the sward. wet_gamma (e.g. 1.4): wet ground = dry^gamma (darker, more saturated) and roughness x wet_rough.
+
+## `materials.luxcore` — LuxCore material helpers: corner dust, anti-tiling, per-instance variation (luxcore.md, references/materials/edge-wear.md > Concave corners, references/materials/variation.md).
 
 - `dust_uv(ob, name='DustUV')` — Non-overlapping layout for a baked map, beside the tiling UVs. Smart Project is deterministic, so a cached map still matches: always call it, even when not re-baking (a missing layer makes a LuxCore mapping uvindex -1, which crashes pyluxcore).
 - `bake_dust(objs, cache_dir, rebake=False, samples=64)` — One dust mask per object into cache_dir/<object>.png (EMIT bake, GPU). Returns {name: path}.
 - `lux_textured(name, folder, me, dust_png=None, uv_tex='BoxUV', uv_dust='DustUV', randomized=True, specular=0.5)` — Native LuxCore Disney from a generated/scanned map folder; `me` = the mesh it goes on (its UV layer indices are baked into the tree, so one material per mesh layout).
 - `glass_instance_tint(name='Glass_rand', tint=(0.985, 0.996, 0.99), ior=1.52)` — Clear glass; Object Info Random mixes white -> `tint` per instance (per face crossed, so a hollow block's 4 faces give ~tint^4).
+
+## `materials.metal` — Metal material helpers; canonical implementations.
+
+- `polished_steel(name='STEEL_POLISHED', color=(0.67, 0.64, 0.6), edge=(0.8, 0.8, 0.8), roughness=0.05)` — Mirror-polished stainless (physicallybased.info 0.67/0.64/0.60 linear). Metallic BSDF with F82 tint -- the edge colour of the conductor Fresnel.
+
+## `materials.nodes` — Nodes material helpers; canonical implementations.
+
+- `sock(sockets, name)` — Active socket by name (Mix nodes keep hidden same-named sockets per data type).
+- `G` — The node-graph builder for shader and Geometry Nodes trees: frames, nodes (inputs by keyword, or properties with n()), images on a named UV map, links, and the math / map range / noise / named-attribute shorthands. G(material) starts the material's tree empty; G(node_tree) adds to an existing tree (a GN group). materials.edge_wear._GN and the materials.edge_wear._math/_range/_noise/_attr functions are thin aliases of this class.
+
+## `materials.pbr` — Pbr material helpers; canonical implementations.
+
+- `pbr_material(tex_id, name=None, scale=1.0, tint=None)` — Material from a Poly Haven texture folder, box-mapped in world space at real-world size.
+- `dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None)` — The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled, transmission 1. `tint` multiplies every crossing, so keep it within a few % of white.
+- `glass_material(name='Glass_Clear', tint=(0.92, 0.96, 0.97), roughness=0.0)` — Clear glass (IOR 1.52); the default tint is slightly green, for thick panes. An existing material is edited in place (nodes the user added stay); a new one is built by dielectric.
+- `simple_material(name, color, roughness=0.5, metallic=0.0)` — Principled with a flat colour, roughness and metallic -- placeholders and controls.
+- `material_from_spec(spec)` — spec: "ph:<tex_id>" | "glass" | {"type": "ph"|"glass"|"simple", ...kwargs}.
+- `solve_levels(path, target_rgb, gamma=0.5)` — 'Measured levels': per-channel gain that lands the map's mean linear colour, after a shared gamma, on a target albedo. Returns the gain.
+- `white_backdrop(name='WHITE_BACKDROP', albedo=0.85)` — Matte white backdrop of a measured albedo (product/studio shots).
+- `map_mean(tex_id)` — Linear mean RGB of a Poly Haven diff map; measured once, then cached in meta.json.
+- `albedo_material(tex_id, name, target, scale=1.0)` — pbr_material whose base colour averages `target` (linear RGB).
+
+## `materials.stone` — Stone material helpers; canonical implementations.
+
+- `polished_granite(name='GRANITE_POLISHED', grain_m=0.006, roughness=0.04, ior=1.55, base=((0.01, 0.008, 0.007), (0.026, 0.019, 0.015)), flecks=((0.62, (0.055, 0.037, 0.026)), (0.8, (0.13, 0.12, 0.11)), (0.91, (0.34, 0.28, 0.21))))` — Procedural speckled granite in 3-D world space (a solid texture: cut faces and edges agree). Crystals = Voronoi cells of ~grain_m, each coloured by its random value through a constant ramp (black mica / brown feldspar / grey quartz / cream feldspar); a coarse noise drifts the base. Polished = one smooth dielectric (no coat). No Bevel node: the pool lining is a caustic receiver -- round edges come from a geometric Bevel modifier instead.
+- `stone_tiles(name='LIMESTONE', tile=(1.2, 0.6), grout=0.002, albedo=(0.46, 0.41, 0.33), var=0.05, roughness=0.35, coat=0.0, coat_rough=0.08, uv='BoxUV')` — Large-format stone/porcelain on real-metre BoxUV: Brick Texture (offset 0) for the joints, per-tile tone from the brick colour pair, cloudy limestone mottling + fine specks, a soft coat for a honed-and-sealed floor. Grout darker and matte, joints slightly recessed (bump).
+- `long_pavers(tex_id, name, target, row=0.18, length=0.75, mortar=0.008, long_axis='Y', scale=0.5, tone=((0.95, 0.95, 0.95), (0.72, 0.72, 0.71)), mortar_color=(0.22, 0.22, 0.22))` — Running-bond strips over a concrete map. `long_axis` = world axis of the strips' length (read it from the vanishing point the long joints run to). Mortar < 8 mm vanishes at frame scale; joints recessed by bump.
+
+## `materials.tile_damage` — Warped, tile-local Voronoi fracture cells, coating loss and rigid piece planes.
+
+- `damage_group(name='TileDamage')` — Build four shared Voronoi evaluations, preserving matching links on v6 upgrade.
+- `damage_bsdfs(a, i, intact, color, height, d)` — Shade exposed clay, engobe and dirt independently of the coated glaze.
+
+## `materials.tile_layout` — Metre-based tile layout shader maths; see references/materials/tiles.md
+
+- `reference(u, v, tile_w, tile_h, joint, row_offset=0.0, rotation=0.0, origin=(0.0, 0.0), corner_radius=0.0, jitter_offset=0.0, jitter_rotation=0.0)` — Return layout truth in metres; row_offset accepts any real value and wraps.
+- `layout_group(name='TileLayout')` — Create the metre-based shader layout group or reuse its matching version.
+- `add_layout(node_tree, vector_socket, loc=(0, 0), **inputs)` — Add a metre/radian layout group; row_offset accepts any real value and wraps.
+
+## `materials.tile_mapping` — World-metre UV coordinates for planar and cylindrical tile surfaces.
+
+- `planar_uv(obj, origin=(0.0, 0.0), name='TileUV', facing=None)` — UVs baked in world space: map after placing the object; tilted faces foreshorten by cos(theta), so use cylinder_uv for curved walls.
+- `cylinder_uv(obj, center_xy, radius, origin=(0.0, 0.0), name='TileUV', inward=None, seam_angle=None)` — UVs baked in world space: map after placing the object; write oriented arc-length/Z UVs.
+- `annulus_uv(obj, center_xy, radius, origin=(0.0, 0.0), name='TileUV', seam_angle=None, sign=None, like=None)` — Polar metre UVs for a flat ring: wall-radius arc length U and absolute radial offset V.
+- `layout_vector(node_tree, name='TileUV', loc=(0, 0), obj=None)` — Add a named UV Map node and return its layout vector output socket.
+
+## `materials.tile_surface` — Independent tile layout, glazed face, rounded shoulder and grout shading.
+
+- `tile_material(name, uv='TileUV', tile_w=0.045, tile_h=0.145, joint=0.003, row_offset=0.0, rotation=0.0, origin=(0.0, 0.0), face=None, map_size=None, body_albedo=(0.65, 0.64, 0.61), coat_ior=1.5, coat_rough=0.25, edge_radius=0.002, recess=0.0015, grout_albedo=(0.36, 0.36, 0.35), grout_rough=0.9, dust=0.5, dust_width=0.004, tint_var=0.03, rough_var=0.05, tilt_deg=0.4, wave_amp=0.0001, specks=0.3, macro=0.05, off=(), corner_radius=0.003, speck_size=0.001, lippage=0.0003, jitter_offset=0.0, jitter_rotation_deg=0.0, face_contrast=1.0, face_saturation=1.0, damage=0.05, crack_share=0.45, chip_share=0.35, step_height=0.00015, piece_tilt=0.0035, crack_width=0.00018, crack_depth=0.0008, chip_size=0.004, chip_depth=0.0008, spall_size=0.001, spall_density=0.25, glaze_thickness=0.0003, engobe_thickness=0.0002, glaze_lip_width=0.0002, engobe_ring=0.0003, force_kind=0, displacement=False, pixel_size=1.0, shell_exponent=0.6, crack_dirt=0.85, dirt_width=0.004, warp=0.004, warp_scale=0.02, crack_cell=0.03, crack_density=0.35, chip_density=0.5, displaced_objects=None)` — Build tiles in metres; rotation/piece_tilt radians, tilt/jitter_rotation_deg degrees; displacement False|True|'damage'.
+- `set_param(mat, name, value)` — Set any tile_material keyword, rebuilding structural options in the same material.
+- `toggle(mat, feature, on)` — Enable or remove a finish feature, preserving its parameter values.
+- `use_displacement(mat, objects, pixel_size=1.0)` — Opt into world-metre displacement using the shared adaptive subdivision helper.
+- `use_damage_displacement(mat, objects, pixel_size=1.0)` — Displace only damage (piece steps, chip/crack cuts); profile and joints stay bump (edges move only through damage).
+- `use_bump(mat)` — Restore height bump shading and disconnect geometric displacement.
+- `glazed_tiles(name='POOL_TILES', tile=0.1, grout=0.003, glaze=(0.6, 0.79, 0.83), glaze_var=0.06, grout_col=(0.5, 0.51, 0.5), uv='BoxUV')` — Procedural glazed ceramic tiles (Poly Haven has no pool mosaic): Brick Texture with zero offset = square grid at real size (UVs in metres), per-tile colour variation, glossy glaze, rough grout, rounded tile edges as bump from the mortar mask.
+
+## `materials.variation` — Variation material helpers; canonical implementations.
+
+- `random_tone_material(name, c0, c1, roughness=0.6, translucent=0.0)` — Base colour between c0 and c1 per instance (Object Info > Random); optional translucency for leaves.
+
+## `materials.vegetation` — Grass and herb materials for modelled blades (no opacity cards): thin translucent blade, per-instance tone and dryness, optional wet film and near-camera dew (run in Blender).
+
+- `blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dew=None, dry_patch=0.55)` — Thin blade: Principled + Translucent (Add); per-instance value 0.8-1.15 and a patchy straw mix; optional wet film / dew.
+
+## `materials.volumes` — Volumes material helpers; canonical implementations.
+
+- `steam(name='STEAM', density=0.6, z0=0.4, height=0.9, scale=3.0)` — Wisps over a hot tub: Principled Volume, density = noise ramp x fade with height above z0.
+
+## `materials.water` — Water material helpers; canonical implementations.
+
+- `pool_water(name='POOL_WATER', tint=(0.45, 0.85, 0.72), density=1.0, ripple_scale=2.0, ripple_m=0.0015, ior=1.333)` — Water as a closed volume: refractive surface (IOR 1.333) + Volume Absorption, so colour grows with path length (shallow steps stay clear, depth turns green). Absorption coefficient = density * (1 - tint) per metre. Gentle ripples as bump on the surface only.
+- `smooth_flat(obj, sharp_deg=30.0)` — Shade smooth but keep edges sharper than `sharp_deg` split: a box stays geometrically flat (top normals exactly vertical) while counting as 'smooth normals' -- required by MNEE casters.
+- `water_surface(obj, cell=0.1)` — Turn a closed water box into its top surface, diced to `cell` metres and smooth -- the build MNEE needs (control: scripts/controls/mnee_water.py): a one-quad flat caster delivers NO light, the same plane diced 40x40 does; a closed box adds a degenerate bottom interface. The volume still works: rays enter it crossing the surface downward and leave crossing it upward (opaque basin).
+
+## `materials.wood` — Wood material helpers; canonical implementations.
+
+- `coated_wood(name='COATED_PINE', tex_id='coated_pine', coat=0.2, coat_rough=0.04, rough_toward_matte=0.35, albedo_rgb=(0.52, 0.33, 0.17), levels_gamma=0.5, round_edge=0.002, normal_strength=1.0)` — Coated pine: every map wired; levels solved to a natural pine albedo; satin varnish = LOW coat amount with TIGHT gloss (the coat trap); base roughness spread toward matte instead of cheating Fresnel; round edges combined with the normal map.
+
+## `materials.wood_wear` — Weathered varnished wood: worn edges (shading), dents along arrises and torn-off varnished skin on the top surface that exposes the pale inner wood (both real geometry).
+
+- `round_arrises(obj, width=0.0025, segments=2, min_angle_deg=30.0)` — Real rounded arrises. Two segments keep each new edge at 45 deg, so the GN edge field (threshold 30 deg) still finds them.
+- `grain_uv(obj, size, name='BoxUV', axis=None, along='U')` — Kept for existing scripts: archviz.directional_uv, which serves every directional texture (not only wood).
+- `wood_wear_group(name='Wood Wear + Breaks', band=0.02, level=3, chip_reach=0.006, chip_depth=0.0025, chipped_share=0.3, break_share=0.5, break_depth=0.0015, grain_stretch=(35.0, 5.0, 35.0), seed=(0.0, 0.0, 0.0), sharp_deg=30.0)` — grain_stretch: noise scale per world axis for break outlines; the small value is the grain axis (the board's long axis), so breaks run long along the grain.
+- `weathered_wood(name='PINE_WEATHERED', wear_band=0.012, wear_amount=0.9, inner_tint=(0.8, 0.6, 0.36), inner_mix=0.3, inner_gain=1.7)` — coated_wood base (levels, satin coat trap) + worn varnish/grime at arrises + inner wood.
 
 ## `max_import` — 3ds Max .max -> Blender: repaired import, units and slots, vendor V-Ray materials rebuilt (run in Blender).
 
@@ -130,6 +231,10 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `legacy_studies(project)` — Study folder names listed in <project>/library/legacy_studies.txt (# comments allowed).
 - `find_project(starts)` — Project folder for the first start that resolves (see module doc), else None.
 
+## `render_variant` — Headless look-dev / control render of a saved .blend, with overrides. Never saves the .blend.
+
+- `main()` — Run the command against the supplied files; never save a scene.
+
 ## `scatter` — Geometry Nodes scatter for small instances: leaf litter, climbers, shrub foliage (run in Blender).
 
 - `scatter_group(name='SCATTER')` — GN group: distribute points below a height and inside a noise patch, instance with random rotation/scale.
@@ -140,74 +245,9 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `frustum_tangents(cam, res, margin=1.15)` — Half-tangents (x, y) of a camera's view incl. vertical lens shift, for the meadow frustum mask.
 - `meadow_layer(name, group, terrain, collection, camera, target_collection=None, **inputs)` — One meadow layer object (empty mesh + MEADOW_LAYER modifier); inputs by name, '_' for spaces.
 
-## `study_materials` — Shader-node recipes: concrete, gravel, coated wood, glass, glazed tiles.
-
-- `G` — The node-graph builder for shader and Geometry Nodes trees: frames, nodes (inputs by keyword, or properties with n()), images on a named UV map, links, and the math / map range / noise / named-attribute shorthands. G(material) starts the material's tree empty; G(node_tree) adds to an existing tree (a GN group). wear._GN and the wear._math/_range/_noise/_attr functions are thin aliases of this class.
-- `concrete_study(name='CONCRETE', tex_id='concrete_wall_009', color_mult=(0.76, 0.82, 0.99), normal_strength=0.6, bump_distance=0.004, round_edge=0.0025, chip_spread=0.05, chip_in=(0.4, 0.9), noise_scale=14.0, noise_band=(0.35, 0.6), edge_dark=True, stain=True, stain_mult=1.15, bevel_chips=True, stain_map=('local', 'leakage_tdlbbd1c', 'Leakage_tdlbbd1c_2K_Opacity.jpg'))` — Cast concrete: tone-matched diffuse, wired roughness/normal/height, round edges combined with the normal map, chipped-edge wear and a leak stain driving a worn BRDF.
-- `displaced_ground(name='GRAVEL', tex_id='gray_rocks', relief_m=0.12, shift_m=-0.049)` — Gravel ground with true displacement. Displacement: Scale = relief_m, Midlevel = -shift_m / relief_m.
-- `enable_true_displacement(obj, pixel_size=1.0)` — Adaptive (camera-dicing) subdivision, the view-dependent edge_length in pixels.
-- `solve_levels(path, target_rgb, gamma=0.5)` — 'Measured levels': per-channel gain that lands the map's mean linear colour, after a shared gamma, on a target albedo. Returns the gain.
-- `coated_wood(name='COATED_PINE', tex_id='coated_pine', coat=0.2, coat_rough=0.04, rough_toward_matte=0.35, albedo_rgb=(0.52, 0.33, 0.17), levels_gamma=0.5, round_edge=0.002, normal_strength=1.0)` — Coated pine: every map wired; levels solved to a natural pine albedo; satin varnish = LOW coat amount with TIGHT gloss (the coat trap); base roughness spread toward matte instead of cheating Fresnel; round edges combined with the normal map.
-- `clear_glass(name='GLASS', ior=1.52)` — Soda-lime glass via archviz.dielectric (white, IOR 1.52 by default).
-- `white_backdrop(name='WHITE_BACKDROP', albedo=0.85)` — Matte white backdrop of a measured albedo (product/studio shots).
-- `glazed_tiles(name='POOL_TILES', tile=0.1, grout=0.003, glaze=(0.6, 0.79, 0.83), glaze_var=0.06, grout_col=(0.5, 0.51, 0.5), uv='BoxUV')` — Procedural glazed ceramic tiles (Poly Haven has no pool mosaic): Brick Texture with zero offset = square grid at real size (UVs in metres), per-tile colour variation, glossy glaze, rough grout, rounded tile edges as bump from the mortar mask.
-- `retone(mat, target_rgb, tex_id, saturation=0.25)` — Desaturate a concrete_study map toward its luminance, then scale its measured linear mean to `target_rgb` (a dark brown scan -> light grey concrete keeps its pits and pores).
-
 ## `terrain` — Topography around a building pad, and the ground under a meadow (run in Blender).
 
 - `pad_distance(g, centre, pad_half, loc=(-1200, -400))` — Signed plan distance from a rectangle (negative inside): returns (distance, position).
 - `landform_group(name='LANDFORM', centre=(0.0, 0.0), pad_half=(4.0, 4.0), size=300.0, verts=601, pad_z=-0.03, crest=1.5, fall=6.0, run=40.0, warp=7.0, roll=2.5, hummock=0.12)` — GN group: grid -> hill around a pad (landform grading), stores `pad_d`; plan metres.
 - `height(x, y, centre, pad_half, pad_z=-0.03, crest=1.5, fall=6.0, run=40.0)` — Python twin of landform_group without the noise terms (e.g. to set a camera's eye height).
 - `add_terrain(group, material, name='TERRAIN', collection=None)` — An empty mesh object carrying the landform modifier (the GN group makes the geometry).
-- `ground_material(thatch_tex, soil_tex, name='GROUND', bare=BARE, wet_gamma=None, wet_rough=0.6)` — Ground under a meadow: a dead-grass/thatch texture, soil only where the bare-soil noise (same 4D noise and W as scatter.meadow_layer_group) opens the sward. wet_gamma (e.g. 1.4): wet ground = dry^gamma (darker, more saturated) and roughness x wet_rough.
-
-## `tile_damage` — Warped, tile-local Voronoi fracture cells, coating loss and rigid piece planes.
-
-- `damage_group(name='TileDamage')` — Build four shared Voronoi evaluations, preserving matching links on v6 upgrade.
-- `damage_bsdfs(a, i, intact, color, height, d)` — Shade exposed clay, engobe and dirt independently of the coated glaze.
-
-## `tile_layout` — Metre-based tile layout shader maths; see references/materials.md > Tiles.
-
-- `reference(u, v, tile_w, tile_h, joint, row_offset=0.0, rotation=0.0, origin=(0.0, 0.0), corner_radius=0.0, jitter_offset=0.0, jitter_rotation=0.0)` — Return layout truth in metres; row_offset accepts any real value and wraps.
-- `layout_group(name='TileLayout')` — Create the metre-based shader layout group or reuse its matching version.
-- `add_layout(node_tree, vector_socket, loc=(0, 0), **inputs)` — Add a metre/radian layout group; row_offset accepts any real value and wraps.
-
-## `tile_mapping` — World-metre UV coordinates for planar and cylindrical tile surfaces.
-
-- `planar_uv(obj, origin=(0.0, 0.0), name='TileUV', facing=None)` — UVs baked in world space: map after placing the object; tilted faces foreshorten by cos(theta), so use cylinder_uv for curved walls.
-- `cylinder_uv(obj, center_xy, radius, origin=(0.0, 0.0), name='TileUV', inward=None, seam_angle=None)` — UVs baked in world space: map after placing the object; write oriented arc-length/Z UVs.
-- `annulus_uv(obj, center_xy, radius, origin=(0.0, 0.0), name='TileUV', seam_angle=None, sign=None, like=None)` — Polar metre UVs for a flat ring: wall-radius arc length U and absolute radial offset V.
-- `layout_vector(node_tree, name='TileUV', loc=(0, 0), obj=None)` — Add a named UV Map node and return its layout vector output socket.
-
-## `tile_surface` — Independent tile layout, glazed face, rounded shoulder and grout shading.
-
-- `tile_material(name, uv='TileUV', tile_w=0.045, tile_h=0.145, joint=0.003, row_offset=0.0, rotation=0.0, origin=(0.0, 0.0), face=None, map_size=None, body_albedo=(0.65, 0.64, 0.61), coat_ior=1.5, coat_rough=0.25, edge_radius=0.002, recess=0.0015, grout_albedo=(0.36, 0.36, 0.35), grout_rough=0.9, dust=0.5, dust_width=0.004, tint_var=0.03, rough_var=0.05, tilt_deg=0.4, wave_amp=0.0001, specks=0.3, macro=0.05, off=(), corner_radius=0.003, speck_size=0.001, lippage=0.0003, jitter_offset=0.0, jitter_rotation_deg=0.0, face_contrast=1.0, face_saturation=1.0, damage=0.05, crack_share=0.45, chip_share=0.35, step_height=0.00015, piece_tilt=0.0035, crack_width=0.00018, crack_depth=0.0008, chip_size=0.004, chip_depth=0.0008, spall_size=0.001, spall_density=0.25, glaze_thickness=0.0003, engobe_thickness=0.0002, glaze_lip_width=0.0002, engobe_ring=0.0003, force_kind=0, displacement=False, pixel_size=1.0, shell_exponent=0.6, crack_dirt=0.85, dirt_width=0.004, warp=0.004, warp_scale=0.02, crack_cell=0.03, crack_density=0.35, chip_density=0.5, displaced_objects=None)` — Build tiles in metres; rotation/piece_tilt radians, tilt/jitter_rotation_deg degrees; displacement False|True|'damage'.
-- `set_param(mat, name, value)` — Set any tile_material keyword, rebuilding structural options in the same material.
-- `toggle(mat, feature, on)` — Enable or remove a finish feature, preserving its parameter values.
-- `use_displacement(mat, objects, pixel_size=1.0)` — Opt into world-metre displacement using the shared adaptive subdivision helper.
-- `use_damage_displacement(mat, objects, pixel_size=1.0)` — Displace only damage (piece steps, chip/crack cuts); profile and joints stay bump (edges move only through damage).
-- `use_bump(mat)` — Restore height bump shading and disconnect geometric displacement.
-
-## `vegetation` — Grass and herb materials for modelled blades (no opacity cards): thin translucent blade, per-instance tone and dryness, optional wet film and near-camera dew (run in Blender).
-
-- `blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dew=None, dry_patch=0.55)` — Thin blade: Principled + Translucent (Add); per-instance value 0.8-1.15 and a patchy straw mix; optional wet film / dew.
-
-## `wear` — Procedural edge wear (dirty edges, shading only) and edge chips (real geometry).
-
-- `dice(obj, size=0.05)` — Subdivide in place by repeated halving of over-long edges (grid fill keeps quads).
-- `edge_wear_group(name='Edge Wear + Chips', band=0.08, level=3, chip_reach=0.045, chip_depth=0.018, chipped_share=0.55, sharp_deg=30.0, chips=True, bite_scale=22.0, segment_scale=2.2, seed=(0.0, 0.0, 0.0))` — Geometry Nodes modifier: edge field for every point, real chips in the arris band. Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern.
-- `set_input(mod, name, value)` — Blender 5.2: a Geometry Nodes modifier's own input values live at mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the identifier through the group interface. Group defaults are only copied in at creation.
-- `add_edge_wear(obj, group, **inputs)` — Add the modifier; per-object overrides by input name, e.g. add_edge_wear(o, g, Band=0.1).
-- `weathered_concrete(name='CONCRETE_WEATHERED', dirt_band=0.035, dirt_amount=0.85, dirt_noise_scale=9.0, stain=True, tex_id='concrete_wall_009')` — concrete_study base (tone, maps, round edges, leak stain) + procedural dirty edges from the GN `edge_dist` field + a fresh-break material where GN cut a chip (`chip` > 0).
-- `mask_material(name, method, radius=0.035)` — Emission view of one edge-detection method, for side-by-side comparison.
-- `leak_field_group(name='LEAK FIELD', inset=0.02, reach=6.0)` — GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`. Reused if it exists (other objects' modifiers point at it).
-- `add_leak_field(obj)` — Add LEAK FIELD as the FIRST modifier: run after chips, rays slip through the chip-band seam and a wrong leak_d spreads over whole coarse triangles (light triangles under an arris).
-- `add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0)` — On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask.
-- `add_cracks(mat, openings=(), crack=None)` — On a weathered_concrete material: shrinkage cracks from opening corners + patchy map-cracking; dark core over everything, grime halo, groove. openings: (axis 'x'|'y', plane, u0, u1, v0, v1, top_only[, keep_angles]).
-
-## `wood_wear` — Weathered varnished wood: worn edges (shading), dents along arrises and torn-off varnished skin on the top surface that exposes the pale inner wood (both real geometry).
-
-- `round_arrises(obj, width=0.0025, segments=2, min_angle_deg=30.0)` — Real rounded arrises. Two segments keep each new edge at 45 deg, so the GN edge field (threshold 30 deg) still finds them.
-- `grain_uv(obj, size, name='BoxUV', axis=None, along='U')` — Kept for existing scripts: archviz.directional_uv, which serves every directional texture (not only wood).
-- `wood_wear_group(name='Wood Wear + Breaks', band=0.02, level=3, chip_reach=0.006, chip_depth=0.0025, chipped_share=0.3, break_share=0.5, break_depth=0.0015, grain_stretch=(35.0, 5.0, 35.0), seed=(0.0, 0.0, 0.0), sharp_deg=30.0)` — grain_stretch: noise scale per world axis for break outlines; the small value is the grain axis (the board's long axis), so breaks run long along the grain.
-- `weathered_wood(name='PINE_WEATHERED', wear_band=0.012, wear_amount=0.9, inner_tint=(0.8, 0.6, 0.36), inner_mix=0.3, inner_gain=1.7)` — coated_wood base (levels, satin coat trap) + worn varnish/grime at arrises + inner wood.

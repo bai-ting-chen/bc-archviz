@@ -1,11 +1,11 @@
-"""Metre-based tile layout shader maths; see references/materials.md > Tiles.
+"""Metre-based tile layout shader maths; see references/materials/tiles.md
 
 Jitter is contained per cell: cap |angle| at max(joint/2 - 1e-5, 0) /
 half-diagonal, then each offset amplitude at max(joint/2 - |angle| *
 half-diagonal - 1e-5, 0). Zero/tiny joints safely collapse jitter to zero.
 """
 import numpy as np
-from tile_nodes import _replace_group_users
+from .tile_nodes import _replace_group_users
 
 _VERSION = 4
 _INPUTS = {
@@ -99,7 +99,7 @@ def _interface_signature(group):
 def layout_group(name="TileLayout"):
     """Create the metre-based shader layout group or reuse its matching version."""
     import bpy
-    from study_materials import G
+    from materials.nodes import G
 
     old = bpy.data.node_groups.get(name)
     if old is not None:

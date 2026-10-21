@@ -8,7 +8,8 @@ not names or layout), plus evaluated vertex positions of the GN wear groups.
      (polyhaven_fetch.py; the leak map is a Megascans download) -- a throwaway copy, since
      albedo_material caches into meta.json
   3. blender -b --factory-startup --python regress_helpers.py -- dump <scripts/blender> <project> <out.json>
-     for the old and the new code
+     using each snapshot's own regress_helpers.py and matching scripts/blender directory.
+     A pre-package snapshot uses its pre-package runner; the current runner uses canonical materials modules.
   4. python regress_helpers.py compare old.json new.json   -> only intended differences may print
 """
 import json
@@ -110,7 +111,7 @@ elif "--" in sys.argv and sys.argv[sys.argv.index("--") + 1] == "dump":
     def eval_positions(group, add):
         bpy.ops.mesh.primitive_cube_add(size=0.4)
         ob = bpy.context.object
-        import wear
+        import materials.edge_wear as wear
         wear.dice(ob, 0.05)
         add(ob, group)
         dg = bpy.context.evaluated_depsgraph_get()
@@ -121,11 +122,7 @@ elif "--" in sys.argv and sys.argv[sys.argv.index("--") + 1] == "dump":
 
     def B(fn):
         def run():
-            import importlib
-            for m in ("archviz", "study_materials", "interior", "lookdev", "glassware", "gn_caustics", "scatter",
-                      "wear", "wood_wear"):
-                if m in sys.modules:
-                    importlib.reload(sys.modules[m])
+            # Each dump uses a fresh Blender process; preserve one project-root state.
             import archviz as a
             a.set_project(HERE)
             return fn()
@@ -133,45 +130,49 @@ elif "--" in sys.argv and sys.argv[sys.argv.index("--") + 1] == "dump":
 
 
     def mods():
-        import archviz, study_materials, interior, lookdev, glassware, gn_caustics, scatter, wear, wood_wear
-        return archviz, study_materials, interior, lookdev, glassware, gn_caustics, scatter, wear, wood_wear
+        """Import only modules needed by a case; do not let an unrelated import fail every case."""
+        import importlib
+        class Modules(dict):
+            def __missing__(self, name):
+                self[name] = importlib.import_module(name)
+                return self[name]
+        return Modules()
 
 
-    A, SM, I, LD, GW, GC, SC, W, WW = range(9)
     CASES = {
-        "pbr_material": lambda m: m[A].pbr_material("concrete_wall_009"),
-        "glass_material": lambda m: m[A].glass_material(),
-        "simple_material": lambda m: m[A].simple_material("S", (0.5, 0.4, 0.3)),
-        "material_from_spec": lambda m: m[A].material_from_spec({"type": "simple", "name": "S2", "color": (.2, .2, .2)}),
-        "world_hdri": lambda m: m[A].world_hdri("kloppenheim_06_puresky"),
-        "concrete_study": lambda m: m[SM].concrete_study(),
-        "displaced_ground": lambda m: m[SM].displaced_ground(),
-        "coated_wood": lambda m: m[SM].coated_wood(),
-        "clear_glass": lambda m: m[SM].clear_glass(),
-        "white_backdrop": lambda m: m[SM].white_backdrop(),
-        "glazed_tiles": lambda m: m[SM].glazed_tiles(),
-        "emitter": lambda m: m[I].emitter("E", 1000.0),
-        "emitter_dots": lambda m: m[I].emitter_dots("ED", 1000.0),
-        "polished_granite": lambda m: m[I].polished_granite(),
-        "stone_tiles": lambda m: m[I].stone_tiles(),
-        "polished_steel": lambda m: m[I].polished_steel(),
-        "pool_water": lambda m: m[I].pool_water(),
-        "steam": lambda m: m[I].steam(),
-        "sheer": lambda m: m[LD].sheer(),
-        "random_tone": lambda m: m[LD].random_tone_material("R", (0.1, 0.1, 0.1), (0.2, 0.2, 0.2)),
-        "albedo_material": lambda m: m[LD].albedo_material("concrete_wall_009", "AM", (0.5, 0.5, 0.5)),
-        "vertical_boards": lambda m: m[LD].vertical_boards(m[LD].albedo_material("concrete_wall_009", "VB", (0.5, 0.5, 0.5))),
-        "long_pavers": lambda m: m[LD].long_pavers("concrete_wall_009", "LP", (0.4, 0.4, 0.4)),
-        "dielectric": lambda m: m[GW].dielectric("D", 1.52),
-        "caustic_sheet_group": lambda m: m[GC].caustic_sheet_group(),
-        "caustic_sheet_material": lambda m: m[GC].caustic_sheet_material(),
-        "scatter_group": lambda m: m[SC].scatter_group(),
-        "edge_wear_group": lambda m: m[W].edge_wear_group(),
-        "weathered_concrete": lambda m: m[W].weathered_concrete(),
-        "mask_edge_dist": lambda m: m[W].mask_material("MK", "edge_dist"),
-        "mask_damage": lambda m: m[W].mask_material("MK2", "damage"),
-        "wood_wear_group": lambda m: m[WW].wood_wear_group(),
-        "weathered_wood": lambda m: m[WW].weathered_wood(),
+        "pbr_material": lambda m: m['materials.pbr'].pbr_material("concrete_wall_009"),
+        "glass_material": lambda m: m['materials.pbr'].glass_material(),
+        "simple_material": lambda m: m['materials.pbr'].simple_material("S", (0.5, 0.4, 0.3)),
+        "material_from_spec": lambda m: m['materials.pbr'].material_from_spec({"type": "simple", "name": "S2", "color": (.2, .2, .2)}),
+        "world_hdri": lambda m: m['archviz'].world_hdri("kloppenheim_06_puresky"),
+        "concrete_study": lambda m: m['materials.concrete'].concrete_study(),
+        "displaced_ground": lambda m: m['materials.ground'].displaced_ground(),
+        "coated_wood": lambda m: m['materials.wood'].coated_wood(),
+        "clear_glass": lambda m: m['materials.glass'].clear_glass(),
+        "white_backdrop": lambda m: m['materials.pbr'].white_backdrop(),
+        "glazed_tiles": lambda m: m['materials.tile_surface'].glazed_tiles(),
+        "emitter": lambda m: m['interior'].emitter("E", 1000.0),
+        "emitter_dots": lambda m: m['interior'].emitter_dots("ED", 1000.0),
+        "polished_granite": lambda m: m['materials.stone'].polished_granite(),
+        "stone_tiles": lambda m: m['materials.stone'].stone_tiles(),
+        "polished_steel": lambda m: m['materials.metal'].polished_steel(),
+        "pool_water": lambda m: m['materials.water'].pool_water(),
+        "steam": lambda m: m['materials.volumes'].steam(),
+        "sheer": lambda m: m['materials.fabric'].sheer(),
+        "random_tone": lambda m: m['materials.variation'].random_tone_material("R", (0.1, 0.1, 0.1), (0.2, 0.2, 0.2)),
+        "albedo_material": lambda m: m['materials.pbr'].albedo_material("concrete_wall_009", "AM", (0.5, 0.5, 0.5)),
+        "vertical_boards": lambda m: m['materials.concrete'].vertical_boards(m['materials.pbr'].albedo_material("concrete_wall_009", "VB", (0.5, 0.5, 0.5))),
+        "long_pavers": lambda m: m['materials.stone'].long_pavers("concrete_wall_009", "LP", (0.4, 0.4, 0.4)),
+        "dielectric": lambda m: m['materials.pbr'].dielectric("D", 1.52),
+        "caustic_sheet_group": lambda m: m['gn_caustics'].caustic_sheet_group(),
+        "caustic_sheet_material": lambda m: m['gn_caustics'].caustic_sheet_material(),
+        "scatter_group": lambda m: m['scatter'].scatter_group(),
+        "edge_wear_group": lambda m: m['materials.edge_wear'].edge_wear_group(),
+        "weathered_concrete": lambda m: m['materials.edge_wear'].weathered_concrete(),
+        "mask_edge_dist": lambda m: m['materials.edge_wear'].mask_material("MK", "edge_dist"),
+        "mask_damage": lambda m: m['materials.edge_wear'].mask_material("MK2", "damage"),
+        "wood_wear_group": lambda m: m['materials.wood_wear'].wood_wear_group(),
+        "weathered_wood": lambda m: m['materials.wood_wear'].weathered_wood(),
     }
     res = {}
     for k, f in CASES.items():
@@ -181,8 +182,8 @@ elif "--" in sys.argv and sys.argv[sys.argv.index("--") + 1] == "dump":
             res[k] = snapshot()
         except Exception:
             res[k] = {"ERROR": traceback.format_exc().splitlines()[-1]}
-    for k, fn in (("eval edge_wear", lambda m: eval_positions(m[W].edge_wear_group(), m[W].add_edge_wear)),
-                  ("eval wood_wear", lambda m: eval_positions(m[WW].wood_wear_group(), m[W].add_edge_wear))):
+    for k, fn in (("eval edge_wear", lambda m: eval_positions(m['materials.edge_wear'].edge_wear_group(), m['materials.edge_wear'].add_edge_wear)),
+                  ("eval wood_wear", lambda m: eval_positions(m['materials.wood_wear'].wood_wear_group(), m['materials.edge_wear'].add_edge_wear))):
         bpy.ops.wm.read_homefile(use_empty=True)
         try:
             res[k] = B(lambda: fn(mods()))()

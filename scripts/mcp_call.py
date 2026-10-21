@@ -42,4 +42,5 @@ async def main():
                         print("image saved:", out)
                 return res.isError
 
-sys.exit(1 if asyncio.run(main()) else 0)
+if __name__ == "__main__":
+    sys.exit(1 if asyncio.run(main()) else 0)

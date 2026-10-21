@@ -4,7 +4,7 @@
 
 The reference is resized to the width the edges were projected at (--w, its own aspect kept),
 washed 35 % toward white, and each layer drawn in its own colour. Run with the MCP venv python.
-Check the geometry against this BEFORE the Rhino approval gate (RULES 10a)."""
+Check the geometry against this BEFORE the Rhino approval gate (RULES GAT_01)."""
 import argparse
 import colorsys
 import json

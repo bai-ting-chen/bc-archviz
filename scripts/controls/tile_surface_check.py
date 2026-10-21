@@ -5,7 +5,9 @@ import os, sys, math, shutil, tempfile, struct, zlib, json, warnings
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "blender"))
 sys.path.insert(0, os.path.dirname(__file__))
 import bpy, numpy as np
-import _scene, tile_mapping, tile_surface
+import _scene
+import materials.tile_mapping as tile_mapping
+import materials.tile_surface as tile_surface
 
 def scene(mat_kwargs):
     """Create a repeatable wall and light rig for feature comparisons."""

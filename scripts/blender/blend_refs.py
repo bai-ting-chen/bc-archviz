@@ -3,7 +3,7 @@
     blender -b scene.blend --factory-startup --python blend_refs.py -- --study <dir> --out refs.json [--localise]
 
 --localise first relinks missing files by name from inside the study, then copies every referenced file that lies outside <study> (or in its _wip/) into <study>/library/local/<parent folder>/,
-repaths it relative and saves the .blend (RULES 10c). Packed files are skipped.
+repaths it relative and saves the .blend (RULES AST_03). Packed files are skipped.
 """
 import filecmp
 import glob

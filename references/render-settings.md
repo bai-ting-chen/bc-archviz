@@ -17,14 +17,14 @@ around that, rather than carrying someone else's numbers.
 - **Know your noise floor before trusting any comparison.** Render the same frame twice with
   only the seed changed; that difference is the floor. At moderate sample counts with denoising
   it is high enough to swamp a real effect — hence finals at a thousand-plus samples, and the
-  control criterion of RULES 9.
+  control criterion of RULES VAL_02.
 - Light tree on (default); `light_sampling_threshold` is ignored while it is on.
 - **Fireflies vs real highlights:** per region compare the raw *mean / median* (≈ 1 clean, ≫ 1 =
   energy in rare samples) and look again in an independent render: real caustic hot spots span
   several pixels and land on the same pixels; fireflies are lone random pixels. Remove fireflies
-  *before* the denoiser (clamping; luxcore.md › Fireflies) — OIDN smears them into blotches.
+  *before* the denoiser (clamping; [luxcore.md](luxcore.md) › Fireflies) — OIDN smears them into blotches.
 
-## Finals with no sample limit (`finals.py`, RULES 10b)
+## Finals with no sample limit (`finals.py`, RULES GAT_03)
 - Estimate before launch from a full-frame test at the final settings: s/sample measured, raw
   noise in a smooth region at two sample counts; noise ~ 1/sqrt(N). Tell the user the time at
   which more samples stop showing (raw ~1-2 % on a smooth sky with OIDN, ~0.4 % = one 8-bit
@@ -46,7 +46,7 @@ caustics off, Fast GI, `volume_biased`, shadow-transparent glass. Unbiased: Russ
 (`min_light_bounces`), adaptive sampling, blue-noise pattern, denoising (post).
 
 ## Memory
-VRAM first (RULES 13). Tools: `texture_limit_render`, `texture_resolution_render` (5.2);
+VRAM first (RULES SAF_02). Tools: `texture_limit_render`, `texture_resolution_render` (5.2);
 5.2 Texture Cache (`render.use_texture_cache`; auto-generate writes `.tx` beside each image — set
 Preferences `texture_cache_directory` first to keep `library/` clean); a large `tile_size`
 (small tiles are slow on GPU); instances (Alt+D); `use_persistent_data` for re-render loops.
@@ -56,3 +56,9 @@ Per-file working space (Rec.709 default / Rec.2020 / ACEScg) — pick it at proj
 changing it later re-reads every material. Views: AgX (our default), ACES 2.0, Khronos PBR
 Neutral. Pick the AgX look from the reference's contrast, not from habit. `film_exposure` acts on
 render data, `view_settings.exposure` on the view; we set exposure via `physical_camera`.
+
+
+## SAF_02 procedure
+
+Know the GPU's VRAM before committing to a heavy scene; adaptive subdivision over large
+    diced surfaces is the usual way to exhaust it (render-settings.md › Memory).

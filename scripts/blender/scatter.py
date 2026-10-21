@@ -7,9 +7,9 @@
 Points are distributed on each target's faces where Z < `z_max` AND a 0.6/m noise > `patch`
 (0 = everywhere), then instanced with random rotation and 0.6-1.3 x `scale`. The patch threshold
 is sensitive near 0.5: on one wall 0.42 blanketed it, 0.48 gave patches, 0.53 left nothing.
-Inputs are set through wear.set_input (Blender 5.2: mod["id"] = v raises).
+Inputs are set through materials.edge_wear.set_input (Blender 5.2: mod["id"] = v raises).
 
-Meadow / grass on terrain (materials.md > Grass and meadow):
+Meadow / grass on terrain (references/materials/vegetation.md):
     sos = load_scatter_on_surface()                   # Blender's own essentials group
     grp = meadow_layer_group(sos)
     tx, ty = frustum_tangents(cam, (w, h))
@@ -23,7 +23,7 @@ import os
 
 import bpy
 
-from wear import set_input
+from materials.edge_wear import set_input
 
 
 def scatter_group(name="SCATTER"):
@@ -121,7 +121,7 @@ def load_scatter_on_surface():
 
 def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=None):
     """GN group: Scatter on Surface on a terrain object, masked by species patch noise, shared bare-soil noise, pad clearance and the camera frustum. Reused if it exists (layers point at it)."""
-    from study_materials import G
+    from materials.nodes import G
     from terrain import BARE_W
     ng = bpy.data.node_groups.get(name)
     if ng:
@@ -161,7 +161,7 @@ def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=None):
     pm = g.n("ShaderNodeMapRange", (-900, -100), interpolation_type="SMOOTHSTEP")
     g.link(pn.outputs[0], pm.inputs["Value"]); g.link(I["Patch Low"], pm.inputs["From Min"])
     g.link(I["Patch High"], pm.inputs["From Max"])
-    # bare soil: shared noise (terrain.ground_material uses the same) thins the sward to nothing
+    # bare soil: shared noise (materials.ground.ground_material uses the same) thins the sward to nothing
     bn = g.n("ShaderNodeTexNoise", (-1100, -400), noise_dimensions="4D")
     bn.inputs["Detail"].default_value = 4.0
     bn.inputs["W"].default_value = BARE_W

@@ -1,7 +1,7 @@
 """Weathered varnished wood: worn edges (shading), dents along arrises and torn-off varnished
 skin on the top surface that exposes the pale inner wood (both real geometry).
 
-Builds on wear.py (edge field, dicing, Blender 5.2 modifier inputs) and study_materials.coated_wood.
+Builds on materials.edge_wear (edge field, dicing, Blender 5.2 modifier inputs) and _mat_wood.coated_wood.
 
   round_arrises()  -- real 2.5 mm bevel (the Bevel *node* is invalid on MNEE caustic receivers)
   grain_uv()       -- alias of archviz.directional_uv (U along each piece's long axis)
@@ -9,14 +9,23 @@ Builds on wear.py (edge field, dicing, Blender 5.2 modifier inputs) and study_ma
                       breaks on the top, stretched along the grain; stores `chip`, `break`
   weathered_wood() -- shader: varnish worn + grime at arrises; inner wood where chip/break > 0
 """
+from . import nodes as _mat_nodes
+from . import wood as _mat_wood
 import math
 
 import bmesh
 import bpy
 
-import study_materials as sm
-from study_materials import sock
-from wear import _GN, _input, _attr, _noise, _range, _math, _edge_field, _chip_field, _rejoin
+from .nodes import sock
+from .edge_wear import _GN
+from .edge_wear import _input
+from .edge_wear import _attr
+from .edge_wear import _noise
+from .edge_wear import _range
+from .edge_wear import _math
+from .edge_wear import _edge_field
+from .edge_wear import _chip_field
+from .edge_wear import _rejoin
 
 
 # --- geometry ---------------------------------------------------------------------------
@@ -141,8 +150,8 @@ def wood_wear_group(name="Wood Wear + Breaks", band=0.02, level=3,
 def weathered_wood(name="PINE_WEATHERED", wear_band=0.012, wear_amount=0.9,
                    inner_tint=(0.80, 0.60, 0.36), inner_mix=0.30, inner_gain=1.7):
     """coated_wood base (levels, satin coat trap) + worn varnish/grime at arrises + inner wood."""
-    mat = sm.coated_wood(name=name, round_edge=0)
-    g = sm.G(mat.node_tree)                   # add to the existing tree
+    mat = _mat_wood.coated_wood(name=name, round_edge=0)
+    g = _mat_nodes.G(mat.node_tree)                   # add to the existing tree
     nt = mat.node_tree
     coated = next(n for n in nt.nodes if n.label == "Pine + satin varnish coat")
     out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")

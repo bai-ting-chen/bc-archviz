@@ -3,7 +3,7 @@ class _Graph:
     """Small composition helpers using the shared G node builder."""
     def __init__(self, tree):
         """Wrap the shared graph builder without clearing the tree."""
-        from study_materials import G
+        from materials.nodes import G
         self.g = G(tree)
         self.count = 0
 
@@ -126,5 +126,3 @@ def _replace_group_users(old, new):
             dst = target.inputs.get(input_name) if target in users else input_name
             if src is not None and dst is not None:
                 tree.links.new(src, dst)
-
-

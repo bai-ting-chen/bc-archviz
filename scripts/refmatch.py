@@ -7,7 +7,7 @@
 
 regions.json: {"oak": [x0, y0, x1, y1], ...} in 0..1 fractions of the frame (y from the top).
 Images are compared at the reference's aspect, 1000 px wide. Balance lights region by region
-before touching exposure (RULES 7).
+before touching exposure (RULES RES_03).
 """
 import json
 import sys

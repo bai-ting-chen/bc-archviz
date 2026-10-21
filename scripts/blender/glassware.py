@@ -7,6 +7,7 @@ Three interfaces, each its own surface, normals defining which medium is in fron
   WATER_TOP  air  -> water   IOR 1.33    free surface with a capillary meniscus
 GLASS + INTERFACE enclose the glass solid; INTERFACE + WATER_TOP enclose the water.
 """
+from materials.pbr import dielectric
 import math
 
 import bpy
@@ -103,10 +104,6 @@ def lathe(name, profile, centre, segments=256, normal_hint=None):
     return ob
 
 
-def dielectric(name, ior, tint=(1, 1, 1)):
-    """Kept for existing scripts: archviz.dielectric."""
-    import archviz
-    return archviz.dielectric(name, ior, tint)
 
 
 def glass_of_water(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256, lift=0.0001):

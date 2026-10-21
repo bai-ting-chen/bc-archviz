@@ -10,7 +10,7 @@ genera, 25–320 MB, 46k–971k faces; the checks below must pass on every new m
   Download the zip, compare its sha256 with the platform's `archive_hash`
   (`https://extensions.blender.org/api/v1/extensions/?type=add-on`), then
   `blender -b -c extension install-file -r user_default --enable <zip>` and delete the zip.
-  It lives in Blender's extension folder, never in a project (RULES 10d).
+  It lives in Blender's extension folder, never in a project (RULES AST_04).
 - `--factory-startup` turns extensions off: `max_import.load` enables it in the script.
 - Reads Editable Mesh/Poly, primitives, VRayMtl, VRay2SidedMtl, Corona, Physical, Multi/Sub.
   Not: V-Ray proxies (`.vrmesh`), Forest Pack / RailClone scatter, GrowFX, modifier stacks.
@@ -64,11 +64,11 @@ cards (foliage).
   sits inside the other surface (signed distance < 0 along that surface's normal).
 - Texel density along and around a tube within ~2× of each other (UV length per metre ×
   texture pixels); a 10× difference is a broken UV, not the vendor's texture.
-- Silhouette and branching against the vendor thumbnail; close-ups at native resolution (RULES 8b).
+- Silhouette and branching against the vendor thumbnail; close-ups at native resolution (RULES VAL_01).
 
 ## Materials
 The file's bitmap paths point at the vendor's machine; the materials are rebuilt in Blender
-anyway (RULES 4). `rebuild_materials` finds the maps by the diffuse bitmap's stem in the
+anyway (RULES PIP_01). `rebuild_materials` finds the maps by the diffuse bitmap's stem in the
 material name (`<max name>_<stem>_albedo` → `<stem>_{albedo,opacity,tran,glossiness,normal}`,
 common suffix aliases accepted) and logs every fallback.
 - **A wired V-Ray map overrides the scalar stored next to it.** The importer carries only the
@@ -78,7 +78,7 @@ common suffix aliases accepted) and logs every fallback.
 - Glossiness → roughness = 1 − gloss (Non-Color). Roughness maps wire directly.
 - Leaf cards: Principled (albedo, roughness, normal, IOR 1.6) **+** Translucent (transmission
   map, else albedo), cut by the opacity map through Mix with Transparent. Green leaves reflect
-  and transmit only ~0.1 each (materials.md › Grass and meadow), so Add stays energy-conserving;
+  and transmit only ~0.1 each ([vegetation.md](materials/vegetation.md)), so Add stays energy-conserving;
   check the maps' linear means.
 - Bark: albedo, roughness, normal, IOR 1.52. Vendor bark albedo maps can be dark (~0.04
   linear); compare with measured bark before a final.

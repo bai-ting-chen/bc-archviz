@@ -165,7 +165,6 @@ def annulus_uv(obj, center_xy, radius, origin=(0.0, 0.0), name="TileUV",
     return _write_uv(obj.data, values, name)
 
 
-
 def layout_vector(node_tree, name="TileUV", loc=(0, 0), obj=None):
     """Add a named UV Map node and return its layout vector output socket."""
     if obj is not None and (obj.type != 'MESH' or obj.data.uv_layers.get(name) is None):

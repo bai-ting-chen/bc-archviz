@@ -230,9 +230,10 @@ def bake_irradiance(npy_paths, exr_path, sigma_cells=1.0):
 def add_caustic_light(mat, exr_path, scale=1.0, albedo_label="Pine + satin varnish coat"):
     """Adds Emission = albedo * E / pi on up-facing faces, E sampled at world XY from the map.
     `albedo_label`: label of the receiver's BSDF whose Base Color input carries the albedo (the
-    default is study_materials.coated_wood's)."""
+    default is materials.wood.coated_wood's)."""
     import bpy
-    from study_materials import G, sock
+    from materials.nodes import G
+    from materials.nodes import sock
     _load_grid(exr_path)
     nt = mat.node_tree
     out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")

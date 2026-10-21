@@ -11,6 +11,7 @@ import bpy
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "blender"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import materials.water as _mat_water
 from _scene import black_scene, render_linear, white_lambert  # noqa: E402
 
 
@@ -36,8 +37,7 @@ def box(name, x0, y0, z0, x1, y1, z1, top_only=False, cuts=0):
 def run(kind="SPOT", water="plane", mnee=True, volume=False, caustics=True, samples=512, blur=0.0, smooth=True, cuts=0):
     sc = black_scene(samples, 64)
     import importlib
-    import interior
-    importlib.reload(interior)
+    importlib.reload(_mat_water)
     sc.cycles.blur_glossy = blur
     sc.cycles.caustics_refractive = caustics
     floor = box("floor", -2, -2, -1.3, 2, 2, -1.2)          # pool floor (receiver), Lambert 0.8
@@ -45,14 +45,14 @@ def run(kind="SPOT", water="plane", mnee=True, volume=False, caustics=True, samp
     floor.cycles.is_caustics_receiver = mnee
     if water != "none":
         w = box("water", -2, -2, -1.2 + 0.0005, 2, 2, 0.0, top_only=(water == "plane"), cuts=cuts)
-        wm = interior.pool_water("W", density=1.0, ripple_m=0.0)
+        wm = _mat_water.pool_water("W", density=1.0, ripple_m=0.0)
         if not volume:
             for l in list(wm.node_tree.links):
                 if l.to_socket.name == "Volume":
                     wm.node_tree.links.remove(l)
         w.data.materials.append(wm)
         if smooth:
-            interior.smooth_flat(w)
+            _mat_water.smooth_flat(w)
         w.cycles.is_caustics_caster = mnee
     ld = bpy.data.lights.new("L", kind)
     ld.energy = 100.0

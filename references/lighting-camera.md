@@ -3,7 +3,7 @@
 One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera exposure).
 
 ## Daylight
-- **Matching an HDRI to a reference** (RULES 8a). Shortlist by tags from the Poly Haven API
+- **Matching an HDRI to a reference** (RULES LGT_02). Shortlist by tags from the Poly Haven API
   (`api.polyhaven.com/assets?t=hdris`: overcast/clear, forest/park/urban...), then judge on the
   equirect itself, not the thumbnail sphere: tone-map a 1024 px strip in Blender, draw elevation
   lines at 0° and the reference's horizon-content height (tree tops read ~10° above the horizon
@@ -18,7 +18,7 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
 - **Target illuminance** (these are the world, so they carry everywhere): full sun 80-100 klux,
   overcast daylight 10-20 klux, a bright north-lit studio ~2 klux, a tabletop studio ~500 lux.
 - Equirect: `u = 0.5 - atan2(y,x)/2π`, `v = elev/π + 0.5`; world Mapping rotates the lookup (Rzᵀ).
-- Placing the sun (RULES 8a): rotate the map by its `hdri_analyse` sun direction (formula
+- Placing the sun (RULES LGT_02): rotate the map by its `hdri_analyse` sun direction (formula
   above), scale with `world_hdri_lux`. `sun_from_direction` is for scenes with no HDRI (tests,
   controls).
 - **Pick the HDRI by its sun when sun matters** (hard shadows, caustics, sunlit patches):
@@ -57,11 +57,11 @@ schedule gives you.
 ## Light types — which one models what
 | Source | Use for | Units / traps |
 |---|---|---|
-| World (HDRI / Sky) | all daylight (RULES 8a) | lux via `world_hdri_lux` |
+| World (HDRI / Sky) | all daylight (RULES LGT_02) | lux via `world_hdri_lux` |
 | Point | bulbs, **any IES fixture** | W for the full sphere; Radius = bulb/lens size (softness only) |
 | Spot | downlights/spots without an IES | same power as a point, the cone only masks; Blend softens the edge, not the shadow |
 | Area (rect/square/disk/ellipse) | panels, troffers, coves, light boxes, backlit sheers | Lambert emitter, P = flux; *Spread* narrows like a louvre/honeycomb; *Portal* in windows only samples the HDRI (no light of its own) |
-| Sun | tests and controls only (RULES 8a) | W/m² |
+| Sun | tests and controls only (RULES LGT_02) | W/m² |
 | Emissive mesh | visible lenses, LED lines, screens, signage | luminance cd/m² (`interior.emitter`); count once with the analytic light (`lit_once`) |
 
 Per-light Cycles settings: *Max Bounces*, *Cast Shadow*, *Multiple Importance* (keep on for
@@ -116,7 +116,7 @@ the manufacturer's file a render's illuminance is the fixture's, not a guess fro
   PDF's URL with `.ies` often serves the file). European makers often ship Eulumdat `.ldt`
   only: Cycles reads IES only, so convert with `scripts/ldt2ies.py in.ldt out.ies` (MCP venv
   python), which prints the lumens integrated from the written file against the LDT's. Save into the study's `library/local/ies/` with a `meta.json` (maker, catalogue,
-  URL, lumens) (RULES 10c). `ies_light` embeds the file in the .blend (Internal mode).
+  URL, lumens) (RULES AST_03). `ies_light` embeds the file in the .blend (Internal mode).
 
 ## Placement and visibility
 - Grazed or washed wall (when the design calls for it): a linear source along the wall — a thin
@@ -124,7 +124,7 @@ the manufacturer's file a render's illuminance is the fixture's, not a guess fro
   texture relief and falloff; size them from the fixture or the reference. A row of spots on a
   wall gives scallops; use spots only when scallops are intended.
 - Recessed fixture: `visible_camera = False` on the light (it sits in a slot).
-- **Count each fixture once** (RULES 5). Either the lens is the source (luminance from lumens, visible to
+- **Count each fixture once** (RULES LGT_01). Either the lens is the source (luminance from lumens, visible to
   all rays) or the lens is decor for an analytic light → `interior.lit_once()` = `visible_diffuse`
   AND `visible_transmission` off. Visibility follows the LAST bounce: a diffuse ray through water
   arrives as *transmission*, so turning diffuse off alone still leaks.
@@ -258,7 +258,7 @@ blender()` from a study script). Read the base and top of every repeat at full r
    mirror the camera ray in the glass normal, then pick the HDRI rotation from luminance by
    azimuth: trees on the horizon band, bright sky higher up for upper floors. Rotate the HDRI,
    not the glass.
-6. Exposure last (RULES 7). When every region is off by the same ratio, *that* is the exposure
+6. Exposure last (RULES RES_03). When every region is off by the same ratio, *that* is the exposure
    step, so take it then.
 
 ## Fog and mist (`atmosphere.fog_volume`, control `scripts/controls/fog_koschmieder.py`)
@@ -268,9 +268,9 @@ blender()` from a study script). Read the base and top of every repeat at full r
   contrast). Control: absorption-only transmission through 29 m = exp(-sigma d) to 1.000.
   Dense fog V ~150 m: an object at 27 m keeps ~half its contrast, 80 m almost nothing.
 - Shape: full below the fog top, smoothstep to clear air above it, denser in hollows, patchy
-  noise (RULES 8c); a box around the site with the camera inside. Clear the inside of
+  noise (RULES MAT_05); a box around the site with the camera inside. Clear the inside of
   buildings (indoor air has no fog; a fog-filled dark room behind glass is also a noise source).
-- Light: a sunless overcast HDRI (no sun lamp, RULES 8a). `atmosphere.volume_render_settings`:
+- Light: a sunless overcast HDRI (no sun lamp, RULES LGT_02). `atmosphere.volume_render_settings`:
   volume bounces (api-traps › Render). Cost ~2.5-3.5x a clear scene.
 - Raw noise in the fog falls as 1/sqrt(N); OIDN cleans smooth fog without blotches at a few
   hundred spp - check a contrast-stretched sky crop.
@@ -279,8 +279,30 @@ blender()` from a study script). Read the base and top of every repeat at full r
 - Area-light direction: api-traps › Render (they emit along local −Z); print the world direction
   after creating the light.
 - Pendant globes: a solid glass sphere is a lens ball. Give it a thin Solidify shell, IOR 1.5 and
-  mid roughness so it reads as lit glass (`lookdev.glass_shell(objs)`). The bulb is a point light
+  mid roughness so it reads as lit glass (`materials.glass.glass_shell(objs)`). The bulb is a point light
   with `visible_camera = True`; hide the bulb mesh so the fixture counts once.
 - Backdrop that lights nothing: Mix(HDRI, white Background, Light Path *Is Camera Ray*); under AgX
   display-white needs ~4/2^exposure.
-- Match targets on the written PNG (RULES 10).
+- Match targets on the written PNG (RULES VAL_03).
+
+
+## LGT_01 procedure
+
+**Real units everywhere.** Daylight: calibrated HDRI in lux, nothing else (LGT_02). Artificial: lumens at
+   683 lm/W — the same constant the camera uses, so a real ISO/f/shutter gives the right exposure
+   without eyeballing. A specified fixture uses the manufacturer's photometric file (IES; LDT
+   converted) at its catalogue output — never a power set by eye (lighting-camera › IES).
+   Model each fixture once (a visible lens *and* an analytic light both lighting
+   double the flux). White balance is a camera setting. Parallel verticals.
+
+
+## LGT_02 procedure
+
+**Natural light = matching HDRI sky first**. Whenever sun, sky or any
+   daylight is in the scene, light it with an HDRI whose sky matches the reference (overcast vs
+   clear, sun height and direction, horizon content) before any Sky Texture, sun-only rig or
+   fake. Search Poly Haven by tag/thumbnail for the match; fall back to Sky Texture only when no
+   HDRI fits, and say so. **The HDRI is the sole natural light source**:
+   never a sun lamp alongside it — not "matched", not to boost a weak sun, not after painting the
+   disc out. The HDRI's sun direction (`hdri_analyse`) only guides rotating and placing the map.
+   If its sun is too weak or in the wrong place for the shot, choose another HDRI.

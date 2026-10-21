@@ -12,13 +12,14 @@ Rhino meshes are too coarse for curvature methods (a beam arrives as 8 faces), s
   3. weathered_concrete() -- shader: dirty-edge grime from edge_dist x noise (no geometry),
                     fresh-break material where `chip` > 0
 """
+from . import concrete as _mat_concrete
 import math
 
 import bmesh
 import bpy
 
-import study_materials as sm
-from study_materials import G, sock
+from .nodes import G
+from .nodes import sock
 
 
 # --- geometry ---------------------------------------------------------------------------
@@ -41,7 +42,7 @@ def dice(obj, size=0.05):
 
 
 def _GN(ng):
-    """Kept for existing scripts: study_materials.G on a node group."""
+    """Kept for existing scripts: materials.nodes.G on a node group."""
     return G(ng, clear=False)
 
 
@@ -202,7 +203,7 @@ def weathered_concrete(name="CONCRETE_WEATHERED", dirt_band=0.035, dirt_amount=0
                        dirt_noise_scale=9.0, stain=True, tex_id="concrete_wall_009"):
     """concrete_study base (tone, maps, round edges, leak stain) + procedural dirty edges from
     the GN `edge_dist` field + a fresh-break material where GN cut a chip (`chip` > 0)."""
-    mat = sm.concrete_study(name=name, tex_id=tex_id, edge_dark=False, stain=stain, bevel_chips=False)
+    mat = _mat_concrete.concrete_study(name=name, tex_id=tex_id, edge_dark=False, stain=stain, bevel_chips=False)
     g = G(mat.node_tree)                      # add to the existing tree
     nt = mat.node_tree
     mix = next(n for n in nt.nodes if n.label == "Wear Layered (BRDFLayered)")
@@ -276,7 +277,7 @@ def mask_material(name, method, radius=0.035):
         ao.inside, ao.only_local, ao.samples = True, True, 16
         val = _range(g, ao.outputs["AO"], 1.0, 0.6, (-500, 0), F)
     elif method == "bevel":
-        val = sm._edge_mask(g, radius, (-500, 0), F, "bevel")
+        val = _mat_concrete._edge_mask(g, radius, (-500, 0), F, "bevel")
     elif method == "edge_dist":
         val = _range(g, _attr(g, "edge_dist", (-800, 0), F), 0.0, radius, (-500, 0), F, 1.0, 0.0)
     elif method == "chip":

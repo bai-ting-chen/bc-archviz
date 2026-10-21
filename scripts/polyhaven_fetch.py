@@ -1,5 +1,5 @@
 """Download Poly Haven (CC0) HDRIs and PBR textures into a study's library/polyhaven.
-Each study owns its assets (RULES 10c): run with env ARCHVIZ_PROJECT=<study folder>.
+Each study owns its assets (RULES AST_03): run with env ARCHVIZ_PROJECT=<study folder>.
 
 Assets are CC0. Data comes from the live API at api.polyhaven.com -- Powered by Poly Haven.
 
@@ -129,7 +129,7 @@ def main():
     if a.cmd == "search":
         search(a.ids[0], a.ids[1], a.top)
     elif not projectpath.is_study(PROJECT):
-        print(f"NOTE: downloading into {LIB}, which is not a study's library (RULES 10c). "
+        print(f"NOTE: downloading into {LIB}, which is not a study's library (RULES AST_03). "
               f"Set ARCHVIZ_PROJECT=<study folder> unless this is meant.")
     for i in a.ids if a.cmd != "search" else ():
         try:

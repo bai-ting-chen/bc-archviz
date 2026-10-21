@@ -13,8 +13,10 @@ import math
 
 import bpy
 
-from wear import _GN, _input
-from study_materials import G, sock
+from materials.edge_wear import _GN
+from materials.edge_wear import _input
+from materials.nodes import G
+from materials.nodes import sock
 
 
 def caustic_sheet_group(name="Wavefront Caustics"):
@@ -184,7 +186,7 @@ def add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_te
                       floor_tile_m=2.0, name="CAUSTIC_SHEET", floor_albedo=(0.5, 0.5, 0.5)):
     """Create the overlay object with the GN modifier; inputs set on the modifier itself."""
     from mathutils import Vector
-    import wear
+    import materials.edge_wear as wear
     me = bpy.data.meshes.new(name)
     ob = bpy.data.objects.new(name, me)
     bpy.context.scene.collection.objects.link(ob)

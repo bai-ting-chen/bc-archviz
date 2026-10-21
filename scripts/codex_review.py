@@ -1,6 +1,6 @@
 """Second-opinion review of a skill change by Codex (read-only), before the change is pushed.
 
-When and why: RULES 14; how: references/maintaining.md › Review.
+When and why: RULES AGT_01; how: references/maintaining.md › Review.
 
     python scripts/codex_review.py --commit <sha>      # one commit
     python scripts/codex_review.py --uncommitted       # working tree
@@ -23,7 +23,7 @@ Report, most severe first, each with file:line and a concrete failure scenario:
 1. Correctness bugs in the code: wrong Blender 5.2 API use (see api-traps.md), broken
    node links, unit errors (mm vs m, lux, lumens, EV), paths that only work on one machine.
 2. Breaks of the skill's own rules: a project, study, client or user-folder name in the skill;
-   a scene-specific number presented as a rule (RULES 0); a rule stated outside RULES.md
+   a scene-specific number presented as a rule (RULES GOV_01); a rule stated outside RULES.md
    instead of pointed to; a push without a MIGRATE.md section; a second builder for a job
    that already has one; a new public helper without a one-line docstring.
 3. Docs that no longer match the code (SKILL.md tables, references, helpers.md).

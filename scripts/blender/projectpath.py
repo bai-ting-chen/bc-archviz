@@ -1,6 +1,6 @@
 """Which folder's library/ a script reads and writes assets in (no bpy: also used by host tools).
 
-Each study owns its assets (RULES 10c). Walking up from a start folder:
+Each study owns its assets (RULES AST_03). Walking up from a start folder:
 - a folder with its own library/ before any study folder -> that folder (a project, test scene);
 - inside a study (a folder whose parent is named "studies") -> the study, even before its
   library/ exists, so downloads land there;

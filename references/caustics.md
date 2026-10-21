@@ -1,13 +1,13 @@
 # Caustics
 
-## Decision (RULES 2)
+## Decision (RULES REN_02)
 | Case | Method | Why |
 |---|---|---|
 | Large light source, any refractor | Cycles path tracing | unbiased; converges when the key subtends a real angle, never for a sun-sized source |
 | Lamps above calm water, submerged surfaces | **MNEE** | cheap and clean, but under-delivers energy and ignores volumes on the light leg |
 | Sun through a rippled pool | **GN wavefront** `gn_caustics.add_caustic_sheet()` | native, exact, noise-free; MNEE fails outright on real ripples |
-| Sun through glassware (glass, glass of water) | LuxCore, as the row below (RULES 2a); `caustic_photons.py` (external, CPU) only when the scene must stay in Cycles | photons were the most faithful of the Cycles-side options on a measured shadow/lit ratio; MNEE and path tracing fall short |
-| **Sun through patterned glass / glass block / several interfaces, room-scale receivers** | **LuxCore PATH + light tracing**, GPU camera paths + CPU light tracing (luxcore.md, RULES 2a) | unbiased and energy-correct; the only engine that converged |
+| Sun through glassware (glass, glass of water) | LuxCore, as the row below (RULES REN_03); `caustic_photons.py` (external, CPU) only when the scene must stay in Cycles | photons were the most faithful of the Cycles-side options on a measured shadow/lit ratio; MNEE and path tracing fall short |
+| **Sun through patterned glass / glass block / several interfaces, room-scale receivers** | **LuxCore PATH + light tracing**, GPU camera paths + CPU light tracing (luxcore.md, RULES REN_03) | unbiased and energy-correct; the only engine that converged |
 
 Measured on sun (0.53°) → 4 glass interfaces with a wavy relief → diffuse floor, equal 120 s,
 scored against a 900 s reference: LuxCore CPU light tracing 18 % rel. error, −0.5 % bias;
@@ -73,7 +73,7 @@ Model the relief as geometry: bump and normal maps do not bend a caustic.
   tens of millions of faces. Instanced, the modelled relief is cheap to trace (flat boxes were
   only 1.1–1.3× faster); displacement or normal maps are no speedup (luxcore.md). Fade the relief to a flat border over ≥ 25 mm — a short fade
   lenses into bright square outlines.
-- **Light for caustics:** the HDRI's own sun casts them (RULES 8a) — pick a map by its sun share
+- **Light for caustics:** the HDRI's own sun casts them (RULES LGT_02) — pick a map by its sun share
   (lighting-camera.md › Pick the HDRI by its sun).
 - **Contrast of light against the surface is set by the fill, not the caustic.** Sky through a
   large glazed wall plus white walls bouncing it lift the "shade" the caustics sit in. A clearer,
@@ -86,7 +86,7 @@ Model the relief as geometry: bump and normal maps do not bend a caustic.
 ## MNEE build rules (measured, `scripts/controls/mnee_water.py`)
 - Flags: `obj.cycles.is_caustics_caster` / `is_caustics_receiver`, `light.cycles.is_caustics_light`.
 - The caster must be **tessellated and smooth**. One flat quad or a closed box gives no light at
-  all; water as a diced, smoothed top plane works (`interior.water_surface`).
+  all; water as a diced, smoothed top plane works (`materials.water.water_surface`).
 - Any refractive object in the path that is *not* a caster blocks MNEE, and the solver gives up
   after a few refractions — so glassware has to be built for it
   (`glassware.glass_of_water_mnee()`).
@@ -122,3 +122,19 @@ LuxCore (free, GPL) — tested, adopted for caustics (luxcore.md). Unverified: C
 progressive photon mapping in a Cycles build), Reblend (~$49, photon caustics / BDPT / VCM),
 Octane (paid).
 Fakes — Voronoi textures, gobo area lights, shadow-ray Transparent — only as a declared fallback.
+
+
+## REN_01 procedure
+
+**Native first.** Blender's own features (Cycles, shader nodes, Geometry Nodes, modifiers, Sky
+   Texture) before self-written external tools — native work stays editable in the .blend and
+   survives Blender updates; external tools are a last resort, and say so when used.
+
+
+## REN_02 procedure
+
+**Unbiased first.** Order: (a) Cycles path tracing; (b) native physically based approximations
+   (MNEE, GN wavefront caustics) only when (a) cannot converge — state why and the bias;
+   (c) external tools only when nothing native works — tell the user. Fakes (light-path tricks,
+   projected patterns) only as a declared fallback. The point of the studies is renders that
+   hold up as physics, so a bias must always be named, never hidden.

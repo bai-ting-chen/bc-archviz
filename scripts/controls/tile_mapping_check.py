@@ -3,7 +3,7 @@ cylinder crossing the ±pi cut). Run: blender -b --factory-startup --python <thi
 import os, sys, math
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "blender"))
 import bpy, bmesh, numpy as np
-import tile_mapping
+import materials.tile_mapping as tile_mapping
 
 def uv_vs_world(ob, uvname, metric):
     """Max |uv edge length - metric edge length| over all face edges, metres."""

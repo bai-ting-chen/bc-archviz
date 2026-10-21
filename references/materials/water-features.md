@@ -1,8 +1,8 @@
 # Water features: films, cascades, overflows, whitewater, choppy pools
 
 Stills of water running down a wall or glass, spilling into a trench or pool, and the pool around
-it. Physics first (RULES 3), then how to build each part as geometry + shading in Cycles. Pool
-water basics (absorption, ripples as geometry): materials.md › Water.
+it. Physics first (RULES RES_01), then how to build each part as geometry + shading in Cycles. Pool
+water basics (absorption, ripples as geometry): [materials/water.md](water.md)
 
 ## Method: procedural or simulation?
 | Approach | Use | Notes |
@@ -75,7 +75,7 @@ The projected-area and delta formulas above are continuity geometry, not solver 
   lip (teapot effect) and rejoins the face below. A face leaning out a few degrees still holds a
   moving film. Measure the depth profile down one vertical line (raycast) before modelling.
 - **Character traps:** fine relief + roll waves draw squiggly contour-like highlights; keep roll
-  waves ~0.2 mm and ropes λ 2–9 cm. Judge at native resolution (RULES 8b).
+  waves ~0.2 mm and ropes λ 2–9 cm. Judge at native resolution (RULES VAL_01).
 
 ## Free curtain off a lip: 2D ribbon pattern on a ballistic carrier
 Once the flow detaches from the lip (check the section first — a low flow clings and wraps
@@ -147,7 +147,7 @@ field in the carrier's own (u, v), unioned into one watertight body (SDF).
 - At grazing view (~70°) water reflects only 6–10 %: the **floor sets the pool's tone**. Polished
   near-black stone (albedo 0.02–0.05) + absorption ~1.5 /m + chop removes the floor from view.
 
-## Materials around water (sized for the final view, RULES 8)
+## Materials around water (sized for the final view, RULES MAT_03)
 - **Brushed anodised metal:** Metallic BSDF F82 (edge tint brighter, warmer than base),
   anisotropy ~0.75 with the tangent from a directional UV along the part's length, brush streaks
   in roughness (noise stretched ~400:1); bevel 1–2 mm with hardened normals. Water marks as

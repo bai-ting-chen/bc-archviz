@@ -1,6 +1,6 @@
 # Coaching: the judgement Claude applies, written down for Codex
 
-The goal is that Codex makes the same render calls Claude would (RULES 15b). Each lesson below
+The goal is that Codex makes the same render calls Claude would (RULES AGT_03). Each lesson below
 began as a gap: Claude caught something that Codex's own report or review missed. Read this file
 before every stage report and every review. Craft facts (materials, light, water) go into their
 topic reference; this file holds **how to look and how to check**.
@@ -35,10 +35,10 @@ topic reference; this file holds **how to look and how to check**.
   - The trap: a relief control was judged on wall crops; one board end, bottom left of the frame,
     displaced several cm into a wedge on the deck — builder, reviewer and director all missed it.
 - **Look up the API before the one allowed run.** Before writing render or output setup, grep
-  `api-traps.md` for the property and reuse the skill's helpers (`finals.py` savers) or the study's
+  [api-traps.md](api-traps.md) for the property and reuse the skill's helpers (`finals.py` savers) or the study's
   last working script; probe the scene in-process before spending a frame.
   - The trap: a stage with one launch died on `obj.cycles.use_adaptive_subdivision` (moved to the
-    modifier) and its rerun on the `OPEN_EXR_MULTILAYER` enum — both already in api-traps.md.
+    modifier) and its rerun on the `OPEN_EXR_MULTILAYER` enum — both already in [api-traps.md](api-traps.md).
 - **Aim a camera at the thing.** Use a Track To constraint on an empty placed at the feature's
   real coordinates, rather than guessed rotations. Then check the feature lands inside the frame
   (`world_to_camera_view`) before rendering.
@@ -68,7 +68,7 @@ topic reference; this file holds **how to look and how to check**.
 
 ## Look judgement (render rounds)
 - **Judge the final camera first,** then native-resolution crops beside the same crops of the
-  reference (RULES 8, 8b).
+  reference (RULES MAT_03, VAL_01).
 - **Name the character, not only the mean:** feature size, edge sharpness, contrast, density,
   orientation, distribution. A metric that passes while the image looks wrong means the metric is
   wrong.
@@ -89,3 +89,17 @@ topic reference; this file holds **how to look and how to check**.
   the surroundings) — the next step follows from the cause, not from the look.
 - **Show the user the best state after a few rounds** (the study's cap), rather than tuning blind.
   Metric checklists are evidence for a look decision, never a replacement for it.
+
+
+## AGT_03 procedure
+
+**Train Codex towards Claude's judgement.** The goal is for Codex to make the same render calls
+    Claude would.
+    - Every Codex stage report ends with Codex's own self-judgement against the reference and the
+      design intent.
+    - Claude compares it with its own verdict and writes each gap as a checkable lesson:
+      - working and judging habits go in [codex-coaching.md](codex-coaching.md);
+      - craft goes in the topic reference.
+    - A kind of decision moves to Codex once its self-judgement keeps matching Claude's.
+    - **Normal mode by default.** Training costs extra tokens on both sides, so CPM (AGT_02) skips the
+      self-judgement and the lesson writing unless the user asks for training in CPM.

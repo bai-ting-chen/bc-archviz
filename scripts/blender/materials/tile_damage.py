@@ -1,11 +1,13 @@
 """Warped, tile-local Voronoi fracture cells, coating loss and rigid piece planes.
 
 Cracks (network, pieces, spalls, dirt band) are look-approved; chips and edge flakes are WORK IN
-PROGRESS (shape still under look-dev, controls report them as WIP) — see materials.md › Tiles.
+PROGRESS (shape still under look-dev, controls report them as WIP) — see references/materials/tiles.md
 """
 import math
 import bpy
-from tile_nodes import _Graph, _socket, _replace_group_users
+from .tile_nodes import _Graph
+from .tile_nodes import _socket
+from .tile_nodes import _replace_group_users
 
 _VERSION = 7
 _REVISION = 1
@@ -391,5 +393,3 @@ def damage_bsdfs(a, i, intact, color, height, d):
     shader = mix(d['Body'], shader, material(clay_color, .9, fine.outputs['Normal']))
     dark = v('MULTIPLY', color, (.25, .25, .25))
     return mix(d['Crack'], shader, material(dark, .9, bump.outputs['Normal']))
-
-

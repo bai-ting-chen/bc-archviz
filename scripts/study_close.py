@@ -1,4 +1,4 @@
-"""Close a study (RULES 10e): keep milestones and finals, make them self-contained, delete the rest.
+"""Close a study (RULES AST_02): keep milestones and finals, make them self-contained, delete the rest.
 
     python study_close.py <study> [--keep a.blend ...] [--apply] [--blender <exe>]
 

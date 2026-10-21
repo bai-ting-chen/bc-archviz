@@ -4,7 +4,8 @@ import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "blender"))
 sys.path.insert(0, os.path.dirname(__file__))
 import bpy, numpy as np
-import _scene, tile_layout
+import _scene
+import materials.tile_layout as tile_layout
 
 RES, SIZE = 400, 1.0                       # 400 px over 1 m: 2.5 mm per px
 CASES = {

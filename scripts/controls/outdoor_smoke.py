@@ -14,14 +14,16 @@ from mathutils import Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "blender"))
+import materials.concrete as _mat_concrete
+import materials.glass as _mat_glass
+import materials.ground as _mat_ground
+import materials.pbr as _mat_pbr
 import archviz  # noqa: E402
 import atmosphere  # noqa: E402
-import lookdev  # noqa: E402
 import scatter  # noqa: E402
-import study_materials  # noqa: E402
 import terrain  # noqa: E402
-import vegetation  # noqa: E402
-import wear  # noqa: E402
+import materials.vegetation as vegetation  # noqa: E402
+import materials.edge_wear as wear  # noqa: E402
 
 out = sys.argv[sys.argv.index("--") + 1]
 bpy.ops.wm.read_homefile(use_empty=True)
@@ -46,7 +48,7 @@ wear.add_leak_field(hut)                                   # first, on the clean
 wear.add_edge_wear(hut, wear.edge_wear_group("SMOKE WEAR", band=0.08, level=3), Seed=(1.0, 2.0, 3.0))
 assert hut.modifiers[0].name == "LEAK FIELD", [m.name for m in hut.modifiers]
 conc = wear.weathered_concrete("SMOKE_CONCRETE", stain=False, tex_id="concrete_wall_006")
-study_materials.retone(conc, (0.28, 0.28, 0.28), "concrete_wall_006")
+_mat_concrete.retone(conc, (0.28, 0.28, 0.28), "concrete_wall_006")
 wear.add_runoff(conc)
 wv = [v.co for v in hut.data.vertices if abs(v.co.y + 1.45) < 0.01]    # recessed window face
 xs, zs = [v.x for v in wv], [v.z for v in wv]
@@ -57,7 +59,7 @@ bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0)
 bmesh.ops.scale(bm, vec=(max(xs) - min(xs), 0.02, max(zs) - min(zs)), verts=bm.verts)
 bmesh.ops.translate(bm, vec=(0, -1.48, (min(zs) + max(zs)) / 2), verts=bm.verts)
 bm.to_mesh(pane.data); bm.free(); sc.collection.objects.link(pane)
-pane.data.materials.append(lookdev.glass_distortion(archviz.dielectric("SMOKE_GLASS"), pane))
+pane.data.materials.append(_mat_glass.glass_distortion(_mat_pbr.dielectric("SMOKE_GLASS"), pane))
 
 # review regressions: a 2nd wall sharing the leak field, a pane rotated in plan, '.001' names
 shed = bpy.data.objects.new("SHED", bpy.data.meshes.new("SHED"))
@@ -67,7 +69,7 @@ wear.add_leak_field(shed)
 assert hut.modifiers["LEAK FIELD"].node_group is not None, "first wall lost its leak field"
 rot = pane.copy(); rot.data = pane.data.copy(); rot.rotation_euler.z = math.radians(30); rot.location.x += 8
 sc.collection.objects.link(rot)
-lookdev.glass_distortion(rot.data.materials[0], rot)
+_mat_glass.glass_distortion(rot.data.materials[0], rot)
 import max_import  # noqa: E402
 tm = bpy.data.materials.new("leaf1B_MT_Tree01_diffuse.001"); probe = bpy.data.objects.new("PROBE", bpy.data.meshes.new("PROBE"))
 probe.data.materials.append(tm)
@@ -81,7 +83,7 @@ bpy.data.objects.remove(probe)
 
 # hill + ground
 topo = terrain.landform_group("SMOKE_LAND", centre=C, pad_half=HALF, size=120, verts=241, fall=4, run=25)
-ground = terrain.ground_material("grass_ground", "forest_ground_05", "SMOKE_GROUND", wet_gamma=1.4)
+ground = _mat_ground.ground_material("grass_ground", "forest_ground_05", "SMOKE_GROUND", wet_gamma=1.4)
 ter = terrain.add_terrain(topo, ground)
 
 # camera down the slope

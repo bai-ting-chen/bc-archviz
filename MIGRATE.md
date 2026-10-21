@@ -1,117 +1,12 @@
-# MIGRATE — check before work
+# Outstanding receiving-machine actions
 
-## 261018 — thin-sheet simulation limits and hybrid boundaries
-Generic reference corrections only; no new code, installation, or scene migration.
+- Pull this restructure into the existing `blender-archviz` clone.
+- Update rule-ID references in active local CLAUDE.md, AGENTS.md and project memory using the map below (remove the map with this step); preserve history and completed studies.
+  0→GOV_01, 0a→GOV_02, 1→REN_01, 2→REN_02, 2a→REN_03, 3→RES_01, 3a→RES_02, 4→PIP_01,
+  5→LGT_01, 6→MAT_01, 7→RES_03, 8→MAT_02/MAT_03/MAT_04, 8a→LGT_02, 8b→VAL_01, 8c→MAT_05, 8d→MAT_06, 8e→GAT_02,
+  9→VAL_02, 10→VAL_03, 10a→GAT_01, 10b→GAT_03, 10c→AST_03, 10d→AST_01/AST_04, 10e→AST_02, 11→VAL_04,
+  12→SAF_01, 13→SAF_02, 14→AGT_01, 15→AGT_02, 15a→AGT_02, 15b→AGT_03, 16→AGT_04, 17→GOV_04.
+- Delete stale `.pyc` files and `__pycache__` directories inside this skill after pulling.
 
-### 1. Read the inlet and boundary guidance
-Check: the operator has read water-features.md “Thin-sheet inlets and hybrid boundaries”,
-materials.md's offset-projection note, and the fluid-simulation capability state.
-Do: read those sections before planning a sheet-fed simulation or duplicating scan lookups.
-Verify the selected FLIP edition's upstream README; public Demo caches contain mesh watermarks.
-
-## 261018 — Closing a study cleans it (RULES 10e)
-New `scripts/study_close.py` + `scripts/blender/blend_refs.py`: on close, keep the milestone scenes
-listed under `## Milestones` in STUDY_NOTES.md, make them self-contained, delete `_wip/`, other .blend,
-unused library files and vendor/cache folders, verify references. Linked-library image paths resolve
-from their library .blend. No installs.
-
-### 2. Read RULES 10e
-Check: this machine's session has read RULES 10e (or the user says so).
-Do: read it; run the tool (plan first) when the user next closes a study.
-
-## 261018 — Two work modes: normal and Codex priority (RULES 15a)
-Docs only. RULES 15a names two Claude/Codex modes. In Codex priority mode (Claude low on budget,
-the user names it) Codex builds everything and a parallel read-only Codex session reviews it.
-How to launch: maintaining.md > Handing work to Codex. No installs.
-
-### 3. Read RULES 15a
-Check: this machine's session has read RULES 15a (or the user says so).
-Do: read it. Local memories that describe a one-off "Codex does all coding" arrangement can point at it.
-
-## 261018 — RULES 15a revised: Rhino modelling and research per mode
-Docs only. Normal mode: Claude does Rhino modelling and the detailed research (online, YouTube) and
-summarises it. Codex priority mode: Codex does coding, Rhino modelling and detailed research (notes in
-`_wip/research/`); Claude digests the notes, decides and commands Codex.
-
-### 4. Read the revised RULES 15a
-Check: this machine's session has read the RULES 15a that assigns Rhino modelling and research per mode.
-Do: read RULES 15a and the amended RULES 15 sentence on Rhino modelling.
-
-## 261018 — RULES 15a: CPM = Claude directs, Codex does all labour
-Docs only. In Codex priority mode (CPM) Claude takes the user's seat as director (big decisions, direction,
-taste, research digest, briefs, user gates); Codex does all hands-on work. Never two Codex builders at once
-(the machine-wide AGENT_LOCK stops the second).
-
-### 5. Read RULES 15a (CPM)
-Check: this machine's session has read the RULES 15a that names CPM.
-Do: read RULES 15a.
-
-## 261019 — RULES 15b: training Codex; references/codex-coaching.md
-Docs only. Codex stage reports end with a self-judgement; Claude writes each gap between its verdict and
-Codex's as a checkable lesson in references/codex-coaching.md (craft lessons go to topic references).
-
-### 6. Read RULES 15b and codex-coaching.md
-Check: this machine's session has read RULES 15b and references/codex-coaching.md.
-Do: read both; Codex briefs on this machine tell Codex to read codex-coaching.md before reporting.
-
-## 261019 — RULES 15b: training in normal mode only
-Docs only. Codex training (self-judgement + lessons) runs only in normal mode; CPM skips it to save tokens.
-
-### 7. Read RULES 15b (normal mode only)
-Check: this machine's session knows training runs only in normal mode.
-Do: read RULES 15b.
-
-## 261019 — Work modes spelled out: references/work-modes.md
-Docs only. RULES 15a now points to `references/work-modes.md`: a stage-by-stage table of who does
-what in normal mode and CPM, the brief / stage report / research note / review formats in
-`_wip/codex/`, and what Claude reads in CPM. RULES 15b: training is normal-mode by default, and
-runs in CPM too when the user asks.
-
-### 8. Read work-modes.md and the revised RULES 15a/15b
-Check: this machine's session has read references/work-modes.md.
-Do: read it; Codex briefs on this machine follow its brief and report formats.
-
-## 261019 — Research gate (RULES 3a)
-Docs only. A third stop in every study, both modes: after gathering sources and before analysing,
-show the question, source list and gaps, and wait for the user's links. Stops are now research
-(3a), model (10a), final preview (10b). work-modes.md table renumbered; new source-list format.
-
-### 9. Read RULES 3a
-Check: this machine's session has read RULES 3a.
-Do: read it and the work-modes.md stages 3–5.
-
-## 261019 — Material gate (RULES 8e)
-Docs only. A fourth stop, both modes: after the first build and before any look round, show the
-material schedule, a first-pass render at the final camera, native crops and candidate sheets;
-wait for approval. Stops: research (3a), model (10a), materials (8e), final preview (10b).
-
-### 10. Read RULES 8e
-Check: this machine's session has read RULES 8e.
-Do: read it and work-modes.md stage 10 and the material schedule format.
-
-## 261020 — board-formed concrete as relief; ballistic curtain; Codex handling
-Docs only, no installs. New: materials.md › Concrete "Board-formed concrete is relief, not a print" (three relief
-scales, grain source map, tone target vs AgX roll-off, build traps); water-features.md "Free curtain off a lip"
-(ballistic carrier, ribbon traps); work-modes.md brief rule for user-requested changes; maintaining.md watching
-and queueing Codex sessions; codex-coaching.md six new lessons (contrast, patch stop, mechanism, user-named
-asset, whole-frame diff, API lookup); api-traps.md adaptive subdivision lives on the modifier.
-
-### 11. Read the new sections
-Check: this machine's session has read the sections listed above.
-Do: read them before the next board-formed concrete, water-curtain or Codex-led stage.
-
-## 261020 — floors from another renderer, scan tinting, warm WB, Codex speed
-Docs only, no installs. materials.md: tint scans with a gain (a flat-colour Mix erases texture),
-choose substitutes by texture, slab-floor variation and joints, honed-stone roughness, dark veneer
-floors at low angles. pipeline.md: reusing Enscape/V-Ray materials from a .3dm. lighting-camera.md:
-warming toward a reference (tint ≤ 0, whole-frame hue). work-modes.md: the brief's checks line.
-maintaining.md: Codex fast tier, amending a running stage, a stage cut off by the plan limit.
-RULES 16: a stopped builder's lock is the director's. api-traps.md: white-balance tint neutral at 10.
-
-### 12. Read the new sections
-Check: this machine's session has read the sections listed above and RULES 16.
-Do: read them before the next floor, reference-warmth or Codex-led stage.
-
-### Last. Delete this file only after this machine carried out a required migration
-If the checks already pass, leave this file for the other machines. Otherwise follow
-references/maintaining.md after carrying out the step.
+Remove a line once every machine has done it.
+Stage 3 rename: pending

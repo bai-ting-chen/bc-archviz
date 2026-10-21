@@ -10,8 +10,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'blender'))
 import bpy
 import numpy as np
 import archviz
-import tile_damage
-import tile_surface
+import materials.tile_damage as tile_damage
+import materials.tile_surface as tile_surface
 
 W, H, J, PX, NT = .0375, .25, .003, .00025, 3
 GLAZE, ENGOBE = .0003, .0002

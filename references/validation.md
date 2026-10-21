@@ -1,0 +1,34 @@
+# Validation
+
+
+## VAL_01 procedure
+
+**Detail pass at native resolution**. Region means match long
+    before the image does. Once they agree, crop each material/effect at full resolution beside
+    the same crop of the reference and judge its *character*: feature size, edge sharpness,
+    contrast, density, orientation, distribution — a feature can match in mean and still read
+    wrong in character. Repeat after every change to that feature; half-res pairs hide it.
+
+
+## VAL_02 procedure
+
+**A control render is the only proof.** Feature OFF + same scene twice (noise floor; same seed
+   for the feature diff); read *changed > 2 %*, several times the noise floor, and look at a
+   diff/crop; verify the control really
+   removed the feature. Whole-frame averages hide local effects, and a broken control looks like
+   "no effect".
+
+
+## VAL_03 procedure
+
+Measure on the PNG the renderer wrote (`imgstats.py`, `refmatch.py`) — AgX rolls off whites,
+    so linear values mislead for look matching. Physical calibration controls may inspect linear EXR energy data. Process frames → study `_wip/`.
+
+
+## VAL_04 procedure
+
+Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real
+    one — a small scene isolates the cause in minutes where the full scene hides it.
+
+Check the crop/patch actually covers the changed feature before interpreting unchanged numbers.
+Pack small GPU probes when possible; run only affected sections. Budget: one first run, one per real fix, one final.

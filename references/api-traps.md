@@ -2,10 +2,10 @@
 
 ## Nodes
 - GN modifier inputs: `mod["Socket_N"]` fails; values live at `mod.properties.inputs.<id>.value`
-  (empty `.name`; resolve via `node_group.interface.items_tree`) → `wear.set_input`. Group defaults
+  (empty `.name`; resolve via `node_group.interface.items_tree`) → `materials.edge_wear.set_input`. Group defaults
   are copied only at modifier creation. New code re-hits this with `mod[ident] = v`.
 - Edge Angle (signed): convex arrises read **positive** on outward-normal Rhino meshes.
-- ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `archviz.sock`.
+- ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `materials.nodes.sock`.
 - Noise Texture output: "Factor" in GN; index 0 is safest.
 - Capture Attribute: socket index 1 is Selection — link by name.
 - Object/Collection Info geometry keeps source materials → Set Material.
@@ -88,7 +88,7 @@
 - Cycles only: `Render Result` cannot be saved while a render runs ("could not be saved") - no
   mid-render snapshots from Python. LuxCore allows them (luxcore.md › Final in the open UI).
 - `bpy.ops.render.view_cancel()` (viewer stop) fires render_complete - yet the denoiser had not
-  run; see render-settings.md > Finals with no sample limit.
+  run; see [render-settings.md](render-settings.md) > Finals with no sample limit.
 
 ## Windows shell
 - Pass Blender output paths with forward slashes from bash.
@@ -106,7 +106,7 @@
 - **Operators in a `--python` startup script with UI** see no active object in their context
   (`mode_set.poll()` fails: "Context missing active object"), unlike `-b`. Wrap them:
   `bpy.context.temp_override(window=w, screen=w.screen, object=ob, active_object=ob,
-  selected_objects=[ob], edit_object=ob)` (`lux_materials._ctx`). Test UI-run code in the UI
+  selected_objects=[ob], edit_object=ob)` (`materials.luxcore._ctx`). Test UI-run code in the UI
   once — a headless pass proves nothing about it.
 - An object with **no material slots bakes nothing** ("No active image found"): give it a
   temporary slot for the bake material.

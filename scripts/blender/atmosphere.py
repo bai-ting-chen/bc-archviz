@@ -8,14 +8,14 @@ Radiation fog and mist are water droplets of ~5-20 um: Mie scattering, strongly 
 no absorption (white). Blender 5.2's Volume Scatter has a native Mie phase function with a droplet
 diameter input (Cycles). Density = extinction coefficient from the visibility (Koschmieder):
 sigma = 3.912 / V (V = meteorological visibility, contrast threshold 2 %). Fog is thickest low
-down and in hollows and thins to clear air at its top; patchy, never a uniform wall (RULES 8c).
+down and in hollows and thins to clear air at its top; patchy, never a uniform wall (RULES MAT_05).
 Indoor air has no fog: clear boxes around buildings (a dark room behind glass filled with fog
 is also a noise source).
 """
 import bmesh
 import bpy
 
-from study_materials import G
+from materials.nodes import G
 
 
 def sigma_from_visibility(visibility_m):
