@@ -18,7 +18,7 @@
   overrides it — don't keep one. Tools load at session start. Server env: `BLENDER_MCP_HOST/PORT`, `BLENDER_PATH`.
 - Codex (OpenAI) on the same machine: its user skills folder is `~/.agents/skills`. Link the
   skill there as a directory junction, not a copy, so a `git pull` updates both agents:
-  `mklink /J "%USERPROFILE%\.agents\skills\blender-archviz" "%USERPROFILE%\.claude\skills\blender-archviz"`.
+  `mklink /J "%USERPROFILE%\.agents\skills\bc-archviz" "%USERPROFILE%\.claude\skills\bc-archviz"`.
   A Codex skill import can leave a stale copy there; replace it. Register the MCP in
   `~/.codex/config.toml` as `[mcp_servers.blender]` with the same command and an
   `[mcp_servers.blender.env]` table; check with `codex mcp list`. Codex reads `AGENTS.md`, not
@@ -33,7 +33,7 @@
   `refmatch.py` / `imgstats.py`.
 - Set prefs headless: `blender -b --python set_prefs.py` with `bpy.ops.wm.save_userpref()`
   (online access, MCP autostart/port, Cycles OPTIX + `refresh_devices()`).
-- Skill code lives in `~/.claude/skills/blender-archviz`, project data in the current study, and MCP in `%LOCALAPPDATA%/BlenderMCP`.
+- Skill code lives in `~/.claude/skills/bc-archviz`, project data in the current study, and MCP in `%LOCALAPPDATA%/BlenderMCP`.
 
 ## MCP tools
 `execute_blender_code` (assign a dict to `result`), `get_objects_summary`,
@@ -285,7 +285,7 @@ Apply only checks needed by the current task. Read-only documentation work needs
 | Assets | `scripts\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); others `<study>\library\local\` with a `meta.json` |
 | Video research | `scripts\yt_learn.py` |
 
-In Blender code: `sys.path.insert(0, os.path.expanduser(r"~\.claude\skills\blender-archviz\scripts\blender"))`.
+In Blender code: `sys.path.insert(0, os.path.expanduser(r"~\.claude\skills\bc-archviz\scripts\blender"))`.
 Without the MCP tools loaded (session started elsewhere), drive Blender with
 `scripts/mcp_call.py execute_blender_code --file script.py`; the script must assign a **dict** to `result`.
 Anything in a Blender panel is RNA → scriptable via MCP `execute_blender_code`. Not scriptable:

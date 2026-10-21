@@ -3,7 +3,7 @@
 Rhino supplies geometry only. Everything visual -- materials, lighting, cameras, render
 settings -- is built here, from the local Poly Haven library.
 
-    import os, sys; sys.path.insert(0, os.path.expanduser(r"~\\.claude\\skills\\blender-archviz\\scripts\\blender"))
+    import os, sys; sys.path.insert(0, os.path.expanduser(r"~\\.claude\\skills\\bc-archviz\\scripts\\blender"))
     import archviz
 """
 import json

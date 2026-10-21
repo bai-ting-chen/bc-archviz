@@ -17,7 +17,7 @@ import sys
 
 SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-PROMPT = """Review this change to the blender-archviz skill (Blender 5.2 archviz pipeline).
+PROMPT = """Review this change to the bc-archviz skill (Blender 5.2 archviz pipeline).
 Read SKILL.md, RULES.md, references/maintaining.md and references/api-traps.md first.
 Report, most severe first, each with file:line and a concrete failure scenario:
 1. Correctness bugs in the code: wrong Blender 5.2 API use (see api-traps.md), broken

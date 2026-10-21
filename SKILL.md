@@ -1,7 +1,8 @@
 ---
-name: blender-archviz
+name: bc-archviz
 description: >-
-  Default for any rendering or visualization work: photoreal archviz in Blender 5.2 + Cycles
+  Archviz/rendering: Rhino geometry to Blender, Houdini-ready. Photoreal archviz
+  in Blender 5.2 + Cycles
   (LuxCore for detailed caustics through glass or water), with Rhino
   (.3dm) as geometry only. Covers materials (Poly Haven PBR, procedural concrete, wood, stone,
   metal, glass, water; edge wear, chips, cracks, leak streaks, anti-tiling), HDRI
@@ -14,9 +15,9 @@ description: >-
   Evermotion, Forest Pack vegetation; V-Ray or Corona props), and for pulling, editing or
   pushing this skill (MIGRATE.md and maintenance rules).
 ---
-<!-- blender-archviz-skill-loaded-marker -->
+<!-- bc-archviz-skill-loaded-marker -->
 
-# Blender archviz
+# bc-archviz
 
 Read [RULES.md](RULES.md), then the task reference below. Check outstanding actions in
 [MIGRATE.md](MIGRATE.md) when present; complete only applicable receiving-machine actions.
