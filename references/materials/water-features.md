@@ -82,10 +82,31 @@ Once the flow detaches from the lip (check the section first — a low flow clin
 under it, see *Falling film* › Check the section and *Overflow edge*), a thin curtain thrown off
 the lip can be built without simulation: a carrier surface plus a 2D ribbon
 field in the carrier's own (u, v), unioned into one watertight body (SDF).
-- **Carrier = the trajectory.** Water leaves the lip horizontally, so the section is a parabola with
+- **Carrier = the trajectory (free-fall curtain).** Water leaves the lip horizontally, so the section is a parabola with
   its vertex at the lip: x(d) = v0·sqrt(2d/g), standoff growing monotonically with the drop d. Never a
   bulge that returns to the wall. Let v0 vary slowly and irregularly along the lip (q varies) so the
   landing line and the light gradient vary. Prove it with true sections against the analytic curve.
+  - **Free fall:** after separation the only body force is gravity (projectile motion). This holds for the
+    coherent sheet over a few metres. It fails where:
+    - drops near the foot approach terminal speed (2 mm drop ≈ 6.5 m/s) while the sheet reaches √(2gH) ≈ 9 m/s at 4 m;
+    - a curtain sealed to walls at both ends traps air behind it, the air is entrained, and the low pressure pulls the
+      nappe toward the wall (weir ventilation). An open or torn curtain is aerated and stays ballistic.
+  - **One family of profiles:** every section is the same one-parameter parabola z = −g·x²/(2·v0²). All sections share
+    the separation line (the lip). The launch direction is the crest tangent at separation, horizontal off a sharp or
+    flat lip. On a rounded crest the separation point slides round as v0 falls (cling, see *Overflow edge*).
+  - **The surface is analytic, not lofted:** S(y, d) = (x_lip − v0(y)·√(2d/g), y, z_lip − d). Each section is exactly a
+    parabola, and smoothness comes only from v0(y). Use a C¹/C² noise, two scales (metres + decimetres), never per-cell
+    steps. A loft between drawn sections can wiggle or kink between them.
+  - **Landing line** = the intersection with the receiving plane z_w: x_L(y) = v0(y)·√(2H/g), H = z_lip − z_w.
+    The impact angle from horizontal is atan(√(2gH)/v0), near vertical (≈ 83° for 0.6 m/s off 4 m). Splash, foam and
+    drops follow x_L(y) and vary along it.
+  - **v0 is set by the flow:** off a free overfall v0 ≈ √(g·h_c), h_c = (q²/g)^(1/3), so v0 = (g·q)^(1/3) and the
+    throw x_L ∝ q^(1/3). Doubling the throw takes ~8× the discharge per metre, or a projecting nozzle or lip. More q
+    also means a thicker sheet that breaks up later. Declare it when a look asks for long throw *and* early breakup.
+  - **Along the drop:** speed U = √(v0² + 2gd), and the sheet thins as h = q/U. Holes open, their rims retract
+    (Taylor–Culick, V = √(2σ/(ρh))) and leave ligaments, which pinch into drops (Rayleigh–Plateau, drop ≈ 1.9 × ligament
+    diameter). So gap fraction and gap size grow with d, string length falls, and the lowest band is fragments and
+    drops. Measure the reference's coverage at top / mid / bottom and match that profile.
 - **The carrier gives the volume.** A standoff of a few cm (often what a reference measures) reads
   as paint on the wall at a distance; size the standoff from the final view.
 - **Ribbon traps (each seen in a failed round):**
