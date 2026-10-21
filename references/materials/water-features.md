@@ -98,7 +98,7 @@ field in the carrier's own (u, v), unioned into one watertight body (SDF).
     parabola, and smoothness comes only from v0(y). Use a C¹/C² noise, two scales (metres + decimetres), never per-cell
     steps. A loft between drawn sections can wiggle or kink between them.
   - **Landing line** = the intersection with the receiving plane z_w: x_L(y) = v0(y)·√(2H/g), H = z_lip − z_w.
-    The impact angle from horizontal is atan(√(2gH)/v0), near vertical (≈ 83° for 0.6 m/s off 4 m). Splash, foam and
+    The impact angle from horizontal is atan(√(2gH)/v0), near vertical (≈ 86° for 0.6 m/s off 4 m). Splash, foam and
     drops follow x_L(y) and vary along it.
   - **v0 is set by the flow:** off a free overfall v0 ≈ √(g·h_c), h_c = (q²/g)^(1/3), so v0 = (g·q)^(1/3) and the
     throw x_L ∝ q^(1/3). Doubling the throw takes ~8× the discharge per metre, or a projecting nozzle or lip. More q
