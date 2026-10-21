@@ -1,7 +1,7 @@
 # Maintaining this skill
 
 Read this before changing, pulling or pushing the skill. One person keeps it in sync across
-several machines through GitHub (`github.com/bai-ting-chen/blender-archviz-skill`). Git carries
+several machines through GitHub (`github.com/bai-ting-chen/bc-archviz`). Git carries
 the files but not what each machine has to do about them, so every push also has to leave
 instructions behind.
 
