@@ -1,167 +1,167 @@
-# House rules
+## House rules
 
-## Governance
+### Governance
 
-When: GOV_01 — recording reusable knowledge.
-Rule: Keep scene-independent methods, constants, traps and taste; scene results belong in study notes.
-Read: references/maintaining.md (before publishing knowledge).
+**GOV_01 — Recording reusable knowledge.**  
+Rule: Keep scene-independent methods, constants, traps and taste; scene results belong in study notes.  
+Read: [maintaining.md](references/maintaining.md)
 
-When: GOV_02 — working with skill and project files.
-Rule: Publish only generic skill code and method; keep project data local and unnamed here.
-Read: references/maintaining.md (before editing the skill).
+**GOV_02 — Working with skill and project files.**  
+Rule: Publish only generic skill code and method; keep project data local and unnamed here.  
+Read: [maintaining.md](references/maintaining.md)
 
-When: GOV_03 — synchronizing this skill.
-Rule: Pull before editing, use the per-clone identity, and leave outstanding receiving-machine actions with pushes.
-Read: references/maintaining.md (before synchronizing).
+**GOV_03 — Synchronizing this skill.**  
+Rule: Pull before editing, use the per-clone identity, and leave outstanding receiving-machine actions with pushes.  
+Read: [maintaining.md](references/maintaining.md)
 
-When: GOV_04 — extending code or documents.
-Rule: Keep one module per job and one authority per helper; use focused functions and topic references.
-Read: references/maintaining.md (before extending helpers).
+**GOV_04 — Extending code or documents.**  
+Rule: Keep one module per job and one authority per helper; use focused functions and topic references.  
+Read: [maintaining.md](references/maintaining.md)
 
-## Renderer
+### Renderer
 
-When: REN_01 — choosing an implementation.
-Rule: Prefer editable Blender-native methods; declare external fallbacks, subject to REN_03.
-Read: references/caustics.md (before choosing a method).
+**REN_01 — Choosing an implementation.**  
+Rule: Prefer editable Blender-native methods; declare external fallbacks, subject to REN_03.  
+Read: [caustics.md](references/caustics.md)
 
-When: REN_02 — choosing a transport method.
-Rule: Prefer unbiased transport, then native physical approximations, then external tools; disclose every bias or fake.
-Read: references/caustics.md (before choosing transport).
+**REN_02 — Choosing a transport method.**  
+Rule: Prefer unbiased transport, then native physical approximations, then external tools; disclose every bias or fake.  
+Read: [caustics.md](references/caustics.md)
 
-When: REN_03 — detailed caustics or heavy refraction carries the shot.
-Rule: Use LuxCore PATH with light tracing; otherwise default to Cycles and disclose the external engine.
-Read: references/luxcore.md (before selecting the renderer).
+**REN_03 — Detailed caustics or heavy refraction carries the shot.**  
+Rule: Use LuxCore PATH with light tracing; otherwise default to Cycles and disclose the external engine.  
+Read: [luxcore.md](references/luxcore.md)
 
-## Research
+### Research
 
-When: RES_01 — building a new technique.
-Rule: Research physics and full-resolution source evidence, compare workflows, cite and prove the chosen method.
-Read: references/research-loop.md (before building).
+**RES_01 — Building a new technique.**  
+Rule: Research physics and full-resolution source evidence, compare workflows, cite and prove the chosen method.  
+Read: [research-loop.md](references/research-loop.md)
 
-When: RES_02 — sources are gathered for a new technique.
-Rule: Show the question, sources and gaps; wait for user links before analysis; quick API lookups are exempt.
-Read: references/work-modes.md (before analysing research).
+**RES_02 — Sources are gathered for a new technique.**  
+Rule: Show the question, sources and gaps; wait for user links before analysis; quick API lookups are exempt.  
+Read: [work-modes.md](references/work-modes.md)
 
-When: RES_03 — making a look decision or recreating a reference.
-Rule: Shortlist the reference library; solve the reference camera first and adjust exposure last.
-Read: references/reference-library.md (before look decisions).
+**RES_03 — Making a look decision or recreating a reference.**  
+Rule: Shortlist the reference library; solve the reference camera first and adjust exposure last.  
+Read: [reference-library.md](references/reference-library.md)
 
-## Pipeline
+### Pipeline
 
-When: PIP_01 — transferring Rhino geometry.
-Rule: Keep source Rhino documents read-only; author materials, lighting, camera look and rendering in Blender.
-Read: references/pipeline.md (before importing).
+**PIP_01 — Transferring Rhino geometry.**  
+Rule: Keep source Rhino documents read-only; author materials, lighting, camera look and rendering in Blender.  
+Read: [pipeline.md](references/pipeline.md)
 
-## Lighting and camera
+### Lighting and camera
 
-When: LGT_01 — setting lights or camera.
-Rule: Use photometric units and physical camera exposure; count each emitter once, white-balance and keep verticals parallel.
-Read: references/lighting-camera.md (before lighting).
+**LGT_01 — Setting lights or camera.**  
+Rule: Use photometric units and physical camera exposure; count each emitter once, white-balance and keep verticals parallel.  
+Read: [lighting-camera.md](references/lighting-camera.md)
 
-When: LGT_02 — lighting daylight.
-Rule: Use a matching HDRI as the sole natural source; declare Sky Texture fallback only if none fits.
-Read: references/lighting-camera.md (before setting daylight).
+**LGT_02 — Lighting daylight.**  
+Rule: Use a matching HDRI as the sole natural source; declare Sky Texture fallback only if none fits.  
+Read: [lighting-camera.md](references/lighting-camera.md)
 
-## Materials
+### Materials
 
-When: MAT_01 — authoring surface materials.
-Rule: Use all applicable maps, real-scale directional UVs and physically plausible surface ranges.
-Read: references/materials/physical-ranges.md (before authoring materials).
+**MAT_01 — Authoring surface materials.**  
+Rule: Use all applicable maps, real-scale directional UVs and physically plausible surface ranges.  
+Read: [physical-ranges.md](references/materials/physical-ranges.md)
 
-When: MAT_02 — authoring edge damage.
-Rule: Keep dirty-edge shading distinct from geometric chips.
-Read: references/materials/edge-wear.md (before authoring wear).
+**MAT_02 — Authoring edge damage.**  
+Rule: Keep dirty-edge shading distinct from geometric chips.  
+Read: [edge-wear.md](references/materials/edge-wear.md)
 
-When: MAT_03 — sizing visible detail.
-Rule: Size from the final shot; pair every close-up with a native final-view crop.
-Read: references/materials/scale.md (before tuning detail).
+**MAT_03 — Sizing visible detail.**  
+Rule: Size from the final shot; pair every close-up with a native final-view crop.  
+Read: [scale.md](references/materials/scale.md)
 
-When: MAT_04 — features are sub-pixel.
-Rule: Model their aggregate appearance and ask before building micro-geometry.
-Read: references/materials/scale.md (before building detail).
+**MAT_04 — Features are sub-pixel.**  
+Rule: Model their aggregate appearance and ask before building micro-geometry.  
+Read: [scale.md](references/materials/scale.md)
 
-When: MAT_05 — authoring natural surface marks.
-Rule: Make marks patchy, able to disappear, with physically shaped extents.
-Read: references/materials/variation.md (before authoring marks).
+**MAT_05 — Authoring natural surface marks.**  
+Rule: Make marks patchy, able to disappear, with physically shaped extents.  
+Read: [variation.md](references/materials/variation.md)
 
-When: MAT_06 — using repeated units or tiled maps.
-Rule: Add per-unit variation, hide repeats and fade concave-joint dust outward from corners in the first pass.
-Read: references/materials/variation.md (before building repeated surfaces).
+**MAT_06 — Using repeated units or tiled maps.**  
+Rule: Add per-unit variation, hide repeats and fade concave-joint dust outward from corners in the first pass.  
+Read: [variation.md](references/materials/variation.md)
 
-## Validation
+### Validation
 
-When: VAL_01 — judging material or effect character.
-Rule: Compare native-resolution crops beside the reference and repeat after changing that feature.
-Read: references/validation.md (before declaring a match).
+**VAL_01 — Judging material or effect character.**  
+Rule: Compare native-resolution crops beside the reference and repeat after changing that feature.  
+Read: [validation.md](references/validation.md)
 
-When: VAL_02 — claiming a feature works.
-Rule: Prove it with feature-off and repeated-baseline renders, noise-floor measurements and inspected diffs.
-Read: references/validation.md (before claiming proof).
+**VAL_02 — Claiming a feature works.**  
+Rule: Prove it with feature-off and repeated-baseline renders, noise-floor measurements and inspected diffs.  
+Read: [validation.md](references/validation.md)
 
-When: VAL_03 — measuring the rendered look.
-Rule: Measure renderer-written display PNGs; use linear energy data only for physical calibration controls.
-Read: references/validation.md (before measuring).
+**VAL_03 — Measuring the rendered look.**  
+Rule: Measure renderer-written display PNGs; use linear energy data only for physical calibration controls.  
+Read: [validation.md](references/validation.md)
 
-When: VAL_04 — diagnosing odd behaviour.
-Rule: Bisect in a minimal control scene before tuning the full scene.
-Read: references/validation.md (before debugging).
+**VAL_04 — Diagnosing odd behaviour.**  
+Rule: Bisect in a minimal control scene before tuning the full scene.  
+Read: [validation.md](references/validation.md)
 
-## Approval gates
+### Approval gates
 
-When: GAT_01 — a Rhino study model is ready.
-Rule: Show captures and modelled/omitted items; wait for geometry approval before import.
-Read: references/pipeline.md (before importing the model).
+**GAT_01 — A Rhino study model is ready.**  
+Rule: Show captures and modelled/omitted items; wait for geometry approval before import.  
+Read: [pipeline.md](references/pipeline.md)
 
-When: GAT_02 — the first full material build is ready.
-Rule: Show schedule, final-camera render, native reference crops and uncertain candidates; wait for approval and re-gate swaps.
-Read: references/work-modes.md (before look rounds).
+**GAT_02 — The first full material build is ready.**  
+Rule: Show schedule, final-camera render, native reference crops and uncertain candidates; wait for approval and re-gate swaps.  
+Read: [work-modes.md](references/work-modes.md)
 
-When: GAT_03 — launching a final.
-Rule: Wait for preview approval; test the full frame, render unlimited in the open UI until stopped, then inspect the saved result.
-Read: references/pipeline.md (before launching finals).
+**GAT_03 — Launching a final.**  
+Rule: Wait for preview approval; test the full frame, render unlimited in the open UI until stopped, then inspect the saved result.  
+Read: [pipeline.md](references/pipeline.md)
 
-## Assets and lifecycle
+### Assets and lifecycle
 
-When: AST_01 — producing study output.
-Rule: Keep every output in its study folder and process artifacts in its _wip; tell other agents the path.
-Read: references/pipeline.md (before producing output).
+**AST_01 — Producing study output.**  
+Rule: Keep every output in its study folder and process artifacts in its _wip; tell other agents the path.  
+Read: [pipeline.md](references/pipeline.md)
 
-When: AST_02 — the user declares a study finished.
-Rule: List milestones, plan then apply checked cleanup, localize dependencies and verify preserved milestone references.
-Read: references/study-lifecycle.md (before closing a study).
+**AST_02 — The user declares a study finished.**  
+Rule: List milestones, plan then apply checked cleanup, localize dependencies and verify preserved milestone references.  
+Read: [study-lifecycle.md](references/study-lifecycle.md)
 
-When: AST_03 — acquiring study assets.
-Rule: Keep every asset and metadata in that study’s own library for a self-contained handoff.
-Read: references/pipeline.md (before acquiring assets).
+**AST_03 — Acquiring study assets.**  
+Rule: Keep every asset and metadata in that study’s own library for a self-contained handoff.  
+Read: [pipeline.md](references/pipeline.md)
 
-When: AST_04 — installing Blender extensions or add-ons.
-Rule: Use Blender’s extension installer and software folders; delete downloaded installer zips afterward.
-Read: references/pipeline.md (before installing software).
+**AST_04 — Installing Blender extensions or add-ons.**  
+Rule: Use Blender’s extension installer and software folders; delete downloaded installer zips afterward.  
+Read: [pipeline.md](references/pipeline.md)
 
-## Agents
+### Agents
 
-When: AGT_01 — code is authored.
-Rule: Get a fresh review, weigh findings and disclose rejected findings; disclose same-model review when applicable.
-Read: references/maintaining.md (before accepting code).
+**AGT_01 — Code is authored.**  
+Rule: Get a fresh review, weigh findings and disclose rejected findings; disclose same-model review when applicable.  
+Read: [maintaining.md](references/maintaining.md)
 
-When: AGT_02 — dividing work or handing over.
-Rule: Follow the user-selected mode, default normal; keep one builder and the documented handoff and review roles.
-Read: references/work-modes.md (before dividing work).
+**AGT_02 — Dividing work or handing over.**  
+Rule: Follow the user-selected mode, default normal; keep one builder and the documented handoff and review roles.  
+Read: [work-modes.md](references/work-modes.md)
 
-When: AGT_03 — reporting a Codex stage.
-Rule: Train judgement in normal mode; in CPM perform training only when the user opts in.
-Read: references/codex-coaching.md (before reporting).
+**AGT_03 — Reporting a Codex stage.**  
+Rule: Train judgement in normal mode; in CPM perform training only when the user opts in.  
+Read: [codex-coaching.md](references/codex-coaching.md)
 
-When: AGT_04 — driving Blender or editing study files.
-Rule: Hold the exclusive machine/file lock; stop and tell the user if another owner holds it; never clear a live or unknown lock.
-Read: references/agent-lock.md (before driving Blender).
+**AGT_04 — Driving Blender or editing study files.**  
+Rule: Hold the exclusive machine/file lock; stop and tell the user if another owner holds it; never clear a live or unknown lock.  
+Read: [agent-lock.md](references/agent-lock.md)
 
-## Safety
+### Safety
 
-When: SAF_01 — operating the user’s Blender.
-Rule: Preserve user datablocks; save first when explicitly authorized, otherwise stop before destructive scene operations; rebuild only owned study files.
-Read: references/pipeline.md (before scene operations).
+**SAF_01 — Operating the user’s Blender.**  
+Rule: Preserve user datablocks; save first when explicitly authorized, otherwise stop before destructive scene operations; rebuild only owned study files.  
+Read: [pipeline.md](references/pipeline.md)
 
-When: SAF_02 — planning a heavy scene.
-Rule: Check GPU VRAM before allocating heavy geometry, dicing or textures.
-Read: references/render-settings.md (before building a heavy scene).
+**SAF_02 — Planning a heavy scene.**  
+Rule: Check GPU VRAM before allocating heavy geometry, dicing or textures.  
+Read: [render-settings.md](references/render-settings.md)

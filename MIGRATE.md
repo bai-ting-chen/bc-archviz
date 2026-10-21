@@ -15,3 +15,7 @@
 - Move evaluation snapshots out of skill discovery; restart Claude Code and Codex/reimport skills.
 
 Remove a line once every machine has done it.
+
+## 2026-10-21: RULES.md format
+
+- Check: `RULES.md` starts with `## House rules` and rules read `**GOV_01 — ...**`. Do: `git pull`; nothing else (format only, rule IDs and wording unchanged).
