@@ -7,7 +7,7 @@ Rule: Keep scene-independent methods, constants, traps and taste; scene results 
 Read: [maintaining.md](references/maintaining.md)
 
 **GOV_02 — Working with skill and project files.**  
-Rule: Publish only generic skill code and method; keep project data local and unnamed here.  
+Rule: Publish only generic skill code and method; keep data specific to each project local and unnamed here.  
 Read: [maintaining.md](references/maintaining.md)
 
 **GOV_03 — Synchronizing this skill.**  
@@ -28,7 +28,7 @@ Read: [caustics.md](references/caustics.md)
 Rule: Prefer unbiased transport, then native physical approximations, then external tools; disclose every bias or fake.  
 Read: [caustics.md](references/caustics.md)
 
-**REN_03 — Detailed caustics or heavy refraction carries the shot.**  
+**REN_03 — Use LuxCore when detailed caustics or heavy refraction carries the shot.**  
 Rule: Use LuxCore PATH with light tracing; otherwise default to Cycles and disclose the external engine.  
 Read: [luxcore.md](references/luxcore.md)
 
