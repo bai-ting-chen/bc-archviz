@@ -78,7 +78,7 @@ common suffix aliases accepted) and logs every fallback.
 - Glossiness → roughness = 1 − gloss (Non-Color). Roughness maps wire directly.
 - Leaf cards: Principled (albedo, roughness, normal, IOR 1.6) **+** Translucent (transmission
   map, else albedo), cut by the opacity map through Mix with Transparent. Green leaves reflect
-  and transmit only ~0.1 each ([vegetation.md](materials/vegetation.md)), so Add stays energy-conserving;
+  and transmit only ~0.1 each ([vegetation.md](../materials/vegetation.md)), so Add stays energy-conserving;
   check the maps' linear means.
 - Bark: albedo, roughness, normal, IOR 1.52. Vendor bark albedo maps can be dark (~0.04
   linear); compare with measured bark before a final.

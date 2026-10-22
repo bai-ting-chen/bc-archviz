@@ -1,6 +1,6 @@
 """Second-opinion review of a skill change by Codex (read-only), before the change is pushed.
 
-When and why: RULES AGT_01; how: references/maintaining.md › Review.
+When and why: RULES AGT_01; how: references/workflow/skill-maintaining.md › Review.
 
     python scripts/codex_review.py --commit <sha>      # one commit
     python scripts/codex_review.py --uncommitted       # working tree
@@ -18,7 +18,7 @@ import sys
 SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 PROMPT = """Review this change to the bc-archviz skill (Blender 5.2 archviz pipeline).
-Read SKILL.md, RULES.md, references/maintaining.md and references/api-traps.md first.
+Read SKILL.md, RULES.md, references/workflow/skill-maintaining.md and references/scene/api-traps.md first.
 Report, most severe first, each with file:line and a concrete failure scenario:
 1. Correctness bugs in the code: wrong Blender 5.2 API use (see api-traps.md), broken
    node links, unit errors (mm vs m, lux, lumens, EV), paths that only work on one machine.

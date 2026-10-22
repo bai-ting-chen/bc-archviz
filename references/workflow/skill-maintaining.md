@@ -1,4 +1,4 @@
-# Maintaining this skill
+# Maintaining the skill set
 
 Read this before changing, pulling or pushing the skill. One person keeps it in sync across
 several machines through GitHub (`github.com/bai-ting-chen/bc-archviz`). Git carries
@@ -17,7 +17,7 @@ instructions behind.
   `archviz.project_root()`, never a user folder or a fixed project path. A machine-specific
   resource such as the Render Reference Library gets a default location plus "ask if missing".
 - Code goes into `scripts/` only once it runs on a scene it was not written for.
-- **State each rule once, in [RULES.md](../RULES.md).** [SKILL.md](../SKILL.md) and the references carry only the how-to
+- **State each rule once, in [RULES.md](../../RULES.md).** [SKILL.md](../../SKILL.md) and the references carry only the how-to
   (commands, functions, numbers) and a pointer such as "(RULES AST_03)". A rule repeated in several
   files drifts apart the first time it changes.
 
@@ -29,13 +29,13 @@ instructions behind.
    `git config user.name bai-ting-chen`, `git config user.email baitingchen.arch@gmail.com`.
 
 ## Receiving-machine actions
-With each push, add only outstanding receiver actions to [MIGRATE.md](../MIGRATE.md), using Check/Do guards when needed.
+With each push, add only outstanding receiver actions to [MIGRATE.md](../../MIGRATE.md), using Check/Do guards when needed.
 Pull-only delivery needs no dated changelog or mandatory reread notice. Check existing pending actions before syncing;
 each clone tracks its own unfinished setup. Remove each action when completed and delete the file only when no action
-remains. Never attach automatic commit/push or self-deletion commands. [SKILL.md](../SKILL.md) retains its conditional pointer.
+remains. Never attach automatic commit/push or self-deletion commands. [SKILL.md](../../SKILL.md) retains its conditional pointer.
 
 ## Helpers changed?
-Run `python scripts/helper_index.py` (MCP venv python) so [helpers.md](helpers.md) matches the
+Run `python scripts/helper_index.py` (MCP venv python) so [helpers.md](../scene/helpers.md) matches the
 code, and give every new public helper a one-line docstring — that line is its index entry.
 Refactoring a helper: prove nothing else moved with `scripts/regress_helpers.py` (dump with the
 old and the new code, then compare; its docstring has the steps).
@@ -46,12 +46,12 @@ Keep one builder per job (one dielectric, one socket helper, one node-graph buil
 **Claude's code → Codex.** After committing, before pushing, with the MCP venv python:
 `python scripts/codex_review.py --commit <sha>` (`--base origin/main` for everything unpushed,
 `--uncommitted` for the working tree). It runs `codex exec` read-only at high reasoning effort
-against this file, [RULES.md](../RULES.md) and [api-traps.md](api-traps.md), and prints the findings.
+against this file, [RULES.md](../../RULES.md) and [api-traps.md](../scene/api-traps.md), and prints the findings.
 
 **Codex's code → a fresh Claude subagent.** Start a general-purpose subagent with only: the task
 brief, the complete change (`git show <sha>` once committed; before that `git diff HEAD` plus
-the new files listed by `git status --short`), and "review against [RULES.md](../RULES.md), [maintaining.md](maintaining.md)
-and [api-traps.md](api-traps.md): correctness bugs, rule breaks, docs out of date; findings only, most severe
+the new files listed by `git status --short`), and "review against [RULES.md](../../RULES.md), [skill-maintaining.md](skill-maintaining.md)
+and [api-traps.md](../scene/api-traps.md): correctness bugs, rule breaks, docs out of date; findings only, most severe
 first, with file:line". Only its verdict enters the main session.
 
 A new technique also needs its control render (VAL_02). Check each finding against the code before acting, fix what holds in a new commit, and list for
@@ -63,9 +63,9 @@ cross-check was same-model (RULES AGT_01).
 For detail work, from the project folder:
 `codex exec -s workspace-write "<brief>" < NUL > <study>\_wip\codex\<task>.log`
 (stdin closed, or it waits). Put the brief in a file when it is longer than a few lines. The
-brief names the goal, the helpers to reuse ([helpers.md](helpers.md)), the interface in real units, where
+brief names the goal, the helpers to reuse ([helpers.md](../scene/helpers.md)), the interface in real units, where
 outputs go (the study's `_wip/`) and asks for a report file with a summary of at most 20 lines.
-Read the summary, not the log. Codex takes the agent lock (RULES AGT_04) when it drives Blender.
+Read the summary, not the log. Codex takes the agent lock (RULES AGT_04) when it works in Blender, Rhino, scripts or files.
 - **Codex runs the headless Blender tests itself:** launch with `--sandbox danger-full-access`
   (the unelevated Windows sandbox cannot spawn Blender) and list in the brief the files it owns;
   the other agent keeps off them until it ends. A fix round resumes the writer's session
@@ -75,13 +75,13 @@ Read the summary, not the log. Codex takes the agent lock (RULES AGT_04) when it
   alone (`--only`), slow convergence comparisons sit behind `--full`. Cap: one fail-first run,
   one run per real fix, one final pass; never rerun controls of modules the task did not touch.
 - **Codex priority mode, CPM (RULES AGT_02):** who does which stage and the brief/report formats:
-  [work-modes.md](work-modes.md).
+  [work-modes.md](work-modes.md), [study-stages.md](study-stages.md), [handoff-documents.md](handoff-documents.md).
   - **Builder:** one `--sandbox danger-full-access` session per stage, owning the stage's files.
     Each stage ends with a commit-sized change and a report in `_wip/codex/`.
   - **Reviewer:** `codex exec -s read-only` started as soon as a stage report lands, while the
     builder goes on with the next stage on other files.
     - Its brief holds only: the stage brief, the diff (or the list of changed files), and "review
-      against [RULES.md](../RULES.md), [api-traps.md](api-traps.md) and the brief: correctness bugs, rule breaks, wrong units;
+      against [RULES.md](../../RULES.md), [api-traps.md](../scene/api-traps.md) and the brief: correctness bugs, rule breaks, wrong units;
       findings only, most severe first, file:line".
     - Output: `_wip/codex/review_<stage>.md`.
   - The next builder stage starts by weighing that review and fixing what holds.
@@ -92,7 +92,7 @@ Read the summary, not the log. Codex takes the agent lock (RULES AGT_04) when it
   every launch its own log tag. On Windows, stopping a background shell that queues sessions can
   leave its wait loop alive and start a duplicate builder later: list the surviving processes by
   script name and stop each by PID before relaunching. A lock left by a session that ended stays
-  (RULES AGT_04): report it to the user with the check that no Blender or Codex process still runs.
+  (RULES AGT_04): report it to the user with the check that no process working in Blender, Rhino, scripts or files still runs.
 - **Fast tier:** `service_tier = "fast"` in `~/.codex/config.toml` (or `-c service_tier="fast"`
   per run) when the user asks for speed. It uses the plan allowance faster. A run already going
   keeps its tier.

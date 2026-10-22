@@ -115,7 +115,7 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   `polyhaven_fetch.py search textures <cat>`, `tex <id> --res 2k`, `hdri <id> --res 4k`; maps diff,
   arm, nor_gl, disp; `meta.json` has `dimensions_mm`. `search` matches categories only. For
   names and tags, query `api.polyhaven.com/assets?t=textures|hdris` and choose from a thumbnail
-  contact sheet ([README.md](materials/README.md)). HTTP 520–525 is Cloudflare: retry the same call.
+  contact sheet ([README.md](../materials/README.md)). HTTP 520–525 is Cloudflare: retry the same call.
 - Others in `library/local/<name>/` with a `meta.json` stating the source. Megascans via Fab:
   free items only; download needs the user's own sign-in (their Chrome) — never type passwords.
 - **Where:** the study's own `library/` (RULES AST_03) — `ARCHVIZ_PROJECT=<study> polyhaven_fetch.py …`,
@@ -124,7 +124,7 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   read only by studies listed in its `legacy_studies.txt`, and `polyhaven_fetch` prints a NOTE
   when it downloads anywhere but a study. Edited HDRIs, baked/generated maps and their
   generator script references go in `<study>/library/local/` with a `meta.json`. Never repoint a
-  study at another study's or a shared copy. Choosing a texture: [materials/texture-selection.md](materials/texture-selection.md)
+  study at another study's or a shared copy. Choosing a texture: [materials/texture-selection.md](../materials/texture-selection.md)
 
 ## Look-dev headless
 `blender -b scene.blend --python scripts/blender/render_variant.py -- out.png res=800x800
@@ -132,7 +132,7 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
 (forward-slash paths from bash; the script's docstring lists every option, and an unknown option
 stops it rather than rendering an unchanged "control"). It renders on the GPU (`archviz.use_gpu`).
 
-## Final render in the open UI (RULES GAT_03)
+## Final render in the open UI (RULES GAT_04)
 `bpy.ops.render.render("INVOKE_DEFAULT")` inside `bpy.context.temp_override(window=…)` returns
 immediately and the user watches it; register a `bpy.app.handlers.render_complete` function
 that `save_render`s *Render Result* to the study folder (and removes itself), then wait for the
@@ -145,13 +145,13 @@ file from the shell. Save the .blend first when explicitly authorized; otherwise
   `halt.enable = False`. Register the save handler on
   `render_complete` **and** `render_cancel` — Esc fires only the latter, and skips the
   compositor: save all passes as multilayer EXR and build the finals from the denoised layer
-  (`scripts/blender/from_passes.py`; [luxcore.md](luxcore.md) › Final in the open UI).
-- The pre-final full-frame check (RULES GAT_03 (4)) runs the same build script headless at reduced
+  (`scripts/blender/from_passes.py`; [luxcore.md](../renderer/luxcore.md) › Final in the open UI).
+- The pre-final full-frame check (RULES GAT_04 (4)) runs the same build script headless at reduced
   resolution; it caught a broken save helper and a UI-only context error before a multi-hour run.
   Only one Blender may hold the MCP port: quit an idle finished-final window first.
 - Before proposing the final, estimate how long the expected quality takes from a measured
   preview (noise ∝ 1/√(samples/px)), so the user knows when stopping is reasonable.
-- Tests and previews headless (RULES GAT_03), one at a time; tell the user when a CPU-only
+- Tests and previews headless (RULES GAT_04), one at a time; tell the user when a CPU-only
   engine leaves the GPU idle — it looks like wasted capacity otherwise.
 
 - Cycles: `scripts/blender/finals.py` does all of this - `start_in_ui(out_dir, res)` (untiled,
@@ -192,7 +192,7 @@ Closing a study: `## Milestones` list in STUDY_NOTES, then `study_close.py` (RUL
    hooks; discard .3dm materials. Rhino files are read-only; re-meshing imported meshes is fine.
 
 
-## GAT_01 procedure
+## GAT_02 procedure
 
 **Rhino → Blender gate**. After the Rhino model is finished, stop and
     show the user (viewport captures + a list of what was modelled and left out); pipe to
@@ -200,7 +200,7 @@ Closing a study: `## Milestones` list in STUDY_NOTES, then `study_close.py` (RUL
     round on wrong geometry is not.
 
 
-## GAT_03 procedure
+## GAT_04 procedure
 
 **Final render gate**. (1) Render a preview, show it, state the final's
     resolution, time budget and expected noise, and **wait for approval** — the user reviews the
@@ -243,23 +243,23 @@ Apply only checks needed by the current task. Read-only documentation work needs
 
 ## Runtime preflight (task-conditional)
 ```
-- [ ] Read [RULES.md](../RULES.md) and the references/ file for the task — both live in THIS skill folder,
+- [ ] Read [RULES.md](../../RULES.md) and the references/ file for the task — both live in THIS skill folder,
       not the project; skim [api-traps.md](api-traps.md) before writing node/GN code
-- [ ] `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` absent or mine (RULES AGT_04); create it before driving Blender
+- [ ] `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` absent or mine (RULES AGT_04); create it before working in Blender, Rhino, scripts or files
 - [ ] Blender open, MCP on 9876 (get_blendfile_summary_datablocks)
 - [ ] Rhino: which document is open, is it modified? A user's file stays untouched — write
       the study geometry with File3dm (pipeline.md)
 - [ ] Local studies? read `studies/README.md` + the latest STUDY_NOTES.md (open items carry over)
 - [ ] New technique? gather sources (physics first), stop at the research gate for the user's
-      links, then analyse and compare workflows (RULES RES_01, RES_02)
-- [ ] First build done? material gate: schedule + first pass + crops, wait (RULES GAT_02)
+      links, then analyse and compare workflows (RULES RES_01, GAT_01)
+- [ ] First build done? material gate: schedule + first pass + crops, wait (RULES GAT_03)
 - [ ] Before every "done": native-resolution crop pass of each material vs the ref (RULES VAL_01)
 - [ ] Look decision? profile the Render Reference Library slice
 - [ ] Study folder set? `archviz.set_project(<study>)`; every asset downloaded/generated into
       the study's own `library/` (`ARCHVIZ_PROJECT=<study> polyhaven_fetch.py …`)
-- [ ] Caustics through glass/water central to the shot? → LuxCore (RULES REN_03, [luxcore.md](luxcore.md));
+- [ ] Caustics through glass/water central to the shot? → LuxCore ([RULES REN_03](../renderer/renderer-choice.md), [LuxCore setup](../renderer/luxcore.md));
       otherwise Cycles
-- [ ] Final render: preview approved by the user first, then render in the open UI (RULES GAT_03)
+- [ ] Final render: preview approved by the user first, then render in the open UI (RULES GAT_04)
 ```
 
 
@@ -270,7 +270,7 @@ Apply only checks needed by the current task. Read-only documentation work needs
 |---|---|
 | Blender | `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` |
 | MCP | server `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\blender-mcp.exe` (user scope, `claude mcp get blender`); add-on `mcp` autostarts on 127.0.0.1:9876 (needs Prefs → *Allow Online Access*) |
-| Helpers (run in Blender) | `scripts/blender/`: `archviz` (assets, import, UVs, camera and rendering), `interior` (photometric lighting), `scatter`, `terrain`, `atmosphere`, `glassware`, caustic solvers, `render_variant`, `finals`, `from_passes`. Materials use the canonical `materials` package; see [family map](materials/README.md). |
+| Helpers (run in Blender) | `scripts/blender/`: `archviz` (assets, import, UVs, camera and rendering), `interior` (photometric lighting), `scatter`, `terrain`, `atmosphere`, `glassware`, caustic solvers, `render_variant`, `finals`, `from_passes`. Materials use the canonical `materials` package; see [family map](../materials/README.md). |
 | Outdoor | `terrain`, `scatter`, `atmosphere`; `materials.ground` and `materials.vegetation` for shading. |
 | Finals (Cycles) | `scripts\blender\finals.py`: untiled no-limit final in the UI, savers, OIDN from passes, graded PNG |
 | 3ds Max assets | `scripts\blender\max_import.py`: `load` (io_scene_max extension + repairs), `tidy`, `rebuild_materials`, `open_loops` — [max-import.md](max-import.md) |
@@ -279,9 +279,9 @@ Apply only checks needed by the current task. Read-only documentation work needs
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `scripts\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
 | Maintenance | `scripts\helper_index.py` (writes [helpers.md](helpers.md)), `scripts\regress_helpers.py` (old vs new helper output), `scripts\codex_review.py` (Codex reviews a change before push, RULES AGT_01), `scripts\study_close.py` (close a study: keep milestones, delete the rest, RULES AST_02) |
-| Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](materials/tiles.md). |
+| Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tiles.md). |
 | Controls | `scripts\controls\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`) |
-| Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
+| Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
 | Assets | `scripts\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); others `<study>\library\local\` with a `meta.json` |
 | Video research | `scripts\yt_learn.py` |
 
@@ -298,15 +298,15 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 ## Workflow
 1. **Rhino** (Rook): geometry on named layers; force render meshes; write only the owned study `.3dm` with explicit save authorization — or, when the
    user has their own file open, build meshes into a `File3dm` and write it (pipeline.md).
-   Then the model gate (RULES GAT_01).
+   Then the model gate (RULES GAT_02).
 2. **Import**: `bpy.ops.wm.read_homefile(use_empty=True)` in an owned disposable study process, `archviz.import_rhino(path)` → layer
    collections, blocks → instances, named views → cameras, materials dropped, mm → m.
 3. **UVs** at the texture's real size: non-directional textures (plain concrete, plaster,
    terrazzo, mortar, gravel) `archviz.box_uv(obj, size_m)`; directional ones (wood grain, boards,
    brushed metal, vein-cut stone, ribbed sheet, weave, long tiles) `archviz.directional_uv(obj,
-   size_m, axis)` so the direction follows the element on every face ([texture-selection.md](materials/texture-selection.md)).
-4. **Materials** by layer → [materials/README.md](materials/README.md); after the first full build (step 6), the
-   material gate (RULES GAT_02) before any look round.
+   size_m, axis)` so the direction follows the element on every face ([texture-selection.md](../materials/texture-selection.md)).
+4. **Materials** by layer → [materials/README.md](../materials/README.md); after the first full build (step 6), the
+   material gate (RULES GAT_03) before any look round.
 5. **Light**: daylight (RULES LGT_02) `archviz.world_hdri_lux`, rotated by its `hdri_analyse` sun
    direction; artificial: the fixture's IES file `interior.ies_light` when it is specified, else `interior.downlight /
    led_strip / lens_luminance` → [lighting-camera.md](lighting-camera.md).
@@ -316,14 +316,14 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
    camera (`refsolve.py` when the image has a repeated element) → `archviz.framing_render(root, path)` +
    `refmatch.py pair --overlay`; then light region by region with `study_run.py`
    (lighting-camera.md › *Recreating a reference*).
-7. **Render**: settings → [render-settings.md](render-settings.md); LuxCore case
-   (RULES REN_03) → [luxcore.md](luxcore.md).
+7. **Render**: settings → [render-settings.md](../renderer/render-settings.md); LuxCore case
+   ([RULES REN_03](../renderer/renderer-choice.md)) → [LuxCore setup](../renderer/luxcore.md).
 8. **Look-dev**: headless `render_variant.py` or MCP renders into the study `_wip/`; measure
    with `imgstats`; prove each feature with a control (RULES VAL_02). Reuse the helpers
    ([helpers.md](helpers.md) lists them all: `materials.edge_wear.set_input`, `materials.nodes.sock`, `materials.pbr.pbr_material`,
    `materials.nodes.G`, `materials.pbr`, `scatter`) instead of re-deriving
    node plumbing — the traps they wrap get hit again otherwise.
-9. **Final** (RULES GAT_03) → [pipeline.md](pipeline.md) › *Final render in the open UI* (Cycles: `finals.py`); linear EXR + graded
+9. **Final** (RULES GAT_04) → [pipeline.md](pipeline.md) › *Final render in the open UI* (Cycles: `finals.py`); linear EXR + graded
    PNGs into the study folder.
 10. `studies/<yymmdd>_<topic>/STUDY_NOTES.md`: what, proof numbers, traps, open items.
 

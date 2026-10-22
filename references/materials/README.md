@@ -18,6 +18,7 @@ Use all applicable maps at real size with physical surface ranges (MAT_01).
 | [Stone](stone.md) | `materials.stone` |
 | [Metal](metal.md) | `materials.metal` |
 | [Glass](glass.md) | `materials.glass` |
+| [Caustics](caustics.md) | `gn_caustics` / `caustic_photons.py` |
 | [Fabric](fabric.md) | `materials.fabric` |
 | [Water](water.md) | `materials.water` |
 | [Variation](variation.md) | `materials.variation` |
@@ -27,4 +28,4 @@ Use all applicable maps at real size with physical surface ranges (MAT_01).
 
 Shared graph/socket helpers: `materials.nodes.G` / `sock`; asset lookup and project state: `archviz`.
 Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.
-[LuxCore materials](../luxcore.md): `materials.luxcore`; [all helper signatures](../helpers.md).
+[LuxCore materials](../renderer/luxcore.md): `materials.luxcore`; [all helper signatures](../scene/helpers.md).

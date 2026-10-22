@@ -24,7 +24,7 @@ around that, rather than carrying someone else's numbers.
   several pixels and land on the same pixels; fireflies are lone random pixels. Remove fireflies
   *before* the denoiser (clamping; [luxcore.md](luxcore.md) › Fireflies) — OIDN smears them into blotches.
 
-## Finals with no sample limit (`finals.py`, RULES GAT_03)
+## Finals with no sample limit (`finals.py`, RULES GAT_04)
 - Estimate before launch from a full-frame test at the final settings: s/sample measured, raw
   noise in a smooth region at two sample counts; noise ~ 1/sqrt(N). Tell the user the time at
   which more samples stop showing (raw ~1-2 % on a smooth sky with OIDN, ~0.4 % = one 8-bit

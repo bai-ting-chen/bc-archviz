@@ -65,7 +65,7 @@ schedule gives you.
 | Emissive mesh | visible lenses, LED lines, screens, signage | luminance cd/m² (`interior.emitter`); count once with the analytic light (`lit_once`) |
 
 Per-light Cycles settings: *Max Bounces*, *Cast Shadow*, *Multiple Importance* (keep on for
-area lights and glossy floors), *Shadow Caustics* (MNEE, caustics.md); *Light Linking* limits
+area lights and glossy floors), *Shadow Caustics* (MNEE, [caustics.md](../materials/caustics.md)); *Light Linking* limits
 what a light reaches; the light tree (Sampling › Lights, on by default) is what keeps dozens of
 fixtures from turning into noise. *Normalize* (default on) keeps power constant as the size
 changes; *Exposure* multiplies by 2^x — keep both at defaults so watts stay lumens/683.

@@ -1,9 +1,9 @@
-"""Write references/helpers.md: every public function in scripts/blender/ with its signature and
+"""Write references/scene/helpers.md: every public function in scripts/blender/ with its signature and
 the first line of its docstring, read from the code (ast, nothing imported).
 
     python scripts/helper_index.py
 
-Run it after adding or changing a helper (maintaining.md), so the index never drifts.
+Run it after adding or changing a helper (skill-maintaining.md), so the index never drifts.
 """
 import ast
 import os
@@ -11,7 +11,7 @@ from pathlib import Path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "blender")
-OUT = os.path.join(os.path.dirname(HERE), "references", "helpers.md")
+OUT = os.path.join(os.path.dirname(HERE), "references", "scene", "helpers.md")
 
 
 def sig(fn):

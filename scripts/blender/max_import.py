@@ -10,7 +10,7 @@ what version 1.9.2 gets wrong, from the importer's own captured face / ID / UV l
   the first dropped face) -> re-assigned face by face.
 - Slot != Max ID (Multi/Sub parameter block, 2-sided subs take two slots) -> mapped per sub.
 - The first UV layer may be Max channel 0 (vertex colour) -> render UV = channel 1.
-references/max-import.md has the workflow and the checks.
+references/scene/max-import.md has the workflow and the checks.
 
     import max_import
     objs, report = max_import.load(path)            # repaired meshes + per-object report

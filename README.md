@@ -8,4 +8,4 @@ Install the skill:
 git clone https://github.com/bai-ting-chen/bc-archviz.git %USERPROFILE%\.claude\skills\bc-archviz
 ```
 
-Start at [SKILL.md](SKILL.md). [Setup details](references/pipeline.md#install).
+Start at [SKILL.md](SKILL.md). [Setup details](references/scene/pipeline.md#install).

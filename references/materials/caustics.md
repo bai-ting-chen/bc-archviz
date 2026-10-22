@@ -1,13 +1,15 @@
 # Caustics
 
-## Decision (RULES REN_02)
+## Applying REN_02 to caustics
+
+Apply the [renderer and method procedures](../renderer/renderer-choice.md) to the cases below.
 | Case | Method | Why |
 |---|---|---|
 | Large light source, any refractor | Cycles path tracing | unbiased; converges when the key subtends a real angle, never for a sun-sized source |
 | Lamps above calm water, submerged surfaces | **MNEE** | cheap and clean, but under-delivers energy and ignores volumes on the light leg |
 | Sun through a rippled pool | **GN wavefront** `gn_caustics.add_caustic_sheet()` | native, exact, noise-free; MNEE fails outright on real ripples |
-| Sun through glassware (glass, glass of water) | LuxCore, as the row below (RULES REN_03); `caustic_photons.py` (external, CPU) only when the scene must stay in Cycles | photons were the most faithful of the Cycles-side options on a measured shadow/lit ratio; MNEE and path tracing fall short |
-| **Sun through patterned glass / glass block / several interfaces, room-scale receivers** | **LuxCore PATH + light tracing**, GPU camera paths + CPU light tracing (luxcore.md, RULES REN_03) | unbiased and energy-correct; the only engine that converged |
+| Sun through glassware (glass, glass of water) | LuxCore, as the row below ([RULES REN_03](../renderer/renderer-choice.md#ren_03-procedure)); `caustic_photons.py` (external, CPU) only when the scene must stay in Cycles | photons were the most faithful of the Cycles-side options on a measured shadow/lit ratio; MNEE and path tracing fall short |
+| **Sun through patterned glass / glass block / several interfaces, room-scale receivers** | **LuxCore PATH + light tracing**, GPU camera paths + CPU light tracing ([LuxCore setup](../renderer/luxcore.md), [RULES REN_03](../renderer/renderer-choice.md#ren_03-procedure)) | unbiased and energy-correct; the only engine that converged |
 
 Measured on sun (0.53°) → 4 glass interfaces with a wavy relief → diffuse floor, equal 120 s,
 scored against a 900 s reference: LuxCore CPU light tracing 18 % rel. error, −0.5 % bias;
@@ -122,19 +124,3 @@ LuxCore (free, GPL) — tested, adopted for caustics (luxcore.md). Unverified: C
 progressive photon mapping in a Cycles build), Reblend (~$49, photon caustics / BDPT / VCM),
 Octane (paid).
 Fakes — Voronoi textures, gobo area lights, shadow-ray Transparent — only as a declared fallback.
-
-
-## REN_01 procedure
-
-**Native first.** Blender's own features (Cycles, shader nodes, Geometry Nodes, modifiers, Sky
-   Texture) before self-written external tools — native work stays editable in the .blend and
-   survives Blender updates; external tools are a last resort, and say so when used.
-
-
-## REN_02 procedure
-
-**Unbiased first.** Order: (a) Cycles path tracing; (b) native physically based approximations
-   (MNEE, GN wavefront caustics) only when (a) cannot converge — state why and the bias;
-   (c) external tools only when nothing native works — tell the user. Fakes (light-path tricks,
-   projected patterns) only as a declared fallback. The point of the studies is renders that
-   hold up as physics, so a bias must always be named, never hidden.

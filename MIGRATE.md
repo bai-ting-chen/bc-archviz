@@ -19,3 +19,27 @@ Remove a line once every machine has done it.
 ## 2026-10-21: RULES.md format
 
 - Check: `RULES.md` starts with `## House rules` and rules read `**GOV_01 — ...**`. Do: `git pull`; nothing else (format only, rule IDs and wording unchanged).
+
+## 2026-10-22: Renderer-choice reference
+
+- New `references/renderer/renderer-choice.md` holds the REN_01–REN_03 procedures; REN links moved there. No machine action.
+
+## 2026-10-22: Reference topic folders
+
+- `references/` files moved into topic folders; links updated. No machine action.
+
+## 2026-10-22: Caustics reference
+
+- `caustics.md` moved to `references/materials/`; links updated. No machine action.
+
+## 2026-10-22: Work modes split
+
+work-modes.md now holds mode and model choice only; stage table, handoff formats and gates moved to workflow/. No machine action.
+
+## 2026-10-22: Gates numbered in study order
+
+Gate IDs renumbered: RES_02 → GAT_01 (research), GAT_01 → GAT_02 (model), GAT_02 → GAT_03 (materials), GAT_03 → GAT_04 (final). Study notes outside the skill that cite old gate IDs read them with this mapping. No machine action.
+
+## 2026-10-22: Skill maintenance doc renamed
+
+references/workflow/maintaining.md is now skill-maintaining.md (the skill set's own upkeep). No machine action.

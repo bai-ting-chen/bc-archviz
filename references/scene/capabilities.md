@@ -17,11 +17,11 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Edge chips (geometry) | GN band subdivision + Set Position; per-object `Seed` | solid |
 | Displacement | Displacement + adaptive subdivision | solid, fast |
 | Tiling by real height | `height_span_uv` + REPEAT | solid |
-| Caustics | GN wavefront (pools); glassware → LuxCore (RULES REN_03), `caustic_photons.py` as the Cycles-only fallback | solid |
-| Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH, GPU + CPU light tracing (luxcore.md), energy-checked (caustics.md) | solid |
+| Caustics | GN wavefront (pools); glassware → LuxCore ([RULES REN_03](../renderer/renderer-choice.md)), `caustic_photons.py` as the Cycles-only fallback | solid |
+| Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH, GPU + CPU light tracing (luxcore.md), energy-checked ([caustics.md](../materials/caustics.md)) | solid |
 | Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh (materials › Glass block) | solid |
 | Baked procedural textures for LuxCore (terrazzo, smooth concrete, sand mortar) | numpy seamless colour + roughness maps | test |
-| Tangled glass-block caustics across units | long-wave relief at higher slope (Wave/Iceberg mix), sized by a thin-lens sim (caustics.md › Designing a refractive relief) | test |
+| Tangled glass-block caustics across units | long-wave relief at higher slope (Wave/Iceberg mix), sized by a thin-lens sim ([caustics.md](../materials/caustics.md) › Designing a refractive relief) | test |
 | Clean caustic renders without OIDN blotches | LuxCore radiance clamping (camera paths only) | solid, measured |
 | Concave-corner dust | AO band × noise × height; Cycles live or baked for LuxCore (`materials.luxcore.bake_dust`) | test |
 | Anti-tiling | LuxCore Randomized Tiling (native); Cycles: noise-mixed lookups / hex tiling built from nodes | LuxCore test, Cycles untested |
@@ -48,10 +48,10 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Runoff / leak streaks below drip edges | GN raycast drip-edge field + streak shader (`materials.edge_wear.add_leak_field`, `add_runoff`) | solid, control-proved |
 | Concrete cracks | corner shrinkage cracks + patchy Voronoi map-cracking (`materials.edge_wear.add_cracks`) | solid, control-proved |
 | Glazing distortion | roller wave + IGU pillowing bump (`materials.glass.glass_distortion`) | solid |
-| Water film down a wall / textured glass | height field from a raycast of the surface + Nusselt film, ropes, roll waves; glass/water interface IOR 1.14 ([water-features.md](materials/water-features.md)) | test (one study, no control yet) |
-| Overflow edge into a trench | rim strip: draw-down → roll over the crest → clinging film down the wall ([water-features.md](materials/water-features.md)) | test |
-| Whitewater / plunge foam | opaque milky subsurface surface + soft marbled foam + milky body below + splash drops ([water-features.md](materials/water-features.md)) | test |
-| Choppy pool hiding the floor | shared geometry wave field (64 cosines + gust envelope) + dark floor + absorption ([water-features.md](materials/water-features.md)) | test |
-| Fluid simulation (splash, plunge) | FLIP source/Demo bakes and hybrid slice integration tested; sub-voxel inlet flux/momentum and pool boundaries require validation ([water-features.md](materials/water-features.md)); Mantaflow alternative | research; no matched-physics superiority established |
+| Water film down a wall / textured glass | height field from a raycast of the surface + Nusselt film, ropes, roll waves; glass/water interface IOR 1.14 ([water-features.md](../materials/water-features.md)) | test (one study, no control yet) |
+| Overflow edge into a trench | rim strip: draw-down → roll over the crest → clinging film down the wall ([water-features.md](../materials/water-features.md)) | test |
+| Whitewater / plunge foam | opaque milky subsurface surface + soft marbled foam + milky body below + splash drops ([water-features.md](../materials/water-features.md)) | test |
+| Choppy pool hiding the floor | shared geometry wave field (64 cosines + gust envelope) + dark floor + absorption ([water-features.md](../materials/water-features.md)) | test |
+| Fluid simulation (splash, plunge) | FLIP source/Demo bakes and hybrid slice integration tested; sub-voxel inlet flux/momentum and pool boundaries require validation ([water-features.md](../materials/water-features.md)); Mantaflow alternative | research; no matched-physics superiority established |
 | Soft backplate vs crisp model | measured edge widths + slight DOF in front of the subject | solid |
 | No-limit Cycles final in the UI | `finals.py` (untiled, savers, OIDN from passes) | solid |

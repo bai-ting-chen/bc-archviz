@@ -88,7 +88,7 @@
 - Cycles only: `Render Result` cannot be saved while a render runs ("could not be saved") - no
   mid-render snapshots from Python. LuxCore allows them (luxcore.md › Final in the open UI).
 - `bpy.ops.render.view_cancel()` (viewer stop) fires render_complete - yet the denoiser had not
-  run; see [render-settings.md](render-settings.md) > Finals with no sample limit.
+  run; see [render-settings.md](../renderer/render-settings.md) > Finals with no sample limit.
 
 ## Windows shell
 - Pass Blender output paths with forward slashes from bash.

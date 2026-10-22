@@ -35,10 +35,10 @@ topic reference; this file holds **how to look and how to check**.
   - The trap: a relief control was judged on wall crops; one board end, bottom left of the frame,
     displaced several cm into a wedge on the deck — builder, reviewer and director all missed it.
 - **Look up the API before the one allowed run.** Before writing render or output setup, grep
-  [api-traps.md](api-traps.md) for the property and reuse the skill's helpers (`finals.py` savers) or the study's
+  [api-traps.md](../scene/api-traps.md) for the property and reuse the skill's helpers (`finals.py` savers) or the study's
   last working script; probe the scene in-process before spending a frame.
   - The trap: a stage with one launch died on `obj.cycles.use_adaptive_subdivision` (moved to the
-    modifier) and its rerun on the `OPEN_EXR_MULTILAYER` enum — both already in [api-traps.md](api-traps.md).
+    modifier) and its rerun on the `OPEN_EXR_MULTILAYER` enum — both already in [api-traps.md](../scene/api-traps.md).
 - **Aim a camera at the thing.** Use a Track To constraint on an empty placed at the feature's
   real coordinates, rather than guessed rotations. Then check the feature lands inside the frame
   (`world_to_camera_view`) before rendering.

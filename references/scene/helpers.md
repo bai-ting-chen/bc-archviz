@@ -49,7 +49,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `bake_irradiance(npy_paths, exr_path, sigma_cells=1.0)` — Merge photon grids, smooth by sigma_cells, write the irradiance EXR (W/m2).
 - `add_caustic_light(mat, exr_path, scale=1.0, albedo_label='Pine + satin varnish coat')` — Adds Emission = albedo * E / pi on up-facing faces, E sampled at world XY from the map. `albedo_label`: label of the receiver's BSDF whose Base Color input carries the albedo (the default is materials.wood.coated_wood's).
 
-## `finals` — Cycles finals in the open UI with no sample/time limit (RULES GAT_03), and post-processing from the saved passes. LuxCore finals: from_passes.py. pipeline.md > Final render in the open UI.
+## `finals` — Cycles finals in the open UI with no sample/time limit (RULES GAT_04), and post-processing from the saved passes. LuxCore finals: from_passes.py. pipeline.md > Final render in the open UI.
 
 - `setup_unlimited(res, samples=1000000, denoiser='OPENIMAGEDENOISE')` — Final settings: full res, untiled (tile > frame), no adaptive/time limit, denoiser + its passes stored, multilayer EXR.
 - `remove_handlers()` — Unregister the final's save handlers (do this before cancelling a final you do not want saved).

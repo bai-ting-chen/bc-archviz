@@ -1,6 +1,6 @@
-# LuxCore — the caustics renderer (RULES REN_03)
+# LuxCore — setup and settings
 
-When to use it: RULES REN_03; the measured comparison is in [caustics.md](caustics.md) › Decision.
+When to choose LuxCore: [renderer-choice.md](renderer-choice.md).
 
 ## Install (BlendLuxCore 2.11, official support for Blender 4.5 LTS and 5.2 LTS)
 - `gh release download <tag> -R LuxCoreRender/BlendLuxCore -p "BlendLuxCore-*.zip"` into an
@@ -152,7 +152,7 @@ island = V-Ray's UVW Randomizer). Build: `bpy.data.node_groups.new(n, "luxcore_m
   (EXCEPTION_ACCESS_VIOLATION in `pyluxcore.pyd`, no Python error). Build every UV layer the
   tree references on every run, even when the map itself is cached.
 - No AO texture and no usable dirt texture in LuxCore (Pointiness has no width control and cannot
-  see where two objects meet): bake corner dust with Cycles ([edge-wear.md](materials/edge-wear.md) › Concave corners).
+  see where two objects meet): bake corner dust with Cycles ([edge-wear.md](../materials/edge-wear.md) › Concave corners).
 
 ## Output
 - The OIDN result (`sc.luxcore.denoiser.enabled = True`) is a **separate `DENOISED` pass**; a
@@ -164,7 +164,7 @@ island = V-Ray's UVW Randomizer). Build: `bpy.data.node_groups.new(n, "luxcore_m
 - Save the linear EXR, then graded PNGs from it (AgX at a few EVs) with `img.save_render(p, scene=sc)`.
 
 ## Final in the open UI
-Mechanics: [pipeline.md](pipeline.md) › *Final render in the open UI*. LuxCore specifics: `halt.enable = False`.
+Mechanics: [pipeline.md](../scene/pipeline.md) › *Final render in the open UI*. LuxCore specifics: `halt.enable = False`.
 - **Two ways to stop, different results.** LuxCore's own Stop (render-window button;
   scriptable as `LuxCoreDisplaySettings.stop_requested = True` from
   `bl_ext.user_default.blendluxcore.properties.display`) ends normally: OIDN, compositor,
@@ -178,14 +178,3 @@ Mechanics: [pipeline.md](pipeline.md) › *Final render in the open UI*. LuxCore
 - A cancelled LuxCore session cannot be resumed; the time spent is in the passes file only.
 - The live view refreshes in an Image Editor on `Render Result`; the first light-tracing passes
   look like scattered dots. A snapshot mid-render: `Render Result.save_render(...)` over MCP.
-
-
-## REN_03 procedure
-
-**Renderer: Cycles by default, LuxCore for detailed caustics**. When
-   caustics or heavy refraction carry the shot — sun through patterned glass or glass block,
-   glass-on-water, multi-interface glass — render in LuxCore (BlendLuxCore, path tracing with
-   light tracing: GPU camera paths + CPU light paths). It is the one standing exception to
-   native-first: Cycles path tracing, path guiding and MNEE all fail on specular–diffuse–specular
-   paths from a sun-sized source, while LuxCore light tracing is unbiased and energy-correct there (caustics.md › Decision). Say it is
-   an external engine when you switch.
