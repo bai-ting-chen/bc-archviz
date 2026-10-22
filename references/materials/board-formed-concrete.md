@@ -1,6 +1,27 @@
 # Board Formed Concrete
 
 ### Board-formed concrete
+Concrete poured into moulds built from timber boards, so the surface is board-marked: it keeps
+the imprint of each board's face and wood grain.
+
+**Three independent layers, in this order:**
+1. **Base:** a clean, jointless concrete (or plaster) material with no board marks.
+2. **Board layer:** the board layout and joints.
+   - **Layout:** courses, butt joints, board-to-board tone.
+   - **Tilt and offset:** each board's own tilt and in/out offset.
+   - **Joint marks:** paste fins and paste loss at the joints.
+3. **Grain layer:** wood grain from a timber/wood material, placed *inside each board*.
+
+**Grain continuity rule:** grain is continuous within a board and never continuous across a joint.
+- **Why:** no two formwork boards are alike, so neighbours differ.
+- **How:** give each board its own window of the grain source (offset over the whole usable map,
+  flip in u and v, about ±0.5° angle, about ±10 % scale).
+- **Neighbours:** no two adjacent boards may share a window that lines up. That covers the same
+  course, the course above and below, and boards across corners.
+- **Check:** correlate the grain height across every butt and bed joint in 2 cm strips; each pair
+  must stay below a threshold.
+- **Trap:** a few source bands × a flip gives too few variants, and neighbours line up.
+
 Relief, not a print: the wall is a negative cast of the board faces, at three scales, all from
 the formwork. Use this wherever boards are close or large enough to resolve; a printed board map
 (below) is only a fallback for walls far away or small in frame.
