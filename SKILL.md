@@ -14,9 +14,10 @@ Read [RULES.md](RULES.md), then the task reference below. Check outstanding acti
 Method and code live here; study data lives in the current project.
 
 ## Workflow
-Research → GAT_01 → Rhino geometry → GAT_02 → import/camera/light/materials → GAT_03 →
-look rounds and control proof → GAT_04 → open-UI final → study notes → user-declared closure.
-Use [work modes](references/workflow/work-modes.md) for ownership and [handoff documents](references/workflow/handoff-documents.md) for handoff artifacts.
+[Work mode](references/workflow/work-modes.md) (Normal unless the user names CPM) → Research →
+GAT_01 → Rhino geometry → GAT_02 → import/camera/light/materials → GAT_03 → look rounds and
+control proof → GAT_04 → open-UI final → study notes → user-declared closure.
+Each stage opens with a brief and closes with a report ([agent exchange documents](references/workflow/agent-exchange.md)).
 
 ## Stack and task router
 | Task | Read |
@@ -34,7 +35,7 @@ Use [work modes](references/workflow/work-modes.md) for ownership and [handoff d
 | Study closure | [Lifecycle](references/workflow/study-lifecycle.md) |
 | Machine/file ownership | [Agent lock](references/workflow/agent-lock.md) |
 | Skill changes, Git, review, sync | [Maintaining](references/workflow/skill-maintaining.md) |
-| Model roles, training, proven/research features | [Work modes](references/workflow/work-modes.md), [Study stages](references/workflow/study-stages.md), [Handoff documents](references/workflow/handoff-documents.md), [Coaching](references/review/codex-coaching.md), [Capabilities](references/scene/capabilities.md) |
+| Model roles, training, proven/research features | [Work modes](references/workflow/work-modes.md), [Study stages](references/workflow/study-stages.md), [Agent exchange documents](references/workflow/agent-exchange.md), [Coaching](references/review/codex-coaching.md), [Capabilities](references/scene/capabilities.md) |
 
 Code: `scripts/blender/` for Blender; `scripts/blender/materials/` for material families;
 `scripts/controls/` for headless controls; `scripts/rhino/` for Rook geometry extraction;

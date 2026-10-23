@@ -7,7 +7,7 @@ rule; this file is the detail. How to launch the sessions: [skill-maintaining.md
   from briefs, runs, measures and reviews Claude's code.
 - **Codex priority mode, CPM** (Claude's budget is low, the user names it): Claude only directs —
   decisions, direction, taste, briefs, user gates. Codex does every hands-on task. Claude reads
-  short documents, not logs ([handoff formats](handoff-documents.md)).
+  short documents, not logs ([agent exchange documents](agent-exchange.md)).
 
 While both models work, Claude talks to the user, brings the gates (GAT_01–04) and commits to the
 skill repo (RULES AGT_02). When one model works alone, it does all of that itself

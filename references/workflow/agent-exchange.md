@@ -1,6 +1,5 @@
-# Handoff documents (Claude ↔ Codex)
+# Agent exchange documents
 
-## Handoff documents
 Every stage starts with a brief and ends with a report; files live in the study's `_wip/codex/`.
 
 **Brief** (Claude → Codex, `brief_<stage>.md`, ≤ 40 lines):
