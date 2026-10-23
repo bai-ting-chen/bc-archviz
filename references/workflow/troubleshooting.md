@@ -25,7 +25,7 @@ Fix: Check any existing download, then retry the same request a bounded number o
 ### Script works headless, fails in the UI ("Context missing active object")
 
 Cause: UI startup scripts have a different operator context from background runs.
-Fix: Operators need `temp_override` in a UI startup script (api-traps). See [api-traps.md](../scene/api-traps.md).
+Fix: Operators need `temp_override` in a UI startup script (blender-api-traps). See [blender-api-traps.md](../scene/blender-api-traps.md).
 
 ### Rook call hangs / "dispatcher busy" / file won't open
 
@@ -67,7 +67,7 @@ Fix: Use the current warming/tint procedure and compare the entire reference ima
 ### `bpy_struct[key] = val: id properties not supported` on a GN modifier
 
 Cause: The GN interface socket needs the Blender-version-specific setter.
-Fix: 5.2 inputs: `materials.edge_wear.set_input(mod, name, value)`. See [api-traps.md](../scene/api-traps.md).
+Fix: 5.2 inputs: `materials.edge_wear.set_input(mod, name, value)`. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
 ### IES / point light much dimmer than the hand calc
 
@@ -124,7 +124,7 @@ Fix: Force render meshes in an owned export mesh. Extract mesh data without modi
 ### GN geometry renders with source's material
 
 Cause: Object Info instances inherit their source material.
-Fix: Set Material. See [api-traps.md](../scene/api-traps.md).
+Fix: Set Material. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
 ### An area renders black that is bright in the ref
 
@@ -139,7 +139,7 @@ Fix: Rotate/flatten the map (materials › Tiled maps). See [texture-selection.m
 ### Water/haze/fog volume murky and dark
 
 Cause: Check the volume-bounce setting for this Blender version.
-Fix: `cycles.volume_bounces` defaults to 0 (api-traps › Render). See [api-traps.md](../scene/api-traps.md).
+Fix: `cycles.volume_bounces` defaults to 0 (blender-api-traps › Render). See [blender-api-traps.md](../scene/blender-api-traps.md).
 
 ### Rhino boxes/slabs hang below their datum
 

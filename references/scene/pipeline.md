@@ -244,7 +244,7 @@ Apply only checks needed by the current task. Read-only documentation work needs
 ## Runtime preflight (task-conditional)
 ```
 - [ ] Read [RULES.md](../../RULES.md) and the references/ file for the task — both live in THIS skill folder,
-      not the project; skim [api-traps.md](api-traps.md) before writing node/GN code
+      not the project; skim [blender-api-traps.md](blender-api-traps.md) before writing node/GN code
 - [ ] `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` absent or mine (RULES AGT_04); create it before working in Blender, Rhino, scripts or files
 - [ ] Blender open, MCP on 9876 (get_blendfile_summary_datablocks)
 - [ ] Rhino: which document is open, is it modified? A user's file stays untouched — write
@@ -278,7 +278,7 @@ Apply only checks needed by the current task. Read-only documentation work needs
 | Measure | `scripts\imgstats.py stats|patch|diff`; `scripts\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `scripts\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
-| Maintenance | `scripts\helper_index.py` (writes [helpers.md](helpers.md)), `scripts\regress_helpers.py` (old vs new helper output), `scripts\codex_review.py` (Codex reviews a change before push, RULES AGT_01), `scripts\study_close.py` (close a study: keep milestones, delete the rest, RULES AST_02) |
+| Maintenance | `scripts\helper_index.py` (writes [blender-python-helpers.md](blender-python-helpers.md)), `scripts\regress_helpers.py` (old vs new helper output), `scripts\codex_review.py` (Codex reviews a change before push, RULES AGT_01), `scripts\study_close.py` (close a study: keep milestones, delete the rest, RULES AST_02) |
 | Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tiles.md). |
 | Controls | `scripts\controls\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
@@ -320,7 +320,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
    ([RULES REN_03](../renderer/renderer-choice.md)) → [LuxCore setup](../renderer/luxcore.md).
 8. **Look-dev**: headless `render_variant.py` or MCP renders into the study `_wip/`; measure
    with `imgstats`; prove each feature with a control (RULES VAL_02). Reuse the helpers
-   ([helpers.md](helpers.md) lists them all: `materials.edge_wear.set_input`, `materials.nodes.sock`, `materials.pbr.pbr_material`,
+   ([blender-python-helpers.md](blender-python-helpers.md) lists them all: `materials.edge_wear.set_input`, `materials.nodes.sock`, `materials.pbr.pbr_material`,
    `materials.nodes.G`, `materials.pbr`, `scatter`) instead of re-deriving
    node plumbing — the traps they wrap get hit again otherwise.
 9. **Final** (RULES GAT_04) → [pipeline.md](pipeline.md) › *Final render in the open UI* (Cycles: `finals.py`); linear EXR + graded

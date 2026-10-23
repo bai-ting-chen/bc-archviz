@@ -18,15 +18,15 @@ import sys
 SKILL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 PROMPT = """Review this change to the bc-archviz skill (Blender 5.2 archviz pipeline).
-Read SKILL.md, RULES.md, references/workflow/skill-maintaining.md and references/scene/api-traps.md first.
+Read SKILL.md, RULES.md, references/workflow/skill-maintaining.md and references/scene/blender-api-traps.md first.
 Report, most severe first, each with file:line and a concrete failure scenario:
-1. Correctness bugs in the code: wrong Blender 5.2 API use (see api-traps.md), broken
+1. Correctness bugs in the code: wrong Blender 5.2 API use (see blender-api-traps.md), broken
    node links, unit errors (mm vs m, lux, lumens, EV), paths that only work on one machine.
 2. Breaks of the skill's own rules: a project, study, client or user-folder name in the skill;
    a scene-specific number presented as a rule (RULES GOV_01); a rule stated outside RULES.md
    instead of pointed to; a push without a MIGRATE.md section; a second builder for a job
    that already has one; a new public helper without a one-line docstring.
-3. Docs that no longer match the code (SKILL.md tables, references, helpers.md).
+3. Docs that no longer match the code (SKILL.md tables, references, blender-python-helpers.md).
 Do not report style preferences. Do not edit anything. If nothing survives, say so."""
 
 

@@ -1,4 +1,4 @@
-"""Write references/scene/helpers.md: every public function in scripts/blender/ with its signature and
+"""Write references/scene/blender-python-helpers.md: every public function in scripts/blender/ with its signature and
 the first line of its docstring, read from the code (ast, nothing imported).
 
     python scripts/helper_index.py
@@ -11,7 +11,7 @@ from pathlib import Path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "blender")
-OUT = os.path.join(os.path.dirname(HERE), "references", "scene", "helpers.md")
+OUT = os.path.join(os.path.dirname(HERE), "references", "scene", "blender-python-helpers.md")
 
 
 def sig(fn):

@@ -5,7 +5,7 @@ Every stage starts with a brief and ends with a report; files live in the study'
 **Brief** (Claude → Codex, `brief_<stage>.md`, ≤ 40 lines):
 - goal in one sentence, and the design intent it serves;
 - files Codex owns this stage (others stay untouched);
-- helpers to reuse ([helpers.md](../scene/helpers.md)) and the interface in real units;
+- helpers to reuse ([blender-python-helpers.md](../scene/blender-python-helpers.md)) and the interface in real units;
 - outputs and where they go; the camera(s) the images use;
 - run budget (skill-maintaining.md › Handing work to Codex);
 - done when: the check or image that answers the question;
@@ -48,5 +48,5 @@ albedo and roughness, the reference crop it matches, and "in doubt" with the can
 - full-resolution evidence: frames or crops saved beside the note, not only text.
 
 **Review** (fresh Codex reviewer, `review_<stage>.md`): findings only, most severe first, with
-file:line, against the brief, [RULES.md](../../RULES.md) and [api-traps.md](../scene/api-traps.md). With training on, the reviewer also
+file:line, against the brief, [RULES.md](../../RULES.md) and [blender-api-traps.md](../scene/blender-api-traps.md). With training on, the reviewer also
 opens the images and checks them against the design intent (codex-coaching.md › Reviewing).

@@ -51,3 +51,7 @@ references/workflow/maintaining.md is now skill-maintaining.md (the skill set's 
 ## 2026-10-23: Agent exchange documents renamed
 
 - `references/workflow/handoff-documents.md` renamed to `references/workflow/agent-exchange.md`; links updated. Machine action: none.
+
+## 2026-10-23: Blender coding references renamed
+
+- `references/scene/helpers.md` renamed to `references/scene/blender-python-helpers.md`; `references/scene/api-traps.md` renamed to `references/scene/blender-api-traps.md`; links updated. Machine action: none.

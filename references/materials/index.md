@@ -28,4 +28,4 @@ Use all applicable maps at real size with physical surface ranges (MAT_01).
 
 Shared graph/socket helpers: `materials.nodes.G` / `sock`; asset lookup and project state: `archviz`.
 Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.
-[LuxCore materials](../renderer/luxcore.md): `materials.luxcore`; [all helper signatures](../scene/helpers.md).
+[LuxCore materials](../renderer/luxcore.md): `materials.luxcore`; [all helper signatures](../scene/blender-python-helpers.md).

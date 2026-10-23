@@ -35,7 +35,7 @@ each clone tracks its own unfinished setup. Remove each action when completed an
 remains. Never attach automatic commit/push or self-deletion commands. [SKILL.md](../../SKILL.md) retains its conditional pointer.
 
 ## Helpers changed?
-Run `python scripts/helper_index.py` (MCP venv python) so [helpers.md](../scene/helpers.md) matches the
+Run `python scripts/helper_index.py` (MCP venv python) so [blender-python-helpers.md](../scene/blender-python-helpers.md) matches the
 code, and give every new public helper a one-line docstring — that line is its index entry.
 Refactoring a helper: prove nothing else moved with `scripts/regress_helpers.py` (dump with the
 old and the new code, then compare; its docstring has the steps).
@@ -46,12 +46,12 @@ Keep one builder per job (one dielectric, one socket helper, one node-graph buil
 **Claude's code → Codex.** After committing, before pushing, with the MCP venv python:
 `python scripts/codex_review.py --commit <sha>` (`--base origin/main` for everything unpushed,
 `--uncommitted` for the working tree). It runs `codex exec` read-only at high reasoning effort
-against this file, [RULES.md](../../RULES.md) and [api-traps.md](../scene/api-traps.md), and prints the findings.
+against this file, [RULES.md](../../RULES.md) and [blender-api-traps.md](../scene/blender-api-traps.md), and prints the findings.
 
 **Codex's code → a fresh Claude subagent.** Start a general-purpose subagent with only: the task
 brief, the complete change (`git show <sha>` once committed; before that `git diff HEAD` plus
 the new files listed by `git status --short`), and "review against [RULES.md](../../RULES.md), [skill-maintaining.md](skill-maintaining.md)
-and [api-traps.md](../scene/api-traps.md): correctness bugs, rule breaks, docs out of date; findings only, most severe
+and [blender-api-traps.md](../scene/blender-api-traps.md): correctness bugs, rule breaks, docs out of date; findings only, most severe
 first, with file:line". Only its verdict enters the main session.
 
 A new technique also needs its control render (VAL_02). Check each finding against the code before acting, fix what holds in a new commit, and list for
@@ -63,7 +63,7 @@ cross-check was same-model (RULES AGT_01).
 For detail work, from the project folder:
 `codex exec -s workspace-write "<brief>" < NUL > <study>\_wip\codex\<task>.log`
 (stdin closed, or it waits). Put the brief in a file when it is longer than a few lines. The
-brief names the goal, the helpers to reuse ([helpers.md](../scene/helpers.md)), the interface in real units, where
+brief names the goal, the helpers to reuse ([blender-python-helpers.md](../scene/blender-python-helpers.md)), the interface in real units, where
 outputs go (the study's `_wip/`) and asks for a report file with a summary of at most 20 lines.
 Read the summary, not the log. Codex takes the agent lock (RULES AGT_04) when it works in Blender, Rhino, scripts or files.
 - **Codex runs the headless Blender tests itself:** launch with `--sandbox danger-full-access`
@@ -81,7 +81,7 @@ Read the summary, not the log. Codex takes the agent lock (RULES AGT_04) when it
   - **Reviewer:** `codex exec -s read-only` started as soon as a stage report lands, while the
     builder goes on with the next stage on other files.
     - Its brief holds only: the stage brief, the diff (or the list of changed files), and "review
-      against [RULES.md](../../RULES.md), [api-traps.md](../scene/api-traps.md) and the brief: correctness bugs, rule breaks, wrong units;
+      against [RULES.md](../../RULES.md), [blender-api-traps.md](../scene/blender-api-traps.md) and the brief: correctness bugs, rule breaks, wrong units;
       findings only, most severe first, file:line".
     - Output: `_wip/codex/review_<stage>.md`.
   - The next builder stage starts by weighing that review and fixing what holds.
