@@ -2,8 +2,8 @@
 name: bc-archviz
 description: >-
   Photoreal architectural visualization in Blender 5.2 with Cycles and LuxCore,
-  using Rhino geometry. Use whenever the user wants a render or an architectural
-  visualization, or wants to maintain this skill (pull, edit, push).
+  with Rhino as the geometry source. Use when the user asks to create or revise an
+  architectural render or animation, or wants to maintain this skill (pull, edit, push).
 ---
 <!-- bc-archviz-skill-loaded-marker -->
 
