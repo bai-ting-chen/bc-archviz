@@ -1,19 +1,9 @@
 ---
 name: bc-archviz
 description: >-
-  Archviz/rendering: Rhino geometry to Blender, Houdini-ready. Photoreal archviz
-  in Blender 5.2 + Cycles
-  (LuxCore for detailed caustics through glass or water), with Rhino
-  (.3dm) as geometry only. Covers materials (Poly Haven PBR, procedural concrete, wood, stone,
-  metal, glass, water; edge wear, chips, cracks, leak streaks, anti-tiling), HDRI
-  daylight and lights in real lumens (IES/LDT), physical camera, caustics, fog and mist,
-  terrain, grass and meadow scatter, wet surfaces, matching a reference image, controls
-  and finals. Use whenever the user mentions Blender, Cycles, LuxCore, shader or geometry nodes,
-  Poly Haven, rendering, lookdev, lighting, HDRI, lux, caustics, fireflies or
-  denoising, a Render Reference Library image, or wants a photoreal image of a Rhino model, even
-  without naming Blender. Also for bringing 3ds Max (.max) assets into Blender (Maxtree,
-  Evermotion, Forest Pack vegetation; V-Ray or Corona props), and for pulling, editing or
-  pushing this skill (MIGRATE.md and maintenance rules).
+  Photoreal architectural visualization in Blender 5.2 with Cycles and LuxCore,
+  using Rhino geometry. Use whenever the user wants a render or an architectural
+  visualization, or wants to maintain this skill (pull, edit, push).
 ---
 <!-- bc-archviz-skill-loaded-marker -->
 
