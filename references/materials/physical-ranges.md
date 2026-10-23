@@ -24,5 +24,5 @@ These transfer to any scene and any renderer — they are measurements of the wo
 
 ## MAT_01 procedure
 
-Wire every map that applies; real-world UVs; physically plausible albedo/IOR ([README.md](README.md)) —
+Wire every map that applies; real-world UVs; physically plausible albedo/IOR ([index.md](index.md)) —
    wrong scale or albedo reads as "CG" faster than any lighting error.

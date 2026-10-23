@@ -33,7 +33,7 @@ Use [work modes](references/workflow/work-modes.md) for ownership and [handoff d
 |---|---|
 | Setup, MCP, Rhino import, assets, runtime checks, finals | [Pipeline](references/scene/pipeline.md) |
 | Cycles by default; LuxCore caustics exception | [Renderer choice](references/renderer/renderer-choice.md), [Caustics](references/materials/caustics.md), [LuxCore](references/renderer/luxcore.md) |
-| Material families and techniques | [Materials](references/materials/README.md) |
+| Material families and techniques | [Materials](references/materials/index.md) |
 | HDRI lux, lumens/IES, camera, reference solve, fog | [Lighting and camera](references/scene/lighting-camera.md) |
 | Render quality, VRAM and denoising | [Render settings](references/renderer/render-settings.md) |
 | Python helpers and node/GN API | [Helper index](references/scene/helpers.md), [API traps](references/scene/api-traps.md) |

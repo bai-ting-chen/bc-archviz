@@ -115,7 +115,7 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   `polyhaven_fetch.py search textures <cat>`, `tex <id> --res 2k`, `hdri <id> --res 4k`; maps diff,
   arm, nor_gl, disp; `meta.json` has `dimensions_mm`. `search` matches categories only. For
   names and tags, query `api.polyhaven.com/assets?t=textures|hdris` and choose from a thumbnail
-  contact sheet ([README.md](../materials/README.md)). HTTP 520–525 is Cloudflare: retry the same call.
+  contact sheet ([index.md](../materials/index.md)). HTTP 520–525 is Cloudflare: retry the same call.
 - Others in `library/local/<name>/` with a `meta.json` stating the source. Megascans via Fab:
   free items only; download needs the user's own sign-in (their Chrome) — never type passwords.
 - **Where:** the study's own `library/` (RULES AST_03) — `ARCHVIZ_PROJECT=<study> polyhaven_fetch.py …`,
@@ -270,7 +270,7 @@ Apply only checks needed by the current task. Read-only documentation work needs
 |---|---|
 | Blender | `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` |
 | MCP | server `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\blender-mcp.exe` (user scope, `claude mcp get blender`); add-on `mcp` autostarts on 127.0.0.1:9876 (needs Prefs → *Allow Online Access*) |
-| Helpers (run in Blender) | `scripts/blender/`: `archviz` (assets, import, UVs, camera and rendering), `interior` (photometric lighting), `scatter`, `terrain`, `atmosphere`, `glassware`, caustic solvers, `render_variant`, `finals`, `from_passes`. Materials use the canonical `materials` package; see [family map](../materials/README.md). |
+| Helpers (run in Blender) | `scripts/blender/`: `archviz` (assets, import, UVs, camera and rendering), `interior` (photometric lighting), `scatter`, `terrain`, `atmosphere`, `glassware`, caustic solvers, `render_variant`, `finals`, `from_passes`. Materials use the canonical `materials` package; see [family map](../materials/index.md). |
 | Outdoor | `terrain`, `scatter`, `atmosphere`; `materials.ground` and `materials.vegetation` for shading. |
 | Finals (Cycles) | `scripts\blender\finals.py`: untiled no-limit final in the UI, savers, OIDN from passes, graded PNG |
 | 3ds Max assets | `scripts\blender\max_import.py`: `load` (io_scene_max extension + repairs), `tidy`, `rebuild_materials`, `open_loops` — [max-import.md](max-import.md) |
@@ -305,7 +305,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
    terrazzo, mortar, gravel) `archviz.box_uv(obj, size_m)`; directional ones (wood grain, boards,
    brushed metal, vein-cut stone, ribbed sheet, weave, long tiles) `archviz.directional_uv(obj,
    size_m, axis)` so the direction follows the element on every face ([texture-selection.md](../materials/texture-selection.md)).
-4. **Materials** by layer → [materials/README.md](../materials/README.md); after the first full build (step 6), the
+4. **Materials** by layer → [materials/index.md](../materials/index.md); after the first full build (step 6), the
    material gate (RULES GAT_03) before any look round.
 5. **Light**: daylight (RULES LGT_02) `archviz.world_hdri_lux`, rotated by its `hdri_analyse` sun
    direction; artificial: the fixture's IES file `interior.ies_light` when it is specified, else `interior.downlight /

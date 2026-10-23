@@ -164,7 +164,7 @@ Fix: The importer's stored glossiness scalar used instead of the wired glossines
 ### Grass sinks dark / lawn reads grey when wet
 
 Cause: Canopy albedo and grazing-angle wet-film reflection can suppress saturation.
-Fix: Canopy albedo is ~0.05-0.1 (softer AgX look); wet sheen at grazing - darker base ([README.md](../materials/wet-surfaces.md)). See [wet-surfaces.md](../materials/wet-surfaces.md).
+Fix: Canopy albedo is ~0.05-0.1 (softer AgX look); wet sheen at grazing - darker base ([wet-surfaces.md](../materials/wet-surfaces.md)). See [wet-surfaces.md](../materials/wet-surfaces.md).
 
 ### Foam reads as snow cones with black holes
 

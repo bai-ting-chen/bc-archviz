@@ -5,7 +5,7 @@
     ter = terrain.add_terrain(topo, materials.ground.ground_material("grass_ground", "forest_ground_05"))
     terrain.height(x, y, centre=..., pad_half=..., fall=..., run=...)   # no-noise twin (camera placing)
 
-Landform grading (references/materials/README.md › Terrain): a flat pad just under the slab, an apron, then a fall
+Landform grading (references/materials/index.md › Terrain): a flat pad just under the slab, an apron, then a fall
 of `fall` m over `run` m as a smoothstep in the noise-warped distance from the pad - a rounded
 crest *and* a rounded toe, contours that wander instead of a cone - plus a broad roll beyond and
 pasture hummocks. Steepest slope = 1.5 * fall / run (keep < 0.25 = 4:1 for a gentle, mowable

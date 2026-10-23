@@ -43,3 +43,7 @@ Gate IDs renumbered: RES_02 → GAT_01 (research), GAT_01 → GAT_02 (model), GA
 ## 2026-10-22: Skill maintenance doc renamed
 
 references/workflow/maintaining.md is now skill-maintaining.md (the skill set's own upkeep). No machine action.
+
+## 2026-10-23: Materials index renamed
+
+- The materials family map is now `references/materials/index.md`; links updated. Machine action: none.
