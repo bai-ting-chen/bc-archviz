@@ -43,15 +43,3 @@ Gate IDs renumbered: RES_02 → GAT_01 (research), GAT_01 → GAT_02 (model), GA
 ## 2026-10-22: Skill maintenance doc renamed
 
 references/workflow/maintaining.md is now skill-maintaining.md (the skill set's own upkeep). No machine action.
-
-## 2026-10-23: Materials index renamed
-
-- The materials family map is now `references/materials/index.md`; links updated. Machine action: none.
-
-## 2026-10-23: Agent exchange documents renamed
-
-- `references/workflow/handoff-documents.md` renamed to `references/workflow/agent-exchange.md`; links updated. Machine action: none.
-
-## 2026-10-23: Blender coding references renamed
-
-- `references/scene/helpers.md` renamed to `references/scene/blender-python-helpers.md`; `references/scene/api-traps.md` renamed to `references/scene/blender-api-traps.md`; links updated. Machine action: none.
