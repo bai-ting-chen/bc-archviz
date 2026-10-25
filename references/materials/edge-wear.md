@@ -99,8 +99,9 @@ air is still — floor joints and the tops of plinths — and fainter, greyer at
   - a dirt band ~0.35 m under the top;
   - a damp base with an uneven upper edge, from the *visible* foot (ground or waterline);
   - large soft patches (~2–3 m) and medium blotches (~0.4 m) at low weight;
-  - **leaks under horizontal joints:** narrow drips (~18/m across), 0.1–0.65 m long, present on
-    ~55 % of each joint, with a per-joint seed so no two joints match.
+  - **leaks under horizontal joints:** narrow drips (~18/m across), present on ~55 % of each
+    joint, with a per-joint seed so no two joints match; each drip fades over 0.1–0.65 m and ends
+    at the next joint below.
   Design it on a flat test wall first (`scripts/controls/weathering_lab.py`), then install the
   exact graph. Check that it adds no step at joints (change across a joint ≈ change within a unit).
 - **Modifier order:** the leak field goes FIRST, on the clean shell. Run after the chips, rays

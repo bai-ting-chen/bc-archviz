@@ -97,6 +97,13 @@ class G:
         self.L(vec, node.inputs["Vector"])
         return node.outputs[0]
 
+    def combine(self, x, y, z, loc, frame=None):
+        """Combine XYZ from sockets or numbers; returns the vector socket."""
+        node = self.node("ShaderNodeCombineXYZ", loc, frame)
+        for i, v in enumerate((x, y, z)):
+            self._in(node.inputs[i], v)
+        return node.outputs[0]
+
     def attr(self, name, loc, frame=None, out="Fac"):
         node = self.node("ShaderNodeAttribute", loc, frame, label="attr: " + name)
         node.attribute_name = name

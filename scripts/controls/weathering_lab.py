@@ -6,7 +6,8 @@ Factors, all multiplicative around 1 (RULES MAT_07):
   1 run-off streaks from the top: two widths, clustered, meandering, own length per streak
   2 dirt band under the top     3 damp base with an uneven edge
   4 large soft patches          5 medium blotches
-  6 leaks under horizontal joints: short drips, a pattern per joint
+  6 leaks under horizontal joints: short drips, a pattern per joint; a drip ends at the next
+    joint below (j_len longer than board_h is cut there)
 Defaults are a tuned, balanced set; override any of them as key=value.
 
 Usage: blender -b --factory-startup --python weathering_lab.py -- <out_dir> <tag> [key=value ...]
@@ -14,6 +15,9 @@ Writes <out_dir>/lab_<tag>.png (8 x 4 m wall, joints drawn for scale, Standard v
 """
 import bpy, sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'blender'))
+import archviz
+from materials.nodes import G
 argv = sys.argv[sys.argv.index('--') + 1:]; O = Path(argv[0]); TAG = argv[1]
 P = dict(board_h=.28, j_amp=.24, j_w=18.0, j_len_min=.10, j_len_span=.55, j_density=.55, j_thr=.46,
          wiggle=.06, cluster_scale=.45, cluster_thr=.28, topband_amp=.156, len_min=1.2, len_span=3.0,
@@ -26,32 +30,34 @@ for o in list(bpy.data.objects): bpy.data.objects.remove(o)
 W, H = 8.0, 4.0
 bpy.ops.mesh.primitive_plane_add(size=1); wall = bpy.context.object
 wall.scale = (W, H, 1); wall.rotation_euler = (1.5708, 0, 0); wall.location = (W / 2, 0, H / 2)
-m = bpy.data.materials.new('lab'); m.use_nodes = True; nt = m.node_tree; N = nt.nodes; L = nt.links
-for n in list(N): N.remove(n)
-out = N.new('ShaderNodeOutputMaterial'); em = N.new('ShaderNodeEmission'); L.new(em.outputs[0], out.inputs[0])
-geo = N.new('ShaderNodeNewGeometry'); pos = geo.outputs['Position']   # world metres: x along wall, z up
-sep = N.new('ShaderNodeSeparateXYZ'); L.new(pos, sep.inputs[0])
-def math(op, a, b=0.0, clamp=False):
-    n = N.new('ShaderNodeMath'); n.operation = op; n.use_clamp = clamp
-    for i, v in enumerate((a, b)):
-        if hasattr(v, 'node'): L.new(v, n.inputs[i])
-        else: n.inputs[i].default_value = v
-    return n.outputs[0]
+m = bpy.data.materials.new('lab'); b = G(m)   # canonical node builder (materials.nodes.G)
+out = b.node('ShaderNodeOutputMaterial', (900, 0)); em = b.node('ShaderNodeEmission', (700, 0))
+b.link(em.outputs[0], out.inputs[0])
+pos = b.node('ShaderNodeNewGeometry', (-900, 0)).outputs['Position']   # world metres: x along wall, z up
+sep = b.node('ShaderNodeSeparateXYZ', (-700, 0)); b.link(pos, sep.inputs[0])
+O0 = (0, 0)   # node locations are irrelevant here
+
+
+def math(op, a, b2=0.0, clamp=False):
+    """G.math at the origin."""
+    return b.math(op, a, b2, O0, clamp=clamp)
+
+
 def comb(x, y, z):
-    n = N.new('ShaderNodeCombineXYZ')
-    for i, v in enumerate((x, y, z)):
-        if hasattr(v, 'node'): L.new(v, n.inputs[i])
-        else: n.inputs[i].default_value = v
-    return n.outputs[0]
-def noise(vec, scale, detail=2.0, rough=.5, dim='3D'):
-    n = N.new('ShaderNodeTexNoise'); n.noise_dimensions = dim; L.new(vec, n.inputs['Vector'])
-    n.inputs['Scale'].default_value = scale; n.inputs['Detail'].default_value = detail
-    n.inputs['Roughness'].default_value = rough; n.inputs['Distortion'].default_value = 0.0
-    return n.outputs['Fac']
-def ramp(v, a, b, smooth=True):
-    n = N.new('ShaderNodeMapRange'); n.interpolation_type = 'SMOOTHSTEP' if smooth else 'LINEAR'
-    L.new(v, n.inputs['Value']); n.inputs['From Min'].default_value = a; n.inputs['From Max'].default_value = b
-    return n.outputs['Result']
+    """G.combine at the origin."""
+    return b.combine(x, y, z, O0)
+
+
+def noise(vec, scale, detail=2.0, rough=.5):
+    """G.noise (3D, no distortion) at the origin."""
+    return b.noise(vec, scale, O0, detail=detail, rough=rough)
+
+
+def ramp(v, a, b2, smooth=True):
+    """G.range from [a, b2] to [0, 1]; smoothstep unless smooth=False."""
+    return b.range(v, a, b2, O0, smooth=smooth)
+
+
 x, z = sep.outputs['X'], sep.outputs['Z']
 top = H
 # 1. run-off streaks: narrow along x, long along z; start at the top, each streak with its own length.
@@ -90,12 +96,12 @@ M = math('MULTIPLY', M, math('SUBTRACT', 1.0, math('MULTIPLY', J, P['j_amp'])))
 # board joints for scale only: dark line every 0.28 m.
 j = math('MULTIPLY', math('LESS_THAN', math('PINGPONG', math('SUBTRACT', top, z), P['board_h'] / 2), .006), P['show_joints'])
 col = math('MULTIPLY', math('MULTIPLY', M, .62), math('SUBTRACT', 1.0, math('MULTIPLY', j, .35)))
-L.new(col, em.inputs['Color']); em.inputs['Strength'].default_value = 1.0
+b.link(col, em.inputs['Color']); em.inputs['Strength'].default_value = 1.0
 wall.data.materials.append(m)
 cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera = cam
 cam.data.type = 'ORTHO'; cam.data.ortho_scale = W; cam.location = (W / 2, -10, H / 2); cam.rotation_euler = (1.5708, 0, 0)
 sc.render.resolution_x, sc.render.resolution_y = 1200, 600
-sc.render.engine = 'CYCLES'; sc.cycles.samples = 4; sc.cycles.device = 'CPU'
+sc.render.engine = 'CYCLES'; sc.cycles.samples = 4; archviz.use_gpu(); sc.cycles.device = 'GPU'
 sc.view_settings.view_transform = 'Standard'; sc.world = None
 sc.render.filepath = str(O / f'lab_{TAG}.png'); bpy.ops.render.render(write_still=True)
 print('LAB_DONE', TAG, P)

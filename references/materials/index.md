@@ -4,12 +4,13 @@ Recipes describe node structure and mechanisms; tune scene values in study notes
 Use all applicable maps at real size with physical surface ranges (MAT_01).
 
 ## Layer assembly (MAT_07)
-- **Colour and roughness:** each layer is a multiplier around 1 on the base, chained in sequence:
-  no layer adds or replaces.
+- **Colour and roughness:** each layer is a multiplier around 1 on the base, chained in sequence.
+  Older helpers that mix whole BSDFs or MAXIMUM masks (`edge_wear.weathered_concrete`,
+  `add_runoff`) predate MAT_07: migrate them when they are next changed.
 - **Height:** geometry-scale relief goes to the Displacement output ([displacement.md](displacement.md)),
   surface texture to a Bump node on the Normal input.
-- **Controls:** one switch (a Value node) and one AOV per layer, so a control renders it on and off
-  (RULES VAL_02).
+- **Switching off (MAT_07):** a Value node per layer that scales its deviation from 1 does it; an
+  AOV of the layer's multiplier lets you measure what reaches the image ([variation.md](variation.md)).
 - **Geometry fields** measured in Geometry Nodes run before modifiers that move the mesh (RULES MAT_08).
 
 | Family or technique | Canonical helper |
