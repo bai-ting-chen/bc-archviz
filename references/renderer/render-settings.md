@@ -51,6 +51,15 @@ VRAM first (RULES SAF_02). Tools: `texture_limit_render`, `texture_resolution_re
 Preferences `texture_cache_directory` first to keep `library/` clean); a large `tile_size`
 (small tiles are slow on GPU); instances (Alt+D); `use_persistent_data` for re-render loops.
 
+**What usually fills VRAM:** check evaluated triangle counts per object and image sizes before
+cutting samples.
+- A modifier that subdivides a whole object to carry a field (proximity, wetness) multiplies every
+  face; adaptive dicing then adds more. Prefer fields that do not need the subdivision.
+- 16-bit 8K maps load as float RGBA (~1 GiB each): use half precision (`image.use_half_precision`)
+  for data maps, a 1K map or a procedural field for low-frequency data.
+- Simulated or sculpted water films can reach tens of millions of triangles: decimate them where
+  the camera cannot resolve them.
+
 ## Colour management
 Per-file working space (Rec.709 default / Rec.2020 / ACEScg) — pick it at project start, because
 changing it later re-reads every material. Views: AgX (our default), ACES 2.0, Khronos PBR

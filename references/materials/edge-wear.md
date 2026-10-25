@@ -19,6 +19,9 @@ huge meshes that would need dicing - the shader Bevel-normal mask ([concrete.md]
    Subdivide so the band resolves the chip size; chip where `edge_dist` < reach, modulated by a
    bite/segment noise and a chipped-share fraction; depth x profile x fracture noise;
    Set Position along −normal; store `chip`; join; merge by distance.
+- **Fresh-break colour comes from the clean base**, before grime, ink or other darkening layers,
+  then lighter (~+20 %) and rougher, blended by a soft mask on the chip depth (0 → ~0.5 mm). Taken
+  from the finished colour, a chip inherits the grime and reads as a dark spot.
 3. `weathered_concrete()`: dirt = smoothstep over the dirt band x grime noise x (1 − chip) → a
    grimier, rougher BSDF; chips → a fresh-break BSDF, slightly lighter and rougher with its own
    bump. The dirt band is wider than the chip reach — grime spreads past where material is gone.
@@ -42,6 +45,17 @@ several faces → dirt band wider than reach.
   remap. This is the single most common way a floor goes uniformly dirty.
 - Halve chip size and lower the chipped share for room-scale shots relative to a close-up: sizes
   that read well on a hero object look chewed on a beam several metres away.
+
+## Chips as displacement (meshes already subdivided wall-wide)
+When another modifier has already subdivided the whole wall (a proximity or wet field at a high
+level), band subdivision on top multiplies an already dense mesh. Long thin faces (planks,
+boards) cannot resolve chips along their length cheaply either. Then build the same chip field
+(`_chip_field`: segments with a chipped share, bite noise on the reach, profile, fracture noise on
+the depth) in the material's displacement, through the existing adaptive dicing, along −normal.
+It adds no mesh; resolution follows the camera.
+- Noise coordinates: a stored rest position, not the displaced position.
+- Edge distance: an attribute adapter (distance to the unit's edges), gated where it is missing.
+- Only outside arrises: exclude wall feet, inside corners and the low side of steps.
 
 ## Wood (`scripts/blender/materials/wood_wear.py`)
 A real bevel on the arris (`round_arrises`) rather than a shaded one; `archviz.directional_uv`; GN dents on the
@@ -75,6 +89,20 @@ air is still — floor joints and the tops of plinths — and fainter, greyer at
   down x0.6, each streak its own length (0.8-3 m), a drip band under the edge, patchy along it
   (RULES MAT_05), vertical faces only (`materials.edge_wear.add_runoff`). On a sunlit wall streaks need full
   strength to read at all.
+- **Procedural run-off (no drip-edge raycast):** for walls whose top is the drip edge, build the
+  layer from the wall's own top and foot (stored per-vertex) and the along-wall coordinate (x + y
+  on axis-aligned walls, plus a per-wall offset). Weathering is gravity-shaped: isotropic cloud
+  noise alone reads as smoke or blur. Factors, multiplied (RULES MAT_07):
+  - streaks from the top in two widths (noise ~7/m and ~3/m across, ~0.45/m down), clustered by a
+    low-frequency noise along the wall (~0.45/m, ~70 % coverage), edges meandering ~5 cm, each
+    streak its own length (~1.2–4 m) fading downward;
+  - a dirt band ~0.35 m under the top;
+  - a damp base with an uneven upper edge, from the *visible* foot (ground or waterline);
+  - large soft patches (~2–3 m) and medium blotches (~0.4 m) at low weight;
+  - **leaks under horizontal joints:** narrow drips (~18/m across), 0.1–0.65 m long, present on
+    ~55 % of each joint, with a per-joint seed so no two joints match.
+  Design it on a flat test wall first (`scripts/controls/weathering_lab.py`), then install the
+  exact graph. Check that it adds no step at joints (change across a joint ≈ change within a unit).
 - **Modifier order:** the leak field goes FIRST, on the clean shell. Run after the chips, rays
   from under an arris slip through the chip-band seam or hit the chipped underside; the wrong
   value of one vertex then spreads over a whole coarse dice triangle -> light triangles hanging

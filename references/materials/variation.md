@@ -30,6 +30,18 @@ tiling (5.2 manual: no such texture node); build it from nodes.
   scanned map with stains or cracks repeats visibly along every joint it is box-mapped onto.
 
 
+## Grunge strength that reaches the image
+- Blender Noise rarely reaches the ends of a remap: a ±15 % range set on the remap extremes lands
+  near ±3 % in the render. Averaging two fields shrinks it again, and masks dilute it.
+- Normalise each field to a signed value with a known SD (remap around its measured mean and SD,
+  from samples on the surface), then set the gain from the SD you want.
+- Set the strength by what reaches the image: measure each layer's multiplier on its AOV
+  (interior pixels of dry surfaces only) and on the beauty, never by the shader parameter.
+- Choose a strength from previews composited from one render ([validation.md](../review/validation.md)).
+- A scan used as a grunge source must be non-directional: a board-formed, panel or brushed scan
+  brings its own lines. Check its preview first; isotropic cloud noise reads as smoke or blur —
+  weathering is gravity-shaped ([edge-wear.md](edge-wear.md) › Runoff).
+
 ## MAT_05 procedure
 
 **Nature is patchy, never continuous or uniform**. Wetness, stains,

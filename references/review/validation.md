@@ -19,6 +19,16 @@ removed the feature. Whole-frame averages hide local effects, and a broken contr
 "no effect".
 
 
+**Strength previews from one render.** For a colour layer built as a multiplier M with an AOV, a
+preview at strength k is `beauty × (1 + k(M − 1)) / M` on linear EXRs. Apply it only where M is
+plausible (e.g. 0.8–1.25), on dry opaque pixels: on transparent layers (water films, glass) the AOV
+holds only a fraction of the surface behind, and the division turns into speckle. It ignores the
+change in bounce light, so it chooses a strength; a render confirms it.
+
+**Flat-wall lab for a look layer.** When a procedural look layer misses twice in full renders, build
+it on a flat wall at real size with the unit joints drawn for scale (renders of seconds), iterate
+against the reference, then install the exact node graph: `scripts/controls/weathering_lab.py`.
+
 ## VAL_03 procedure
 
 Measure on the PNG the renderer wrote (`imgstats.py`, `refmatch.py`) — AgX rolls off whites,

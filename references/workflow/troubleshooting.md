@@ -116,6 +116,26 @@ Fix: Match the frustum (pipeline.md). See [pipeline.md](../scene/pipeline.md).
 Cause: Object without the GN modifier reads `edge_dist` = 0 = "on an arris".
 Fix: Gate it (edge-wear). See [edge-wear.md](../materials/edge-wear.md).
 
+### Chips read as dark spots
+
+Cause: The fresh-break colour is taken after grime, ink or other darkening layers, so the chip inherits them.
+Fix: Derive it from the clean base, lighter and rougher, with a soft mask. See [edge-wear.md](../materials/edge-wear.md).
+
+### Grunge invisible, or reads as smoke
+
+Cause: Invisible: the remap extremes are rarely reached, fields are averaged or masked. Smoke or blur: isotropic, distorted cloud noise.
+Fix: Normalise by the measured SD and set the gain from the image; build weathering gravity-shaped (run-off). See [variation.md](../materials/variation.md).
+
+### Scan-based grunge brings bands or lines
+
+Cause: The scan itself is directional (board-formed, panels, brushing) and adds its own lines.
+Fix: Check the scan's preview; use a non-directional scan or a procedural field. See [variation.md](../materials/variation.md).
+
+### Strength preview speckles on water or glass
+
+Cause: The layer AOV holds only part of the surface behind a transparent layer; dividing by it explodes.
+Fix: Rescale only dry opaque pixels with plausible multipliers. See [validation.md](../review/validation.md).
+
 ### Imported object has 0 faces
 
 Cause: No cached render mesh in the .3dm.
@@ -135,6 +155,21 @@ Fix: Check sky access. See [lighting-camera.md](../scene/lighting-camera.md).
 
 Cause: Texture tile edges.
 Fix: Rotate/flatten the map (materials › Tiled maps). See [texture-selection.md](../materials/texture-selection.md).
+
+### Printed map stains repeat
+
+Cause: A tiled diffuse with distinctive stains repeats at its tile size.
+Fix: Mix the diffuse part-way toward its own mean, and add a low-frequency tone field. See [variation.md](../materials/variation.md).
+
+### Relief vanishes on a bright wall
+
+Cause: Near display value ~0.8, AgX's highlight roll-off flattens relief shading: grain, steps and fins disappear.
+Fix: Match the reference's typical wall, not its brightest patch; lower the base or the exposure. See [physical-ranges.md](../materials/physical-ranges.md).
+
+### Displacement shelf from a negative distance
+
+Cause: A distance field that drives a fin or a displacement went negative and was amplified (one case: ~100×, a shelf on the floor).
+Fix: Clamp every distance before it drives geometry. See [displacement.md](../materials/displacement.md).
 
 ### Water/haze/fog volume murky and dark
 
@@ -180,6 +215,11 @@ Fix: In whitewater/trough contexts, check for an open water sheet over a void an
 
 Cause: Clear drops in soft light refract the dark surroundings.
 Fix: Fewer, higher, spread ([water-features.md](../materials/water-features.md)). See [water-features.md](../materials/water-features.md).
+
+### Multilayer EXR seems to hold only Combined
+
+Cause: Blender 5.2 writes multi-part EXRs; the reader opened only the first part.
+Fix: Read every part (`seek_subimage`) with the bundled OpenImageIO. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
 ## LuxCore and caustics
 

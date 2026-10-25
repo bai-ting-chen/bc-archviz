@@ -31,6 +31,8 @@
 - Subdivision adaptive (5.x): the properties live on the **Subdivision Surface modifier** —
   `mod.use_adaptive_subdivision`, `mod.adaptive_space='PIXEL'`, `mod.adaptive_pixel_size`. The old
   `obj.cycles.use_adaptive_subdivision` no longer exists and raises AttributeError.
+  It works only while that modifier is **last** in the stack; anywhere else it is evaluated as plain
+  subdivision at render levels before the modifiers after it.
 - After changing modifier inputs in background scripts: `obj.update_tag()` +
   `view_layer.update()` before reading evaluated meshes.
 - `matrix_world` is stale right after a script sets `location`/`rotation_euler`: call
@@ -101,6 +103,12 @@
   found"); set `media_type = "IMAGE"` back before saving PNGs. `Render Result.save_render()`
   then writes every pass (e.g. Combined + DENOISED) into one file. Read layers back with the
   bundled `OpenImageIO` (`seek_subimage` per layer); `scripts/blender/from_passes.py`.
+  The file is **multi-part**: every pass is its own part, so a reader that opens only the first
+  part sees Combined alone and concludes the AOVs are missing. Loop `seek_subimage(i, 0)` and take
+  the part name from `spec.getattribute("name")`. OpenImageIO ships with Blender: no pip install.
+- **File Output (5.2):** inputs are `file_output_items.new(socket_type, name)` (FLOAT, RGBA …), the
+  format is `node.format.media_type` then `file_format`; it writes only when the scene compositor
+  (`scene.compositing_node_group`) runs.
 - **Blender's render cancel skips the compositor** (Esc, status-bar ✕): `render_cancel` fires,
   `render_complete` does not, and the composited Render Result is the uncomposited image.
 - **Operators in a `--python` startup script with UI** see no active object in their context

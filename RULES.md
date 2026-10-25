@@ -122,6 +122,14 @@ Read: [variation.md](references/materials/variation.md)
 Rule: Add per-unit variation, hide repeats and fade concave-joint dust outward from corners in the first pass.  
 Read: [variation.md](references/materials/variation.md)
 
+**MAT_07 — Composing Material Layers**  
+Rule: Build each look layer as its own term — colour and roughness as multipliers around 1, height as its own displacement or bump term — so each can be switched off for a control.  
+Read: [index.md](references/materials/index.md)
+
+**MAT_08 — Ordering Geometry Fields**  
+Rule: Measure geometry fields (edge, leak, proximity distances) on the clean mesh, before any modifier that moves or cracks it.  
+Read: [edge-wear.md](references/materials/edge-wear.md)
+
 ### Validation
 
 **VAL_01 — Judging Material Or Effect Character**  

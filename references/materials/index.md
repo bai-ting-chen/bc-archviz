@@ -3,6 +3,15 @@
 Recipes describe node structure and mechanisms; tune scene values in study notes (GOV_01).
 Use all applicable maps at real size with physical surface ranges (MAT_01).
 
+## Layer assembly (MAT_07)
+- **Colour and roughness:** each layer is a multiplier around 1 on the base, chained in sequence:
+  no layer adds or replaces.
+- **Height:** geometry-scale relief goes to the Displacement output ([displacement.md](displacement.md)),
+  surface texture to a Bump node on the Normal input.
+- **Controls:** one switch (a Value node) and one AOV per layer, so a control renders it on and off
+  (RULES VAL_02).
+- **Geometry fields** measured in Geometry Nodes run before modifiers that move the mesh (RULES MAT_08).
+
 | Family or technique | Canonical helper |
 |---|---|
 | [Physical Ranges](physical-ranges.md) | `materials.pbr` |

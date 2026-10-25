@@ -280,7 +280,7 @@ Apply only checks needed by the current task. Read-only documentation work needs
 | Reference recreation | `scripts\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
 | Maintenance | `scripts\helper_index.py` (writes [blender-python-helpers.md](blender-python-helpers.md)), `scripts\regress_helpers.py` (old vs new helper output), `scripts\codex_review.py` (Codex reviews a change before push, RULES AGT_01), `scripts\study_close.py` (close a study: keep milestones, delete the rest, RULES AST_02) |
 | Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tiles.md). |
-| Controls | `scripts\controls\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`) |
+| Controls | `scripts\controls\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`); `weathering_lab.py` (flat-wall look lab, `-- <out> <tag> [key=value]`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
 | Assets | `scripts\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); others `<study>\library\local\` with a `meta.json` |
 | Video research | `scripts\yt_learn.py` |
