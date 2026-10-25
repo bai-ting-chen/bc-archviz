@@ -15,7 +15,7 @@ Method and code live here; study data lives in the current project.
 
 ## Workflow
 GAT_xx = a user approval gate ([RULES.md](RULES.md)).
-[Work mode](references/workflow/work-modes.md) (Normal unless the user names CPM) → Research →
+[Work mode](references/workflow/work-modes.md) (the user's choice, RULES AGT_02) → Research →
 GAT_01 → Rhino geometry → GAT_02 → import/camera/light/materials → GAT_03 → look rounds and
 control proof → GAT_04 → open-UI final → study notes → user-declared closure.
 Each stage opens with a brief and closes with a report ([agent exchange documents](references/workflow/agent-exchange.md)).
@@ -41,7 +41,7 @@ Read the files for the stage you are in.
 - [Learning from video](references/research/learning-from-video.md): the source is a video
 
 ### 2. Rhino geometry and import (→ GAT_02)
-- [Pipeline](references/scene/pipeline.md): setup, MCP, Rhino import, assets
+- [Pipeline](references/scene/pipeline.md): setup, MCP, runtime checks, Rhino import, assets
 - [Max import](references/scene/max-import.md): 3ds Max assets
 
 ### 3. Camera, light and materials (→ GAT_03)
