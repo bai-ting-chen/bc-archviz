@@ -13,11 +13,11 @@ Use all applicable maps at real size with physical surface ranges (MAT_01).
   AOV of the layer's multiplier lets you measure what reaches the image ([variation.md](../effects/variation.md)).
 - **Geometry fields** measured in Geometry Nodes run before modifiers that move the mesh (RULES MAT_08).
 
-Three kinds of reference. **General rules** (this folder's root) apply to every material.
+Three kinds of reference. **General rules and techniques** (this folder's root) apply to every material.
 **Materials** describe one family each; effects used only by that family live with it (water ripple,
 foam, splash in `water/`). **Effects** (`../effects/`) are layers shared by many materials.
 
-| General rules | Canonical helper |
+| General rules and techniques | Canonical helper |
 |---|---|
 | [Physical Ranges](physical-ranges.md) | `materials.pbr` |
 | [Texture Selection](texture-selection.md) | `materials.pbr` |
