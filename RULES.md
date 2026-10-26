@@ -11,7 +11,7 @@ Rule: Publish only generic skill code and method; keep data specific to each pro
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 **GOV_03 — Synchronizing This Skill**  
-Rule: Pull before editing, use the per-clone identity, and write MIGRATE.md only for unpushed changes the other machine must know about.  
+Rule: Pull before editing, use the per-clone identity, and before editing, pull and apply MIGRATE.md if present. Write MIGRATE.md for any change that can break another clone.  
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 **GOV_04 — Extending Code Or Documents**  

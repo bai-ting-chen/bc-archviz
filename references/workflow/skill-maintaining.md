@@ -28,12 +28,22 @@ instructions behind.
 2. Identity, set once per clone and not globally (work machines hold other repos):
    `git config user.name bai-ting-chen`, `git config user.email baitingchen.arch@gmail.com`.
 
-## MIGRATE.md (other machine)
-MIGRATE.md exists only for changes made after the last pull and before the next push that the other machine must know
-about. It says what changed and how to update the local clone safely. Each machine deletes it itself once it has applied the steps: Claude runs the steps, runs
-`python scripts/workflow/structure_check.py` (0 problems), then `git rm MIGRATE.md` and commits
-"Apply MIGRATE: <topic>" locally. That commit goes out with the machine's next push; nothing is pushed automatically.
-Pushed changes need no note there; the commit message describes them.
+## Pull, then MIGRATE.md (every machine)
+Pulling (run before any edit, on either machine):
+1. `git fetch origin`, then `git pull --ff-only origin main`. Never force. If the pull refuses, stop and report.
+2. If `MIGRATE.md` exists in the skill folder, read it before using the skill. Its "Check after pull" lines are the
+   caveats (moved paths, renamed names, setup) to verify.
+3. Run `python scripts/workflow/structure_check.py` (0 problems) and each check in MIGRATE.md.
+4. Only if steps 1-3 pass: `git rm MIGRATE.md` and commit "Apply MIGRATE: <topic>". This commit goes out with the
+   machine's next push; nothing is pushed automatically. If any step fails: keep MIGRATE.md, report what failed, change nothing else.
+
+Writing MIGRATE.md (before pushing a change):
+- Pull first (above), so no unapplied MIGRATE.md is in place.
+- If the change can break another clone (moved, renamed or deleted paths or names; changed setup; new install steps;
+  references in memory or CLAUDE.md files), write MIGRATE.md in the same commit:
+  `# MIGRATE: <topic>`, then `## What changed` (only what can break), `## Check after pull` (concrete checks or commands),
+  and `## Steps` if an action is needed. End it with "Delete this file after applying it."
+- Not a change log. If the change cannot break another clone, write nothing.
 
 ## Helpers changed?
 Run `python scripts/workflow/helper_index.py` (MCP venv python) so [blender-python-helpers.md](../scene/blender-python-helpers.md) matches the
