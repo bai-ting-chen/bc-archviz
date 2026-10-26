@@ -35,5 +35,6 @@
   is a rigid tell.
 - **Splash band:** a low band above the pool (0.2–0.6 m, varying along the wall) fading out past
   both ends of the fall (e-fold ~0.45 m). Not the whole wall (RULES MAT_05: patchy, physically shaped).
+- Code: `water.wet.proxy(lip, pool_z, WetParams)`.
 - Keep the proxy a plain hidden mesh referenced by the wetness GN; replace its mesh data in place
   (never delete the object, or every reference goes empty and the noise term draws blotches).

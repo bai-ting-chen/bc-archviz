@@ -34,11 +34,11 @@ Use all applicable maps at real size with physical surface ranges (MAT_01).
 | [Variation](variation.md) | `materials.variation` |
 | [Scale](scale.md) | `materials.nodes` |
 | [Edge Wear](edge-wear.md) | `materials.edge_wear` |
-| [Water Free-Falling Film](water-free-falling-film.md) | none yet (numpy field map on a carrier) |
+| [Water Free-Falling Film](water-free-falling-film.md) | `water.build.falling_film` (`water.curtain`, `water.film`, `water.fragments`) |
 | [Water Attached Film](water-attached-film.md) | none yet (raycast height field) |
-| [Water Ripple](water-ripple.md) | none yet (float height map → pool bump) |
-| [Water Foam](water-foam.md) | none yet |
-| [Water Splash](water-splash.md) | none yet |
+| [Water Ripple](water-ripple.md) | `water.ripple`, `water.pool` |
+| [Water Foam](water-foam.md) | `water.foot` (foam, bubbles) |
+| [Water Splash](water-splash.md) | `water.foot` (impacts, crowns, splash) |
 
 Shared graph/socket helpers: `materials.nodes.G` / `sock`; asset lookup and project state: `archviz`.
 Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.

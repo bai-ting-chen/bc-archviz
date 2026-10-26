@@ -1,5 +1,7 @@
 # Water ripples and waves
 
+Code: `water.ripple.height_field` (field), `water.pool.save_height_exr` + `install_bump` (material) (used by `water.build.falling_film`).
+
 Ripples and waves on a water surface caused by something: falling water landing, impacts, wind
 near a plunge. Shared by any water material that hits a pool ([water-free-falling-film.md](water-free-falling-film.md),
 [water-attached-film.md](water-attached-film.md), fountains). The pool body and plain wind ripples:

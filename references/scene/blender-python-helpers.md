@@ -251,3 +251,83 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `landform_group(name='LANDFORM', centre=(0.0, 0.0), pad_half=(4.0, 4.0), size=300.0, verts=601, pad_z=-0.03, crest=1.5, fall=6.0, run=40.0, warp=7.0, roll=2.5, hummock=0.12)` — GN group: grid -> hill around a pad (landform grading), stores `pad_d`; plan metres.
 - `height(x, y, centre, pad_half, pad_z=-0.03, crest=1.5, fall=6.0, run=40.0)` — Python twin of landform_group without the noise terms (e.g. to set a camera's eye height).
 - `add_terrain(group, material, name='TERRAIN', collection=None)` — An empty mesh object carrying the landform modifier (the GN group makes the geometry).
+
+## `water.build` — One entry point: a free-falling water film with its foot, pool ripples, wet-wall proxy and motion blur (references/materials/water-free-falling-film.md, water-splash.md, water-foam.md, water-ripple.md, wet-surfaces.md).
+
+- `Setup` — Grid, flow and layer parameters (all with defaults).
+- `falling_film(lip, pool_z, film_mat, foam_mat=None, pool_mat=None, exr_path=None, wet_proxy=None, setup=None, collection=None, name='Water')` — Build the film, strings, drops, foot, pool bump and wet proxy for one lip; returns objects and stats.
+
+## `water.curtain` — Ballistic carrier of a water sheet thrown off a straight lip (references/materials/water-free-falling-film.md §3.1-3.3).
+
+- `Lip` — A straight horizontal lip. along/out are horizontal unit vectors (out = away from the wall).
+- `Flow` — Launch speed and per-stream flow (§3.1-3.2). Seeds make every layer repeatable.
+- `stream_factor(flow, s, d)` — 1 + m: per-stream flow multiplier, constant down each stream apart from a slow drift.
+- `flux(flow, s, d)` — Flow per metre width q (m^2/s) at (s, d).
+- `launch(flow, s, d)` — Local launch speed v0 = (g q)^(1/3), m/s.
+- `speed(flow, s, d)` — Sheet speed U = sqrt(v0^2 + 2 g d), m/s.
+- `thickness(flow, s, d)` — Sheet thickness h = q / U, m.
+- `throw(flow, s, d)` — Outward distance of the sheet mid-surface from the wall face, m.
+- `effective_depth(flow, s, d, k=0.5, d_ref=0.15)` — Fall-time stretch coordinate v_eff = d_ref + int (U(d_ref)/U)^k (unchanged above d_ref), m.
+- `carrier_grid(lip, flow, s, d)` — Mid-surface points (nd, ns, 3) and unit normals pointing away from the wall, on a grid s x d.
+- `landing(lip, flow, s)` — Landing line on the receiving surface: world points (len(s), 3).
+
+## `water.film` — Free-falling film as a field map on the ballistic carrier (references/materials/water-free-falling-film.md §3.3-3.8).
+
+- `FilmParams` — Layer strengths and scales (metres, unless noted). Defaults = starting values from one courtyard-scale study.
+- `zones(p, s, v, m)` — Calm/busy multiplier in [zone_min, 1]: clustered patches 0.3-1 m, busier on thick streams.
+- `swell_field(s, v, seed)` — Smooth broad swell in [-1, 1]: 32 noncommensurate modes, 80-200 mm across, ~60 mm half-width along v.
+- `roll_waves(p, s, v, d)` — Roll-wave arcs across the flow in [0, ~3]: two irregular trains, per-crest strength, per-stream on/off, growing.
+- `meander(p, s, v, d)` — Sideways meander shape (multiply by p.meander): two along-fall scales, phases changing over a few cm across.
+- `ribbon_envelope(p, s_grid, v, h)` — Front/back offsets (>= h/2, <= -h/2) of the ribbon union over a base sheet of thickness h (2-D arrays).
+- `tear_value(p, s, v)` — High = torn: narrow across (slit_lo..slit_hi), long and finite along the stretched fall.
+- `film_surfaces(lip, flow, p, s, d)` — All layers on the grid s x d: front/back world points (nd, ns, 3), water mask, and fields for fragments/foot.
+
+## `water.foot` — Where falling water meets a pool: impacts, crowns, foam, floating bubbles, splash (references/materials/water-splash.md, water-foam.md).
+
+- `FootParams`
+- `impacts(lip, land_mid, land_keep, land_thick, drops, pool_z, p)` — Impact points (N, 3) on the pool surface and strengths (N,), from the film's bottom row and falling drops.
+- `crowns(pts, strength, p)` — Clear crowns at the strongest impacts: tilted rings with spiky rims. Returns (V, F); use thin-wall water.
+- `foam(lip, pts, strength, pool_z, p)` — Irregular foam flecks clustered at impacts, drifting out and past the ends, stretched as they travel. (V, F).
+- `bubbles(lip, pts, strength, pool_z, p)` — Floating clear domes (single or rafts), carried far out and past the ends. (V, F); use thin-wall water.
+- `splash(lip, pts, strength, pool_z, p)` — Splash drops thrown up and out from the strongest impacts: array (N, 5) = x, y, z, diameter, stretch.
+
+## `water.fragments` — Strings and drops of a torn falling film (references/materials/water-free-falling-film.md §3.7).
+
+- `FragmentParams`
+- `edge_drops(fs, lip, p, s, d)` — Drops and ligaments shed at torn edges: array (N, 5) = x, y, z, diameter, stretch along the fall.
+- `gap_fill(fs, lip, p, s, d)` — Strings (list of (M, 4) arrays: x, y, z, radius) and drops (N, 5) inside torn cells.
+
+## `water.mesh` — Blender objects for the water fields: closed film sheet, string tubes, drop spheroids, generic (V, F) meshes, and the `velocity` attribute for motion blur (references/materials/water-free-falling-film.md §3.9).
+
+- `from_arrays(name, V, F, material=None, collection=None, smooth=True)` — Object from vertices (N, 3) and a face list (any polygon sizes).
+- `film_sheet(name, front, back, keep, material=None, collection=None)` — Closed water body from front/back grids (nd, ns, 3): quads fully torn (all corners outside keep) removed.
+- `tubes(name, strings, material=None, collection=None, sides=6)` — Tubes along polylines; each string is an (M, 4) array x, y, z, radius. Ends capped.
+- `spheroids(name, drops, material=None, collection=None)` — Low-poly drops, (N, 5) = x, y, z, diameter, stretch along z.
+- `set_velocity(ob, vel)` — Store a per-vertex `velocity` (m/s) and enable deformation motion blur on the object.
+- `film_velocity(front, back, lip_z, v0=0.35)` — Velocity for film_sheet's vertex order: U(d) = sqrt(v0^2 + 2 g d) along the local fall direction (row diffs).
+- `falling_velocity(ob, lip_z, v0=0.35)` — Straight-down velocity at the local fall speed for every vertex of an object (strings, drops).
+- `thin_wall_copy(material, name)` — Copy of a water material with Principled Thin Wall on: glints and rims, straight transmission (open shells).
+
+## `water.noise` — Smooth, irregular, seeded 1-D noise: the single noise source for the water fields (metres in, [-1, 1] out).
+
+- `smooth(t)` — Quintic smoothstep of t clipped to [0, 1].
+- `clustered(x, seed, lo, hi)` — Irregular smooth noise in [-1, 1] at x metres; knot spacing uniform in [lo, hi] metres.
+- `unit(x, seed, lo, hi)` — Same noise mapped to [0, 1].
+
+## `water.pool` — Install a ripple height field as a bump on the pool's own material (references/materials/water-ripple.md §3).
+
+- `save_height_exr(H, path, name='water ripple height (mm)')` — Write H (metres, [a, o]) as a float EXR in millimetres and return the loaded image datablock.
+- `install_bump(material, image, lip, o_range, a_range)` — Bump the material's Principled Normal with image (mm) mapped over lip-local o_range x a_range (metres).
+- `readback_mm(image)` — Min/max (mm) of a loaded height image: proof the field survived saving and loading.
+
+## `water.ripple` — Pool-surface height field around falling water: craters, crowns, rings, wall-parallel fronts, chop (references/materials/water-ripple.md). Pure numpy; water.pool installs it as a bump on the pool material.
+
+- `RippleParams`
+- `grid(lip, p)` — Lip-local axes (o, a) and 2-D arrays (O, A) of the ripple field.
+- `height_field(lip, impact_pts, strength, p)` — Height (m) on the lip-local grid: returns (o_axis, a_axis, H[a, o]) faded to zero at the borders.
+- `slope_stats(H, step)` — RMS and 99th-percentile surface slope (rad) of a height field: ripples need ~0.05-0.15 rad to read.
+
+## `water.wet` — Wet-wall proxy behind falling water (references/materials/wet-surfaces.md › Wet wall behind falling water).
+
+- `WetParams`
+- `proxy(lip, pool_z, p)` — Vertices and quads of the wet proxy sheet on the wall face (world space).

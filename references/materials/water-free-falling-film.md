@@ -8,6 +8,13 @@ For a still, build it as a **2D field map in the sheet's own coordinates on an a
 surface**: a fast, physics-informed approximation, not a simulation (method choice:
 [index.md](index.md) › Water). Water that clings to the wall instead: [water-attached-film.md](water-attached-film.md).
 
+## Code
+`scripts/blender/water/`: `build.falling_film(lip, pool_z, film_mat, …)` builds every layer below from a
+`curtain.Lip` (any straight lip: origin, along, out, length, drop) and returns objects and stats; parameters
+in `build.Setup` (`curtain.Flow`, `film.FilmParams`, `fragments.FragmentParams`, `foot.FootParams`,
+`ripple.RippleParams`, `wet.WetParams`), defaults = the starting values in the tables. `s_range` builds a
+strip of the lip for a lab. Control on an unrelated scene: `scripts/controls/falling_film_check.py`.
+
 ## 2. Layers and how they combine
 Specific layers are described here. Generic layers are written once, in their own reference, and
 used here with falling-film settings.
