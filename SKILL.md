@@ -9,8 +9,8 @@ description: >-
 
 # bc-archviz
 
-Read [RULES.md](RULES.md), then the task reference below. Check outstanding actions in
-`MIGRATE.md` when present; complete only applicable receiving-machine actions.
+Read [RULES.md](RULES.md), then the task reference below. If `MIGRATE.md` is present, apply it and
+delete it as its last step (see [skill-maintaining.md](references/workflow/skill-maintaining.md)).
 Method and code live here; study data lives in the current project.
 
 ## Workflow

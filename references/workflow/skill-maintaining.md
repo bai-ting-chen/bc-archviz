@@ -30,8 +30,10 @@ instructions behind.
 
 ## MIGRATE.md (other machine)
 MIGRATE.md exists only for changes made after the last pull and before the next push that the other machine must know
-about. It says what changed and how to update the local clone safely. Delete it in the push that publishes those changes.
-Pushed changes need no note there; the commit message describes them. Never attach automatic commit/push or self-deletion commands.
+about. It says what changed and how to update the local clone safely. Each machine deletes it itself once it has applied the steps: Claude runs the steps, runs
+`python scripts/workflow/structure_check.py` (0 problems), then `git rm MIGRATE.md` and commits
+"Apply MIGRATE: <topic>" locally. That commit goes out with the machine's next push; nothing is pushed automatically.
+Pushed changes need no note there; the commit message describes them.
 
 ## Helpers changed?
 Run `python scripts/workflow/helper_index.py` (MCP venv python) so [blender-python-helpers.md](../scene/blender-python-helpers.md) matches the

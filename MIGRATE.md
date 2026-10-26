@@ -12,6 +12,8 @@ Changes made on the other machine after its last pull. Apply the steps, then del
    below, and update them. Studies are closed, so none should need changes.
 5. Run `python scripts/workflow/structure_check.py` in the skill folder. It must report 0 problems.
 6. Restart Claude Code so it reloads the skill.
+7. Once steps 1-6 pass, delete this file: `git rm MIGRATE.md`, commit "Apply MIGRATE: skill restructure".
+   Push with your next push. Do not push this deletion on its own.
 
 ## Moved scripts (paths)
 - `scripts/{study_close,study_files,study_milestones,study_prune,study_refs,study_run,codex_review,helper_index,mcp_call}.py` -> `scripts/workflow/`
