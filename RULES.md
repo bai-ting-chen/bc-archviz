@@ -15,7 +15,7 @@ Rule: Pull before editing, use the per-clone identity, and leave outstanding rec
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 **GOV_04 — Extending Code Or Documents**  
-Rule: Keep one module per job and one authority per helper; use focused functions and topic references.  
+Rule: Keep one module per job and one authority per helper; use focused, readable functions and topic references; prove a refactor by reproducing a saved control baseline exactly.  
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 ### Agent Cooperation

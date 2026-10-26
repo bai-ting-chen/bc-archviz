@@ -43,3 +43,13 @@ Gate IDs renumbered: RES_02 → GAT_01 (research), GAT_01 → GAT_02 (model), GA
 ## 2026-10-22: Skill maintenance doc renamed
 
 references/workflow/maintaining.md is now skill-maintaining.md (the skill set's own upkeep). No machine action.
+
+## 2026-10-26: Water package API and reference folders
+
+- Check: any local study script imports `water.pool`, calls `water.mesh.set_velocity` / `film_velocity` /
+  `falling_velocity` / `thin_wall_copy`, indexes `film_surfaces(...)['...']`, or unpacks `ripple.height_field` as
+  `(o, a, H)`. Do: `water.pool` → `water.shading`; velocity helpers → `water.motion` (v0 now required);
+  `thin_wall_copy` → `water.shading`; `film_surfaces` returns `FilmFields` (attributes, `tear_start` not `start`);
+  `height_field` returns `(s_axis, o_axis, H[s, o])`. `build.falling_film` and `curtain.Lip` are unchanged.
+- Check: local CLAUDE.md, AGENTS.md or memory link `references/materials/{edge-wear,variation,wet-surfaces,caustics}.md`
+  or `references/materials/water*.md`. Do: point them to `references/effects/` and `references/materials/water/`.
