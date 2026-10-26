@@ -184,7 +184,7 @@ Fix: `Surface.CreateExtrusion` (pipeline). See [pipeline.md](../scene/pipeline.m
 ### Ripples look fake or stretched
 
 Cause: A shader noise bump or stretched mapping does not reproduce the sampled water geometry.
-Fix: Ocean geometry on a finer mesh, never stretch (materials › Water). See [water.md](../materials/water.md).
+Fix: Ocean geometry on a finer mesh, never stretch (water-surface). See [water-surface.md](../materials/water-surface.md).
 
 ### Imported .max: trunk/twigs missing, leaves rendered as bark, bark squashed
 
@@ -204,17 +204,17 @@ Fix: Canopy albedo is ~0.05-0.1 (softer AgX look); wet sheen at grazing - darker
 ### Foam reads as snow cones with black holes
 
 Cause: Spiky short boils + a hard foam switch over a dark trench.
-Fix: Rounded chop, milky subsurface whitewater, soft foam mask ([water-features.md](../materials/water-features.md)). See [water-features.md](../materials/water-features.md).
+Fix: Rounded chop, milky subsurface whitewater, soft foam mask ([water-foam.md](../materials/water-foam.md)). See [water-foam.md](../materials/water-foam.md).
 
 ### Black band at a waterline seen through glass
 
 Cause: An open water sheet may expose a dark void below troughs.
-Fix: In whitewater/trough contexts, check for an open water sheet over a void and add the scoped milky body below troughs. Clear pools keep their clear optical body; do not silently make them opaque. See [water-features.md](../materials/water-features.md).
+Fix: In whitewater/trough contexts, check for an open water sheet over a void and add the scoped milky body below troughs. Clear pools keep their clear optical body; do not silently make them opaque. See [water-foam.md](../materials/water-foam.md).
 
 ### Splash drops read as a dark band
 
 Cause: Clear drops in soft light refract the dark surroundings.
-Fix: Fewer, higher, spread ([water-features.md](../materials/water-features.md)). See [water-features.md](../materials/water-features.md).
+Fix: Fewer, higher, spread ([water-splash.md](../materials/water-splash.md)). See [water-splash.md](../materials/water-splash.md).
 
 ### Multilayer EXR seems to hold only Combined
 

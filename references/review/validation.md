@@ -28,6 +28,15 @@ change in bounce light, so it chooses a strength; a render confirms it.
 **Flat-wall lab for a look layer.** When a procedural look layer misses twice in full renders, build
 it on a flat wall at real size with the unit joints drawn for scale (renders of seconds), iterate
 against the reference, then install the exact node graph: `scripts/controls/weathering_lab.py`.
+For geometry layers seen at grazing angles (water films, their foot), the lab is a strip of the
+real scene: the final camera with a render border around a short stretch (about a minute per
+variant), one variant file per try and a side-by-side sheet.
+
+**Judge at final-view pixels.** Before matching a reference, compute mm per pixel at the feature
+in the final view (vertical and along a foreshortened wall separately). A close-up reference
+shows detail that is sub-pixel in the shot; matching it adds features the final view cannot show
+(and loses the ones it does). Crop the reference to the same footprint, or judge its look at the
+final view's scale.
 
 ## VAL_03 procedure
 

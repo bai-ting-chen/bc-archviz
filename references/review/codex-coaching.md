@@ -48,6 +48,18 @@ topic reference; this file holds **how to look and how to check**.
   - The trap: a plank scan's own plank ends gave false short joints; the builder replaced the scan
     with procedural noise, and the grain the user had asked to see disappeared.
 
+- **A method change is the director's call.** When the brief says "retune nothing else; if
+  something else must change, stop and report", a new construction for an approved part is exactly
+  that: stop and report, even when the brief's own items seem to require it.
+  - The trap: told that a new hole field must be the only source of gaps, the builder filled the
+    approved ribbon field's gaps with one continuous sheet; the approved look (broad clear ribbons)
+    was gone, replaced by a bright comb and glitter.
+- **Make failures loud.** Launch Blender with `--python-exit-code 1` so a Python exception fails the
+  run; trust no return code until you have seen it fail. A retry after a failed check is a new run:
+  only within the brief's cap, or ask.
+  - The trap: an assertion failed, Blender exited 0, the run log recorded success, and the retry
+    went past the run cap.
+
 ## Making images someone must judge
 - **A geometry check image:**
   - flat colour per layer or material;
@@ -87,6 +99,16 @@ topic reference; this file holds **how to look and how to check**.
 - **Name the mechanism, not only the symptom.** A self-judgement that says "metallic strands" should
   also say why (here: ropes constant along their length act as cylinders that mirror one band of
   the surroundings) — the next step follows from the cause, not from the look.
+- **Judge at the final view's scale.** Compute mm per pixel before reading a close-up reference;
+  features below a pixel in the shot read only in aggregate (RULES MAT_04).
+  - The trap: horizontal roll-wave arcs copied from a close-up crop of the reference became
+    ladders and chevrons at the final view, where the reference reads as wavy vertical streaks.
+- **Natural, not rigid, is the test that comes first.** Before any metric, look for rigid tells:
+  perfect circles or wedges, even spacing, one size, one wavelength, a line or band at one height,
+  hard on/off edges, glitter with no visible cause. A number fitted to the reference does not
+  excuse them.
+  - The trap: gaps fitted to the reference's coverage per band came out as straight-sided wedges
+    and empty full-height lanes; a later hole model with a fitted width came out as round dots.
 - **Show the user the best state after a few rounds** (the study's cap), rather than tuning blind.
   Metric checklists are evidence for a look decision, never a replacement for it.
 

@@ -48,10 +48,12 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Runoff / leak streaks below drip edges | GN raycast drip-edge field + streak shader (`materials.edge_wear.add_leak_field`, `add_runoff`) | solid, control-proved |
 | Concrete cracks | corner shrinkage cracks + patchy Voronoi map-cracking (`materials.edge_wear.add_cracks`) | solid, control-proved |
 | Glazing distortion | roller wave + IGU pillowing bump (`materials.glass.glass_distortion`) | solid |
-| Water film down a wall / textured glass | height field from a raycast of the surface + Nusselt film, ropes, roll waves; glass/water interface IOR 1.14 ([water-features.md](../materials/water-features.md)) | test (one study, no control yet) |
-| Overflow edge into a trench | rim strip: draw-down → roll over the crest → clinging film down the wall ([water-features.md](../materials/water-features.md)) | test |
-| Whitewater / plunge foam | opaque milky subsurface surface + soft marbled foam + milky body below + splash drops ([water-features.md](../materials/water-features.md)) | test |
-| Choppy pool hiding the floor | shared geometry wave field (64 cosines + gust envelope) + dark floor + absorption ([water-features.md](../materials/water-features.md)) | test |
-| Fluid simulation (splash, plunge) | FLIP source/Demo bakes and hybrid slice integration tested; sub-voxel inlet flux/momentum and pool boundaries require validation ([water-features.md](../materials/water-features.md)); Mantaflow alternative | research; no matched-physics superiority established |
+| Water film down a wall / textured glass | height field from a raycast of the surface + Nusselt film, ropes, roll waves; glass/water interface IOR 1.14 ([water-attached-film.md](../materials/water-attached-film.md)) | test (one study, no control yet) |
+| Overflow edge into a trench | rim strip: draw-down → roll over the crest → clinging film down the wall ([water-attached-film.md](../materials/water-attached-film.md)) | test |
+| Whitewater / plunge foam | opaque milky subsurface surface + soft marbled foam + milky body below + splash drops ([water-foam.md](../materials/water-foam.md)) | test |
+| Choppy pool hiding the floor | shared geometry wave field (64 cosines + gust envelope) + dark floor + absorption ([water-ripple.md](../materials/water-ripple.md)) | test |
+| Free-falling curtain off a lip | 2D field map on a ballistic carrier: stream flow, fall-time stretch, meander, tears into braids, gap strings/drops, dissolving edges, velocity motion blur ([water-free-falling-film.md](../materials/water-free-falling-film.md)) | used (one study, user-approved; no skill helper yet) |
+| Foot of a fall: impacts, crowns, foam, bubbles, pool waves | impacts from the film's landing row; thin-wall crowns; drifting foam and bubbles; pool bump from a float height map ([water-splash.md](../materials/water-splash.md), [water-foam.md](../materials/water-foam.md), [water-ripple.md](../materials/water-ripple.md)) | used (one study, user-approved; no skill helper yet) |
+| Fluid simulation (splash, plunge) | FLIP source/Demo bakes and hybrid slice integration tested; sub-voxel inlet flux/momentum and pool boundaries require validation ([water-splash.md](../materials/water-splash.md)); Mantaflow alternative | research; no matched-physics superiority established |
 | Soft backplate vs crisp model | measured edge widths + slight DOF in front of the subject | solid |
 | No-limit Cycles final in the UI | `finals.py` (untiled, savers, OIDN from passes) | solid |

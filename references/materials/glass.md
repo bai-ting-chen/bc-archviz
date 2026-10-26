@@ -22,3 +22,10 @@
   bump of a sine roller wave + a dome over the pane. 0.25 mm of wave read as blinds; the dome
   carries the effect. A glass that "looks too reflective" is usually a dark room behind it -
   Fresnel is physical; distortion and something to reflect make it read.
+
+## Cast glass relief (sized for the final view, RULES MAT_03)
+- Multi-scale: soft folds λ 8–40 cm + ridged creases + very weak crinkle, each tile its own cast,
+  faded flat over ~30 mm at the border so the grid meets the untouched body; strong fine crinkle
+  reads as squiggles.
+- A slight roughness (~0.05) on the dry faces gives the satin haze of cast glass.
+- Under a water film: [water-attached-film.md](water-attached-film.md) (wetted face IOR 1.14).

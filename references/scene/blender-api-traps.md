@@ -67,6 +67,16 @@
   so the shell grows inward and the silhouette does not change.
 - `view_settings.white_balance_temperature`: lower = cooler. `white_balance_tint` is neutral at
   its default 10 (daylight), not at 0.
+- A **generated float image** (`images.new(..., float_buffer=True)`): set
+  `colorspace_settings.name` **before** writing pixels — changing it afterwards regenerates the
+  buffer and wipes it to zeros. `image.pack()` on a generated image stores an 8-bit PNG (mm-scale
+  heights become 0); save a float EXR and point the datablock at the file instead.
+- **Velocity motion blur:** Cycles reads a mesh's `velocity` POINT FLOAT_VECTOR attribute in
+  **m/s** (with the object's deformation motion blur on); `motion_blur_shutter` is in frames, so the
+  streak = speed × shutter / fps. Verified with a known speed and shutter.
+- Principled BSDF **Thin Wall** = a transparent sheet with reflection and straight transmission:
+  use it for open shells (crowns, bubbles, thin overlays); a solid water material on an open shell
+  traps light and glows white.
 - `Image.save()` on float images applies view transform + exposure → for data EXRs use
   `img.save_render(path)` with OPEN_EXR 32-bit.
 - Pixel analysis: `img.pixels.foreach_get(np_array)` is linear for **float** images only; 8-bit

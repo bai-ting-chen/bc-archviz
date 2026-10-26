@@ -24,3 +24,16 @@
   faces. Gate by height so canopies and far floors stay dry. Patchy, never a band (RULES MAT_05):
   drive the band width with a slow noise along the edge (down to negative = dry), and make dried
   marks blobs darker at their rim (coffee-ring) rather than contour lines.
+
+## Wet wall behind falling water
+- **Wet where the water is, not where the film is near.** A free-falling sheet stands off the wall
+  (tens of cm at the foot), so a wetness mask from distance-to-film leaves the wall behind the
+  lower curtain dry. Drive it from a proxy lying **on the wall face** over the curtain's whole
+  footprint (behind the water, everything is wet: spray, run-down and condensation).
+- **Ragged ends:** the wet edge wanders past each end of the curtain (5–30 cm, changing with
+  height), with runoff fingers hanging from the top near the ends. A straight vertical wet/dry line
+  is a rigid tell.
+- **Splash band:** a low band above the pool (0.2–0.6 m, varying along the wall) fading out past
+  both ends of the fall (e-fold ~0.45 m). Not the whole wall (RULES MAT_05: patchy, physically shaped).
+- Keep the proxy a plain hidden mesh referenced by the wetness GN; replace its mesh data in place
+  (never delete the object, or every reference goes empty and the noise term draws blotches).
