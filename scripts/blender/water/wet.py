@@ -13,6 +13,7 @@ from . import noise
 
 @dataclass
 class WetParams:
+    """Cell size, wall gap and splash-band shape of the wet-wall proxy."""
     cell: float = .02            # m
     gap: float = .002            # m in front of the wall face
     band_lo: float = .20         # m splash band height range above the pool

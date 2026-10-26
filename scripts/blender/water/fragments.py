@@ -11,6 +11,7 @@ import numpy as np
 
 @dataclass
 class FragmentParams:
+    """Densities and sizes of gap strings, gap drops and edge drops (starting values; size from the shot)."""
     edge_drops_per_m: float = 570.     # per m of lip
     edge_drop_d: float = .0035         # m median diameter
     edge_drop_max: float = .008

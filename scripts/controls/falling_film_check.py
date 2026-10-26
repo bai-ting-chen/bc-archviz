@@ -55,6 +55,8 @@ b.inputs['IOR'].default_value = 1.333; b.inputs['Roughness'].default_value = 0.0
 foam_mat = _scene.white_lambert('foam', .7)
 proxy = bpy.data.objects.new('wet proxy', bpy.data.meshes.new('wet proxy')); sc.collection.objects.link(proxy)
 proxy.hide_render = True
+proxy.location = (.7, -.4, .3); proxy.rotation_euler = (0, 0, .5)   # transformed on purpose
+sc.render.image_settings.media_type = 'MULTI_LAYER_IMAGE'          # as a finals scene may leave it
 
 cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera = cam
 cam.data.lens = 28
@@ -69,6 +71,12 @@ objs, stats = build.falling_film(lip, POOL_Z, film_mat, foam_mat, pool_mat, OUT 
 checks = {}
 co = np.empty(len(objs['film'].data.vertices) * 3, np.float32); objs['film'].data.vertices.foreach_get('co', co)
 checks['film finite'] = bool(np.isfinite(co).all())
+vol = 0.0; v3 = co.reshape(-1, 3)
+for poly in objs['film'].data.polygons:            # signed volume > 0 <=> faces wound outward
+    idx = list(poly.vertices); a0 = v3[idx[0]]
+    for i in range(1, len(idx) - 1): vol += np.dot(a0, np.cross(v3[idx[i]], v3[idx[i + 1]])) / 6
+checks['film wound outward (signed volume > 0)'] = vol > 0
+stats['film_signed_volume_m3'] = float(vol)
 checks['torn fraction 0.03-0.40'] = .03 <= stats['torn'] <= .40
 checks['folded fraction < 0.30'] = stats['folded'] < .30
 checks['strings and drops present'] = stats['strings'] > 0 and stats['drops'] > 0
@@ -78,7 +86,9 @@ vmax = float(np.linalg.norm(vel.reshape(-1, 3), axis=1).max()); expect = math.sq
 checks['velocity max ~ sqrt(v0^2+2gH)'] = abs(vmax - expect) < .1 * expect
 lo, hi = stats.get('ripple_mm', (0, 0)); checks['ripple read back non-zero'] = lo < 0 < hi
 pv = np.empty(len(proxy.data.vertices) * 3, np.float32); proxy.data.vertices.foreach_get('co', pv)
-_, o = lip.local(pv.reshape(-1, 3)); checks['wet proxy on the wall face'] = bool(len(o)) and float(np.abs(o - setup.wet.gap).max()) < 1e-4
+pw = np.c_[pv.reshape(-1, 3), np.ones(len(pv) // 3)] @ np.array(proxy.matrix_world).T
+_, o = lip.local(pw[:, :3]); checks['wet proxy on the wall face'] = bool(len(o)) and float(np.abs(o - setup.wet.gap).max()) < 1e-4
+sc.render.image_settings.media_type = 'IMAGE'; sc.render.image_settings.file_format = 'PNG'
 sc.render.filepath = str(OUT / 'falling_film_check.png'); bpy.ops.render.render(write_still=True)
 img = bpy.data.images.load(str(OUT / 'falling_film_check.png')); px = np.empty(img.size[0] * img.size[1] * 4, np.float32); img.pixels.foreach_get(px)
 checks['render not empty'] = float(px[0::4].std()) > .02

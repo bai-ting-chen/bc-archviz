@@ -284,7 +284,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `water.foot` — Where falling water meets a pool: impacts, crowns, foam, floating bubbles, splash (references/materials/water-splash.md, water-foam.md).
 
-- `FootParams`
+- `FootParams` — Impact spacing, crowns, foam, floating bubbles and splash (starting values; size from the shot).
 - `impacts(lip, land_mid, land_keep, land_thick, drops, pool_z, p)` — Impact points (N, 3) on the pool surface and strengths (N,), from the film's bottom row and falling drops.
 - `crowns(pts, strength, p)` — Clear crowns at the strongest impacts: tilted rings with spiky rims. Returns (V, F); use thin-wall water.
 - `foam(lip, pts, strength, pool_z, p)` — Irregular foam flecks clustered at impacts, drifting out and past the ends, stretched as they travel. (V, F).
@@ -293,7 +293,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `water.fragments` — Strings and drops of a torn falling film (references/materials/water-free-falling-film.md §3.7).
 
-- `FragmentParams`
+- `FragmentParams` — Densities and sizes of gap strings, gap drops and edge drops (starting values; size from the shot).
 - `edge_drops(fs, lip, p, s, d)` — Drops and ligaments shed at torn edges: array (N, 5) = x, y, z, diameter, stretch along the fall.
 - `gap_fill(fs, lip, p, s, d)` — Strings (list of (M, 4) arrays: x, y, z, radius) and drops (N, 5) inside torn cells.
 
@@ -322,12 +322,12 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `water.ripple` — Pool-surface height field around falling water: craters, crowns, rings, wall-parallel fronts, chop (references/materials/water-ripple.md). Pure numpy; water.pool installs it as a bump on the pool material.
 
-- `RippleParams`
+- `RippleParams` — Grid, extent and strengths of the pool ripple field (craters, chop, ring waves, line fronts).
 - `grid(lip, p)` — Lip-local axes (o, a) and 2-D arrays (O, A) of the ripple field.
 - `height_field(lip, impact_pts, strength, p)` — Height (m) on the lip-local grid: returns (o_axis, a_axis, H[a, o]) faded to zero at the borders.
 - `slope_stats(H, step)` — RMS and 99th-percentile surface slope (rad) of a height field: ripples need ~0.05-0.15 rad to read.
 
 ## `water.wet` — Wet-wall proxy behind falling water (references/materials/wet-surfaces.md › Wet wall behind falling water).
 
-- `WetParams`
+- `WetParams` — Cell size, wall gap and splash-band shape of the wet-wall proxy.
 - `proxy(lip, pool_z, p)` — Vertices and quads of the wet proxy sheet on the wall face (world space).

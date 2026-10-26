@@ -13,6 +13,7 @@ import numpy as np
 
 @dataclass
 class FootParams:
+    """Impact spacing, crowns, foam, floating bubbles and splash (starting values; size from the shot)."""
     impact_spacing: float = .02     # m of landing line per stream impact
     crowns: float = .35             # share of impacts (strongest) with a standing crown
     foam_per_m: float = 350.
@@ -35,19 +36,22 @@ def impacts(lip, land_mid, land_keep, land_thick, drops, pool_z, p):
     """Impact points (N, 3) on the pool surface and strengths (N,), from the film's bottom row and falling drops."""
     rng = np.random.default_rng(p.seed)
     thick = land_thick * land_keep
-    if thick.sum() <= 0: return np.zeros((0, 3)), np.zeros(0)
     a_mid, o_mid = lip.local(land_mid)
     span = float(abs(a_mid[-1] - a_mid[0])) or lip.length
     n = max(1, int(span / p.impact_spacing))
-    idx = rng.choice(len(land_mid), size=n, p=thick / thick.sum())
-    a = a_mid[idx] + rng.normal(0, .006, n); o = o_mid[idx] + rng.normal(0, .012, n)
-    strength = np.clip(thick[idx] / np.percentile(thick[land_keep], 90), .15, 1.5)
+    if thick.sum() > 0:                      # sheet landings (none when the bottom row is fully torn)
+        idx = rng.choice(len(land_mid), size=n, p=thick / thick.sum())
+        a = a_mid[idx] + rng.normal(0, .006, n); o = o_mid[idx] + rng.normal(0, .012, n)
+        strength = np.clip(thick[idx] / np.percentile(thick[land_keep], 90), .15, 1.5)
+    else:
+        a = o = strength = np.zeros(0)
     if drops is not None and len(drops):
         low = drops[drops[:, 2] < pool_z + .6]
         if len(low):
             k = rng.choice(len(low), size=min(len(low), n), replace=False)
             da, do = lip.local(low[k, :3]); do = do + rng.uniform(0, .03, len(k))
             a = np.r_[a, da]; o = np.r_[o, do]; strength = np.r_[strength, rng.uniform(.05, .3, len(k))]
+    if not len(a): return np.zeros((0, 3)), np.zeros(0)
     return lip.world(a, o, np.full_like(a, pool_z)), strength
 
 

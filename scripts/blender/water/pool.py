@@ -16,10 +16,13 @@ def save_height_exr(H, path, name='water ripple height (mm)'):
     img.pixels.foreach_set(px.ravel())
     img.filepath_raw = str(path); img.file_format = 'OPEN_EXR'
     sc = bpy.context.scene; s = sc.render.image_settings
-    keep = (s.file_format, s.color_depth, s.exr_codec)
+    keep = (s.media_type, s.file_format, s.color_depth, s.exr_codec)
+    s.media_type = 'IMAGE'                               # OPEN_EXR is not valid under MULTI_LAYER_IMAGE
     s.file_format = 'OPEN_EXR'; s.color_depth = '32'; s.exr_codec = 'ZIP'
-    img.save_render(str(path), scene=sc)
-    s.file_format, s.color_depth, s.exr_codec = keep
+    try:
+        img.save_render(str(path), scene=sc)
+    finally:
+        s.media_type = keep[0]; s.file_format, s.color_depth, s.exr_codec = keep[1:]
     bpy.data.images.remove(img)
     out = bpy.data.images.load(str(path), check_existing=False); out.name = name
     out.colorspace_settings.name = 'Non-Color'

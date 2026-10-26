@@ -72,6 +72,8 @@ def falling_film(lip, pool_z, film_mat, foam_mat=None, pool_mat=None, exr_path=N
         stats['ripple_mm'] = pool.readback_mm(img); stats['ripple_slope_rad'] = _ripple.slope_stats(H, st.ripple.step)
     if wet_proxy is not None:
         V, F = _wet.proxy(lip, pool_z, st.wet)
+        M = np.array(wet_proxy.matrix_world.inverted())                  # world -> the proxy's local space
+        V = V @ M[:3, :3].T + M[:3, 3]
         old = wet_proxy.data; new = bpy.data.meshes.new(f'{name} | wet proxy')
         new.from_pydata(V.tolist(), [], F.tolist()); new.update(); wet_proxy.data = new
         if old.users == 0: bpy.data.meshes.remove(old)

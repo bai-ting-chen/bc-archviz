@@ -29,7 +29,7 @@ def from_arrays(name, V, F, material=None, collection=None, smooth=True):
 def film_sheet(name, front, back, keep, material=None, collection=None):
     """Closed water body from front/back grids (nd, ns, 3): quads fully torn (all corners outside keep) removed.
 
-    Vertex order = front grid then back grid (row-major); side caps close the outer border with outward winding.
+    Vertex order = front grid then back grid (row-major); faces wound outward for either lip handedness.
     """
     nr, nc = keep.shape; N = nr * nc
     a = (np.arange(nr - 1)[:, None] * nc + np.arange(nc - 1)[None, :]).ravel().astype(np.int32)
@@ -37,6 +37,10 @@ def film_sheet(name, front, back, keep, material=None, collection=None):
     q = q[keep.ravel()[q].any(axis=1)]
     edge = np.r_[np.arange(nc), np.arange(2 * nc - 1, N, nc), np.arange(N - 2, N - nc - 1, -1), np.arange(N - 2 * nc, 0, -nc)]
     end = np.roll(edge, -1); side = np.c_[end, edge, edge + N, end + N].astype(np.int32)
+    # Winding follows the surface: front faces must point from the back skin to the front skin.
+    ds_ = np.diff(front, axis=1)[:-1]; dd_ = np.diff(front, axis=0)[:, :-1]
+    if np.sum(np.cross(ds_, dd_) * (front - back)[:-1, :-1]) < 0:
+        q = q[:, ::-1]; side = side[:, ::-1]
     loops = np.r_[q.ravel(), (q[:, ::-1] + N).ravel(), side.ravel()]
     count = 2 * len(q) + len(side); coords = np.r_[front.reshape(-1, 3), back.reshape(-1, 3)].astype(np.float32)
     me = bpy.data.meshes.new(name)

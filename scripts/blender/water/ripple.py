@@ -11,6 +11,7 @@ import numpy as np
 
 @dataclass
 class RippleParams:
+    """Grid, extent and strengths of the pool ripple field (craters, chop, ring waves, line fronts)."""
     step: float = .004          # m grid
     reach_out: float = 2.0      # m from the wall face
     reach_side: float = 1.0     # m past each end
