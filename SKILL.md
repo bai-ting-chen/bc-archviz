@@ -9,8 +9,8 @@ description: >-
 
 # bc-archviz
 
-Read [RULES.md](RULES.md), then the task reference below. Any action a receiving machine must take
-is stated in the commit that needs it.
+Read [RULES.md](RULES.md), then the task reference below. Check outstanding actions in
+`MIGRATE.md` when present; complete only applicable receiving-machine actions.
 Method and code live here; study data lives in the current project.
 
 ## Workflow

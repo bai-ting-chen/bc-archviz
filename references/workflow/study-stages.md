@@ -21,7 +21,7 @@ Who does each stage in each mode; mode and model choice is in [work-modes.md](wo
 | **13. Code review** (RULES AGT_01) | reviews Codex's code via a fresh subagent | reviews Claude's code (`codex_review.py`) | none; reads only the review's findings summary | a fresh read-only Codex reviewer per stage; the builder weighs the findings |
 | **14. Preview + final** (GAT_04) | shows the preview, states resolution/time/noise, launches the final in the open UI | the full-frame test with final settings | shows the preview and asks; tells Codex to launch | full-frame test; launches the UI final (`finals.py`) |
 | **15. Study notes** | writes Decisions, findings, open items | appends numbers and traps to its report | writes the Decisions section and the user's choices | writes findings, numbers, traps, open items |
-| **16. Skill changes** | edits, commits (with any receiving-machine action), pushes after Codex's review | reviews | reads Codex's proposed diff, commits and pushes it | drafts the change in the skill folder, uncommitted |
+| **16. Skill changes** | edits, `MIGRATE.md`, commits, pushes after Codex's review | reviews | reads Codex's proposed diff, commits and pushes it | drafts the change in the skill folder, uncommitted |
 | **17. Training** (AGT_03) | compares its verdict with Codex's self-judgement, writes lessons | self-judgement at the end of each report | only when the user asks for it in CPM | same |
 | **18. Close a study** (AST_02) | lists the milestones, runs `study_close.py` | — | lists the milestones | runs `study_close.py`, plan first, then `--apply` |
 

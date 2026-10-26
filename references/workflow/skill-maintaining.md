@@ -28,10 +28,10 @@ instructions behind.
 2. Identity, set once per clone and not globally (work machines hold other repos):
    `git config user.name bai-ting-chen`, `git config user.email baitingchen.arch@gmail.com`.
 
-## Receiving-machine actions
-If a push needs another machine to act (an install, a renamed path, a moved import, a memory or project-doc edit),
-say so in the commit message: what to check and what to do. No separate file. Before pushing, check
-`git log origin/main..HEAD` for actions already written there. Never attach automatic commit/push or self-deletion commands.
+## MIGRATE.md (other machine)
+MIGRATE.md exists only for changes made after the last pull and before the next push that the other machine must know
+about. It says what changed and how to update the local clone safely. Delete it in the push that publishes those changes.
+Pushed changes need no note there; the commit message describes them. Never attach automatic commit/push or self-deletion commands.
 
 ## Helpers changed?
 Run `python scripts/workflow/helper_index.py` (MCP venv python) so [blender-python-helpers.md](../scene/blender-python-helpers.md) matches the
