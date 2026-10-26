@@ -1,28 +1,66 @@
 # Water ripples and waves
 
-Code: `materials.water.ripple.height_field` (field), `materials.water.shading.save_height_exr` + `install_bump` (material) (used by `materials.water.build.falling_film`).
-
+## 1. Overview
 Ripples and waves on a water surface caused by something: falling water landing, impacts, wind
 near a plunge. Shared by any water material that hits a pool ([water-free-falling-film.md](water-free-falling-film.md),
 [water-attached-film.md](water-attached-film.md), fountains). The pool body and plain wind ripples:
 [water-surface.md](water-surface.md).
 
-## 1. Bump or geometry?
+**Use when:** a ripple or wave is caused by something (a landing, an impact, a plunge). Plain wind
+ripples and the pool body: [water-surface.md](water-surface.md).
+
+## 2. Layers and node-editor diagram
+Specific layers are described in §4. Generic layers are written once, in their own reference, and
+used here with ripple settings.
+
+```
+                           WATER RIPPLES AND WAVES
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │ SPECIFIC (§4)                                                            │
+ │   §4.1 Impact field (float height, mm)  → height image                   │
+ │   §4.2 Bump on the pool material        → shading (surface normal)       │
+ │   §4.3 Choppy pool (geometry wavelets)  → pool geometry, boils           │
+ │ GENERIC (own reference)                                                  │
+ │   Landing line, crowns, drops           → water-splash.md                │
+ │   Pool body, wind ripples as geometry   → water-surface.md               │
+ └──────────────────────────────────────────────────────────────────────────┘
+```
+
+Flow:
+```
+   landing line, weighted by local thickness (water-splash.md) ──► §4.1 height field (mm)
+   §4.1 ──► float EXR ──► §4.2 bump (top faces only) ──► pool Principled normal
+   §4.3 wave field ──► shared by every mesh touching the pond ──► pool geometry
+```
+
+**Bump or geometry?**
+
 | Case | Build | Why |
 |---|---|---|
 | Ripples a few mm high whose job is to break reflections and wobble what is seen through the surface | **bump on the pool's own material** from a float height map | only the slope reads; no extra surface |
 | Wind ripples carrying caustics, or crests seen in silhouette | geometry (Ocean / height field), [water-surface.md](water-surface.md) | caustics and silhouettes need real surface |
-| Rounded chop and boils in a plunge zone | geometry, see *Choppy pool* below | amplitude of cm |
+| Rounded chop and boils in a plunge zone | geometry, see §4.3 | amplitude of cm |
 
 - **Never a second water skin over the pool** for ripples: a thin transparent sheet above the pool
   adds its own Fresnel reflection, and its area reads as a lighter rectangle. A thin-wall skin is
   fine only for small standing features (crowns, [water-splash.md](water-splash.md)).
-- **Slope decides visibility:** ripples that visibly break reflections need slopes of ~3–8°
-  (0.05–0.15 rad). Amplitudes giving ~1° are invisible however wide the field.
 
-## 2. Impact field (from a falling sheet or drops)
-Sources come from where the water actually lands (the landing line, weighted by local thickness;
-drops through the gaps land weaker), so the line is ragged and heavy streams hit harder.
+## 3. Code
+`scripts/blender/materials/water/`:
+- `ripple.py`: `height_field(lip, impact_pts, strength, p)` builds the impact field (§4.1); parameters
+  in `RippleParams`.
+- `height_image.py`: `save_height_exr(H, path)` writes the float EXR (§4.2).
+- `ripple_bump.py`: `install_bump(material, image, lip, s_range, o_range)` puts the bump on the pool
+  material (§4.2).
+- `build.py`: `falling_film()` runs these for a falling film.
+
+No script is named in this file for the choppy pool (§4.3). No control scene is named either.
+
+## 4. Instructions and parameters, per layer
+
+### 4.1 Impact field (from a falling sheet or drops)
+- Sources come from where the water actually lands (the landing line, weighted by local thickness;
+  drops through the gaps land weaker), so the line is ragged and heavy streams hit harder.
 - **Per impact:** a crater (−0.7 A, Gaussian, r < 0.6 R), a crown ring A at radius R with 3–7
   lobes, then damped capillary ripples outside it.
 - **Spreading waves:** short capillary-gravity rings die within tens of cm; longer gravity waves
@@ -44,33 +82,65 @@ drops through the gaps land weaker), so the line is ragged and heavy streams hit
 | Chop | λ 2–9 cm, ~1.8 mm, fading over ~0.6 m from the wall |
 | Field extent | ~2 m out from the wall, ~1 m past each end |
 
-## 3. Bump on the pool material
+### 4.2 Bump on the pool material
 - Write the height (mm) into a **float image**, save it as an EXR in the study library, and point
   the image datablock at that file (a generated image is lost on reload): blender-api-traps ›
   Render / images.
 - Pool material: Geometry Position → map world XY to UV over the field → Image Texture (CLIP
   outside, Cubic, Non-Color) × (True Normal z > 0.5, top faces only) → Bump (Distance 0.001 for
   mm) → Principled Normal.
+- **Slope decides visibility:** ripples that visibly break reflections need slopes of ~3–8°
+  (0.05–0.15 rad). Amplitudes giving ~1° are invisible however wide the field.
 - Declare it: the surface shading moves, the geometry does not (mm amplitude, invisible in
   silhouette).
 - Proof: reload the saved scene in a fresh Blender and read the image's min/max back; then a
   render beside the same render without the bump.
 
-## 4. Choppy pool that hides the floor (plunge zones)
-- Geometry wavelets everywhere (λ 3–25 cm, steepness ~0.09), rougher within ~0.4 m of a plunge,
-  under a slow gust envelope (0.3–1.6, λ 0.6–2.5 m). 28 cosines read as a cross-hatch, use ~64.
+| Parameter | Value |
+|---|---|
+| Image interpolation | Cubic |
+| Image extension | CLIP outside the field |
+| Colour space | Non-Color |
+| Top-face mask | True Normal z > 0.5 |
+| Bump distance | 0.001 (mm) |
+| Slope for visible breakup | ~3–8° (0.05–0.15 rad) |
+
+### 4.3 Choppy pool that hides the floor (plunge zones)
+- Geometry wavelets everywhere, rougher within ~0.4 m of a plunge, under a slow gust envelope.
+  28 cosines read as a cross-hatch, use ~64.
 - **One wave field object shared by every mesh touching the pond**, so near grid, crest band and
   far plane meet without seams; the far plane gets a hole matching the near region.
 - At grazing view (~70°) water reflects only 6–10 %: the **floor sets the pool's tone**. Polished
   near-black stone (albedo 0.02–0.05) + absorption ~1.5 /m + chop removes the floor from view.
-- Rounded, not spiky: chop λ 4–15 cm, boils as domes (positive part^1.5) of 5–12 cm; short boils at
-  large amplitude on a fine grid draw cones.
+- Rounded, not spiky: boils as domes (positive part^1.5); short boils at large amplitude on a fine
+  grid draw cones.
+
+| Parameter | Value |
+|---|---|
+| Wavelets | λ 3–25 cm, steepness ~0.09 |
+| Rougher zone | within ~0.4 m of a plunge |
+| Gust envelope | 0.3–1.6, λ 0.6–2.5 m |
+| Cosines | ~64 |
+| Chop (rounded) | λ 4–15 cm |
+| Boils | domes of 5–12 cm |
+| Grazing view / reflection | ~70° / 6–10 % |
+| Floor albedo / absorption | 0.02–0.05 / ~1.5 /m |
+
+Generic layers, ripple settings:
+
+| Layer | Reference | Note for this material |
+|---|---|---|
+| Landing line, crowns, drops | [water-splash.md](water-splash.md) | the impact sources for §4.1 |
+| Pool body, wind ripples as geometry | [water-surface.md](water-surface.md) | plain wind ripples and caustics; the pool body |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |
 |---|---|---|
-| Lighter rectangle on the pool | ripples on a separate skin over the pool | bump on the pool material (§1) |
-| Bump has no effect | image wiped (colour space set after the pixels, see api-traps); or slope ~1° | colour space before pixels, read min/max back; slopes 3–8° (§1, §3) |
-| Cm-high bumps at strong impacts | overlapping impacts summed | soft cap (§2) |
-| Waves stop dead at the field edge | no border fade | fade to zero at the borders (§2) |
-| Cross-hatched chop | too few cosines | ~64 (§4) |
+| Lighter rectangle on the pool | ripples on a separate skin over the pool | bump on the pool material (§2, §4.2) |
+| Bump has no effect | image wiped (colour space set after the pixels, see api-traps); or slope ~1° | colour space before pixels, read min/max back; slopes 3–8° (§4.2) |
+| Cm-high bumps at strong impacts | overlapping impacts summed | soft cap (§4.1) |
+| Waves stop dead at the field edge | no border fade | fade to zero at the borders (§4.1) |
+| Cross-hatched chop | too few cosines | ~64 (§4.3) |
+
+Generic problems: `references/workflow/troubleshooting.md` (not linked from this file: a link here
+would close a reference loop).

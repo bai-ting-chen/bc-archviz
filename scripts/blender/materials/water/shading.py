@@ -1,4 +1,4 @@
-"""Materials and images for the water geometry (references/materials/water/water-ripple.md §3, water-splash.md §2).
+"""Materials and images for the water geometry (references/materials/water/water-ripple.md §4.2, water-splash.md §4.2).
 
 - thin_wall_copy: water for open shells (crowns, bubbles): glints and rims, straight transmission.
 - save_height_exr / install_bump / readback_mm: a ripple height field as a bump on the pool's own material.

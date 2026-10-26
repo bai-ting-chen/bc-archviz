@@ -1,29 +1,24 @@
 # Free-falling water film
 
-## 1. What it is
+## 1. Overview
 A thin sheet of water thrown off a lip (a weir edge, a wall-top channel) and falling free in front
 of the wall to a pool. Near the lip it is a glassy sheet; as it falls it speeds up, thins,
 stretches, meanders sideways, tears into braids, and the lowest band breaks into strings and drops.
 For a still, build it as a **2D field map in the sheet's own coordinates on an analytic carrier
 surface**: a fast, physics-informed approximation, not a simulation (method choice:
-[index.md](../index.md) › Water). Water that clings to the wall instead: [water-attached-film.md](water-attached-film.md).
+[index.md](../index.md) › Water).
 
-## Code
-`scripts/blender/materials/water/`: `build.falling_film(lip, pool_z, film_mat, …)` builds every layer below from a
-`curtain.Lip` (any straight lip: origin, along, out, length, drop) and returns objects and stats; parameters
-in `build.Setup` (`curtain.Flow`, `film.FilmParams`, `fragments.FragmentParams`, `foot.FootParams`,
-`ripple.RippleParams`, `wet.WetParams`); modules `mesh` (geometry), `motion` (velocity), `shading`
-(materials, ripple bump). Defaults = the starting values in the tables. `s_range` builds a
-strip of the lip for a lab. Control on an unrelated scene: `scripts/controls/water/falling_film_check.py`.
+**Use when:** water leaves a lip and falls free to a pool. Water that clings to the wall instead:
+[water-attached-film.md](water-attached-film.md).
 
-## 2. Layers and how they combine
-Specific layers are described here. Generic layers are written once, in their own reference, and
+## 2. Layers and node-editor diagram
+Specific layers are described in §4. Generic layers are written once, in their own reference, and
 used here with falling-film settings.
 
 ```
                            FREE-FALLING WATER FILM
  ┌───────────────────────────────────────────────────────────────────────────┐
- │ SPECIFIC (§3)                          GENERIC (own reference)            │
+ │ SPECIFIC (§4)                          GENERIC (own reference)            │
  │ 1 Ballistic carrier   → geometry       Impact rings, waves, chop          │
  │ 2 Stream flow q(y)    → throw, depth                 → water-ripple.md    │
  │ 3 Fall-time stretch   → field coords   Foam, floating bubbles             │
@@ -54,12 +49,22 @@ used here with falling-film settings.
   ~4 mm × 10 mm, so drops, strings and roll-wave arcs are sub-pixel and read only in aggregate
   (RULES MAT_04). A close-up reference shows detail that cannot exist at that scale.
 
-## 3. Instructions and parameters, per layer
+## 3. Code
+`scripts/blender/materials/water/`: `build.falling_film(lip, pool_z, film_mat, …)` builds every layer in
+§2 from a `curtain.Lip` (any straight lip: origin, along, out, length, drop) and returns objects and
+stats. Parameters live in `build.Setup` (`curtain.Flow`, `film.FilmParams`, `fragments.FragmentParams`,
+`foot.FootParams`, `ripple.RippleParams`, `wet.WetParams`). Modules: `mesh` (geometry), `motion`
+(velocity), `shading` (materials, ripple bump). Defaults = the starting values in §4. `s_range` builds a
+strip of the lip for a lab.
+
+Control on an unrelated scene: `scripts/controls/water/falling_film_check.py`.
+
+## 4. Instructions and parameters, per layer
 Table values are starting points that held at one courtyard-scale view (~4 × 10 mm per pixel);
 size them from the shot (RULES MAT_03), judge in a strip lab (validation.md), and record the final
 values in the study notes (RULES GOV_01).
 
-### 3.1 Ballistic carrier (geometry)
+### 4.1 Ballistic carrier (geometry)
 - Water leaves the lip horizontally, so each section is a parabola with its vertex at the lip:
   x(d) = v0·√(2d/g), standoff growing monotonically with the drop d. Never a bulge that
   returns to the wall.
@@ -84,7 +89,7 @@ values in the study notes (RULES GOV_01).
 | Throw at the foot (4 m drop) | a few cm reads as paint on the wall; ~0.2–0.35 m reads as a curtain — size from the view |
 | v0 variation along the lip | ±40 %, two smooth scales |
 
-### 3.2 Stream flow q(y) (throw and depth)
+### 4.2 Stream flow q(y) (throw and depth)
 - **One flat profile is the tell:** every column on the same curve, at the same thickness, reads
   as a textured pane. Real lips deliver uneven flow: each stream carries its own q, so it has its
   own throw and thickness and stands at its own depth.
@@ -98,7 +103,7 @@ values in the study notes (RULES GOV_01).
 | Flow variation m | about ±40 % (±70 % reads heavier) |
 | Max stream thickness | ~15–20 mm |
 
-### 3.3 Fall-time stretch (field coordinates)
+### 4.3 Fall-time stretch (field coordinates)
 - A falling sheet stretches along the flow by U(d)/U(d₀): features born near the lip become long
   and gentle lower down. Evaluate every along-fall pattern in an effective coordinate
   v_eff(d) = ∫ (U(d_ref)/U(s))^k ds, keeping the top band unchanged below d_ref.
@@ -111,7 +116,7 @@ values in the study notes (RULES GOV_01).
 | k | start at 0.5 (1 = physical) |
 | d_ref (unchanged top band) | ~0.15 m |
 
-### 3.4 Fine ribbons (relief)
+### 4.4 Fine ribbons (relief)
 - A 2D ribbon field in (y, v_eff): ribbons that wander, swell (varicose), twist flat ↔ round,
   braid, and tear; nothing constant along its length, nothing periodic.
 - **Keep it gentle:** slope p99 ~0.3 rad at full strength. Steeper fine relief (p99 ~0.9 rad)
@@ -131,7 +136,7 @@ values in the study notes (RULES GOV_01).
 | Calm/busy zone range | 0.4–1, patches 0.3–1 m |
 | Roll-wave arcs | ~0.6 mm, λ ~3.5 and ~8 cm, ±35–45 % irregular, growing ~1×/m of drop |
 
-### 3.5 Sideways meander (geometry)
+### 4.5 Sideways meander (geometry)
 - **At the final view the film reads as wavy vertical streaks.** Straight streaks read as ruled
   glass; the missing ingredient is a sideways meander of the water itself.
 - Two along-fall scales (~3–10 cm and ~8–25 cm in v_eff), phases that change across the wall over
@@ -139,7 +144,7 @@ values in the study notes (RULES GOV_01).
 - **The fold trade-off:** a meander that varies over a few cm across the wall folds a continuous
   sheet (Δy′ < −1). A fold-free version (neighbours in step over 10–30 cm) reads as a washboard and
   rows of bright dots. Use the independent meander, and **tear the sheet where it is stretched**
-  (§3.6): the remaining folds are water pushed together = braids crossing. Measure the folded
+  (§4.6): the remaining folds are water pushed together = braids crossing. Measure the folded
   fraction of water quads (Δy′ ≤ −1 where both sides are water) and render-check the folds at the
   final view; if they show as dark blotches or crumpling, lower the amplitude or tear more of the
   stretched sheet.
@@ -149,7 +154,7 @@ values in the study notes (RULES GOV_01).
 | Meander amplitude A | ~14 mm (×0.4–1.7 down the fall) |
 | Folded water quads | measure and report; acceptable only if the final view shows no artifacts |
 
-### 3.6 Tears and braids (mask + rims)
+### 4.6 Tears and braids (mask + rims)
 - **Where:** a sheet pulled apart thins and tears; pushed together it piles into braids. Tear where
   the meander's stretch 1 + ∂Δy/∂y exceeds a threshold, plus narrow slits from a field that is
   narrow across (1–3.5 cm) and long along the stretched fall. Tearing starts part-way down and
@@ -170,7 +175,7 @@ values in the study notes (RULES GOV_01).
 | Rim bead | ~2 mm |
 | Torn fraction | ~10–15 % overall, ~40–45 % in the bottom rows |
 
-### 3.7 Strings and drops (geometry)
+### 4.7 Strings and drops (geometry)
 - **A gap is never empty.** Where the sheet tears, the gap holds hanging strings and falling drops;
   a hard edge between water and empty reads false even when coverage is right.
 - **Gap fill** (densities per m² of torn area, so they scale with the curtain): strings follow the
@@ -186,7 +191,7 @@ values in the study notes (RULES GOV_01).
 | Gap drops | ~5 000 per m² of torn area; 1.2–7 mm |
 | Edge drops | ~570 per m of curtain, weighted by drop; 2.5–8 mm; 30 % ligaments (stretch 4–9×) |
 
-### 3.8 Dissolving edges (mask)
+### 4.8 Dissolving edges (mask)
 - A free edge is pulled inward by surface tension as it falls and breaks into strings and drops;
   a clean straight edge is a rigid tell.
 - The edge line retreats with the drop and wavers; a band beside it tears much more, feeding the
@@ -197,7 +202,7 @@ values in the study notes (RULES GOV_01).
 | Retreat | ~6 cm·d^1.3 at the foot, wavering ±1.5 cm |
 | Dissolve band | ~20 cm, extra tearing from ~0.6 m down |
 
-### 3.9 Motion blur (velocity attribute)
+### 4.9 Motion blur (velocity attribute)
 - Very slight blur keeps the water transparent and volumetric yet in motion. The mesh does not
   move: give film, strings and drops a `velocity` POINT FLOAT_VECTOR attribute = U(d) along the
   local fall direction (strings, drops straight down), and enable deformation motion blur on those
@@ -210,39 +215,39 @@ values in the study notes (RULES GOV_01).
 |---|---|
 | Streak at the foot | ~1–2 px (≈1/1200 s at 9 m/s and ~4 mm/px); ~5 px already reads too blurry |
 
-### 3.10 Generic layers, falling-film settings
+### 4.10 Generic layers, falling-film settings
 | Layer | Reference | Falling-film note |
 |---|---|---|
 | Impact rings, waves, chop | [water-ripple.md](water-ripple.md) | sources = the film's own landing row, weighted by thickness |
 | Foam, floating bubbles | [water-foam.md](water-foam.md) | clustered at impacts, drifting past both ends of the fall |
-| Crowns, splash, landing line | [water-splash.md](water-splash.md) | landing line from §3.1 and the bottom row of §3.6 |
+| Crowns, splash, landing line | [water-splash.md](water-splash.md) | landing line from §4.1 and the bottom row of §4.6 |
 | Wet wall behind the water | [wet-surfaces.md](../../effects/wet-surfaces.md) › Wet wall behind falling water | the wall behind the whole footprint, not the film's distance |
 | Pool body | [water-surface.md](water-surface.md) | clear pool, absorption, Ocean |
 
-## 4. Troubleshooting (falling-film specific)
-Generic problems are in [troubleshooting.md](../../workflow/troubleshooting.md). These are specific to this film:
+## 5. Troubleshooting
+Generic problems are in troubleshooting.md. These are specific to this film:
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Chrome flutes | ropes constant along their length mirror one band of the surroundings | ribbons that wander, swell, twist, tear (§3.4) |
-| Etched / hammered glass | dense short-correlated relief | fall-time stretch, calm zones, gentler relief (§3.3, §3.4) |
-| Reads as paint on the wall | standoff of a few cm | size the throw from the view (§3.1) |
-| One flat textured pane | one carrier curve and thickness for every column | stream flow q(y) (§3.2) |
-| Clear glass pane, lower film | fine relief cut too far | relief ~0.4, waves growing with the drop (§3.4) |
-| Bright comb at the crest, uniform glitter | fine relief too steep everywhere | slope p99 ≲ 0.3 rad, calm zones (§3.4) |
-| Ladder rungs / V chevrons | roll-wave arcs at one wavelength, aligned, too strong | two irregular trains, per-crest strength, ~0.6 mm (§3.4) |
-| Horizontal band of activity | on/off term that depends on height only | per-stream on/off heights (§3.4) |
-| Ruled vertical lines | streams fixed in y | meander (§3.5) |
-| Washboard, rows of dots | meander too coherent across the wall | independent meander + tear where stretched (§3.5, §3.6) |
-| Crumpled, dark blotches | meander folds a continuous sheet everywhere | tear the stretched parts; measure folded fraction (§3.5) |
-| Triangle / wedge gaps | constant-rate hole opening on constant speed | tears along the meander and stretch, not hole wedges (§3.6) |
-| Round holes | young holes from a physical hole model with narrow-gap limits | no hole field; slits along the flow (§3.6) |
-| Hard divide water / empty at the foot | empty gaps | gap fill strings and drops (§3.7) |
-| Edge too perfect | no edge retreat or breakup | dissolving edges (§3.8) |
-| Looks frozen | no motion | velocity motion blur, 1–2 px (§3.9) |
-| Silky, loses transparency | shutter too long | shorter shutter (§3.9) |
-| Coarse, hard gap map | block cells, binary mask | contour-level fields, rounded rims (§3.6) |
+| Chrome flutes | ropes constant along their length mirror one band of the surroundings | ribbons that wander, swell, twist, tear (§4.4) |
+| Etched / hammered glass | dense short-correlated relief | fall-time stretch, calm zones, gentler relief (§4.3, §4.4) |
+| Reads as paint on the wall | standoff of a few cm | size the throw from the view (§4.1) |
+| One flat textured pane | one carrier curve and thickness for every column | stream flow q(y) (§4.2) |
+| Clear glass pane, lower film | fine relief cut too far | relief ~0.4, waves growing with the drop (§4.4) |
+| Bright comb at the crest, uniform glitter | fine relief too steep everywhere | slope p99 ≲ 0.3 rad, calm zones (§4.4) |
+| Ladder rungs / V chevrons | roll-wave arcs at one wavelength, aligned, too strong | two irregular trains, per-crest strength, ~0.6 mm (§4.4) |
+| Horizontal band of activity | on/off term that depends on height only | per-stream on/off heights (§4.4) |
+| Ruled vertical lines | streams fixed in y | meander (§4.5) |
+| Washboard, rows of dots | meander too coherent across the wall | independent meander + tear where stretched (§4.5, §4.6) |
+| Crumpled, dark blotches | meander folds a continuous sheet everywhere | tear the stretched parts; measure folded fraction (§4.5) |
+| Triangle / wedge gaps | constant-rate hole opening on constant speed | tears along the meander and stretch, not hole wedges (§4.6) |
+| Round holes | young holes from a physical hole model with narrow-gap limits | no hole field; slits along the flow (§4.6) |
+| Hard divide water / empty at the foot | empty gaps | gap fill strings and drops (§4.7) |
+| Edge too perfect | no edge retreat or breakup | dissolving edges (§4.8) |
+| Looks frozen | no motion | velocity motion blur, 1–2 px (§4.9) |
+| Silky, loses transparency | shutter too long | shorter shutter (§4.9) |
+| Coarse, hard gap map | block cells, binary mask | contour-level fields, rounded rims (§4.6) |
 
-Generic problems that often show up with this film, in [troubleshooting.md](../../workflow/troubleshooting.md):
+Generic problems that often show up with this film, in troubleshooting.md:
 - Splash drops read as a dark band;
 - Foam reads as snow cones with black holes.

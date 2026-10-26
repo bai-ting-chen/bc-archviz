@@ -1,19 +1,22 @@
 # Board-formed concrete
 
-## 1. What it is
+## 1. Overview
 Concrete poured into moulds built from timber boards. The hardened surface is a negative cast of
 the formwork: each board's face, its tilt and offset, the joints between boards, and the wood grain.
 Treat it as **relief plus a faint print**, wherever boards are large enough in frame to resolve. A
-printed board map is only a fallback for distant or small walls (§3.6).
+printed board map is only a fallback for distant or small walls (§4.6).
 
-## 2. Layers and how they combine
-Specific layers are described here. Generic layers are written once, in their own reference, and
+**Use when:** a concrete wall shows board marks that resolve in frame. A plain or jointless wall:
+[concrete.md](concrete.md).
+
+## 2. Layers and node-editor diagram
+Specific layers are described in §4. Generic layers are written once, in their own reference, and
 used here with board-form settings.
 
 ```
                           BOARD-FORMED CONCRETE
  ┌───────────────────────────────────────────────────────────────────────────┐
- │ SPECIFIC (§3)                         GENERIC (own reference)             │
+ │ SPECIFIC (§4)                         GENERIC (own reference)             │
  │ 1 Base concrete      → colour, rough  Chips at joints   → edge-wear.md    │
  │ 2 Board layout/tilt  → geometry       Dirty joints/edge → edge-wear.md    │
  │ 3 Joint marks        → displacement   Run-off, leaks    → edge-wear.md    │
@@ -37,9 +40,16 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
   chips) is true displacement; everything on a board face (grain) is bump only. Faces stay cheap;
   joints keep their silhouette and shadow line.
 
-## 3. Instructions and parameters, per layer
+## 3. Code
+- `scripts/blender/materials/concrete/concrete.py`: `vertical_boards(mat, cylinder=(cx, cy, r) | None)`,
+  the printed board map for distant walls (its helper is `concrete_boards.py` in the same folder).
+- Board cells as GN geometry have no script in `scripts/` yet; build them in the node editor.
+- Control for the printed map: the `vertical_boards` case in `scripts/controls/regression/regress_cases.py`
+  and the `boards_` case in `scripts/controls/material_graph_cases.py`.
 
-### 3.1 Base concrete
+## 4. Instructions and parameters, per layer
+
+### 4.1 Base concrete
 - A clean, jointless concrete or plaster with no board marks: [concrete.md](concrete.md),
   surface ranges in [physical-ranges.md](../physical-ranges.md) (RULES MAT_01).
 - **Tone target:** match the reference's typical wall, not its brightest patch.
@@ -48,7 +58,7 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
 |---|---|
 | Display value of a typical lit wall | below ~0.8 |
 
-### 3.2 Board layout, tilt and offset (geometry)
+### 4.2 Board layout, tilt and offset (geometry)
 - Courses, butt joints, board widths from the formwork drawing or reference.
 - **Boards are never coplanar.** Each tilts about its long axis and sits slightly in or out, so
   courses step at the joints and catch light differently. This is what reads at a distance.
@@ -59,7 +69,7 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
 |---|---|
 | Edge excursion per board | ±1–3 mm |
 
-### 3.3 Joint marks (displacement)
+### 4.3 Joint marks (displacement)
 - Paste leaks between boards make **light, ragged fins** a few mm proud, broken in places.
 - Where fines are lost, the joint band is **rougher and darker**.
 - **The joint is the deepest feature on the wall:** a groove along each joint between two boards
@@ -81,7 +91,7 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
 | Groove width at the surface | ≥ 2 px at the final view |
 | Chip reach / depth | ~5–10 mm / ~2–3 mm |
 
-### 3.4 Grain inside each board (bump + ink)
+### 4.4 Grain inside each board (bump + ink)
 - **Relief:** ridges of hard latewood (raised on the board by weathering or sandblasting) cast as
   **grooves** in the concrete: the dark figure of the grain map is recessed. Prove the sign on a
   test plane with a raking light before the scene (one dark stripe must read as a groove).
@@ -124,45 +134,45 @@ formwork boards are alike, so neighbours differ (RULES MAT_06):
 **Proof:** a raking-light patch beside the reference before any final-view render. Then check the
 final view's mm per pixel: relief finer than a pixel reads only through its tone (RULES MAT_04).
 
-### 3.5 Board tone (colour)
+### 4.5 Board tone (colour)
 - Soft per-board tone from absorbency: a per-unit key, from [variation.md](../../effects/variation.md) (RULES MAT_06).
 - Small, and never stepping harder than the joints themselves.
 
-### 3.6 Printed board map (fallback for distant walls)
+### 4.6 Printed board map (fallback for distant walls)
 - Most board-formed maps run horizontal. To stand them up, feed a FLAT projection with
   Combine(z, along-wall):
   - planar walls: x + y;
   - a cylinder: arc length `atan2(y − cy, x − cx) · R`, which also avoids box-projection stretch.
 - Vary tone per formwork strip (white noise on `floor(along / strip width)`) × a low-frequency field.
   That reads as cast panels and hides the tile repeat.
-- → `materials.concrete.concrete.vertical_boards(mat, cylinder=(cx, cy, r) | None)`.
+- Entry point: §3.
 
-### 3.7 Generic layers, board-form settings
+### 4.7 Generic layers, board-form settings
 | Layer | Reference | Board-form note |
 |---|---|---|
-| Chips | [edge-wear.md](../../effects/edge-wear.md) | at board arrises, as displacement (§3.3) |
-| Dirty joints / edge grime | [edge-wear.md](../../effects/edge-wear.md) | joint band rougher and darker (§3.3) |
+| Chips | [edge-wear.md](../../effects/edge-wear.md) | at board arrises, as displacement (§4.3) |
+| Dirty joints / edge grime | [edge-wear.md](../../effects/edge-wear.md) | joint band rougher and darker (§4.3) |
 | Run-off streaks | [edge-wear.md](../../effects/edge-wear.md) › Runoff | from each wall's own top; vertical faces only |
 | Joint leaks | [edge-wear.md](../../effects/edge-wear.md) › Runoff | short drips under the horizontal joints, a pattern per joint, ending at the next joint |
 | Concave dust | [variation.md](../../effects/variation.md) (RULES MAT_06) | at inside corners and wall feet |
 | Wet / dew | [wet-surfaces.md](../../effects/wet-surfaces.md) | darkens and smooths all layers above |
 
-## 4. Troubleshooting (board-formed specific)
-Generic problems are in [troubleshooting.md](../../workflow/troubleshooting.md). These are specific to this material:
+## 5. Troubleshooting
+Generic problems are in troubleshooting.md. These are specific to this material:
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Wall reads as cladding, not concrete | tilt sized as an angle; edge excursion far over ±3 mm | size the edge excursion (§3.2) |
-| Neighbouring boards show the same grain lined up | too few variants (a few source bands × a flip) | more windows over the whole map, all jitters, neighbour check (§3.4) |
-| Grain invisible at the final view | relief only, too faint | add the ink print (§3.4) |
-| Grain looks the same everywhere | strength field drives only the ink | let it drive the bump depth too (§3.4) |
-| Grain reads raised, not recessed | bump sign | test plane with a raking light; invert the height (§3.4) |
-| Grain softened, knots rounded | directional smoothing or blur | isotropic high-pass; dissolve edges with noise (§3.4) |
-| Grain confused with the joints | joints as shallow as the grain | joint groove ≥ 2 × the grain depth (§3.3) |
-| Joint fin missing beside the groove | depths summed | combine with MIN/MAX (§3.3) |
-| Printed map runs the wrong way or stretches on a curved wall | wrong projection | FLAT projection with Combine(z, along-wall) (§3.6) |
+| Wall reads as cladding, not concrete | tilt sized as an angle; edge excursion far over ±3 mm | size the edge excursion (§4.2) |
+| Neighbouring boards show the same grain lined up | too few variants (a few source bands × a flip) | more windows over the whole map, all jitters, neighbour check (§4.4) |
+| Grain invisible at the final view | relief only, too faint | add the ink print (§4.4) |
+| Grain looks the same everywhere | strength field drives only the ink | let it drive the bump depth too (§4.4) |
+| Grain reads raised, not recessed | bump sign | test plane with a raking light; invert the height (§4.4) |
+| Grain softened, knots rounded | directional smoothing or blur | isotropic high-pass; dissolve edges with noise (§4.4) |
+| Grain confused with the joints | joints as shallow as the grain | joint groove ≥ 2 × the grain depth (§4.3) |
+| Joint fin missing beside the groove | depths summed | combine with MIN/MAX (§4.3) |
+| Printed map runs the wrong way or stretches on a curved wall | wrong projection | FLAT projection with Combine(z, along-wall) (§4.6) |
 
-Generic problems that often show up on this material, in [troubleshooting.md](../../workflow/troubleshooting.md):
+Generic problems that often show up on this material, in troubleshooting.md:
 - Relief vanishes on a bright wall;
 - Displacement shelf from a negative distance;
 - Chips read as dark spots;

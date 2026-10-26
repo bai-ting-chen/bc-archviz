@@ -115,8 +115,9 @@ Fallback CLI client: `scripts/workflow/mcp_call.py <tool> [json | --file script.
   arm, nor_gl, disp; `meta.json` has `dimensions_mm`. `search` matches categories only. For
   names and tags, query `api.polyhaven.com/assets?t=textures|hdris` and choose from a thumbnail
   contact sheet ([index.md](../materials/index.md)). HTTP 520–525 is Cloudflare: retry the same call.
-- Others in `library/local/<name>/` with a `meta.json` stating the source. Megascans via Fab:
-  free items only; download needs the user's own sign-in (their Chrome) — never type passwords.
+- Others in `library/local/<name>/` with a `meta.json` stating the source: IES light files and Megascans
+  (Quixel Megascans on Fab). The user downloads Megascans by hand. Ask before using any asset; never
+  sign in to Fab or download on the user's behalf.
 - **Where:** the study's own `library/` (RULES AST_03) — `ARCHVIZ_PROJECT=<study> polyhaven_fetch.py …`,
   `archviz.set_project(<study>)` in Blender. Run from inside a study, both find it without the
   setting (`projectpath`: the search stops at the study folder); a shared `library/` above is

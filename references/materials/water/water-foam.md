@@ -1,13 +1,49 @@
 # Water foam, bubbles and whitewater
 
-Code: `materials.water.foot.foam`, `materials.water.foot.bubbles` (used by `materials.water.build.falling_film`).
-
+## 1. Overview
 Aerated water on and in a pool: white foam flecks, clear floating bubbles, and dense milky
 whitewater in plunge zones. Shared by every water material that lands in a pool
-([water-free-falling-film.md](water-free-falling-film.md), [water-attached-film.md](water-attached-film.md)). Where the
-impacts are: [water-splash.md](water-splash.md).
+([water-free-falling-film.md](water-free-falling-film.md), [water-attached-film.md](water-attached-film.md)).
+Where the impacts are: [water-splash.md](water-splash.md).
 
-## 1. Foam flecks (surface)
+## 2. Layers and node-editor diagram
+Specific layers are described in §4. The impacts that seed the flecks and bubbles are written once,
+in their own reference, and used here with foam settings.
+
+```
+                        WATER FOAM, BUBBLES, WHITEWATER
+ ┌──────────────────────────────────────────────────────────────────────────┐
+ │ SPECIFIC (§4)                                                            │
+ │   §4.1 Foam flecks (surface)            → white flecks, drift past ends  │
+ │   §4.2 Floating bubbles                 → clear domes, sparkle far out   │
+ │   §4.3 Whitewater (plunge zones)        → opaque milky surface, trench   │
+ │ GENERIC (own reference)                                                  │
+ │   Impacts: landing line, crowns, splash → water-splash.md                │
+ └──────────────────────────────────────────────────────────────────────────┘
+```
+
+Flow:
+```
+   impacts (water-splash.md) ──► parents weighted by strength^0.4 (flecks, §4.1), strength^0.3 (bubbles, §4.2)
+   flecks and bubbles ──► carried out with a sideways drift that grows with the distance travelled
+   whitewater (§4.3) ──► bursts along the line drive foam width, boil height and splash density together
+```
+
+- Flecks and bubbles share the same impact parents and the same growing sideways drift, so the
+  foam carries past both ends of the fall.
+- Whitewater is the only milky layer. Clear pools keep their clear optical body.
+
+## 3. Code
+`scripts/blender/materials/water/`:
+- `foot_foam.py`: `foam(lip, pts, strength, pool_z, p)` (flecks, §4.1).
+- `foot_bubbles.py`: `bubbles(lip, pts, strength, pool_z, p)` (floating bubbles, §4.2).
+- Parameters: `FootParams` in `foot_config.py`.
+
+No script is named in this file for whitewater (§4.3). No control scene is named.
+
+## 4. Instructions and parameters, per layer
+
+### 4.1 Foam flecks (surface)
 - **Spawned at impacts, not along a band:** parents are impacts weighted by strength^0.4 (strong
   landings make more, but not all), so foam clusters without piling into white clumps.
 - **Drift:** distance from the impact exponential; direction away from the wall with a spread;
@@ -16,7 +52,7 @@ impacts are: [water-splash.md](water-splash.md).
   along the drift the further they travel. Identical discs in a row read as fake at once.
 - **Size from the final view** (RULES MAT_03): flecks under ~1 px vanish; at ~4–10 mm/px the
   median must be ~1 cm.
-- Flat, just above the surface; material: off-white (~0.7), rough ~0.2, a short subsurface.
+- Flat, just above the surface; a short subsurface.
 
 | Parameter | Value |
 |---|---|
@@ -25,13 +61,14 @@ impacts are: [water-splash.md](water-splash.md).
 | Reach from the wall | exponential, mean ~18 cm |
 | Sideways drift | σ = 3 cm + 0.5 × distance travelled |
 | Stretch | 1 + Exp(0.8) × min(1, distance/0.1 m) |
+| Material | off-white (~0.7), rough ~0.2 |
 
-## 2. Floating bubbles
+### 4.2 Floating bubbles
 - Clear domes sitting on the water, single or in small rafts; they travel much further than foam
   and give the scattered sparkle far from the fall.
 - Dome = upper hemisphere squashed to ~0.85 of its radius, sunk ~20 % of the radius; material:
   thin-wall water (glints and rim, no bending).
-- Spawned at impacts (weight strength^0.3), carried out with the same growing sideways drift.
+- Spawned at impacts, carried out with the same growing sideways drift.
 
 | Parameter | Value |
 |---|---|
@@ -39,15 +76,15 @@ impacts are: [water-splash.md](water-splash.md).
 | Diameter | 2–15 mm, median ~6 mm |
 | Rafts | ~15 % of spawns, 3–11 bubbles, spread ~6 mm·√n |
 | Reach | 5 cm + exponential mean 0.5 m (some past 1.5 m) |
+| Spawn weight | strength^0.3 |
+| Dome | ~0.85 of radius, sunk ~20 % of radius |
 
-## 3. Whitewater (plunge zones, trenches)
-- **Optics:** a bubble cloud scatters σ_s ≈ 1.5·α / r (void fraction α, bubble radius r): 10 %,
-  1 mm → 150 /m; 30 %, 0.5 mm → ~900 /m. Ten centimetres is optically thick: the floor of a
-  churning trench never shows.
+### 4.3 Whitewater (plunge zones, trenches)
+- **Optics:** a bubble cloud scatters σ_s ≈ 1.5·α / r (void fraction α, bubble radius r). Ten
+  centimetres is optically thick: the floor of a churning trench never shows.
 - **Render it as an opaque milky surface, not a volume.** A scattering volume in a shaded slot
-  renders dark grey and slow. Use Burley subsurface (radius 3–4 cm) under a wet sheen (IOR 1.33,
-  rough ~0.06), base around 0.35–0.45 albedo; foam (0.8, rougher, short radius) blended in as
-  soft marbled streaks and lace; a few darker, less aerated streaks — never clear holes.
+  renders dark grey and slow. Use Burley subsurface under a wet sheen, foam (rougher, short radius)
+  blended in as soft marbled streaks and lace; a few darker, less aerated streaks — never clear holes.
 - **Never a hard foam switch.** Opaque white beside clear water over a dark trench reads as
   snow with black holes.
 - **Fill below the surface.** An open water sheet over a void lets sight lines bent through
@@ -56,12 +93,30 @@ impacts are: [water-splash.md](water-splash.md).
 - **Bursts, not a uniform band:** one along-line "scallop" field (bursts every 0.15–0.6 m) drives
   foam width, boil height and splash density together.
 
-## 4. Troubleshooting
+| Parameter | Value |
+|---|---|
+| Scatter | σ_s ≈ 1.5·α/r; 10 %, 1 mm → 150 /m; 30 %, 0.5 mm → ~900 /m |
+| Subsurface | Burley, radius 3–4 cm |
+| Wet sheen | IOR 1.33, roughness ~0.06 |
+| Base albedo | 0.35–0.45 |
+| Foam albedo | 0.8 (rougher, short radius) |
+| Burst spacing | 0.15–0.6 m |
+
+Generic layers, foam settings:
+
+| Layer | Reference | Note for this material |
+|---|---|---|
+| Impacts, crowns, splash | [water-splash.md](water-splash.md) | the impact parents for §4.1 and §4.2; crowns are thin-wall |
+
+## 5. Troubleshooting
 | Symptom | Cause | Fix |
 |---|---|---|
-| Foam in one line of identical discs | one band, one size | impact-spawned, lognormal, irregular (§1) |
-| Foam invisible at the final view | sizes under a pixel | size from mm/px (§1) |
-| Foam stops where the fall stops | no sideways drift | drift growing with distance (§1) |
+| Foam in one line of identical discs | one band, one size | impact-spawned, lognormal, irregular (§4.1) |
+| Foam invisible at the final view | sizes under a pixel | size from mm/px (§4.1) |
+| Foam stops where the fall stops | no sideways drift | drift growing with distance (§4.1) |
 | White clumps at strong impacts | crowns as open shells (light trapped), not foam | thin-wall crowns ([water-splash.md](water-splash.md)) |
-| Only white foam, no sparkle far out | no floating bubbles | bubbles (§2) |
-| Snow cones with black holes | hard foam switch over a dark trench | soft mask, milky body (§3) |
+| Only white foam, no sparkle far out | no floating bubbles | bubbles (§4.2) |
+| Snow cones with black holes | hard foam switch over a dark trench | soft mask, milky body (§4.3) |
+
+Generic problems: `references/workflow/troubleshooting.md` (not linked from this file: a link here
+would close a reference loop).

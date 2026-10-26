@@ -20,6 +20,8 @@ instructions behind.
 - **State each rule once, in [RULES.md](../../RULES.md).** [SKILL.md](../../SKILL.md) and the references carry only the how-to
   (commands, functions, numbers) and a pointer such as "(RULES AST_03)". A rule repeated in several
   files drifts apart the first time it changes.
+- **Reference layout:** every material and effect reference follows [reference-format.md](reference-format.md)
+  (Overview, Layers and node-editor diagram, Code, Instructions and parameters, Troubleshooting).
 
 ## Before editing
 1. `git pull` in the skill folder. Other machines push too, and editing a stale copy means a
