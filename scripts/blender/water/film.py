@@ -1,4 +1,4 @@
-"""Free-falling film as a field map on the ballistic carrier (references/materials/water-free-falling-film.md §3.3-3.8).
+"""Free-falling film as a field map on the ballistic carrier (references/materials/water/water-free-falling-film.md §3.3-3.8).
 
 film_surfaces() evaluates every layer on a grid (s along the lip, d drop) and returns the front and back skins of
 one water body, the water/torn mask and the fields the fragments and foot need. Every layer is its own term with

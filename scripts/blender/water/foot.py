@@ -1,5 +1,5 @@
 """Where falling water meets a pool: impacts, crowns, foam, floating bubbles, splash
-(references/materials/water-splash.md, water-foam.md).
+(references/materials/water/water-splash.md, water-foam.md).
 
 Works in lip-local coordinates (a along the lip, o outward from the wall face) and returns world-space
 geometry as (vertices, faces) arrays; water.mesh makes the objects. Impacts come from the water itself (the

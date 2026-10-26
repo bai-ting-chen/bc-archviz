@@ -1,7 +1,7 @@
 """Weathering lab: whole-wall weathering multiplier in native shader nodes on a flat test wall (metres).
 
 Design a look layer here (renders take seconds), then install the exact node graph in the scene
-(references/materials/edge-wear.md > Runoff; references/review/validation.md > Flat-wall lab).
+(references/effects/edge-wear.md > Runoff; references/review/validation.md > Flat-wall lab).
 Factors, all multiplicative around 1 (RULES MAT_07):
   1 run-off streaks from the top: two widths, clustered, meandering, own length per streak
   2 dirt band under the top     3 damp base with an uneven edge

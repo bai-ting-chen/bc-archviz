@@ -28,4 +28,4 @@
   faded flat over ~30 mm at the border so the grid meets the untouched body; strong fine crinkle
   reads as squiggles.
 - A slight roughness (~0.05) on the dry faces gives the satin haze of cast glass.
-- Under a water film: [water-attached-film.md](water-attached-film.md) (wetted face IOR 1.14).
+- Under a water film: [water-attached-film.md](water/water-attached-film.md) (wetted face IOR 1.14).

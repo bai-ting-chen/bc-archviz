@@ -1,4 +1,4 @@
-"""Wet-wall proxy behind falling water (references/materials/wet-surfaces.md › Wet wall behind falling water).
+"""Wet-wall proxy behind falling water (references/effects/wet-surfaces.md › Wet wall behind falling water).
 
 A sheet lying on the wall face over the curtain's whole footprint, with ragged ends, runoff fingers and a splash
 band fading past both ends. A wetness mask driven by distance to this proxy marks exactly the wall the water wets,

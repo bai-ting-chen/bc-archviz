@@ -1,5 +1,5 @@
 """LuxCore material helpers: corner dust, anti-tiling, per-instance variation (luxcore.md,
-references/materials/edge-wear.md > Concave corners, references/materials/variation.md).
+references/effects/edge-wear.md > Concave corners, references/effects/variation.md).
 
 bake_dust(objs, cache_dir)    Cycles bake of a concave-corner dust mask per object into its own
                               UV layout "DustUV" (LuxCore has no AO texture). Cached PNGs.

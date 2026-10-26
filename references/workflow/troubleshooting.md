@@ -97,7 +97,7 @@ Fix: Call it before `physical_camera`. See [lighting-camera.md](../scene/lightin
 ### Light triangles hanging below an arris
 
 Cause: The leak/raycast field was evaluated after chip geometry.
-Fix: Compute the leak field on the clean shell before chip geometry. See [edge-wear.md](../materials/edge-wear.md).
+Fix: Compute the leak field on the clean shell before chip geometry. See [edge-wear.md](../effects/edge-wear.md).
 
 ### House edge crisp against a soft HDRI backplate
 
@@ -114,22 +114,22 @@ Fix: Match the frustum (pipeline.md). See [pipeline.md](../scene/pipeline.md).
 ### Whole floor/slab gets edge grime
 
 Cause: Object without the GN modifier reads `edge_dist` = 0 = "on an arris".
-Fix: Gate it (edge-wear). See [edge-wear.md](../materials/edge-wear.md).
+Fix: Gate it (edge-wear). See [edge-wear.md](../effects/edge-wear.md).
 
 ### Chips read as dark spots
 
 Cause: The fresh-break colour is taken after grime, ink or other darkening layers, so the chip inherits them.
-Fix: Derive it from the clean base, lighter and rougher, with a soft mask. See [edge-wear.md](../materials/edge-wear.md).
+Fix: Derive it from the clean base, lighter and rougher, with a soft mask. See [edge-wear.md](../effects/edge-wear.md).
 
 ### Grunge invisible, or reads as smoke
 
 Cause: Invisible: the remap extremes are rarely reached, fields are averaged or masked. Smoke or blur: isotropic, distorted cloud noise.
-Fix: Normalise by the measured SD and set the gain from the image; build weathering gravity-shaped (run-off). See [variation.md](../materials/variation.md).
+Fix: Normalise by the measured SD and set the gain from the image; build weathering gravity-shaped (run-off). See [variation.md](../effects/variation.md).
 
 ### Scan-based grunge brings bands or lines
 
 Cause: The scan itself is directional (board-formed, panels, brushing) and adds its own lines.
-Fix: Check the scan's preview; use a non-directional scan or a procedural field. See [variation.md](../materials/variation.md).
+Fix: Check the scan's preview; use a non-directional scan or a procedural field. See [variation.md](../effects/variation.md).
 
 ### Strength preview speckles on water or glass
 
@@ -159,7 +159,7 @@ Fix: Rotate/flatten the map (materials › Tiled maps). See [texture-selection.m
 ### Printed map stains repeat
 
 Cause: A tiled diffuse with distinctive stains repeats at its tile size.
-Fix: Mix the diffuse part-way toward its own mean, and add a low-frequency tone field. See [variation.md](../materials/variation.md).
+Fix: Mix the diffuse part-way toward its own mean, and add a low-frequency tone field. See [variation.md](../effects/variation.md).
 
 ### Relief vanishes on a bright wall
 
@@ -184,7 +184,7 @@ Fix: `Surface.CreateExtrusion` (pipeline). See [pipeline.md](../scene/pipeline.m
 ### Ripples look fake or stretched
 
 Cause: A shader noise bump or stretched mapping does not reproduce the sampled water geometry.
-Fix: Ocean geometry on a finer mesh, never stretch (water-surface). See [water-surface.md](../materials/water-surface.md).
+Fix: Ocean geometry on a finer mesh, never stretch (water-surface). See [water-surface.md](../materials/water/water-surface.md).
 
 ### Imported .max: trunk/twigs missing, leaves rendered as bark, bark squashed
 
@@ -199,22 +199,22 @@ Fix: The importer's stored glossiness scalar used instead of the wired glossines
 ### Grass sinks dark / lawn reads grey when wet
 
 Cause: Canopy albedo and grazing-angle wet-film reflection can suppress saturation.
-Fix: Canopy albedo is ~0.05-0.1 (softer AgX look); wet sheen at grazing - darker base ([wet-surfaces.md](../materials/wet-surfaces.md)). See [wet-surfaces.md](../materials/wet-surfaces.md).
+Fix: Canopy albedo is ~0.05-0.1 (softer AgX look); wet sheen at grazing - darker base ([wet-surfaces.md](../effects/wet-surfaces.md)). See [wet-surfaces.md](../effects/wet-surfaces.md).
 
 ### Foam reads as snow cones with black holes
 
 Cause: Spiky short boils + a hard foam switch over a dark trench.
-Fix: Rounded chop, milky subsurface whitewater, soft foam mask ([water-foam.md](../materials/water-foam.md)). See [water-foam.md](../materials/water-foam.md).
+Fix: Rounded chop, milky subsurface whitewater, soft foam mask ([water-foam.md](../materials/water/water-foam.md)). See [water-foam.md](../materials/water/water-foam.md).
 
 ### Black band at a waterline seen through glass
 
 Cause: An open water sheet may expose a dark void below troughs.
-Fix: In whitewater/trough contexts, check for an open water sheet over a void and add the scoped milky body below troughs. Clear pools keep their clear optical body; do not silently make them opaque. See [water-foam.md](../materials/water-foam.md).
+Fix: In whitewater/trough contexts, check for an open water sheet over a void and add the scoped milky body below troughs. Clear pools keep their clear optical body; do not silently make them opaque. See [water-foam.md](../materials/water/water-foam.md).
 
 ### Splash drops read as a dark band
 
 Cause: Clear drops in soft light refract the dark surroundings.
-Fix: Fewer, higher, spread ([water-splash.md](../materials/water-splash.md)). See [water-splash.md](../materials/water-splash.md).
+Fix: Fewer, higher, spread ([water-splash.md](../materials/water/water-splash.md)). See [water-splash.md](../materials/water/water-splash.md).
 
 ### Multilayer EXR seems to hold only Combined
 
@@ -226,7 +226,7 @@ Fix: Read every part (`seek_subimage`) with the bundled OpenImageIO. See [blende
 ### Submerged surfaces black under lamps
 
 Cause: Shadow rays can't pass refraction.
-Fix: MNEE with a diced top plane (caustics.md). This is a transport/tessellation diagnostic, subject to [renderer selection REN_03](../renderer/renderer-choice.md). See [caustics.md](../materials/caustics.md).
+Fix: MNEE with a diced top plane (caustics.md). This is a transport/tessellation diagnostic, subject to [renderer selection REN_03](../renderer/renderer-choice.md). See [caustics.md](../effects/caustics.md).
 
 ### LuxCore render stops after a few seconds at "100 %"
 
@@ -256,7 +256,7 @@ Fix: Route it through the compositor (luxcore.md). See [luxcore.md](../renderer/
 ### Caustics a flat glow on far surfaces / one S-shaped bright line per pattern tile
 
 Cause: Relief too steep (focal length cm) / single-frequency pattern.
-Fix: Size relief slope from receiver distance, randomise (caustics.md › Designing a refractive relief). See [caustics.md](../materials/caustics.md).
+Fix: Size relief slope from receiver distance, randomise (caustics.md › Designing a refractive relief). See [caustics.md](../effects/caustics.md).
 
 ### Cloudy blotches on smooth walls/ceiling after OIDN (LuxCore)
 
@@ -271,7 +271,7 @@ Fix: Create and validate the referenced UV layer, or correct uvindex before expo
 ### Caustics on a wall look like vertical streaks
 
 Cause: A grazing receiver view stretches the apparent caustic pattern.
-Fix: Seen at a grazing angle; judge on a face-on surface (caustics.md). See [caustics.md](../materials/caustics.md).
+Fix: Seen at a grazing angle; judge on a face-on surface (caustics.md). See [caustics.md](../effects/caustics.md).
 
 ## Final output
 

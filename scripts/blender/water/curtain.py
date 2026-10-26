@@ -1,4 +1,4 @@
-"""Ballistic carrier of a water sheet thrown off a straight lip (references/materials/water-free-falling-film.md §3.1-3.3).
+"""Ballistic carrier of a water sheet thrown off a straight lip (references/materials/water/water-free-falling-film.md §3.1-3.3).
 
 Local coordinates: s = metres along the lip from its start (0..length), d = drop below the lip (0..drop).
 World point = origin + s*along + throw(s, d)*out - d*Z. Water leaves horizontally, so every section is a

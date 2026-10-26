@@ -22,7 +22,7 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
 - Damp band at the foot of walls and columns: world Z thresholded, plus the same ragged noise so
   the top edge isn't a straight line.
 - Concave-corner grime: AO node (**outside**, not Inside) x fine noise, into the grunge
-  darkening. See [edge-wear.md](edge-wear.md) › Concave corners.
+  darkening. See [edge-wear.md](../effects/edge-wear.md) › Concave corners.
 - **Multiplying several 0..1 masks washes them out fast.** Remap the inner masks into a narrow
   high range before multiplying, or the patches disappear.
 - Fresh breaks under direct floods want their tint only *barely* above the surface; a visibly
@@ -30,7 +30,7 @@ between map and a constant, IOR 1.5, light coat, Normal Map -> Bump -> Bevel. Le
 
 - Rough, weathered concrete from a dark scanned map: `materials.concrete.retone(mat, target, tex_id)` -
   desaturate, then scale the measured mean to the target albedo (the multiply keeps pits and
-  pores). Runoff streaks and cracks: [edge-wear.md](edge-wear.md) > Runoff streaks, cracks.
+  pores). Runoff streaks and cracks: [edge-wear.md](../effects/edge-wear.md) > Runoff streaks, cracks.
 
 ### Burnished / polished white concrete (microcement, soffits)
 - Reads glossy, not matte: low roughness varied in soft clouds; the plaster relief mostly

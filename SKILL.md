@@ -46,11 +46,12 @@ Read the files for the stage you are in.
 
 ### 3. Camera, light and materials (→ GAT_03)
 - [Lighting and camera](references/scene/lighting-camera.md): HDRI, lumens/IES, camera, reference solve, fog
-- [Materials](references/materials/index.md): material families and techniques
+- [Materials](references/materials/index.md): general rules, material families (water in `materials/water/`) and
+  shared effects (`references/effects/`: edge wear, variation, wet surfaces, caustics); the index routes all three
 
 ### 4. Look rounds and controls (→ GAT_04)
 - [Renderer choice](references/renderer/renderer-choice.md): Cycles, or LuxCore for caustics
-- [Caustics](references/materials/caustics.md), [LuxCore](references/renderer/luxcore.md): when caustics are needed
+- [Caustics](references/effects/caustics.md), [LuxCore](references/renderer/luxcore.md): when caustics are needed
 - [Render settings](references/renderer/render-settings.md): quality, VRAM, denoising
 - [Validation](references/review/validation.md): PNG measurements, crops, controls, bisects
 
@@ -61,6 +62,6 @@ Read the files for the stage you are in.
 ### Skill maintenance
 - [Maintaining](references/workflow/skill-maintaining.md): skill changes, Git, review, sync
 
-Code: `scripts/blender/` for Blender; `scripts/blender/materials/` for material families;
+Code: `scripts/blender/` for Blender; `scripts/blender/materials/` for material families; `scripts/blender/water/` for water geometry;
 `scripts/controls/` for headless controls; `scripts/rhino/` for Rook geometry extraction;
 `scripts/` for host measurement, asset and maintenance tools. Invocation details live in Pipeline.

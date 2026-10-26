@@ -69,7 +69,7 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
   cannot cancel another (a summed groove erased the fin) or exceed the cap.
 - **Clamp every distance** that drives a fin or a displacement.
 - **Chips:** mostly the thin paste fin breaking off in short ragged lengths, plus small shallow
-  losses at the arris — no deep bites. Method and fresh-break colour: [edge-wear.md](edge-wear.md)
+  losses at the arris — no deep bites. Method and fresh-break colour: [edge-wear.md](../effects/edge-wear.md)
   (RULES MAT_02), sized from the shot (RULES MAT_03). On meshes already subdivided wall-wide, build
   the chip field as displacement through the adaptive dicing (edge-wear.md › Chips as displacement).
 
@@ -125,7 +125,7 @@ formwork boards are alike, so neighbours differ (RULES MAT_06):
 final view's mm per pixel: relief finer than a pixel reads only through its tone (RULES MAT_04).
 
 ### 3.5 Board tone (colour)
-- Soft per-board tone from absorbency: a per-unit key, from [variation.md](variation.md) (RULES MAT_06).
+- Soft per-board tone from absorbency: a per-unit key, from [variation.md](../effects/variation.md) (RULES MAT_06).
 - Small, and never stepping harder than the joints themselves.
 
 ### 3.6 Printed board map (fallback for distant walls)
@@ -140,12 +140,12 @@ final view's mm per pixel: relief finer than a pixel reads only through its tone
 ### 3.7 Generic layers, board-form settings
 | Layer | Reference | Board-form note |
 |---|---|---|
-| Chips | [edge-wear.md](edge-wear.md) | at board arrises, as displacement (§3.3) |
-| Dirty joints / edge grime | [edge-wear.md](edge-wear.md) | joint band rougher and darker (§3.3) |
-| Run-off streaks | [edge-wear.md](edge-wear.md) › Runoff | from each wall's own top; vertical faces only |
-| Joint leaks | [edge-wear.md](edge-wear.md) › Runoff | short drips under the horizontal joints, a pattern per joint, ending at the next joint |
-| Concave dust | [variation.md](variation.md) (RULES MAT_06) | at inside corners and wall feet |
-| Wet / dew | [wet-surfaces.md](wet-surfaces.md) | darkens and smooths all layers above |
+| Chips | [edge-wear.md](../effects/edge-wear.md) | at board arrises, as displacement (§3.3) |
+| Dirty joints / edge grime | [edge-wear.md](../effects/edge-wear.md) | joint band rougher and darker (§3.3) |
+| Run-off streaks | [edge-wear.md](../effects/edge-wear.md) › Runoff | from each wall's own top; vertical faces only |
+| Joint leaks | [edge-wear.md](../effects/edge-wear.md) › Runoff | short drips under the horizontal joints, a pattern per joint, ending at the next joint |
+| Concave dust | [variation.md](../effects/variation.md) (RULES MAT_06) | at inside corners and wall feet |
+| Wet / dew | [wet-surfaces.md](../effects/wet-surfaces.md) | darkens and smooths all layers above |
 
 ## 4. Troubleshooting (board-formed specific)
 Generic problems are in [troubleshooting.md](../workflow/troubleshooting.md). These are specific to this material:

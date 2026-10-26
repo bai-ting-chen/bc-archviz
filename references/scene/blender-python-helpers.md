@@ -125,7 +125,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `displaced_ground(name='GRAVEL', tex_id='gray_rocks', relief_m=0.12, shift_m=-0.049)` — Gravel ground with true displacement. Displacement: Scale = relief_m, Midlevel = -shift_m / relief_m.
 - `ground_material(thatch_tex, soil_tex, name='GROUND', bare=BARE, wet_gamma=None, wet_rough=0.6)` — Ground under a meadow: a dead-grass/thatch texture, soil only where the bare-soil noise (same 4D noise and W as scatter.meadow_layer_group) opens the sward. wet_gamma (e.g. 1.4): wet ground = dry^gamma (darker, more saturated) and roughness x wet_rough.
 
-## `materials.luxcore` — LuxCore material helpers: corner dust, anti-tiling, per-instance variation (luxcore.md, references/materials/edge-wear.md > Concave corners, references/materials/variation.md).
+## `materials.luxcore` — LuxCore material helpers: corner dust, anti-tiling, per-instance variation (luxcore.md, references/effects/edge-wear.md > Concave corners, references/effects/variation.md).
 
 - `dust_uv(ob, name='DustUV')` — Non-overlapping layout for a baked map, beside the tiling UVs. Smart Project is deterministic, so a cached map still matches: always call it, even when not re-baking (a missing layer makes a LuxCore mapping uvindex -1, which crashes pyluxcore).
 - `bake_dust(objs, cache_dir, rebake=False, samples=64)` — One dust mask per object into cache_dir/<object>.png (EMIT bake, GPU). Returns {name: path}.
@@ -252,12 +252,12 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `height(x, y, centre, pad_half, pad_z=-0.03, crest=1.5, fall=6.0, run=40.0)` — Python twin of landform_group without the noise terms (e.g. to set a camera's eye height).
 - `add_terrain(group, material, name='TERRAIN', collection=None)` — An empty mesh object carrying the landform modifier (the GN group makes the geometry).
 
-## `water.build` — One entry point: a free-falling water film with its foot, pool ripples, wet-wall proxy and motion blur (references/materials/water-free-falling-film.md, water-splash.md, water-foam.md, water-ripple.md, wet-surfaces.md).
+## `water.build` — One entry point: a free-falling water film with its foot, pool ripples, wet-wall proxy and motion blur (references/materials/water/water-free-falling-film.md, water-splash.md, water-foam.md, water-ripple.md, wet-surfaces.md).
 
 - `Setup` — Grid, flow and layer parameters (all with defaults).
 - `falling_film(lip, pool_z, film_mat, foam_mat=None, pool_mat=None, exr_path=None, wet_proxy=None, setup=None, collection=None, name='Water')` — Build the film, strings, drops, foot, pool bump and wet proxy for one lip; returns objects and stats.
 
-## `water.curtain` — Ballistic carrier of a water sheet thrown off a straight lip (references/materials/water-free-falling-film.md §3.1-3.3).
+## `water.curtain` — Ballistic carrier of a water sheet thrown off a straight lip (references/materials/water/water-free-falling-film.md §3.1-3.3).
 
 - `Lip` — A straight horizontal lip. along/out are horizontal unit vectors (out = away from the wall).
 - `Flow` — Launch speed and per-stream flow (§3.1-3.2). Seeds make every layer repeatable.
@@ -271,7 +271,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `carrier_grid(lip, flow, s, d)` — Mid-surface points (nd, ns, 3) and unit normals pointing away from the wall, on a grid s x d.
 - `landing(lip, flow, s)` — Landing line on the receiving surface: world points (len(s), 3).
 
-## `water.film` — Free-falling film as a field map on the ballistic carrier (references/materials/water-free-falling-film.md §3.3-3.8).
+## `water.film` — Free-falling film as a field map on the ballistic carrier (references/materials/water/water-free-falling-film.md §3.3-3.8).
 
 - `FilmParams` — Layer strengths and scales (metres, unless noted). Defaults = starting values from one courtyard-scale study.
 - `zones(p, s, v, m)` — Calm/busy multiplier in [zone_min, 1]: clustered patches 0.3-1 m, busier on thick streams.
@@ -282,7 +282,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `tear_value(p, s, v)` — High = torn: narrow across (slit_lo..slit_hi), long and finite along the stretched fall.
 - `film_surfaces(lip, flow, p, s, d)` — All layers on the grid s x d: front/back world points (nd, ns, 3), water mask, and fields for fragments/foot.
 
-## `water.foot` — Where falling water meets a pool: impacts, crowns, foam, floating bubbles, splash (references/materials/water-splash.md, water-foam.md).
+## `water.foot` — Where falling water meets a pool: impacts, crowns, foam, floating bubbles, splash (references/materials/water/water-splash.md, water-foam.md).
 
 - `FootParams` — Impact spacing, crowns, foam, floating bubbles and splash (starting values; size from the shot).
 - `impacts(lip, land_mid, land_keep, land_thick, drops, pool_z, p)` — Impact points (N, 3) on the pool surface and strengths (N,), from the film's bottom row and falling drops.
@@ -291,13 +291,13 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `bubbles(lip, pts, strength, pool_z, p)` — Floating clear domes (single or rafts), carried far out and past the ends. (V, F); use thin-wall water.
 - `splash(lip, pts, strength, pool_z, p)` — Splash drops thrown up and out from the strongest impacts: array (N, 5) = x, y, z, diameter, stretch.
 
-## `water.fragments` — Strings and drops of a torn falling film (references/materials/water-free-falling-film.md §3.7).
+## `water.fragments` — Strings and drops of a torn falling film (references/materials/water/water-free-falling-film.md §3.7).
 
 - `FragmentParams` — Densities and sizes of gap strings, gap drops and edge drops (starting values; size from the shot).
 - `edge_drops(fs, lip, p, s, d)` — Drops and ligaments shed at torn edges: array (N, 5) = x, y, z, diameter, stretch along the fall.
 - `gap_fill(fs, lip, p, s, d)` — Strings (list of (M, 4) arrays: x, y, z, radius) and drops (N, 5) inside torn cells.
 
-## `water.mesh` — Blender objects for the water fields: closed film sheet, string tubes, drop spheroids, generic (V, F) meshes, and the `velocity` attribute for motion blur (references/materials/water-free-falling-film.md §3.9).
+## `water.mesh` — Blender objects for the water fields: closed film sheet, string tubes, drop spheroids, generic (V, F) meshes, and the `velocity` attribute for motion blur (references/materials/water/water-free-falling-film.md §3.9).
 
 - `from_arrays(name, V, F, material=None, collection=None, smooth=True)` — Object from vertices (N, 3) and a face list (any polygon sizes).
 - `film_sheet(name, front, back, keep, material=None, collection=None)` — Closed water body from front/back grids (nd, ns, 3): quads fully torn (all corners outside keep) removed.
@@ -314,20 +314,20 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `clustered(x, seed, lo, hi)` — Irregular smooth noise in [-1, 1] at x metres; knot spacing uniform in [lo, hi] metres.
 - `unit(x, seed, lo, hi)` — Same noise mapped to [0, 1].
 
-## `water.pool` — Install a ripple height field as a bump on the pool's own material (references/materials/water-ripple.md §3).
+## `water.pool` — Install a ripple height field as a bump on the pool's own material (references/materials/water/water-ripple.md §3).
 
 - `save_height_exr(H, path, name='water ripple height (mm)')` — Write H (metres, [a, o]) as a float EXR in millimetres and return the loaded image datablock.
 - `install_bump(material, image, lip, o_range, a_range)` — Bump the material's Principled Normal with image (mm) mapped over lip-local o_range x a_range (metres).
 - `readback_mm(image)` — Min/max (mm) of a loaded height image: proof the field survived saving and loading.
 
-## `water.ripple` — Pool-surface height field around falling water: craters, crowns, rings, wall-parallel fronts, chop (references/materials/water-ripple.md). Pure numpy; water.pool installs it as a bump on the pool material.
+## `water.ripple` — Pool-surface height field around falling water: craters, crowns, rings, wall-parallel fronts, chop (references/materials/water/water-ripple.md). Pure numpy; water.pool installs it as a bump on the pool material.
 
 - `RippleParams` — Grid, extent and strengths of the pool ripple field (craters, chop, ring waves, line fronts).
 - `grid(lip, p)` — Lip-local axes (o, a) and 2-D arrays (O, A) of the ripple field.
 - `height_field(lip, impact_pts, strength, p)` — Height (m) on the lip-local grid: returns (o_axis, a_axis, H[a, o]) faded to zero at the borders.
 - `slope_stats(H, step)` — RMS and 99th-percentile surface slope (rad) of a height field: ripples need ~0.05-0.15 rad to read.
 
-## `water.wet` — Wet-wall proxy behind falling water (references/materials/wet-surfaces.md › Wet wall behind falling water).
+## `water.wet` — Wet-wall proxy behind falling water (references/effects/wet-surfaces.md › Wet wall behind falling water).
 
 - `WetParams` — Cell size, wall gap and splash-band shape of the wet-wall proxy.
 - `proxy(lip, pool_z, p)` — Vertices and quads of the wet proxy sheet on the wall face (world space).

@@ -1,4 +1,4 @@
-"""Strings and drops of a torn falling film (references/materials/water-free-falling-film.md §3.7).
+"""Strings and drops of a torn falling film (references/materials/water/water-free-falling-film.md §3.7).
 
 A gap is never empty: hanging strings and falling drops fill torn cells (densities per m^2 of torn area, so they
 scale with the curtain), and drops/ligaments shed from torn edges (per metre of lip, weighted by drop).

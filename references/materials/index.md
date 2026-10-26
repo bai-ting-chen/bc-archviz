@@ -10,35 +10,45 @@ Use all applicable maps at real size with physical surface ranges (MAT_01).
 - **Height:** geometry-scale relief goes to the Displacement output ([displacement.md](displacement.md)),
   surface texture to a Bump node on the Normal input.
 - **Switching off (MAT_07):** a Value node per layer that scales its deviation from 1 does it; an
-  AOV of the layer's multiplier lets you measure what reaches the image ([variation.md](variation.md)).
+  AOV of the layer's multiplier lets you measure what reaches the image ([variation.md](../effects/variation.md)).
 - **Geometry fields** measured in Geometry Nodes run before modifiers that move the mesh (RULES MAT_08).
 
-| Family or technique | Canonical helper |
+Three kinds of reference. **General rules** (this folder's root) apply to every material.
+**Materials** describe one family each; effects used only by that family live with it (water ripple,
+foam, splash in `water/`). **Effects** (`../effects/`) are layers shared by many materials.
+
+| General rules | Canonical helper |
 |---|---|
 | [Physical Ranges](physical-ranges.md) | `materials.pbr` |
 | [Texture Selection](texture-selection.md) | `materials.pbr` |
-| [Concrete](concrete.md) | `materials.concrete` |
-| [Tiles](tiles.md) | `materials.tile_surface` |
-| [Board Formed Concrete](board-formed-concrete.md) | `materials.concrete` |
-| [Ground](ground.md) | `materials.ground` |
-| [Vegetation](vegetation.md) | `materials.vegetation` |
-| [Wet Surfaces](wet-surfaces.md) | `materials.vegetation` |
+| [Scale](scale.md) | `materials.nodes` |
 | [Displacement](displacement.md) | `materials.displacement` |
-| [Wood](wood.md) | `materials.wood` |
+
+| Materials | Canonical helper |
+|---|---|
+| [Concrete](concrete.md) | `materials.concrete` |
+| [Board Formed Concrete](board-formed-concrete.md) | `materials.concrete` |
+| [Tiles](tiles.md) | `materials.tile_surface` |
 | [Stone](stone.md) | `materials.stone` |
+| [Wood](wood.md) | `materials.wood` |
 | [Metal](metal.md) | `materials.metal` |
 | [Glass](glass.md) | `materials.glass` |
-| [Caustics](caustics.md) | `gn_caustics` / `caustic_photons.py` |
 | [Fabric](fabric.md) | `materials.fabric` |
-| [Water Surface](water-surface.md) | `materials.water` |
-| [Variation](variation.md) | `materials.variation` |
-| [Scale](scale.md) | `materials.nodes` |
-| [Edge Wear](edge-wear.md) | `materials.edge_wear` |
-| [Water Free-Falling Film](water-free-falling-film.md) | `water.build.falling_film` (`water.curtain`, `water.film`, `water.fragments`) |
-| [Water Attached Film](water-attached-film.md) | none yet (raycast height field) |
-| [Water Ripple](water-ripple.md) | `water.ripple`, `water.pool` |
-| [Water Foam](water-foam.md) | `water.foot` (foam, bubbles) |
-| [Water Splash](water-splash.md) | `water.foot` (impacts, crowns, splash) |
+| [Ground](ground.md) | `materials.ground` |
+| [Vegetation](vegetation.md) | `materials.vegetation` |
+| Water: [Surface](water/water-surface.md) | `materials.water` |
+| Water: [Free-Falling Film](water/water-free-falling-film.md) | `water.build.falling_film` (`water.curtain`, `water.film`, `water.fragments`) |
+| Water: [Attached Film](water/water-attached-film.md) | none yet (raycast height field) |
+| Water: [Ripple](water/water-ripple.md) | `water.ripple`, `water.pool` |
+| Water: [Foam](water/water-foam.md) | `water.foot` (foam, bubbles) |
+| Water: [Splash](water/water-splash.md) | `water.foot` (impacts, crowns, splash) |
+
+| Effects (shared) | Canonical helper |
+|---|---|
+| [Edge Wear](../effects/edge-wear.md) | `materials.edge_wear` |
+| [Variation](../effects/variation.md) | `materials.variation` |
+| [Wet Surfaces](../effects/wet-surfaces.md) | `materials.vegetation`, `water.wet` |
+| [Caustics](../effects/caustics.md) | `gn_caustics` / `caustic_photons.py` |
 
 Shared graph/socket helpers: `materials.nodes.G` / `sock`; asset lookup and project state: `archviz`.
 Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.
@@ -59,14 +69,14 @@ Water comes in three build methods. Choose by the shot, then read the file for t
 - Simulation tools: Ocean (open-water wind waves, cannot react to objects); Dynamic Paint *Waves*
   (ripples from objects touching water, stack after Ocean); Mantaflow (built-in FLIP with spray,
   foam and bubble particles); FLIP Fluids add-on (check the edition); no shipped GN fluid solver in
-  5.2. Hybrid plunge zones: [water-splash.md](water-splash.md) › Simulated plunge zone.
+  5.2. Hybrid plunge zones: [water-splash.md](water/water-splash.md) › Simulated plunge zone.
 
 | Water | File |
 |---|---|
-| Pool, still water, wind ripples | [water-surface.md](water-surface.md) |
-| Sheet thrown off a lip, falling free | [water-free-falling-film.md](water-free-falling-film.md) |
-| Film clinging to a wall or glass; low overflow into a trench | [water-attached-film.md](water-attached-film.md) |
-| Ripples and waves from impacts; choppy plunge pools | [water-ripple.md](water-ripple.md) |
-| Foam, floating bubbles, whitewater | [water-foam.md](water-foam.md) |
-| Landing line, crowns, splash; simulated plunge zones | [water-splash.md](water-splash.md) |
-| Wet surfaces around or behind water | [wet-surfaces.md](wet-surfaces.md) |
+| Pool, still water, wind ripples | [water-surface.md](water/water-surface.md) |
+| Sheet thrown off a lip, falling free | [water-free-falling-film.md](water/water-free-falling-film.md) |
+| Film clinging to a wall or glass; low overflow into a trench | [water-attached-film.md](water/water-attached-film.md) |
+| Ripples and waves from impacts; choppy plunge pools | [water-ripple.md](water/water-ripple.md) |
+| Foam, floating bubbles, whitewater | [water-foam.md](water/water-foam.md) |
+| Landing line, crowns, splash; simulated plunge zones | [water-splash.md](water/water-splash.md) |
+| Wet surfaces around or behind water | [wet-surfaces.md](../effects/wet-surfaces.md) |

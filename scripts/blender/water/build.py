@@ -1,5 +1,5 @@
 """One entry point: a free-falling water film with its foot, pool ripples, wet-wall proxy and motion blur
-(references/materials/water-free-falling-film.md, water-splash.md, water-foam.md, water-ripple.md, wet-surfaces.md).
+(references/materials/water/water-free-falling-film.md, water-splash.md, water-foam.md, water-ripple.md, wet-surfaces.md).
 
     from water import build, curtain
     lip = curtain.Lip(origin=(x, y, z_lip), along=(1, 0, 0), out=(0, -1, 0), length=6.0, drop=3.0)

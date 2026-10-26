@@ -49,7 +49,7 @@ enough) a simulated plunge zone. Shared by [water-free-falling-film.md](water-fr
 - **Where simulation pays:** the plunge zone (splash, foam clumps, spray) in motion. Hybrid:
   simulate a short stretch (~1 m domain, 3–5 mm cells) with secondary particles (spray / foam /
   bubble), instance it along the line with random offsets and flips; keep film, crest and pool
-  procedural. Method choice: [index.md](index.md) › Water.
+  procedural. Method choice: [index.md](../index.md) › Water.
 - **Thin-sheet inlets:** compute liquid thickness before choosing a domain: δ = q / V. If δ is
   below one voxel, a fully occupied one-cell source cannot preserve both speed and discharge: a
   q-matched source slows to V′ = q / dx; a speed-matched source over-discharges by dx / δ. State the

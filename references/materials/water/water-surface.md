@@ -1,6 +1,6 @@
 # Water surface (pools, still water)
 
-The pool body and its surface. Which water file to read: [index.md](index.md) › Water. Ripples and
+The pool body and its surface. Which water file to read: [index.md](../index.md) › Water. Ripples and
 waves caused by falling water or impacts: [water-ripple.md](water-ripple.md); choppy plunge pools:
 [water-ripple.md](water-ripple.md) › Choppy pool.
 

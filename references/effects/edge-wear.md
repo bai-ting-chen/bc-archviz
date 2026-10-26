@@ -10,7 +10,7 @@ and band from the shot and judge the first render (RULES MAT_03).
 Compared on one test: Pointiness tracks mesh density and comes out blurry; AO Inside is grainy
 and expensive; Bevel-vs-shading-normal is thin and expensive. **Use GN Edge Angle → Proximity →
 `edge_dist`** — exact metres, clean, cheap and EEVEE-safe. Exception: a *faint* dirty arris on
-huge meshes that would need dicing - the shader Bevel-normal mask ([concrete.md](concrete.md)).
+huge meshes that would need dicing - the shader Bevel-normal mask ([concrete.md](../materials/concrete.md)).
 
 ## Concrete recipe
 1. `dice(obj, …)` — Rhino meshes are too coarse to carry an edge band.
@@ -114,7 +114,7 @@ air is still — floor joints and the tops of plinths — and fainter, greyer at
   hairline is invisible at room-to-street scale; what reads is a dirt-darkened crack: core
   ~5 mm, halo ~20 mm at ~5 mm/px, a shallow groove. One crack at every corner looks
   deliberate - keep a few, not a symmetric set (an opposite pair reads as one line).
-- **Cracks in glazed tiles:** a per-tile Voronoi network, not hand-placed lines — [materials/tiles.md](tiles.md)
+- **Cracks in glazed tiles:** a per-tile Voronoi network, not hand-placed lines — [materials/tiles.md](../materials/tiles.md)
 
 ## Proving it
 Each layer gets its own control (RULES VAL_02): one that moves the frame only *by* the noise floor

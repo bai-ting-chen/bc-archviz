@@ -6,7 +6,7 @@ of the wall to a pool. Near the lip it is a glassy sheet; as it falls it speeds 
 stretches, meanders sideways, tears into braids, and the lowest band breaks into strings and drops.
 For a still, build it as a **2D field map in the sheet's own coordinates on an analytic carrier
 surface**: a fast, physics-informed approximation, not a simulation (method choice:
-[index.md](index.md) › Water). Water that clings to the wall instead: [water-attached-film.md](water-attached-film.md).
+[index.md](../index.md) › Water). Water that clings to the wall instead: [water-attached-film.md](water-attached-film.md).
 
 ## Code
 `scripts/blender/water/`: `build.falling_film(lip, pool_z, film_mat, …)` builds every layer below from a
@@ -215,11 +215,11 @@ values in the study notes (RULES GOV_01).
 | Impact rings, waves, chop | [water-ripple.md](water-ripple.md) | sources = the film's own landing row, weighted by thickness |
 | Foam, floating bubbles | [water-foam.md](water-foam.md) | clustered at impacts, drifting past both ends of the fall |
 | Crowns, splash, landing line | [water-splash.md](water-splash.md) | landing line from §3.1 and the bottom row of §3.6 |
-| Wet wall behind the water | [wet-surfaces.md](wet-surfaces.md) › Wet wall behind falling water | the wall behind the whole footprint, not the film's distance |
+| Wet wall behind the water | [wet-surfaces.md](../../effects/wet-surfaces.md) › Wet wall behind falling water | the wall behind the whole footprint, not the film's distance |
 | Pool body | [water-surface.md](water-surface.md) | clear pool, absorption, Ocean |
 
 ## 4. Troubleshooting (falling-film specific)
-Generic problems are in [troubleshooting.md](../workflow/troubleshooting.md). These are specific to this film:
+Generic problems are in [troubleshooting.md](../../workflow/troubleshooting.md). These are specific to this film:
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -242,6 +242,6 @@ Generic problems are in [troubleshooting.md](../workflow/troubleshooting.md). Th
 | Silky, loses transparency | shutter too long | shorter shutter (§3.9) |
 | Coarse, hard gap map | block cells, binary mask | contour-level fields, rounded rims (§3.6) |
 
-Generic problems that often show up with this film, in [troubleshooting.md](../workflow/troubleshooting.md):
+Generic problems that often show up with this film, in [troubleshooting.md](../../workflow/troubleshooting.md):
 - Splash drops read as a dark band;
 - Foam reads as snow cones with black holes.

@@ -13,7 +13,7 @@
 - **Large tiles** `materials.stone.stone_tiles()`: Brick Texture offset 0 on BoxUV, per-tile tone, cloud
   noise + specks, recessed joints (`bump.invert = True`); floors glossier than walls, with a coat.
 - **Slab floors modelled as separate pieces** (one object per slab or band): per-object random
-  per-unit variation by object (RULES MAT_06; ranges in [variation](variation.md)), so neighbours
+  per-unit variation by object (RULES MAT_06; ranges in [variation](../effects/variation.md)), so neighbours
   differ as laid stone does. Joints as a material hairline (≤ 1 mm, slightly darker), not a gap.
 - **Honed stone** (lobby limestone/marble) shows soft, blurred reflections of walls and people:
   Cycles roughness ~0.3–0.5 modulated by the map. A roughness exported from another renderer

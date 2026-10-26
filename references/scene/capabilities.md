@@ -18,10 +18,10 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Displacement | Displacement + adaptive subdivision | solid, fast |
 | Tiling by real height | `height_span_uv` + REPEAT | solid |
 | Caustics | GN wavefront (pools); glassware → LuxCore ([RULES REN_03](../renderer/renderer-choice.md)), `caustic_photons.py` as the Cycles-only fallback | solid |
-| Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH, GPU + CPU light tracing (luxcore.md), energy-checked ([caustics.md](../materials/caustics.md)) | solid |
+| Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH, GPU + CPU light tracing (luxcore.md), energy-checked ([caustics.md](../effects/caustics.md)) | solid |
 | Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh (materials › Glass block) | solid |
 | Baked procedural textures for LuxCore (terrazzo, smooth concrete, sand mortar) | numpy seamless colour + roughness maps | test |
-| Tangled glass-block caustics across units | long-wave relief at higher slope (Wave/Iceberg mix), sized by a thin-lens sim ([caustics.md](../materials/caustics.md) › Designing a refractive relief) | test |
+| Tangled glass-block caustics across units | long-wave relief at higher slope (Wave/Iceberg mix), sized by a thin-lens sim ([caustics.md](../effects/caustics.md) › Designing a refractive relief) | test |
 | Clean caustic renders without OIDN blotches | LuxCore radiance clamping (camera paths only) | solid, measured |
 | Concave-corner dust | AO band × noise × height; Cycles live or baked for LuxCore (`materials.luxcore.bake_dust`) | test |
 | Anti-tiling | LuxCore Randomized Tiling (native); Cycles: noise-mixed lookups / hex tiling built from nodes | LuxCore test, Cycles untested |
@@ -48,12 +48,12 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Runoff / leak streaks below drip edges | GN raycast drip-edge field + streak shader (`materials.edge_wear.add_leak_field`, `add_runoff`) | solid, control-proved |
 | Concrete cracks | corner shrinkage cracks + patchy Voronoi map-cracking (`materials.edge_wear.add_cracks`) | solid, control-proved |
 | Glazing distortion | roller wave + IGU pillowing bump (`materials.glass.glass_distortion`) | solid |
-| Water film down a wall / textured glass | height field from a raycast of the surface + Nusselt film, ropes, roll waves; glass/water interface IOR 1.14 ([water-attached-film.md](../materials/water-attached-film.md)) | test (one study, no control yet) |
-| Overflow edge into a trench | rim strip: draw-down → roll over the crest → clinging film down the wall ([water-attached-film.md](../materials/water-attached-film.md)) | test |
-| Whitewater / plunge foam | opaque milky subsurface surface + soft marbled foam + milky body below + splash drops ([water-foam.md](../materials/water-foam.md)) | test |
-| Choppy pool hiding the floor | shared geometry wave field (64 cosines + gust envelope) + dark floor + absorption ([water-ripple.md](../materials/water-ripple.md)) | test |
-| Free-falling curtain off a lip | 2D field map on a ballistic carrier: stream flow, fall-time stretch, meander, tears into braids, gap strings/drops, dissolving edges, velocity motion blur ([water-free-falling-film.md](../materials/water-free-falling-film.md)) | used (one study, user-approved); `water.build.falling_film`, control `falling_film_check.py` |
-| Foot of a fall: impacts, crowns, foam, bubbles, pool waves | impacts from the film's landing row; thin-wall crowns; drifting foam and bubbles; pool bump from a float height map ([water-splash.md](../materials/water-splash.md), [water-foam.md](../materials/water-foam.md), [water-ripple.md](../materials/water-ripple.md)) | used (one study, user-approved); `water.foot`, `water.ripple`, `water.pool` |
-| Fluid simulation (splash, plunge) | FLIP source/Demo bakes and hybrid slice integration tested; sub-voxel inlet flux/momentum and pool boundaries require validation ([water-splash.md](../materials/water-splash.md)); Mantaflow alternative | research; no matched-physics superiority established |
+| Water film down a wall / textured glass | height field from a raycast of the surface + Nusselt film, ropes, roll waves; glass/water interface IOR 1.14 ([water-attached-film.md](../materials/water/water-attached-film.md)) | test (one study, no control yet) |
+| Overflow edge into a trench | rim strip: draw-down → roll over the crest → clinging film down the wall ([water-attached-film.md](../materials/water/water-attached-film.md)) | test |
+| Whitewater / plunge foam | opaque milky subsurface surface + soft marbled foam + milky body below + splash drops ([water-foam.md](../materials/water/water-foam.md)) | test |
+| Choppy pool hiding the floor | shared geometry wave field (64 cosines + gust envelope) + dark floor + absorption ([water-ripple.md](../materials/water/water-ripple.md)) | test |
+| Free-falling curtain off a lip | 2D field map on a ballistic carrier: stream flow, fall-time stretch, meander, tears into braids, gap strings/drops, dissolving edges, velocity motion blur ([water-free-falling-film.md](../materials/water/water-free-falling-film.md)) | used (one study, user-approved); `water.build.falling_film`, control `falling_film_check.py` |
+| Foot of a fall: impacts, crowns, foam, bubbles, pool waves | impacts from the film's landing row; thin-wall crowns; drifting foam and bubbles; pool bump from a float height map ([water-splash.md](../materials/water/water-splash.md), [water-foam.md](../materials/water/water-foam.md), [water-ripple.md](../materials/water/water-ripple.md)) | used (one study, user-approved); `water.foot`, `water.ripple`, `water.pool` |
+| Fluid simulation (splash, plunge) | FLIP source/Demo bakes and hybrid slice integration tested; sub-voxel inlet flux/momentum and pool boundaries require validation ([water-splash.md](../materials/water/water-splash.md)); Mantaflow alternative | research; no matched-physics superiority established |
 | Soft backplate vs crisp model | measured edge widths + slight DOF in front of the subject | solid |
 | No-limit Cycles final in the UI | `finals.py` (untiled, savers, OIDN from passes) | solid |

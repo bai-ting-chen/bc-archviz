@@ -1,5 +1,5 @@
 """Blender objects for the water fields: closed film sheet, string tubes, drop spheroids, generic (V, F) meshes,
-and the `velocity` attribute for motion blur (references/materials/water-free-falling-film.md §3.9).
+and the `velocity` attribute for motion blur (references/materials/water/water-free-falling-film.md §3.9).
 """
 import bpy
 import numpy as np

@@ -152,7 +152,7 @@ island = V-Ray's UVW Randomizer). Build: `bpy.data.node_groups.new(n, "luxcore_m
   (EXCEPTION_ACCESS_VIOLATION in `pyluxcore.pyd`, no Python error). Build every UV layer the
   tree references on every run, even when the map itself is cached.
 - No AO texture and no usable dirt texture in LuxCore (Pointiness has no width control and cannot
-  see where two objects meet): bake corner dust with Cycles ([edge-wear.md](../materials/edge-wear.md) › Concave corners).
+  see where two objects meet): bake corner dust with Cycles ([edge-wear.md](../effects/edge-wear.md) › Concave corners).
 
 ## Output
 - The OIDN result (`sc.luxcore.denoiser.enabled = True`) is a **separate `DENOISED` pass**; a

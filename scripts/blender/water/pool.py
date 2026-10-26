@@ -1,4 +1,4 @@
-"""Install a ripple height field as a bump on the pool's own material (references/materials/water-ripple.md §3).
+"""Install a ripple height field as a bump on the pool's own material (references/materials/water/water-ripple.md §3).
 
 The height is written to a float EXR (millimetres) and loaded from that file, so it survives a reload; world
 positions map to the field through the lip's axes, so any wall orientation works. Only up-facing faces are bumped.

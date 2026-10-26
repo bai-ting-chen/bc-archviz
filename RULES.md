@@ -104,7 +104,7 @@ Read: [physical-ranges.md](references/materials/physical-ranges.md)
 
 **MAT_02 — Authoring Edge Damage**  
 Rule: Keep dirty-edge shading distinct from geometric chips.  
-Read: [edge-wear.md](references/materials/edge-wear.md)
+Read: [edge-wear.md](references/effects/edge-wear.md)
 
 **MAT_03 — Sizing Visible Detail**  
 Rule: Size from the final shot; pair every close-up with a native final-view crop.  
@@ -116,11 +116,11 @@ Read: [scale.md](references/materials/scale.md)
 
 **MAT_05 — Authoring Natural Surface Marks**  
 Rule: Make marks patchy, able to disappear, with physically shaped extents.  
-Read: [variation.md](references/materials/variation.md)
+Read: [variation.md](references/effects/variation.md)
 
 **MAT_06 — Using Repeated Units Or Tiled Maps**  
 Rule: Add per-unit variation, hide repeats and fade concave-joint dust outward from corners in the first pass.  
-Read: [variation.md](references/materials/variation.md)
+Read: [variation.md](references/effects/variation.md)
 
 **MAT_07 — Composing Material Layers**  
 Rule: Build each look layer as its own term — colour and roughness as multipliers around 1, height as its own displacement or bump term — so each can be switched off for a control.  
@@ -128,7 +128,7 @@ Read: [index.md](references/materials/index.md)
 
 **MAT_08 — Ordering Geometry Fields**  
 Rule: Measure geometry fields (edge, leak, proximity distances) on the clean mesh, before any modifier that moves or cracks it.  
-Read: [edge-wear.md](references/materials/edge-wear.md)
+Read: [edge-wear.md](references/effects/edge-wear.md)
 
 ### Validation
 
