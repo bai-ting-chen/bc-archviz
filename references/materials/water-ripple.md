@@ -44,8 +44,8 @@ drops through the gaps land weaker), so the line is ragged and heavy streams hit
 
 ## 3. Bump on the pool material
 - Write the height (mm) into a **float image**, save it as an EXR in the study library, and point
-  the image datablock at that file (a generated image is lost on reload; packing writes 8-bit):
-  blender-api-traps › Render / images.
+  the image datablock at that file (a generated image is lost on reload): blender-api-traps ›
+  Render / images.
 - Pool material: Geometry Position → map world XY to UV over the field → Image Texture (CLIP
   outside, Cubic, Non-Color) × (True Normal z > 0.5, top faces only) → Bump (Distance 0.001 for
   mm) → Principled Normal.
@@ -68,7 +68,7 @@ drops through the gaps land weaker), so the line is ragged and heavy streams hit
 | Symptom | Cause | Fix |
 |---|---|---|
 | Lighter rectangle on the pool | ripples on a separate skin over the pool | bump on the pool material (§1) |
-| Bump has no effect | image wiped or 8-bit (see api-traps); or slope ~1° | colour space before pixels, float EXR; slopes 3–8° (§1, §3) |
+| Bump has no effect | image wiped (colour space set after the pixels, see api-traps); or slope ~1° | colour space before pixels, read min/max back; slopes 3–8° (§1, §3) |
 | Cm-high bumps at strong impacts | overlapping impacts summed | soft cap (§2) |
 | Waves stop dead at the field edge | no border fade | fade to zero at the borders (§2) |
 | Cross-hatched chop | too few cosines | ~64 (§4) |

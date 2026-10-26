@@ -47,6 +47,9 @@ used here with falling-film settings.
   (RULES MAT_04). A close-up reference shows detail that cannot exist at that scale.
 
 ## 3. Instructions and parameters, per layer
+Table values are starting points that held at one courtyard-scale view (~4 × 10 mm per pixel);
+size them from the shot (RULES MAT_03), judge in a strip lab (validation.md), and record the final
+values in the study notes (RULES GOV_01).
 
 ### 3.1 Ballistic carrier (geometry)
 - Water leaves the lip horizontally, so each section is a parabola with its vertex at the lip:
@@ -91,12 +94,13 @@ used here with falling-film settings.
 - A falling sheet stretches along the flow by U(d)/U(d₀): features born near the lip become long
   and gentle lower down. Evaluate every along-fall pattern in an effective coordinate
   v_eff(d) = ∫ (U(d_ref)/U(s))^k ds, keeping the top band unchanged below d_ref.
-- k = 1 is the physical stretch; k = 0.5 read better (less stretched, still visibly calmer low).
+- k = 1 is the physical stretch; lower k stretches less. Render two values side by side and let the
+  look decide.
 - Without it, ridges and valleys flip at one fixed rate from lip to foot (a rigid rhythm).
 
 | Parameter | Value |
 |---|---|
-| k | 0.5 (1 = physical) |
+| k | start at 0.5 (1 = physical) |
 | d_ref (unchanged top band) | ~0.15 m |
 
 ### 3.4 Fine ribbons (relief)
@@ -115,7 +119,7 @@ used here with falling-film settings.
 
 | Parameter | Value |
 |---|---|
-| Fine relief strength | ~0.4 of a "full" torn-ribbon field; slope p99 ≲ 0.3 rad |
+| Fine relief strength | measured as slope: p99 ≲ 0.3 rad at full zone strength |
 | Calm/busy zone range | 0.4–1, patches 0.3–1 m |
 | Roll-wave arcs | ~0.6 mm, λ ~3.5 and ~8 cm, ±35–45 % irregular, growing ~1×/m of drop |
 
@@ -128,12 +132,14 @@ used here with falling-film settings.
   sheet (Δy′ < −1). A fold-free version (neighbours in step over 10–30 cm) reads as a washboard and
   rows of bright dots. Use the independent meander, and **tear the sheet where it is stretched**
   (§3.6): the remaining folds are water pushed together = braids crossing. Measure the folded
-  fraction of water quads and render-check the folds for artifacts.
+  fraction of water quads (Δy′ ≤ −1 where both sides are water) and render-check the folds at the
+  final view; if they show as dark blotches or crumpling, lower the amplitude or tear more of the
+  stretched sheet.
 
 | Parameter | Value |
 |---|---|
 | Meander amplitude A | ~14 mm (×0.4–1.7 down the fall) |
-| Folded water quads (accepted) | ~15 %, no visible artifacts |
+| Folded water quads | measure and report; acceptable only if the final view shows no artifacts |
 
 ### 3.6 Tears and braids (mask + rims)
 - **Where:** a sheet pulled apart thins and tears; pushed together it piles into braids. Tear where

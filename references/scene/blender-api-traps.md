@@ -69,8 +69,8 @@
   its default 10 (daylight), not at 0.
 - A **generated float image** (`images.new(..., float_buffer=True)`): set
   `colorspace_settings.name` **before** writing pixels — changing it afterwards regenerates the
-  buffer and wipes it to zeros. `image.pack()` on a generated image stores an 8-bit PNG (mm-scale
-  heights become 0); save a float EXR and point the datablock at the file instead.
+  buffer and wipes it to zeros. A generated image is not saved with the .blend: save it as a float
+  EXR (or pack it) and read min/max back after a reload.
 - **Velocity motion blur:** Cycles reads a mesh's `velocity` POINT FLOAT_VECTOR attribute in
   **m/s** (with the object's deformation motion blur on); `motion_blur_shutter` is in frames, so the
   streak = speed × shutter / fps. Verified with a known speed and shutter.
