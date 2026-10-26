@@ -29,10 +29,9 @@ instructions behind.
    `git config user.name bai-ting-chen`, `git config user.email baitingchen.arch@gmail.com`.
 
 ## Receiving-machine actions
-With each push, add only outstanding receiver actions to [MIGRATE.md](../../MIGRATE.md), using Check/Do guards when needed.
-Pull-only delivery needs no dated changelog or mandatory reread notice. Check existing pending actions before syncing;
-each clone tracks its own unfinished setup. Remove each action when completed and delete the file only when no action
-remains. Never attach automatic commit/push or self-deletion commands. [SKILL.md](../../SKILL.md) retains its conditional pointer.
+If a push needs another machine to act (an install, a renamed path, a moved import, a memory or project-doc edit),
+say so in the commit message: what to check and what to do. No separate file. Before pushing, check
+`git log origin/main..HEAD` for actions already written there. Never attach automatic commit/push or self-deletion commands.
 
 ## Helpers changed?
 Run `python scripts/workflow/helper_index.py` (MCP venv python) so [blender-python-helpers.md](../scene/blender-python-helpers.md) matches the

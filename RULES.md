@@ -11,7 +11,7 @@ Rule: Publish only generic skill code and method; keep data specific to each pro
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 **GOV_03 — Synchronizing This Skill**  
-Rule: Pull before editing, use the per-clone identity, and leave outstanding receiving-machine actions with pushes.  
+Rule: Pull before editing, use the per-clone identity, and state any receiving-machine action in the commit message.  
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 **GOV_04 — Extending Code Or Documents**  

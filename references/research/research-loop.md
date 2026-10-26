@@ -30,7 +30,7 @@ A study built from a scripted test scene (no Rhino) has no model gate.
 8. **Next question** — back to 1. Keep a short log `STUDY/_wip/loop_log.md` (time, question,
    verdict, files) so the user and the other model can catch up in one read.
 9. **Skill changes** (skill-maintaining.md): pull first, one topic per reference, [capabilities.md](../scene/capabilities.md) row
-   with its state, [MIGRATE.md](../../MIGRATE.md) action if a receiving machine must act, commit as `bai-ting-chen`, push. Review per RULES AGT_01; with
+   with its state, a receiving-machine action in the commit message if one is needed, commit as `bai-ting-chen`, push. Review per RULES AGT_01; with
    one model available run the review in a fresh session of that model and say it was same-model.
 
 ## Decisions you make alone

@@ -28,8 +28,6 @@ def main():
         if md.startswith('.git'):
             continue
         body = open(md, encoding='utf-8').read()
-        if md == 'MIGRATE.md':   # receiving-machine notes name the old paths on purpose
-            continue
         base = os.path.dirname(md)
         for m in re.finditer(r'\]\(([^)#\s]+)(#[^)]*)?\)', body):
             target = m.group(1)
