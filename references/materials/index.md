@@ -39,7 +39,7 @@ foam, splash in `water/`). **Effects** (`../effects/`) are layers shared by many
 | Water: [Surface](water/water-surface.md) | `materials.water` |
 | Water: [Free-Falling Film](water/water-free-falling-film.md) | `water.build.falling_film` (`water.curtain`, `water.film`, `water.fragments`) |
 | Water: [Attached Film](water/water-attached-film.md) | none yet (raycast height field) |
-| Water: [Ripple](water/water-ripple.md) | `water.ripple`, `water.pool` |
+| Water: [Ripple](water/water-ripple.md) | `water.ripple`, `water.shading` |
 | Water: [Foam](water/water-foam.md) | `water.foot` (foam, bubbles) |
 | Water: [Splash](water/water-splash.md) | `water.foot` (impacts, crowns, splash) |
 

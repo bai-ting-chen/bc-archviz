@@ -23,23 +23,33 @@ class WetParams:
     seed: int = 2400
 
 
-def proxy(lip, pool_z, p):
-    """Vertices and quads of the wet proxy sheet on the wall face (world space)."""
-    L = lip.length; top = lip.origin[2]
-    s = np.arange(-p.margin, L + p.margin, p.cell); z = np.arange(pool_z - .01, top + p.cell, p.cell)
+def wet_mask(lip, pool_z, p, s, z):
+    """True on the wall where it is wet: behind the curtain (ragged ends, runoff fingers) and a splash band."""
+    length, top = lip.length, lip.origin[2]
     S, Z = np.meshgrid(s, z)
-    reach = .05 + .25 * noise.unit(z, p.seed + 3, .05, .30)
-    near_end = np.clip(1.2 - np.abs(np.minimum(s, L - s)) / .35, 0, 1)
+    reach = .05 + .25 * noise.unit(z, p.seed + 3, .05, .30)           # wet edge 5-30 cm past each end, by height
+    near_end = np.clip(1.2 - np.abs(np.minimum(s, length - s)) / .35, 0, 1)
     fingers = (noise.clustered(s, p.seed + 4, .02, .07) > .55) * near_end
     finger_len = (top - pool_z) * (.2 + .6 * noise.unit(s, p.seed + 5, .03, .12))
-    behind = (S >= -reach[:, None]) & (S <= L + reach[:, None])
+    behind = (S >= -reach[:, None]) & (S <= length + reach[:, None])
     behind |= (fingers[None, :] > 0) & (top - Z < (finger_len * fingers)[None, :])
     band = p.band_lo + (p.band_hi - p.band_lo) * noise.unit(s, p.seed, .08, .35)
-    band = band * np.exp(-np.maximum(0, np.maximum(-s, s - L)) / p.beyond)
-    keep = behind | ((Z - pool_z) < band[None, :])
-    nr, nc = keep.shape
-    V = lip.world(S.ravel(), np.full(S.size, p.gap), Z.ravel())
-    a = (np.arange(nr - 1)[:, None] * nc + np.arange(nc - 1)[None, :]).ravel()
-    q = np.c_[a, a + 1, a + nc + 1, a + nc]; q = q[keep.ravel()[q].all(axis=1)]
-    used = np.unique(q); remap = -np.ones(len(V), int); remap[used] = np.arange(len(used))
-    return V[used], remap[q]
+    band = band * np.exp(-np.maximum(0, np.maximum(-s, s - length)) / p.beyond)   # fades past both ends
+    return behind | ((Z - pool_z) < band[None, :])
+
+
+def proxy(lip, pool_z, p):
+    """Vertices (world space) and quads of the wet proxy sheet lying on the wall face."""
+    s = np.arange(-p.margin, lip.length + p.margin, p.cell)
+    z = np.arange(pool_z - .01, lip.origin[2] + p.cell, p.cell)
+    keep = wet_mask(lip, pool_z, p, s, z)
+    S, Z = np.meshgrid(s, z)
+    verts = lip.world(S.ravel(), np.full(S.size, p.gap), Z.ravel())
+    n_rows, n_cols = keep.shape
+    first = (np.arange(n_rows - 1)[:, None] * n_cols + np.arange(n_cols - 1)[None, :]).ravel()
+    quads = np.c_[first, first + 1, first + n_cols + 1, first + n_cols]
+    quads = quads[keep.ravel()[quads].all(axis=1)]
+    used = np.unique(quads)
+    remap = -np.ones(len(verts), int)
+    remap[used] = np.arange(len(used))
+    return verts[used], remap[quads]

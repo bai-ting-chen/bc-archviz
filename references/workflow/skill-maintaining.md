@@ -119,3 +119,14 @@ in archviz, and one canonical implementation per shared helper. Functions do one
 arguments and have a one-line docstring, with no hidden global state. Split a module that gathers unrelated
 jobs or requires reading the whole file to change one part. Extend by focused functions or modules;
 keep one topic per reference and link to shared procedure instead of repeating it.
+
+**Readable code.** The user reviews references, not code, so code must explain itself:
+- one statement per line; names that say the role or unit (`throw`, `fall_speed`, `s` along a lip, `o` outward),
+  one name per quantity across a package;
+- a comment on every constant whose meaning is not obvious (`# m`, `# share of impacts`, why a cap exists);
+- long functions split into named steps; section comments in modules with several layers;
+- geometry, materials and motion in separate modules; parameters in a dataclass with a docstring and units.
+
+**Refactoring proof.** Before tidying or restructuring, save the control's numeric output as a baseline; after,
+the same control must reproduce it exactly (and an image diff at noise level). A difference means the
+refactor changed behaviour: find it, do not accept it.
