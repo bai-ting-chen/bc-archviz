@@ -3,8 +3,8 @@
 Tools: yt-dlp (+ Deno, FFmpeg) via winget, in `%LOCALAPPDATA%\Microsoft\WinGet\Links\`. Config
 `%APPDATA%\yt-dlp\config.txt` (`--js-runtimes`, `--ffmpeg-location`) needs forward slashes, quoted.
 
-    python scripts/yt_learn.py search "<query>" --n 8
-    python scripts/yt_learn.py <id> <study>/_wip/video [--frames --max-height 1080 --every 8]
+    python scripts/research/yt_learn.py search "<query>" --n 8
+    python scripts/research/yt_learn.py <id> <study>/_wip/video [--frames --max-height 1080 --every 8]
 
 Output `<dir>/<id>/`: `info.json`, `transcript.txt` (`[mm:ss]`), `frames/` (only with `--frames`;
 the video is deleted). Prefer captions-only (YouTube terms discourage downloads). Outputs go in

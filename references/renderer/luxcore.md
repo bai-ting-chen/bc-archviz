@@ -136,18 +136,18 @@ Setting `use_cycles_nodes` from a script logs a harmless traceback (it tries to 
 editor); the value still applies.
 - **Per-instance variation converts:** Object Info › Random → `objectidnormalized`, and every
   instance of a collection gets its own ID automatically (do not set a manual LuxCore object ID
-  on the source meshes). `materials.luxcore.glass_instance_tint()`.
+  on the source meshes). `renderer.luxcore.luxcore.glass_instance_tint()`.
 
-## Native LuxCore materials (`scripts/blender/materials/luxcore.py`)
+## Native LuxCore materials (`scripts/blender/renderer/luxcore/luxcore.py`)
 Needed when the converter cannot express it — notably **Image › Randomized Tiling**
 (histogram-preserving blending after Burley: removes visible tile repeat; only when Wrap =
 Repeat) and **2D Mapping › Randomized UV** (random rotation/scale/offset per object ID or mesh
-island = V-Ray's UVW Randomizer). Build: `bpy.data.node_groups.new(n, "luxcore_material_nodes")`,
+island). Build: `bpy.data.node_groups.new(n, "luxcore_material_nodes")`,
 `mat.luxcore.node_tree = tree; mat.luxcore.use_cycles_nodes = False`; nodes
 `LuxCoreNodeMatOutput`, `LuxCoreNodeMatDisney`, `LuxCoreNodeTexImagemap` (`gamma` 2.2 colour /
 1.0 data, `randomized_tiling`), `LuxCoreNodeTexMapping2D` (`uvindex` = the mesh's UV layer index),
 `LuxCoreNodeTexColorMix` (`mode` "scale"/"mix"), `LuxCoreNodeTexSplitFloat3`.
-`materials.luxcore.lux_textured(name, folder, mesh, dust_png)` does it from a map folder.
+`renderer.luxcore.luxcore.lux_textured(name, folder, mesh, dust_png)` does it from a map folder.
 - **A `uvindex` that points at a missing UV layer (-1) crashes pyluxcore** at export
   (EXCEPTION_ACCESS_VIOLATION in `pyluxcore.pyd`, no Python error). Build every UV layer the
   tree references on every run, even when the map itself is cached.
@@ -173,7 +173,7 @@ Mechanics: [pipeline.md](../scene/pipeline.md) › *Final render in the open UI*
   compositor, so the composited Render Result is the raw image.** An accidental click there ends
   a no-limit final; warn the user.
 - So the save handler writes a **multilayer EXR of all passes** (api-traps › multilayer) and
-  builds the finals from its `DENOISED` layer with `scripts/blender/from_passes.py` — never from
+  builds the finals from its `DENOISED` layer with `scripts/blender/renderer/finals/from_passes.py` — never from
   the composite. Check the result (grain on a smooth wall = raw saved by mistake).
 - A cancelled LuxCore session cannot be resumed; the time spent is in the passes file only.
 - The live view refreshes in an Image Editor on `Render Result`; the first light-tracing passes

@@ -1,8 +1,8 @@
 # 3ds Max (.max) assets → Blender
 
-Vendor libraries (vegetation, furniture, props) often ship only as `.max` with V-Ray or Corona
+Vendor libraries (vegetation, furniture, props) often ship only as `.max` with vendor
 materials. Blender reads them without 3ds Max through the **Import Autodesk MAX** extension plus
-the repair pass in `scripts/blender/max_import.py`. Proved on four vegetation models of three
+the repair pass in `scripts/blender/scene/io/max_import.py`. Proved on four vegetation models of three
 genera, 25–320 MB, 46k–971k faces; the checks below must pass on every new model.
 
 ## Install
@@ -12,17 +12,16 @@ genera, 25–320 MB, 46k–971k faces; the checks below must pass on every new m
   `blender -b -c extension install-file -r user_default --enable <zip>` and delete the zip.
   It lives in Blender's extension folder, never in a project (RULES AST_04).
 - `--factory-startup` turns extensions off: `max_import.load` enables it in the script.
-- Reads Editable Mesh/Poly, primitives, VRayMtl, VRay2SidedMtl, Corona, Physical, Multi/Sub.
-  Not: V-Ray proxies (`.vrmesh`), Forest Pack / RailClone scatter, GrowFX, modifier stacks.
+- Reads Editable Mesh/Poly, primitives, Corona, Physical and Multi/Sub materials.
+  Not: Forest Pack / RailClone scatter, GrowFX, modifier stacks.
 
 ## Workflow
 ```python
 import max_import
 objs, report = max_import.load(path, use_image_search=False, use_collection=True)
 t = max_import.tidy(objs, unit_scale=0.01)        # Max system units: check the height is plausible
-mats = max_import.rebuild_materials(objs, maps_dir)
 ```
-Then light, camera and render as any scene. `transparent_max_bounces` 64 for stacked alpha
+Rebuild vendor materials by hand in Blender, then light, camera and render as any scene. `transparent_max_bounces` 64 for stacked alpha
 cards (foliage).
 
 ## What the importer gets wrong (repaired by `load`)
@@ -45,11 +44,7 @@ cards (foliage).
    importer makes its first layer from whichever channel comes first. Render UV = channel 1.
 
 ## Vendor scene files (grass / plant volumes)
-- Some volumes ship models only inside V-Ray scenes (Forest Pack sources): `load` the scene,
-  keep the objects by name pattern, drop the empty Forest Pack templates.
 - **Units differ per volume** (one in mm, another in cm): check a known plant's height.
-- VRay2Sided: the **back** slot often carries the bitmap name and the front none; `tidy()` drops
-  the unused back slots - read the maps first with `max_import.slot_maps(objs, maps_dir)`.
 - Several species in one scene can share material names: the importer's names then cannot say
   which bitmap is whose - leave such species out rather than guess.
 - Stems without a map come in grey 0.5: colour them from the clump's leaf-map linear mean.
@@ -67,18 +62,12 @@ cards (foliage).
 - Silhouette and branching against the vendor thumbnail; close-ups at native resolution (RULES VAL_01).
 
 ## Materials
-The file's bitmap paths point at the vendor's machine; the materials are rebuilt in Blender
-anyway (RULES PIP_01). `rebuild_materials` finds the maps by the diffuse bitmap's stem in the
-material name (`<max name>_<stem>_albedo` → `<stem>_{albedo,opacity,tran,glossiness,normal}`,
-common suffix aliases accepted) and logs every fallback.
-- **A wired V-Ray map overrides the scalar stored next to it.** The importer carries only the
-  scalar (e.g. reflection glossiness 0.65). A needle card at roughness 0.35 glinted white at
-  grazing sun; its glossiness map (0.136 in the needles → roughness ≥ 0.86) removes the
-  glints and keeps the sheen (control: specular off vs map, same seed).
+The file's bitmap paths point at the vendor's machine. Rebuild vendor materials by hand in
+Blender from the supplied maps (RULES PIP_01); verify map assignments and report missing maps.
 - Glossiness → roughness = 1 − gloss (Non-Color). Roughness maps wire directly.
 - Leaf cards: Principled (albedo, roughness, normal, IOR 1.6) **+** Translucent (transmission
   map, else albedo), cut by the opacity map through Mix with Transparent. Green leaves reflect
-  and transmit only ~0.1 each ([vegetation.md](../materials/vegetation.md)), so Add stays energy-conserving;
+  and transmit only ~0.1 each ([vegetation.md](../materials/vegetation/vegetation.md)), so Add stays energy-conserving;
   check the maps' linear means.
 - Bark: albedo, roughness, normal, IOR 1.52. Vendor bark albedo maps can be dark (~0.04
   linear); compare with measured bark before a final.

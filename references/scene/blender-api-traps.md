@@ -2,10 +2,10 @@
 
 ## Nodes
 - GN modifier inputs: `mod["Socket_N"]` fails; values live at `mod.properties.inputs.<id>.value`
-  (empty `.name`; resolve via `node_group.interface.items_tree`) → `materials.edge_wear.set_input`. Group defaults
+  (empty `.name`; resolve via `node_group.interface.items_tree`) → `effects.edge_wear.set_input`. Group defaults
   are copied only at modifier creation. New code re-hits this with `mod[ident] = v`.
 - Edge Angle (signed): convex arrises read **positive** on outward-normal Rhino meshes.
-- ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `materials.nodes.sock`.
+- ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `materials.shared.nodes.sock`.
 - Noise Texture output: "Factor" in GN; index 0 is safest.
 - Capture Attribute: socket index 1 is Selection — link by name.
 - Object/Collection Info geometry keeps source materials → Set Material.
@@ -112,7 +112,7 @@
   first, then `file_format = "OPEN_EXR_MULTILAYER"` (setting the format alone raises "enum not
   found"); set `media_type = "IMAGE"` back before saving PNGs. `Render Result.save_render()`
   then writes every pass (e.g. Combined + DENOISED) into one file. Read layers back with the
-  bundled `OpenImageIO` (`seek_subimage` per layer); `scripts/blender/from_passes.py`.
+  bundled `OpenImageIO` (`seek_subimage` per layer); `scripts/blender/renderer/finals/from_passes.py`.
   The file is **multi-part**: every pass is its own part, so a reader that opens only the first
   part sees Combined alone and concludes the AOVs are missing. Loop `seek_subimage(i, 0)` and take
   the part name from `spec.getattribute("name")`. OpenImageIO ships with Blender: no pip install.
@@ -124,7 +124,7 @@
 - **Operators in a `--python` startup script with UI** see no active object in their context
   (`mode_set.poll()` fails: "Context missing active object"), unlike `-b`. Wrap them:
   `bpy.context.temp_override(window=w, screen=w.screen, object=ob, active_object=ob,
-  selected_objects=[ob], edit_object=ob)` (`materials.luxcore._ctx`). Test UI-run code in the UI
+  selected_objects=[ob], edit_object=ob)` (`renderer.luxcore.luxcore._ctx`). Test UI-run code in the UI
   once — a headless pass proves nothing about it.
 - An object with **no material slots bakes nothing** ("No active image found"): give it a
   temporary slot for the bake material.

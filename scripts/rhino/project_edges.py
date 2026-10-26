@@ -4,7 +4,7 @@
 #     import os; exec(open(os.path.expanduser(r"~\.claude\skills\bc-archviz\scripts\rhino\project_edges.py")).read())
 # Projects the edges of every visible object of the open document through a LEVEL pinhole camera
 # with lens shift (horizon row given in pixels from the top) and writes [layer, [[x, y] | null, ...]]
-# polylines in pixels. Draw them over the reference with scripts/edge_overlay.py. Eye in metres;
+# polylines in pixels. Draw them over the reference with scripts/research/edge_overlay.py. Eye in metres;
 # model units are read from the document. Breps, extrusions, surfaces and SubDs give their edges,
 # meshes their naked and creased (> 30 deg) edges; block instances are walked with their transforms
 # (import_rhino brings blocks in as instances, so they must be in the check too).

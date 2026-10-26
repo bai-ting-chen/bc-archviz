@@ -1,6 +1,6 @@
 # Water splash and the impact zone
 
-Code: `water.foot.impacts`, `crowns`, `splash` (used by `water.build.falling_film`).
+Code: `materials.water.foot.impacts`, `crowns`, `splash` (used by `materials.water.build.falling_film`).
 
 Where falling water meets a pool: the landing line, crowns, splash drops, and (when a still is not
 enough) a simulated plunge zone. Shared by [water-free-falling-film.md](water-free-falling-film.md),
@@ -73,7 +73,7 @@ enough) a simulated plunge zone. Shared by [water-free-falling-film.md](water-fr
 
 Sources: [FLIP Fluids inflow settings](https://github.com/rlguy/Blender-FLIP-Fluids/wiki/Inflow-Object-Settings),
 [domain and open boundaries](https://github.com/rlguy/Blender-FLIP-Fluids/wiki/Domain-Simulation-Settings),
-[v1.8.8 demo limitations](https://github.com/rlguy/Blender-FLIP-Fluids/tree/v1.8.8#readme). The
+[v1.8.8 demo limitations](https://github.com/rlguy/Blender-FLIP-Fluids/tree/v1.8.8#readme#readme). The
 δ and projected-area formulas are continuity geometry, not solver guarantees.
 
 ## 5. Troubleshooting

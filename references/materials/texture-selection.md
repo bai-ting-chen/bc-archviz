@@ -8,7 +8,7 @@
   MULTIPLY, or a Mix MULTIPLY whose B colour is set above 1 by script — measured unclamped; only
   the Mix *Factor* clamps at 1). Measure the mean on linear values: Blender returns 8-bit maps
   sRGB-encoded (api-traps).
-  → `materials.pbr.albedo_material(tex_id, name, target)` (measures and caches the mean in meta.json).
+  → `materials.shared.pbr.albedo_material(tex_id, name, target)` (measures and caches the mean in meta.json).
 - **Tint a scan with a gain, never with a flat-colour Mix.** Mix(MIX) of a flat colour over the
   map at a high factor replaces the texture, and the surface renders as plain colour. Prove the
   texture survives: high-pass sigma (`imgstats`) of a native render crop against the reference
@@ -40,12 +40,12 @@
   element's long axis (or the given world axis) on every face; `along="V"` when the texture's
   direction runs up the image.
 - Variation: Object Info Random, Geometry › Random per Island (per plank/tile in one mesh).
-- Node trees in labelled frames (`materials.nodes.G`). Mix nodes keep hidden same-named sockets
-  → `materials.nodes.sock()`.
-- **Which Poly Haven builder:** `materials.pbr.pbr_material` — shader box projection, no UVs needed,
+- Node trees in labelled frames (`materials.shared.nodes.G`). Mix nodes keep hidden same-named sockets
+  → `materials.shared.nodes.sock()`.
+- **Which Poly Haven builder:** `materials.shared.pbr.pbr_material` — shader box projection, no UVs needed,
   bump from height (quick, any Rhino mesh); the family recipes in `materials` — real-size
-  `BoxUV`/`directional_uv` UVs, so normal maps and directional grain work; `materials.luxcore.lux_textured`
-  — native LuxCore tree (Randomized Tiling). Clear glass and water: `materials.pbr.dielectric`.
+  `BoxUV`/`directional_uv` UVs, so normal maps and directional grain work; `renderer.luxcore.luxcore.lux_textured`
+  — native LuxCore tree (Randomized Tiling). Clear glass and water: `materials.shared.pbr.dielectric`.
 
 
 ### Tiled maps with joints

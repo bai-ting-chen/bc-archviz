@@ -27,7 +27,7 @@ change in bounce light, so it chooses a strength; a render confirms it.
 
 **Flat-wall lab for a look layer.** When a procedural look layer misses twice in full renders, build
 it on a flat wall at real size with the unit joints drawn for scale (renders of seconds), iterate
-against the reference, then install the exact node graph: `scripts/controls/weathering_lab.py`.
+against the reference, then install the exact node graph: `scripts/controls/effects/weathering_lab.py`.
 For geometry layers seen at grazing angles (water films, their foot), the lab is a strip of the
 real scene: the final camera with a render border around a short stretch (about a minute per
 variant), one variant file per try and a side-by-side sheet.

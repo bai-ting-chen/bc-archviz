@@ -1,6 +1,6 @@
 # Edge wear (dirty edges, shading) and edge chips (geometry)
 
-No built-in "edge wear" node in 5.2; it is a recipe. Code `scripts/blender/materials/edge_wear.py`, `scripts/blender/materials/wood_wear.py`.
+No built-in "edge wear" node in 5.2; it is a recipe. Code `scripts/blender/effects/edge_wear.py`, `scripts/blender/materials/wood/wood_wear.py`.
 
 **Every size here is a dial, not a value** — a chipped arris is millimetres on a close-up and
 can be a hundred across a courtyard. What matters is the pixels it occupies, so set reach, depth
@@ -10,7 +10,7 @@ and band from the shot and judge the first render (RULES MAT_03).
 Compared on one test: Pointiness tracks mesh density and comes out blurry; AO Inside is grainy
 and expensive; Bevel-vs-shading-normal is thin and expensive. **Use GN Edge Angle → Proximity →
 `edge_dist`** — exact metres, clean, cheap and EEVEE-safe. Exception: a *faint* dirty arris on
-huge meshes that would need dicing - the shader Bevel-normal mask ([concrete.md](../materials/concrete.md)).
+huge meshes that would need dicing - the shader Bevel-normal mask ([concrete.md](../materials/concrete/concrete.md)).
 
 ## Concrete recipe
 1. `dice(obj, …)` — Rhino meshes are too coarse to carry an edge band.
@@ -57,18 +57,17 @@ It adds no mesh; resolution follows the camera.
 - Edge distance: an attribute adapter (distance to the unit's edges), gated where it is missing.
 - Only outside arrises: exclude wall feet, inside corners and the low side of steps.
 
-## Wood (`scripts/blender/materials/wood_wear.py`)
+## Wood (`scripts/blender/materials/wood/wood_wear.py`)
 A real bevel on the arris (`round_arrises`) rather than a shaded one; `archviz.directional_uv`; GN dents on the
 edges plus surface breaks on up-facing faces, the break noise stretched *along* the grain so it
 reads as split timber rather than dents. Shader: worn edge = varnish off + grime; exposed wood =
 the texture lifted and pulled toward a raw tint.
 
 **The break share is a steep response** — a small fraction of the top surface is all you want,
-and a little more reads as damage rather than materials.edge_wear. Bisect it against a render.
+and a little more reads as damage rather than effects.edge_wear. Bisect it against a render.
 
 ## Concave corners (RULES MAT_06)
-Corner dust (wall/floor, wall/ceiling, plinths, beam/slab) is shading, not geometry. Target (as
-VRayDirt does it): darkest in the joint, fading outward over ~15–25 cm, broken up, stronger where
+Corner dust (wall/floor, wall/ceiling, plinths, beam/slab) is shading, not geometry. Target: darkest in the joint, fading outward over ~15–25 cm, broken up, stronger where
 air is still — floor joints and the tops of plinths — and fainter, greyer at the ceiling.
 - **Cycles** (the numbers are one room's starting point — size them from the shot, RULES MAT_03):
   AO node, **Inside off, Only Local off** (floor and wall are usually separate Rhino
@@ -77,7 +76,7 @@ air is still — floor joints and the tops of plinths — and fainter, greyer at
   a height falloff (1.0 at 0.6 m → 0.45 at 2.6 m); albedo × mix(1, (0.62, 0.58, 0.52), mask). AO is
   expensive: bake it for repeated renders.
 - **LuxCore** (no AO texture): the same shader **baked** per object into its own UV layout,
-  then multiplied in a native tree — `materials.luxcore.bake_dust(objs, cache_dir)` +
+  then multiplied in a native tree — `renderer.luxcore.luxcore.bake_dust(objs, cache_dir)` +
   `lux_textured(..., dust_png=...)`. 4096 px per object keeps a 20 cm band smooth at room scale.
 - A reach of 0.12 m reads as a pencil line from a few metres; judge the width on the full frame,
   not a close-up.
@@ -85,9 +84,9 @@ air is still — floor joints and the tops of plinths — and fainter, greyer at
 ## Runoff streaks, cracks
 - **Runoff** starts where water leaves a surface: eaves, gable rakes, sill corners. The drip
   edge above every wall point is found by a GN raycast straight up from just inside the wall
-  (`materials.edge_wear.add_leak_field`) -> `leak_d` (m below the edge). Streaks: noise stretched across x14 /
+  (`effects.edge_wear.add_leak_field`) -> `leak_d` (m below the edge). Streaks: noise stretched across x14 /
   down x0.6, each streak its own length (0.8-3 m), a drip band under the edge, patchy along it
-  (RULES MAT_05), vertical faces only (`materials.edge_wear.add_runoff`). On a sunlit wall streaks need full
+  (RULES MAT_05), vertical faces only (`effects.edge_wear.add_runoff`). On a sunlit wall streaks need full
   strength to read at all.
 - **Procedural run-off (no drip-edge raycast):** for walls whose top is the drip edge, build the
   layer from the wall's own top and foot (stored per-vertex) and the along-wall coordinate (x + y
@@ -102,19 +101,19 @@ air is still — floor joints and the tops of plinths — and fainter, greyer at
   - **leaks under horizontal joints:** narrow drips (~18/m across), present on ~55 % of each
     joint, with a per-joint seed so no two joints match; each drip fades over 0.1–0.65 m and ends
     at the next joint below.
-  Design it on a flat test wall first (`scripts/controls/weathering_lab.py`), then install the
+  Design it on a flat test wall first (`scripts/controls/effects/weathering_lab.py`), then install the
   exact graph. Check that it adds no step at joints (change across a joint ≈ change within a unit).
 - **Modifier order:** the leak field goes FIRST, on the clean shell. Run after the chips, rays
   from under an arris slip through the chip-band seam or hit the chipped underside; the wrong
   value of one vertex then spreads over a whole coarse dice triangle -> light triangles hanging
   from the arris. Any raycast/proximity field: before modifiers that crack or move the mesh.
-- **Cracks** (`materials.edge_wear.add_cracks(mat, openings)`): shrinkage cracks start at re-entrant corners -
+- **Cracks** (`effects.edge_wear.add_cracks(mat, openings)`): shrinkage cracks start at re-entrant corners -
   45 deg (+-15) out of opening corners, 0.4-1 m, tapering, two-scale wobble; plus patchy
   map-cracking from noise-distorted Voronoi cell edges, only some edges, only in patches. A
   hairline is invisible at room-to-street scale; what reads is a dirt-darkened crack: core
   ~5 mm, halo ~20 mm at ~5 mm/px, a shallow groove. One crack at every corner looks
   deliberate - keep a few, not a symmetric set (an opposite pair reads as one line).
-- **Cracks in glazed tiles:** a per-tile Voronoi network, not hand-placed lines — [materials/tiles.md](../materials/tiles.md)
+- **Cracks in glazed tiles:** a per-tile Voronoi network, not hand-placed lines — [materials/tiles.md](../materials/tile/tiles.md)
 
 ## Proving it
 Each layer gets its own control (RULES VAL_02): one that moves the frame only *by* the noise floor

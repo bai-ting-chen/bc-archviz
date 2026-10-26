@@ -5,10 +5,10 @@ waves caused by falling water or impacts: [water-ripple.md](water-ripple.md); ch
 [water-ripple.md](water-ripple.md) › Choppy pool.
 
 ## Pool water
-- `materials.water.pool_water()`: Principled transmission 1, IOR 1.333, a shallow ripple bump, and
+- `materials.water.water.pool_water()`: Principled transmission 1, IOR 1.333, a shallow ripple bump, and
   **Volume Absorption** for the tint — depth does the colour work, so a pool reads green in the
   deep end and clear at the step without any gradient map.
-- Geometry: `materials.water.water_surface(obj, …)` = top face only, diced, smooth (MNEE-ready; the
+- Geometry: `materials.water.water.water_surface(obj, …)` = top face only, diced, smooth (MNEE-ready; the
   volume still works over an opaque basin). Keep the waterline just under the coping.
 - Rippled sunlit pool: Ocean modifier on a diced plane — no choppiness on short waves, and
   `wave_scale_min` >= 5 x grid spacing or the waves alias. Short wavelengths give the tight
@@ -29,4 +29,4 @@ waves caused by falling water or impacts: [water-ripple.md](water-ripple.md); ch
   measured water absorption) + Volume Scatter phase **Fournier-Forand** (IOR 1.0-1.2,
   backscatter) for haze and light shafts; noise -> roughness for wind patches; Gabor texture for
   directional ripples.
-- Steam: `materials.volumes.steam()` — Principled Volume, noise x height fade, anisotropy ~0.5.
+- Steam: `materials.shared.volumes.steam()` — Principled Volume, noise x height fade, anisotropy ~0.5.

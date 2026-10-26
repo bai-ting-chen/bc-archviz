@@ -22,7 +22,7 @@
    glass-on-water, multi-interface glass — render in LuxCore (BlendLuxCore, path tracing with
    light tracing: GPU camera paths + CPU light paths). It is the one standing exception to
    native-first: Cycles path tracing, path guiding and MNEE all fail on specular–diffuse–specular
-   paths from a sun-sized source, while LuxCore light tracing is unbiased and energy-correct there ([caustics comparison](../effects/caustics.md#applying-ren_02-to-caustics)). Say it is
+   paths from a sun-sized source, while LuxCore light tracing is unbiased and energy-correct there ([caustics comparison](../effects/caustics.md#applying-ren_02-to-caustics#applying-ren_02-to-caustics)). Say it is
    an external engine when you switch.
 
 Setup and settings: [luxcore.md](luxcore.md).

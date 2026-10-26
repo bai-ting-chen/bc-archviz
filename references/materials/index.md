@@ -7,7 +7,7 @@ Use all applicable maps at real size with physical surface ranges (MAT_01).
 - **Colour and roughness:** each layer is a multiplier around 1 on the base, chained in sequence.
   Older helpers that mix whole BSDFs or MAXIMUM masks (`edge_wear.weathered_concrete`,
   `add_runoff`) predate MAT_07: migrate them when they are next changed.
-- **Height:** geometry-scale relief goes to the Displacement output ([displacement.md](displacement.md)),
+- **Height:** geometry-scale relief goes to the Displacement output ([displacement.md](displacement/displacement.md)),
   surface texture to a Bump node on the Normal input.
 - **Switching off (MAT_07):** a Value node per layer that scales its deviation from 1 does it; an
   AOV of the layer's multiplier lets you measure what reaches the image ([variation.md](../effects/variation.md)).
@@ -19,40 +19,40 @@ foam, splash in `water/`). **Effects** (`../effects/`) are layers shared by many
 
 | General rules and techniques | Canonical helper |
 |---|---|
-| [Physical Ranges](physical-ranges.md) | `materials.pbr` |
-| [Texture Selection](texture-selection.md) | `materials.pbr` |
-| [Scale](scale.md) | `materials.nodes` |
-| [Displacement](displacement.md) | `materials.displacement` |
+| [Physical Ranges](physical-ranges.md) | `materials.shared.pbr` |
+| [Texture Selection](texture-selection.md) | `materials.shared.pbr` |
+| [Scale](scale.md) | `materials.shared.nodes` |
+| [Displacement](displacement/displacement.md) | `materials.displacement.displacement` |
 
 | Materials | Canonical helper |
 |---|---|
-| [Concrete](concrete.md) | `materials.concrete` |
-| [Board Formed Concrete](board-formed-concrete.md) | `materials.concrete` |
-| [Tiles](tiles.md) | `materials.tile_surface` |
-| [Stone](stone.md) | `materials.stone` |
-| [Wood](wood.md) | `materials.wood` |
-| [Metal](metal.md) | `materials.metal` |
-| [Glass](glass.md) | `materials.glass` |
-| [Fabric](fabric.md) | `materials.fabric` |
-| [Ground](ground.md) | `materials.ground` |
-| [Vegetation](vegetation.md) | `materials.vegetation` |
-| Water: [Surface](water/water-surface.md) | `materials.water` |
-| Water: [Free-Falling Film](water/water-free-falling-film.md) | `water.build.falling_film` (`water.curtain`, `water.film`, `water.fragments`) |
+| [Concrete](concrete/concrete.md) | `materials.concrete.concrete` |
+| [Board Formed Concrete](concrete/board-formed-concrete.md) | `materials.concrete.concrete` |
+| [Tiles](tile/tiles.md) | `materials.tile.tile_surface` |
+| [Stone](stone/stone.md) | `materials.stone.stone` |
+| [Wood](wood/wood.md) | `materials.wood.wood` |
+| [Metal](metal/metal.md) | `materials.metal.metal` |
+| [Glass](glass/glass.md) | `materials.glass.glass` |
+| [Fabric](fabric/fabric.md) | `materials.fabric.fabric` |
+| [Ground](ground/ground.md) | `materials.ground.ground` |
+| [Vegetation](vegetation/vegetation.md) | `materials.vegetation.vegetation` |
+| Water: [Surface](water/water-surface.md) | `materials.water.water` |
+| Water: [Free-Falling Film](water/water-free-falling-film.md) | `materials.water.build.falling_film` (`materials.water.curtain`, `materials.water.film`, `materials.water.fragments`) |
 | Water: [Attached Film](water/water-attached-film.md) | none yet (raycast height field) |
-| Water: [Ripple](water/water-ripple.md) | `water.ripple`, `water.shading` |
-| Water: [Foam](water/water-foam.md) | `water.foot` (foam, bubbles) |
-| Water: [Splash](water/water-splash.md) | `water.foot` (impacts, crowns, splash) |
+| Water: [Ripple](water/water-ripple.md) | `materials.water.ripple`, `materials.water.shading` |
+| Water: [Foam](water/water-foam.md) | `materials.water.foot` (foam, bubbles) |
+| Water: [Splash](water/water-splash.md) | `materials.water.foot` (impacts, crowns, splash) |
 
 | Effects (shared) | Canonical helper |
 |---|---|
-| [Edge Wear](../effects/edge-wear.md) | `materials.edge_wear` |
-| [Variation](../effects/variation.md) | `materials.variation` |
-| [Wet Surfaces](../effects/wet-surfaces.md) | `materials.vegetation`, `water.wet` |
+| [Edge Wear](../effects/edge-wear.md) | `effects.edge_wear` |
+| [Variation](../effects/variation.md) | `effects.variation` |
+| [Wet Surfaces](../effects/wet-surfaces.md) | `materials.vegetation.vegetation`, `materials.water.wet` |
 | [Caustics](../effects/caustics.md) | `gn_caustics` / `caustic_photons.py` |
 
-Shared graph/socket helpers: `materials.nodes.G` / `sock`; asset lookup and project state: `archviz`.
+Shared graph/socket helpers: `materials.shared.nodes.G` / `sock`; asset lookup and project state: `archviz`.
 Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.
-[LuxCore materials](../renderer/luxcore.md): `materials.luxcore`; [all helper signatures](../scene/blender-python-helpers.md).
+[LuxCore materials](../renderer/luxcore.md): `renderer.luxcore.luxcore`; [all helper signatures](../scene/blender-python-helpers.md).
 
 ## Water: which method, which file
 Water comes in three build methods. Choose by the shot, then read the file for the kind of water.

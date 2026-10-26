@@ -12,7 +12,7 @@ These transfer to any scene and any renderer — they are measurements of the wo
 - Colour maps sRGB, data maps Non-Color. ARM: R = AO (leave unused — it double-darkens),
   G rough, B metal.
 - Image maps on real-metre UVs (`box_uv`, Poly Haven `dimensions_mm`). Tangent-space normal maps
-  need a UV map; shader-box-projected maps get Bump from height instead (`materials.pbr.pbr_material`).
+  need a UV map; shader-box-projected maps get Bump from height instead (`materials.shared.pbr.pbr_material`).
 - Bump: Distance = the real height of the relief in metres, Strength 1. Relief chain:
   Normal Map -> Bump -> (Bevel node). The Bevel node costs ~20 % and is invalid on MNEE
   casters/receivers → use the Bevel *modifier* there.

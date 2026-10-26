@@ -36,7 +36,7 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
   all have to fit in one map, so shortlist widely.
 - Sky Texture `MULTIPLE_SCATTERING` (5.2 name): calibrate with a white-plane render.
 
-## Artificial light (formulas measured to 0.2 %, `scripts/controls/light_units.py`)
+## Artificial light (formulas measured to 0.2 %, `scripts/controls/lighting/light_units.py`)
 When the fixture is specified, use its IES file (*IES profiles* below) — it carries the beam and
 the intensity. Otherwise convert from the lumens printed on the fixture — the number a lighting
 schedule gives you.
@@ -70,7 +70,7 @@ what a light reaches; the light tree (Sampling › Lights, on by default) is wha
 fixtures from turning into noise. *Normalize* (default on) keeps power constant as the size
 changes; *Exposure* multiplies by 2^x — keep both at defaults so watts stay lumens/683.
 
-## IES profiles — measured fixtures (`interior.ies_light`, control `scripts/controls/ies_units.py`)
+## IES profiles — measured fixtures (`interior.ies_light`, control `scripts/controls/lighting/ies_units.py`)
 An IES file (ANSI/IES LM-63) is the goniophotometer test of one luminaire: candela on a grid of
 vertical angles (0° = nadir) × horizontal C-planes, plus a multiplier, ballast factors and the
 lamp lumens. It holds the beam shape, cut-off, side-throw and the absolute intensity, so with
@@ -114,7 +114,7 @@ the manufacturer's file a render's illuminance is the fixture's, not a guess fro
   bulk zips; the DIALux online catalogue (luminaires.dialux.com) has a direct *Photometric data*
   zip on each article page, no account. Some makers expose a plain file tree (the LM-79 report
   PDF's URL with `.ies` often serves the file). European makers often ship Eulumdat `.ldt`
-  only: Cycles reads IES only, so convert with `scripts/ldt2ies.py in.ldt out.ies` (MCP venv
+  only: Cycles reads IES only, so convert with `scripts/scene/lighting/ldt2ies.py in.ldt out.ies` (MCP venv
   python), which prints the lumens integrated from the written file against the LDT's. Save into the study's `library/local/ies/` with a `meta.json` (maker, catalogue,
   URL, lumens) (RULES AST_03). `ies_light` embeds the file in the .blend (Internal mode).
 
@@ -189,13 +189,13 @@ EV100 by the shutter.
    edges high in the frame, floor points near the camera — and treat near-horizon readings as
    loose. When two readings disagree, ask which one is well conditioned before adding geometry.
 6. Check the Rhino model before Blender: `scripts/rhino/project_edges.py` (in Rhino via Rook,
-   with the solved camera) + `scripts/edge_overlay.py` draws its edges over the reference. Rook
+   with the solved camera) + `scripts/research/edge_overlay.py` draws its edges over the reference. Rook
    viewport captures ignore the requested size, so a lens-shifted named view captures wrong.
 7. `archviz.framing_render()` + `refmatch.py pair --overlay`; move geometry, not the camera, once
    the vanishing point and one height match.
 
 ### Camera from a repeated element (colonnade, mullions, bays)
-Code: `scripts/refsolve.py readings.json` (and `Solve.floor_pt / plane_pt / pt_at_z / fit_circle /
+Code: `scripts/research/refsolve.py readings.json` (and `Solve.floor_pt / plane_pt / pt_at_z / fit_circle /
 blender()` from a study script). Read the base and top of every repeat at full resolution (ticked
 2x crops, not the downscaled frame). Then:
 - Lines through the bases and through the tops meet at the façade vanishing point; its y is the
@@ -261,7 +261,7 @@ blender()` from a study script). Read the base and top of every repeat at full r
 6. Exposure last (RULES RES_03). When every region is off by the same ratio, *that* is the exposure
    step, so take it then.
 
-## Fog and mist (`atmosphere.fog_volume`, control `scripts/controls/fog_koschmieder.py`)
+## Fog and mist (`atmosphere.fog_volume`, control `scripts/controls/lighting/fog_koschmieder.py`)
 - Fog/mist droplets 5-20 um: Mie scattering, strongly forward, no absorption (white). Volume
   Scatter, phase **Mie** (native in 5.2, Cycles) with the droplet diameter.
 - Density = extinction coefficient sigma = 3.912 / V (Koschmieder, V = visibility, 2 %
@@ -279,7 +279,7 @@ blender()` from a study script). Read the base and top of every repeat at full r
 - Area-light direction: api-traps › Render (they emit along local −Z); print the world direction
   after creating the light.
 - Pendant globes: a solid glass sphere is a lens ball. Give it a thin Solidify shell, IOR 1.5 and
-  mid roughness so it reads as lit glass (`materials.glass.glass_shell(objs)`). The bulb is a point light
+  mid roughness so it reads as lit glass (`materials.glass.glass.glass_shell(objs)`). The bulb is a point light
   with `visible_camera = True`; hide the bulb mesh so the fixture counts once.
 - Backdrop that lights nothing: Mix(HDRI, white Background, Light Path *Is Camera Ray*); under AgX
   display-white needs ~4/2^exposure.

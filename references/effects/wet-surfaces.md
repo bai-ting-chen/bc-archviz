@@ -11,7 +11,7 @@
   beads. Under an even sky a bead is bright through refraction + total reflection inside it,
   not its ~4 % surface reflection: a coat-only bead bump was invisible even at 0.4 m. Model
   them as effective-reflectance glossy beads (declared approximation), faded with camera
-  distance (`materials.vegetation.DEW_GRASS`, `DEW_BROAD`). The denoiser smooths isolated sub-pixel
+  distance (`materials.vegetation.vegetation.DEW_GRASS`, `DEW_BROAD`). The denoiser smooths isolated sub-pixel
   glints, so size and density must carry them.
 
 

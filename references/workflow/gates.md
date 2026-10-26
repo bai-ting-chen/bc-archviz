@@ -4,7 +4,7 @@ A gate is a stop where Claude waits for the user's approval or input.
 
 Gates in workflow order: research GAT_01, model GAT_02, materials GAT_03, final preview GAT_04.
 
-See [pipeline.md for GAT_02](../scene/pipeline.md#gat_02-procedure) and [pipeline.md for GAT_04](../scene/pipeline.md#gat_04-procedure).
+See [pipeline.md for GAT_02](../scene/pipeline.md#gat_02-procedure#gat_02-procedure) and [pipeline.md for GAT_04](../scene/pipeline.md#gat_04-procedure#gat_04-procedure).
 
 ## GAT_01 procedure
 

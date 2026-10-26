@@ -14,7 +14,7 @@ import bpy
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
-import archviz
+import core.archviz as archviz
 
 
 def black_scene(samples=256, res=64, gpu=True):

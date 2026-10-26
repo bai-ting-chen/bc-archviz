@@ -62,6 +62,26 @@ Read the files for the stage you are in.
 ### Skill maintenance
 - [Maintaining](references/workflow/skill-maintaining.md): skill changes, Git, review, sync
 
-Code: `scripts/blender/` for Blender; `scripts/blender/materials/` for material families; `scripts/blender/water/` for water geometry;
-`scripts/controls/` for headless controls; `scripts/rhino/` for Rook geometry extraction;
-`scripts/` for host measurement, asset and maintenance tools. Invocation details live in Pipeline.
+## Repository map
+Reference folders and code folders use the same topic names. Each code folder's README (where present) names the reference it implements.
+
+| Topic | Reference folder | Code folder |
+|---|---|---|
+| Workflow, study tools, Codex review | `references/workflow/` | `scripts/workflow/` |
+| Research (reference matching, solving, video) | `references/research/` | `scripts/research/` |
+| Scene: Rhino and Max import, camera, lighting, environment | `references/scene/` | `scripts/blender/core/`, `scripts/blender/scene/`, `scripts/scene/` |
+| Materials, one folder per family | `references/materials/` | `scripts/blender/materials/` |
+| Effects: edge wear, caustics, variation, wet surfaces | `references/effects/` | `scripts/blender/effects/` |
+| Renderer: Cycles and LuxCore, finals | `references/renderer/` | `scripts/blender/renderer/` |
+| Review: controls, validation | `references/review/` | `scripts/controls/`, `scripts/review/` |
+| Rook geometry extraction (host) | — | `scripts/rhino/` |
+
+| Stage | Reference | Code |
+|---|---|---|
+| 1. Research | `references/research/` | `scripts/research/` |
+| 2. Rhino geometry and import | `references/scene/pipeline.md` | `scripts/blender/scene/io/`, `scripts/blender/core/` |
+| 3. Camera, light, materials | `references/scene/lighting-camera.md`, `references/materials/` | `scripts/blender/scene/lighting/`, `scripts/blender/materials/` |
+| 4. Look rounds and controls | `references/renderer/`, `references/review/` | `scripts/blender/renderer/`, `scripts/controls/` |
+| 5. Final and closure | `references/scene/pipeline.md`, `references/workflow/study-lifecycle.md` | `scripts/blender/renderer/finals/`, `scripts/workflow/` |
+
+Invocation details live in Pipeline.

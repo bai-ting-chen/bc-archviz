@@ -15,8 +15,7 @@ tiling (5.2 manual: no such texture node); build it from nodes.
   albedo (±5–10 %) and added to roughness; hides a repeat without removing it.
 - **Anti-tiling** where a repeat would still show: 2–3 lookups of the same map with different
   offsets mixed by a noise (cost ×2–3, robust), or hex tiling (3 lookups over a random hex grid
-  with weight-sharpened blending, Mikkelsen 2022 — the method behind V-Ray's Stochastic
-  Tiling); Voronoi-cell offsets are cheap but seam at cell edges unless blended there. Any UV
+  with weight-sharpened blending, Mikkelsen 2022); Voronoi-cell offsets are cheap but seam at cell edges unless blended there. Any UV
   rotation breaks a tangent-space normal map — drive relief from the height map through a Bump
   node instead. Free add-on to compare against: Patchwork (MIT).
 - Offset lookup copies keep the original Image Texture projection, blend, interpolation and

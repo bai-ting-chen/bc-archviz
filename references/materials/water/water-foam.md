@@ -1,6 +1,6 @@
 # Water foam, bubbles and whitewater
 
-Code: `water.foot.foam`, `water.foot.bubbles` (used by `water.build.falling_film`).
+Code: `materials.water.foot.foam`, `materials.water.foot.bubbles` (used by `materials.water.build.falling_film`).
 
 Aerated water on and in a pool: white foam flecks, clear floating bubbles, and dense milky
 whitewater in plunge zones. Shared by every water material that lands in a pool

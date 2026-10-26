@@ -67,7 +67,7 @@ Fix: Use the current warming/tint procedure and compare the entire reference ima
 ### `bpy_struct[key] = val: id properties not supported` on a GN modifier
 
 Cause: The GN interface socket needs the Blender-version-specific setter.
-Fix: 5.2 inputs: `materials.edge_wear.set_input(mod, name, value)`. See [blender-api-traps.md](../scene/blender-api-traps.md).
+Fix: 5.2 inputs: `effects.edge_wear.set_input(mod, name, value)`. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
 ### IES / point light much dimmer than the hand calc
 
@@ -169,7 +169,7 @@ Fix: Match the reference's typical wall, not its brightest patch; lower the base
 ### Displacement shelf from a negative distance
 
 Cause: A distance field that drives a fin or a displacement went negative and was amplified (one case: ~100×, a shelf on the floor).
-Fix: Clamp every distance before it drives geometry. See [displacement.md](../materials/displacement.md).
+Fix: Clamp every distance before it drives geometry. See [displacement.md](../materials/displacement/displacement.md).
 
 ### Water/haze/fog volume murky and dark
 
@@ -266,7 +266,7 @@ Fix: Radiance clamping, not more time (luxcore.md › Fireflies). Clamping is bi
 ### LuxCore crashes at export, `EXCEPTION_ACCESS_VIOLATION` in pyluxcore
 
 Cause: A native mapping references a missing UV layer.
-Fix: Create and validate the referenced UV layer, or correct uvindex before export. See [luxcore.md](../renderer/luxcore.md#native-luxcore-materials-scriptsblendermaterialsluxcorepy).
+Fix: Create and validate the referenced UV layer, or correct uvindex before export. See [luxcore.md](../renderer/luxcore.md#native-luxcore-materials-scriptsblendermaterialsluxcorepy#native-luxcore-materials-scriptsblendermaterialsluxcorepy).
 
 ### Caustics on a wall look like vertical streaks
 

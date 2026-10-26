@@ -39,7 +39,7 @@
 `execute_blender_code` (assign a dict to `result`), `get_objects_summary`,
 `get_screenshot_of_window_as_image`, `render_viewport_to_path` (writes to
 `<tempdir>/blender_mcp/` — copy out), `search_manual_docs`, `get_python_api_docs`. Timeout 300 s.
-Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
+Fallback CLI client: `scripts/workflow/mcp_call.py <tool> [json | --file script.py]`.
 
 ## Rhino → Blender
 - `import_3dm` reads cached **render meshes**; in Rhino run
@@ -53,8 +53,7 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   `f.Write(path, 7)`. Meshes need no cached render mesh, and `objectsCreated` stays 0 in the
   user's document. Keep the builder as a parameter script in the study, run with
   `exec(open(path).read())` through Rook.
-- **Materials from another renderer on the user's layers** (Enscape, V-Ray; data only, no
-  V-Ray tooling): read them read-only
+- **Enscape materials on the user's layers**: read them read-only
   with `File3dm`. Enscape keeps its data in the RDK RenderMaterials XML (`parameters-v8`, mirrored
   `parameters`) plus plug-in UserData: texture paths, size, rotation, tint, roughness, normal
   strength. Paths often point at another user's machine (`C:\Users\<other>\Enscape\ImportedTextures\`):
@@ -127,7 +126,7 @@ Fallback CLI client: `scripts/mcp_call.py <tool> [json | --file script.py]`.
   study at another study's or a shared copy. Choosing a texture: [materials/texture-selection.md](../materials/texture-selection.md)
 
 ## Look-dev headless
-`blender -b scene.blend --python scripts/blender/render_variant.py -- out.png res=800x800
+`blender -b scene.blend --python scripts/blender/renderer/render_variant.py -- out.png res=800x800
 [disp=off|caustics=off|wear=off|stain=off|chips=off|dirt=off|noise_seed=7|mask_view=1|material_view=NAME|camera=NAME]`
 (forward-slash paths from bash; the script's docstring lists every option, and an unknown option
 stops it rather than rendering an unchanged "control"). It renders on the GPU (`archviz.use_gpu`).
@@ -145,7 +144,7 @@ file from the shell. Save the .blend first when explicitly authorized; otherwise
   `halt.enable = False`. Register the save handler on
   `render_complete` **and** `render_cancel` — Esc fires only the latter, and skips the
   compositor: save all passes as multilayer EXR and build the finals from the denoised layer
-  (`scripts/blender/from_passes.py`; [luxcore.md](../renderer/luxcore.md) › Final in the open UI).
+  (`scripts/blender/renderer/finals/from_passes.py`; [luxcore.md](../renderer/luxcore.md) › Final in the open UI).
 - The pre-final full-frame check (RULES GAT_04 (4)) runs the same build script headless at reduced
   resolution; it caught a broken save helper and a UI-only context error before a multi-hour run.
   Only one Blender may hold the MCP port: quit an idle finished-final window first.
@@ -154,12 +153,12 @@ file from the shell. Save the .blend first when explicitly authorized; otherwise
 - Tests and previews headless (RULES GAT_04), one at a time; tell the user when a CPU-only
   engine leaves the GPU idle — it looks like wasted capacity otherwise.
 
-- Cycles: `scripts/blender/finals.py` does all of this - `start_in_ui(out_dir, res)` (untiled,
+- Cycles: `scripts/blender/renderer/finals/finals.py` does all of this - `start_in_ui(out_dir, res)` (untiled,
   no limit, savers on complete + cancel, view fitted), `stop_in_ui()`, then `-- denoise` and
   `-- png` from the saved passes (render-settings.md > Finals with no sample limit).
 
 ## Iteration loop
-`scripts/study_run.py <study> vNN.png [--rebuild] [--pct 50 --spp 128]` does all of this for a
+`scripts/workflow/study_run.py <study> vNN.png [--rebuild] [--pct 50 --spp 128]` does all of this for a
 study holding `scene_geometry.py` + `scene_look.py` (+ `_wip/ref.jpg`, `regions.json`).
 Keep two rebuild scripts in the study (`scene_geometry.py`: import + camera; `scene_look.py`:
 materials, lights, exposure) and a small runner that rebuilds, renders `_wip/vNN.png`, prints
@@ -271,23 +270,23 @@ Apply only checks needed by the current task. Read-only documentation work needs
 | Blender | `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` |
 | MCP | server `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\blender-mcp.exe` (user scope, `claude mcp get blender`); add-on `mcp` autostarts on 127.0.0.1:9876 (needs Prefs → *Allow Online Access*) |
 | Helpers (run in Blender) | `scripts/blender/`: `archviz` (assets, import, UVs, camera and rendering), `interior` (photometric lighting), `scatter`, `terrain`, `atmosphere`, `glassware`, caustic solvers, `render_variant`, `finals`, `from_passes`. Materials use the canonical `materials` package; see [family map](../materials/index.md). |
-| Outdoor | `terrain`, `scatter`, `atmosphere`; `materials.ground` and `materials.vegetation` for shading. |
-| Finals (Cycles) | `scripts\blender\finals.py`: untiled no-limit final in the UI, savers, OIDN from passes, graded PNG |
-| 3ds Max assets | `scripts\blender\max_import.py`: `load` (io_scene_max extension + repairs), `tidy`, `rebuild_materials`, `open_loops` — [max-import.md](max-import.md) |
-| Photometry | `scripts\ldt2ies.py in.ldt out.ies` (Eulumdat → IES for Cycles, lumens checked); IES files → `interior.ies_light` |
-| Measure | `scripts\imgstats.py stats|patch|diff`; `scripts\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
-| Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\edge_overlay.py edges.json ref.png out.png` |
-| Reference recreation | `scripts\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
-| Maintenance | `scripts\helper_index.py` (writes [blender-python-helpers.md](blender-python-helpers.md)), `scripts\regress_helpers.py` (old vs new helper output), `scripts\codex_review.py` (Codex reviews a change before push, RULES AGT_01), `scripts\study_close.py` (close a study: keep milestones, delete the rest, RULES AST_02) |
-| Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tiles.md). |
-| Controls | `scripts\controls\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`); `weathering_lab.py` (flat-wall look lab, `-- <out> <tag> [key=value]`) |
+| Outdoor | `terrain`, `scatter`, `atmosphere`; `materials.ground.ground` and `materials.vegetation.vegetation` for shading. |
+| Finals (Cycles) | `scripts\blender\renderer\finals\finals.py`: untiled no-limit final in the UI, savers, OIDN from passes, graded PNG |
+| 3ds Max assets | `scripts\blender\scene\io\max_import.py`: `load` (io_scene_max extension + repairs), `tidy`, `open_loops`, `origin_to_root` — [max-import.md](max-import.md) |
+| Photometry | `scripts\scene\lighting\ldt2ies.py in.ldt out.ies` (Eulumdat → IES for Cycles, lumens checked); IES files → `interior.ies_light` |
+| Measure | `scripts\research\imgstats.py stats|patch|diff`; `scripts\research\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
+| Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\research\edge_overlay.py edges.json ref.png out.png` |
+| Reference recreation | `scripts\research\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\workflow\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
+| Maintenance | `scripts\workflow\helper_index.py` (writes [blender-python-helpers.md](blender-python-helpers.md)), `scripts\review\regress_helpers.py` (old vs new helper output), `scripts\workflow\codex_review.py` (Codex reviews a change before push, RULES AGT_01), `scripts\workflow\study_close.py` (close a study: keep milestones, delete the rest, RULES AST_02) |
+| Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tile/tiles.md). |
+| Controls | `scripts\controls\lighting\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`); `weathering_lab.py` (flat-wall look lab, `-- <out> <tag> [key=value]`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
-| Assets | `scripts\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); others `<study>\library\local\` with a `meta.json` |
-| Video research | `scripts\yt_learn.py` |
+| Assets | `scripts\scene\assets\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); others `<study>\library\local\` with a `meta.json` |
+| Video research | `scripts\research\yt_learn.py` |
 
 In Blender code: `sys.path.insert(0, os.path.expanduser(r"~\.claude\skills\bc-archviz\scripts\blender"))`.
 Without the MCP tools loaded (session started elsewhere), drive Blender with
-`scripts/mcp_call.py execute_blender_code --file script.py`; the script must assign a **dict** to `result`.
+`scripts/workflow/mcp_call.py execute_blender_code --file script.py`; the script must assign a **dict** to `result`.
 Anything in a Blender panel is RNA → scriptable via MCP `execute_blender_code`. Not scriptable:
 hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 (`search_manual_docs`, `get_python_api_docs`) — the authority for generic Blender facts.
@@ -320,8 +319,8 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
    ([RULES REN_03](../renderer/renderer-choice.md)) → [LuxCore setup](../renderer/luxcore.md).
 8. **Look-dev**: headless `render_variant.py` or MCP renders into the study `_wip/`; measure
    with `imgstats`; prove each feature with a control (RULES VAL_02). Reuse the helpers
-   ([blender-python-helpers.md](blender-python-helpers.md) lists them all: `materials.edge_wear.set_input`, `materials.nodes.sock`, `materials.pbr.pbr_material`,
-   `materials.nodes.G`, `materials.pbr`, `scatter`) instead of re-deriving
+   ([blender-python-helpers.md](blender-python-helpers.md) lists them all: `effects.edge_wear.set_input`, `materials.shared.nodes.sock`, `materials.shared.pbr.pbr_material`,
+   `materials.shared.nodes.G`, `materials.shared.pbr`, `scatter`) instead of re-deriving
    node plumbing — the traps they wrap get hit again otherwise.
 9. **Final** (RULES GAT_04) → [pipeline.md](pipeline.md) › *Final render in the open UI* (Cycles: `finals.py`); linear EXR + graded
    PNGs into the study folder.

@@ -35,16 +35,16 @@ each clone tracks its own unfinished setup. Remove each action when completed an
 remains. Never attach automatic commit/push or self-deletion commands. [SKILL.md](../../SKILL.md) retains its conditional pointer.
 
 ## Helpers changed?
-Run `python scripts/helper_index.py` (MCP venv python) so [blender-python-helpers.md](../scene/blender-python-helpers.md) matches the
+Run `python scripts/workflow/helper_index.py` (MCP venv python) so [blender-python-helpers.md](../scene/blender-python-helpers.md) matches the
 code, and give every new public helper a one-line docstring — that line is its index entry.
-Refactoring a helper: prove nothing else moved with `scripts/regress_helpers.py` (dump with the
+Refactoring a helper: prove nothing else moved with `scripts/review/regress_helpers.py` (dump with the
 old and the new code, then compare; its docstring has the steps).
-Keep one builder per job (one dielectric, one socket helper, one node-graph builder `materials.nodes.G`, one
+Keep one builder per job (one dielectric, one socket helper, one node-graph builder `materials.shared.nodes.G`, one
 `archviz.read_meta`, `archviz.use_gpu`); extend it rather than writing a second.
 
 ## Review (RULES AGT_01)
 **Claude's code → Codex.** After committing, before pushing, with the MCP venv python:
-`python scripts/codex_review.py --commit <sha>` (`--base origin/main` for everything unpushed,
+`python scripts/workflow/codex_review.py --commit <sha>` (`--base origin/main` for everything unpushed,
 `--uncommitted` for the working tree). It runs `codex exec` read-only at high reasoning effort
 against this file, [RULES.md](../../RULES.md) and [blender-api-traps.md](../scene/blender-api-traps.md), and prints the findings.
 
