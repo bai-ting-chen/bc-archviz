@@ -484,7 +484,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `renderer.finals.final_session` — Final session; implementation for finals.
 
 - `remove_handlers()` — Unregister the final's save handlers (do this before cancelling a final you do not want saved).
-- `start_in_ui(out_dir, res, stem=None, samples=1000000)` — Open UI: save the .blend, register savers (complete + cancel), render INVOKE_DEFAULT, fit the render view.
+- `start_in_ui(out_dir, res, stem=None, samples=1000000)` — Open UI: save the .blend, register savers (complete + cancel), render INVOKE_DEFAULT, fit the render view. LuxCore: no halt.
 - `stop_in_ui()` — Stop the running render from its viewer (savers fire; the stop is asynchronous - wait for the passes file). Check afterwards whether the denoiser ran.
 
 ## `renderer.finals.final_settings` — Final settings; implementation for finals.
@@ -502,6 +502,11 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `renderer.luxcore.dust_uv` — Dust uv; canonical implementation behind luxcore.
 
 - `dust_uv(ob, name='DustUV')` — Non-overlapping layout for a baked map, beside the tiling UVs. Smart Project is deterministic, so a cached map still matches: always call it, even when not re-baking (a missing layer makes a LuxCore mapping uvindex -1, which crashes pyluxcore).
+
+## `renderer.luxcore.engine` — LuxCore engine settings: PATH + light tracing, GPU camera paths with CPU light paths (luxcore.md).
+
+- `set_halt(seconds, scene=None)` — Halt after `seconds` of rendering, or never (None: a final). Halt by samples and by noise always off.
+- `engine_setup(halt_s=None, backend='CUDA', clamp=CLAMP, camera=None, scene=None)` — LuxCore PATH + light tracing on GPU camera paths and CPU light paths; halt after `halt_s` seconds or never (None).
 
 ## `renderer.luxcore.glass_tint` — Glass tint; canonical implementation behind luxcore.
 

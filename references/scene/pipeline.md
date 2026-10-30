@@ -142,7 +142,7 @@ file from the shell. Save the .blend first when explicitly authorized; otherwise
   from `bpy.app.timers.register(start, first_interval=3)`. If no render window appears, put an
   Image Editor on `Render Result` (api-traps).
 - Unlimited final: Cycles `samples` high with `time_limit = 0` and adaptive off, LuxCore
-  `halt.enable = False`. Register the save handler on
+  no halt (both set by `finals.start_in_ui`). Register the save handler on
   `render_complete` **and** `render_cancel` — Esc fires only the latter, and skips the
   compositor: save all passes as multilayer EXR and build the finals from the denoised layer
   (`scripts/blender/renderer/finals/from_passes.py`; [luxcore.md](../renderer/luxcore.md) › Final in the open UI).

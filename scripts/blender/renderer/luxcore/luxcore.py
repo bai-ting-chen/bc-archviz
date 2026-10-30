@@ -8,3 +8,4 @@ from renderer.luxcore.dust_shader import _dust_bake_material
 from renderer.luxcore.dust_bake import bake_dust, _bake_each
 from renderer.luxcore.lux_textured import lux_textured
 from renderer.luxcore.glass_tint import glass_instance_tint
+from renderer.luxcore.engine import engine_setup, set_halt

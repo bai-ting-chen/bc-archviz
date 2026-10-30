@@ -228,21 +228,6 @@ Fix: Read every part (`seek_subimage`) with the bundled OpenImageIO. See [blende
 Cause: Shadow rays can't pass refraction.
 Fix: MNEE with a diced top plane (caustics.md). This is a transport/tessellation diagnostic, subject to [renderer selection REN_03](../renderer/renderer-choice.md). See [caustics.md](../effects/caustics.md).
 
-### LuxCore render stops after a few seconds at "100 %"
-
-Cause: Halt-by-samples is on by default.
-Fix: `halt.use_samples = False` (luxcore.md). See [luxcore.md](../renderer/luxcore.md).
-
-### LuxCore GPU light tracing changes nothing
-
-Cause: CPU light tracing may be disabled even with GPU camera paths.
-Fix: Light tracing runs on CPU threads: Devices › *Use CPUs* on, GPU light-ray field (`_opencl`) 100 % (luxcore.md). See [luxcore.md](../renderer/luxcore.md).
-
-### LuxCore caustic final takes many hours
-
-Cause: Camera paths may be running CPU-only.
-Fix: Check GPU plus Use CPUs for CPU light tracing; benchmark this hardware and scene rather than assuming a fixed speedup. Preserve required relief geometry. See [luxcore.md](../renderer/luxcore.md).
-
 ### LuxCore test sun casts but never glints through glass
 
 Cause: `distant` lights are never hit by camera rays.

@@ -2,6 +2,7 @@
 import os
 import bpy
 from renderer.finals.final_settings import setup_unlimited
+from renderer.luxcore.engine import set_halt
 
 
 _STATE = {}
@@ -36,10 +37,12 @@ def remove_handlers():
 
 
 def start_in_ui(out_dir, res, stem=None, samples=1_000_000):
-    """Open UI: save the .blend, register savers (complete + cancel), render INVOKE_DEFAULT, fit the render view."""
+    """Open UI: save the .blend, register savers (complete + cancel), render INVOKE_DEFAULT, fit the render view. LuxCore: no halt."""
     if not bpy.data.filepath:
         raise RuntimeError("save the .blend first: the final saves it and names its outputs after it")
     sc = setup_unlimited(res, samples)
+    if sc.render.engine == "LUXCORE":                      # a test's time budget would end the final
+        set_halt(None, sc)
     _STATE["out_dir"] = out_dir
     _STATE["stem"] = stem or os.path.splitext(os.path.basename(bpy.data.filepath))[0]
     bpy.ops.wm.save_mainfile()

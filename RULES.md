@@ -83,7 +83,7 @@ Rule: Prefer unbiased transport, then native physical approximations, then exter
 Read: [renderer-choice.md](references/renderer/renderer-choice.md)
 
 **REN_03 — Use LuxCore Only When Detailed Caustics Or Heavy Refraction Carries The Shot**  
-Rule: Use LuxCore PATH with light tracing; otherwise default to Cycles and disclose the external engine.  
+Rule: Use LuxCore PATH with light tracing on GPU + CPU, never CPU only; otherwise default to Cycles and disclose the external engine.  
 Read: [renderer-choice.md](references/renderer/renderer-choice.md)
 
 ### Lighting And Camera
