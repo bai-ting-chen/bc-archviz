@@ -6,7 +6,7 @@ Who does each stage in each mode; mode and model choice is in [work-modes.md](wo
 
 | Stage | Normal: Claude | Normal: Codex | CPM: Claude | CPM: Codex |
 |---|---|---|---|---|
-| **1. Brief intake** | reads the request and refs, writes the study goal and open questions in STUDY_NOTES | — | same | — |
+| **1. Brief intake** | reads the request and refs, writes the study goal and open questions in study-notes.md | — | same | — |
 | **2. Reference analysis** | picks the refs (Render Reference Library shortlist), reads them at full resolution, names the character to match (RULES MAT_03) | `refmatch.py grid/patches`, measured numbers on request | names what to match from a contact sheet; picks among Codex's shortlist | greps `library.jsonl` to a shortlist, makes the contact sheet, crops and `imgstats` numbers |
 | **3. Gather sources** (RULES RES_01) | finds papers, manual, forums, videos; writes the source list | gathers sources into a file on request | — | finds the sources; writes the source list ([format](agent-exchange.md#agent-exchange-documents#agent-exchange-documents)) |
 | **4. Research gate** (GAT_01) | shows the question, source list and gaps; waits; adds the user's links | — | same, from Codex's list; passes the user's links on | adds the user's links to the list |

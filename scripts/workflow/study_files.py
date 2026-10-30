@@ -3,6 +3,17 @@ import os
 import shutil
 import stat
 
+NOTES = ('study-notes.md', 'STUDY_NOTES.md')  # current name first; older studies keep the old one
+
+
+def notes_path(study):
+    """The study's notes file: the one that exists, else the current name."""
+    for name in NOTES:
+        p = os.path.join(study, name)
+        if os.path.exists(p):
+            return p
+    return os.path.join(study, NOTES[0])
+
 
 def norm(p):
     """Case-normalised absolute path."""

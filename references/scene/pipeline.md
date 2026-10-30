@@ -178,11 +178,13 @@ each version's reason lives as a comment next to the value it changed.
 - When patch scripts pile up, fold them back into the scene scripts before the study is reused.
 
 ## Study layout
-`studies/<yymmdd>_<topic>/`: Rhino build script, `*.3dm`, `scene_geometry.py` + `scene_look.py`
-(rebuild from the .3dm via MCP; the names `study_run.py` expects), `.blend`, finals, `STUDY_NOTES.md`, `library/` (`polyhaven/`, `local/` — every asset the
+`studies/<yymmdd>-<topic>/`: Rhino build script, `*.3dm`, `scene_geometry.py` + `scene_look.py`
+(rebuild from the .3dm via MCP; the names `study_run.py` expects), `.blend`, finals, `study-notes.md`, `library/` (`polyhaven/`, `local/` — every asset the
 study uses, RULES AST_03), `_wip/` (controls, boards, test scripts, crops, measurements,
 downloads — everything the study produces, RULES AST_01). Delete `*.blend1` / `*.3dmbak`.
-Closing a study: `## Milestones` list in STUDY_NOTES, then `study_close.py` (RULES AST_02).
+Closing a study: `## Milestones` list in study-notes.md, then `study_close.py` (RULES AST_02).
+New files and folders are lowercase kebab-case, Python files snake_case. Older studies keep
+`<yymmdd>_<topic>` and `STUDY_NOTES.md`; the study scripts read either notes name.
 
 
 ## PIP_01 procedure
@@ -249,7 +251,7 @@ Apply only checks needed by the current task. Read-only documentation work needs
 - [ ] Blender open, MCP on 9876 (get_blendfile_summary_datablocks)
 - [ ] Rhino: which document is open, is it modified? A user's file stays untouched — write
       the study geometry with File3dm (pipeline.md)
-- [ ] Local studies? read `studies/README.md` + the latest STUDY_NOTES.md (open items carry over)
+- [ ] Local studies? read `studies/README.md` + the latest study-notes.md (open items carry over)
 - [ ] New technique? gather sources (physics first), stop at the research gate for the user's
       links, then analyse and compare workflows (RULES RES_01, GAT_01)
 - [ ] First build done? material gate: schedule + first pass + crops, wait (RULES GAT_03)
@@ -325,7 +327,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
    node plumbing — the traps they wrap get hit again otherwise.
 9. **Final** (RULES GAT_04) → [pipeline.md](pipeline.md) › *Final render in the open UI* (Cycles: `finals.py`); linear EXR + graded
    PNGs into the study folder.
-10. `studies/<yymmdd>_<topic>/STUDY_NOTES.md`: what, proof numbers, traps, open items.
+10. `studies/<yymmdd>-<topic>/study-notes.md`: what, proof numbers, traps, open items.
 
 
 ## Tested stack baseline

@@ -8,24 +8,24 @@ material gate (RULES GAT_03) and the final render gate (RULES GAT_04).
 A study built from a scripted test scene (no Rhino) has no model gate.
 
 ## The loop (one question at a time)
-1. **Question.** Write it in `STUDY_NOTES.md` › Open questions as one testable sentence with a
+1. **Question.** Write it in `study-notes.md` › Open questions as one testable sentence with a
    measurable answer ("does a FLIP plunge read closer to the refs than the procedural one, at what
    bake cost?"). Take the next one from the study's open items, [capabilities.md](../scene/capabilities.md) rows marked
    `research` / `test`, or a failure you just saw. One question per loop.
 2. **Physics first** (RULES RES_01): mechanism and numbers from papers or measured data; write each
-   number with its source into STUDY_NOTES. Gather the sources first and stop at the research
+   number with its source into study-notes.md. Gather the sources first and stop at the research
    gate (RULES GAT_01) before analysing them. Then 2–4 workflows (manual, forums, GitHub
    `gh search code`, video via `yt_learn.py`), pick one by 1–2 criteria, say why.
 3. **Plan the proof before the build.** Which control (RULES VAL_02), which images, which number decides
    it, the run budget (lean-run habits: few short headless runs, `--only`, probes packed into one
-   render). Write the plan as 5–10 lines in STUDY_NOTES before coding.
+   render). Write the plan as 5–10 lines in study-notes.md before coding.
 4. **Build** small modules in the study (RULES GOV_04). Syntax-check before every Blender run.
 5. **Prove**: control render, imgstats numbers, native-resolution crops beside the reference
    (RULES VAL_01). A number that matches while the image does not is a fail.
 6. **Judge as the steering model would**: does it read like the reference at the final camera?
    Name the worst defect in the crop, fix only that, rerun. Stop after 3 rounds without a clear
    gain and record why (a dead end is a result).
-7. **Record** in STUDY_NOTES: answer, numbers, renders, traps, cost (time, VRAM, cache size).
+7. **Record** in study-notes.md: answer, numbers, renders, traps, cost (time, VRAM, cache size).
    Promote what is scene-independent to the skill (step 9); keep scene results in the study.
 8. **Next question** — back to 1. Keep a short log `STUDY/_wip/loop_log.md` (time, question,
    verdict, files) so the user and the other model can catch up in one read.
@@ -44,7 +44,7 @@ files, writes to GitHub other than this skill's repo, paid purchases or sign-ins
 Blender, Rhino, scripts or files another agent holds (AGENT_LOCK, RULES AGT_04).
 
 ## Ending a session
-Leave the study resumable cold: STUDY_NOTES current, loop_log updated, no half-written module
+Leave the study resumable cold: study-notes.md current, loop_log updated, no half-written module
 (finish or revert it), AGENT_LOCK deleted, `studies/README.md` entry updated, a short summary
 for the user at the top of the latest report.
 

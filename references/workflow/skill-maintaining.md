@@ -10,7 +10,7 @@ instructions behind.
   it be the same in a different scene?". If not, it is a result and belongs in that project's
   study notes. Physical constants (albedo, IOR, lm/W, typical EV100), conventions, procedures and taste belong here. A chip's scene-specific size belongs in the study notes; size it from the shot (MAT_03).
 - **Never anything from a project:** no project files, study scripts, scenes, renders, and no
-  names that point at one (project folder names, project repos, study folder names (`<yymmdd>_<topic>`),
+  names that point at one (project folder names, project repos, study folder names (`<yymmdd>-<topic>`),
   client or site names). Lessons from a study go in stripped of where they came from. Say "a
   pool soffit rendered cyan from the bounce" and leave out which study it was.
 - **Paths stay portable:** `~`, `%LOCALAPPDATA%`, or the current project found by

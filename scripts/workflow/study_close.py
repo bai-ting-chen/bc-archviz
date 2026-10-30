@@ -2,14 +2,15 @@
 
     python study_close.py <study> [--keep a.blend ...] [--apply] [--blender <exe>]
 
-Milestones: --keep, else the `.blend` names listed under `## Milestones` in STUDY_NOTES.md (the closing
+Milestones: --keep, else the `.blend` names listed under `## Milestones` in the study notes
+(study-notes.md, or STUDY_NOTES.md in older studies; the closing
 agent writes that list: every final scene plus real milestones). Without a list only the plan runs
 (newest .blend assumed). Without --apply it only prints the plan. With --apply it (1) copies files the milestones
 use from outside the study into library/local/ and repaths them (scripts/blender/scene/io/blend_refs.py),
 (2) deletes: _wip/, other .blend, *.blend1/*.3dmbak, library files no milestone uses, and top-level
 folders holding nothing a milestone uses and no .py/.md/.3dm (vendor copies, sim caches),
-(3) checks every milestone reference still resolves and logs the result in STUDY_NOTES.md.
-Kept always: finals/, STUDY_NOTES.md, scripts, .3dm, loose top-level files. Never touches anything
+(3) checks every milestone reference still resolves and logs the result in the study notes.
+Kept always: finals/, the study notes, scripts, .3dm, loose top-level files. Never touches anything
 outside the study.
 """
 import argparse
@@ -17,7 +18,7 @@ import datetime
 import os
 import sys
 
-from study_files import norm, size, remove
+from study_files import norm, size, remove, notes_path
 from study_milestones import milestones
 from study_refs import refs, HERE
 from study_prune import plan, KEEP_DIRS, KEEP_EXT
@@ -69,7 +70,7 @@ def main():
            + f'. Deleted {len(cands)} items ({total / 1e9:.2f} GB): _wip, other .blend, unused library'
            f' files, vendor/cache folders. Files copied in from outside: {sum(len(d["localised"]) for d in data)}.'
            f' Broken references after close: {len(broken)}.\n')
-    with open(os.path.join(study, 'STUDY_NOTES.md'), 'a', encoding='utf-8') as f:
+    with open(notes_path(study), 'a', encoding='utf-8') as f:
         f.write(log)
     print(log)
     if broken:
