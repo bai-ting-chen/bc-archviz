@@ -96,7 +96,7 @@ Read the summary, not the log. Codex takes the agent lock (RULES AGT_04) when it
     - Its brief holds only: the stage brief, the diff (or the list of changed files), and "review
       against [RULES.md](../../RULES.md), [blender-api-traps.md](../scene/blender-api-traps.md) and the brief: correctness bugs, rule breaks, wrong units;
       findings only, most severe first, file:line".
-    - Output: `_wip/codex/review_<stage>.md`.
+    - Output: `_wip/codex/review-<stage>.md`.
   - The next builder stage starts by weighing that review and fixing what holds.
   - Claude reads only the reports and reviews, and steers by writing the next brief.
   - Session cap: RULES AGT_02. Plan usage limits are small, so keep briefs lean.

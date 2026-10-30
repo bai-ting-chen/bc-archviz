@@ -2,17 +2,17 @@
 import os
 import shutil
 import stat
+import sys
 
 NOTES = ('study-notes.md', 'STUDY_NOTES.md')  # current name first; older studies keep the old one
 
 
 def notes_path(study):
-    """The study's notes file: the one that exists, else the current name."""
-    for name in NOTES:
-        p = os.path.join(study, name)
-        if os.path.exists(p):
-            return p
-    return os.path.join(study, NOTES[0])
+    """The study's notes file: the one that exists, else the current name; stops if both exist."""
+    found = [os.path.join(study, n) for n in NOTES if os.path.exists(os.path.join(study, n))]
+    if len(found) > 1:
+        sys.exit(f'two notes files in {study}: merge them into one, then rerun')
+    return found[0] if found else os.path.join(study, NOTES[0])
 
 
 def norm(p):

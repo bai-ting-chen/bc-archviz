@@ -166,6 +166,10 @@ Read: [pipeline.md](references/scene/pipeline.md)
 Rule: Use Blender’s extension installer and software folders; delete downloaded installer zips afterward.  
 Read: [pipeline.md](references/scene/pipeline.md)
 
+**AST_05 — Naming Study Files And Folders**  
+Rule: Name new files and folders in lowercase kebab-case and Python files in snake_case; `_wip/` keeps its name, and older studies keep their names.  
+Read: [pipeline.md](references/scene/pipeline.md)
+
 ### Safety
 
 **SAF_01 — Operating The User’s Blender**  

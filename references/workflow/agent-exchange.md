@@ -2,7 +2,7 @@
 
 Every stage starts with a brief and ends with a report; files live in the study's `_wip/codex/`.
 
-**Brief** (Claude → Codex, `brief_<stage>.md`, ≤ 40 lines):
+**Brief** (Claude → Codex, `brief-<stage>.md`, ≤ 40 lines):
 - goal in one sentence, and the design intent it serves;
 - files Codex owns this stage (others stay untouched);
 - helpers to reuse ([blender-python-helpers.md](../scene/blender-python-helpers.md)) and the interface in real units;
@@ -22,7 +22,7 @@ For imports, previews and plain look rounds the brief says: "Checks: look at eac
 only what the items name; no audits unless something looks wrong." The reviewer (RULES AGT_01) is
 skipped only for a stage that leaves no code behind (a preview or render from saved scripts).
 
-**Stage report** (Codex → Claude, `report_<stage>.md`, ≤ 20 lines on top, detail below):
+**Stage report** (Codex → Claude, `report-<stage>.md`, ≤ 20 lines on top, detail below):
 - what was done, files changed;
 - one line per image: "this shows X" (codex-coaching.md);
 - the deciding numbers, with the control's noise floor;
@@ -30,14 +30,14 @@ skipped only for a stage that leaves no code behind (a preview or render from sa
 - with training on: *Self-judgement* — what still differs from the ref or intent, worst first,
   and the next step with why.
 
-**Source list** (for the research gate, `_wip/research/<topic>_sources.md`):
+**Source list** (for the research gate, `_wip/research/<topic>-sources.md`):
 - the question in one sentence;
 - one line per source: what it is, link or path, what it should answer (mechanism, measured
   data, implementation, reference look);
 - gaps: what no source covers yet;
 - the user's added links, marked as theirs.
 
-**Material schedule** (for the material gate, `_wip/materials_schedule.md`): one row per layer —
+**Material schedule** (for the material gate, `_wip/materials-schedule.md`): one row per layer —
 material, source (Poly Haven asset id, procedural, own file), real size and direction, target
 albedo and roughness, the reference crop it matches, and "in doubt" with the candidate sheet.
 
@@ -47,6 +47,6 @@ albedo and roughness, the reference crop it matches, and "in doubt" with the can
 - a recommendation and what it approximates;
 - full-resolution evidence: frames or crops saved beside the note, not only text.
 
-**Review** (fresh Codex reviewer, `review_<stage>.md`): findings only, most severe first, with
+**Review** (fresh Codex reviewer, `review-<stage>.md`): findings only, most severe first, with
 file:line, against the brief, [RULES.md](../../RULES.md) and [blender-api-traps.md](../scene/blender-api-traps.md). With training on, the reviewer also
 opens the images and checks them against the design intent (codex-coaching.md › Reviewing).

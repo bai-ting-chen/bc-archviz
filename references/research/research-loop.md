@@ -8,7 +8,7 @@ material gate (RULES GAT_03) and the final render gate (RULES GAT_04).
 A study built from a scripted test scene (no Rhino) has no model gate.
 
 ## The loop (one question at a time)
-1. **Question.** Write it in `study-notes.md` › Open questions as one testable sentence with a
+1. **Question.** Write it in the study notes (`study-notes.md`, or `STUDY_NOTES.md` in older studies) › Open questions as one testable sentence with a
    measurable answer ("does a FLIP plunge read closer to the refs than the procedural one, at what
    bake cost?"). Take the next one from the study's open items, [capabilities.md](../scene/capabilities.md) rows marked
    `research` / `test`, or a failure you just saw. One question per loop.
@@ -27,7 +27,7 @@ A study built from a scripted test scene (no Rhino) has no model gate.
    gain and record why (a dead end is a result).
 7. **Record** in study-notes.md: answer, numbers, renders, traps, cost (time, VRAM, cache size).
    Promote what is scene-independent to the skill (step 9); keep scene results in the study.
-8. **Next question** — back to 1. Keep a short log `STUDY/_wip/loop_log.md` (time, question,
+8. **Next question** — back to 1. Keep a short log `STUDY/_wip/loop-log.md` (time, question,
    verdict, files) so the user and the other model can catch up in one read.
 9. **Skill changes** (skill-maintaining.md): pull first, one topic per reference, [capabilities.md](../scene/capabilities.md) row
    with its state, `MIGRATE.md` action if a receiving machine must act, commit as `bai-ting-chen`, push. Review per RULES AGT_01; with
@@ -44,7 +44,7 @@ files, writes to GitHub other than this skill's repo, paid purchases or sign-ins
 Blender, Rhino, scripts or files another agent holds (AGENT_LOCK, RULES AGT_04).
 
 ## Ending a session
-Leave the study resumable cold: study-notes.md current, loop_log updated, no half-written module
+Leave the study resumable cold: study-notes.md current, loop-log updated, no half-written module
 (finish or revert it), AGENT_LOCK deleted, `studies/README.md` entry updated, a short summary
 for the user at the top of the latest report.
 

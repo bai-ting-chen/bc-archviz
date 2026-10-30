@@ -163,7 +163,7 @@ file from the shell. Save the .blend first when explicitly authorized; otherwise
 study holding `scene_geometry.py` + `scene_look.py` (+ `_wip/ref.jpg`, `regions.json`).
 Keep two rebuild scripts in the study (`scene_geometry.py`: import + camera; `scene_look.py`:
 materials, lights, exposure) and a small runner that rebuilds, renders `_wip/vNN.png`, prints
-`refmatch.py patches` and writes `pair_vNN.png`. Every change is then one edit + one run, and
+`refmatch.py patches` and writes `pair-vNN.png`. Every change is then one edit + one run, and
 each version's reason lives as a comment next to the value it changed.
 - The runner must `ast.parse` both scripts before sending them to Blender. A scripted
   replacement (sed or str.replace) appending `# reason` to a line that continues a call comments
@@ -183,8 +183,9 @@ each version's reason lives as a comment next to the value it changed.
 study uses, RULES AST_03), `_wip/` (controls, boards, test scripts, crops, measurements,
 downloads — everything the study produces, RULES AST_01). Delete `*.blend1` / `*.3dmbak`.
 Closing a study: `## Milestones` list in study-notes.md, then `study_close.py` (RULES AST_02).
-New files and folders are lowercase kebab-case, Python files snake_case. Older studies keep
-`<yymmdd>_<topic>` and `STUDY_NOTES.md`; the study scripts read either notes name.
+Names (RULES AST_05): older studies keep `<yymmdd>_<topic>` and `STUDY_NOTES.md`; keep writing
+to that file there, never add a `study-notes.md` beside it. The study scripts read either name
+and stop if a study has both.
 
 
 ## PIP_01 procedure
