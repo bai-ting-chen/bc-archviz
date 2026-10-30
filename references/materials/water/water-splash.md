@@ -2,8 +2,8 @@
 
 ## 1. Overview
 Where falling water meets a pool: the landing line, crowns, splash drops, and (when a still is not
-enough) a simulated plunge zone. Shared by [water-free-falling-film.md](water-free-falling-film.md),
-[water-attached-film.md](water-attached-film.md) and fountains. Ripples from the impacts:
+enough) a simulated plunge zone. Shared by water-free-falling-film.md,
+water-attached-film.md and fountains. Ripples from the impacts:
 [water-ripple.md](water-ripple.md); foam and bubbles: [water-foam.md](water-foam.md).
 
 ## 2. Layers and node-editor diagram
@@ -90,7 +90,7 @@ FLIP Fluids add-on. No control scene is named.
 - **Where simulation pays:** the plunge zone (splash, foam clumps, spray) in motion. Hybrid:
   simulate a short stretch (~1 m domain, 3–5 mm cells) with secondary particles (spray / foam /
   bubble), instance it along the line with random offsets and flips; keep film, crest and pool
-  procedural. Method choice: [index.md](../index.md) › Water.
+  procedural. Method choice: materials/index.md › Water.
 - **Thin-sheet inlets:** compute liquid thickness before choosing a domain: δ = q / V. If δ is
   below one voxel, a fully occupied one-cell source cannot preserve both speed and discharge: a
   q-matched source slows to V′ = q / dx; a speed-matched source over-discharges by dx / δ. State the
@@ -122,7 +122,7 @@ FLIP Fluids add-on. No control scene is named.
 
 Sources: [FLIP Fluids inflow settings](https://github.com/rlguy/Blender-FLIP-Fluids/wiki/Inflow-Object-Settings),
 [domain and open boundaries](https://github.com/rlguy/Blender-FLIP-Fluids/wiki/Domain-Simulation-Settings),
-[v1.8.8 demo limitations](https://github.com/rlguy/Blender-FLIP-Fluids/tree/v1.8.8#readme#readme). The
+[v1.8.8 demo limitations](https://github.com/rlguy/Blender-FLIP-Fluids/tree/v1.8.8#readme). The
 δ and projected-area formulas are continuity geometry, not solver guarantees.
 
 Generic layers, splash settings:

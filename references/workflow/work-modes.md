@@ -18,7 +18,7 @@ To keep Claude's tokens for decisions: the top of each report, the review's find
 images it judges (the final camera plus 2–4 native crops beside the ref, or one sheet). Not:
 logs, study-script diffs, or long research text beyond the note's recommendation and evidence.
 Claude opens a file only when a report leaves a decision unclear. One exception: a proposed skill
-change, whose full diff Claude reads before committing it ([stage 16](study-stages.md#stage-by-stage#stage-by-stage)).
+change, whose full diff Claude reads before committing it ([stage 16](study-stages.md#stage-by-stage)).
 
 ## Switching modes
 The user names the mode; it holds until they switch back or the round ends. Before switching,
@@ -35,4 +35,4 @@ Normal is the default until the user selects CPM. Either model can take over alo
 Claude owns method/research conclusions, proof renders, reference-image analysis, look judgement and the
 shape of the skill. Codex implements scripts from short briefs, gathers sources on request and reports
 measurement runs as a numbers table plus one contact sheet. Long output goes to a file with a short
-summary returned to the director. The [stage table](study-stages.md#stage-by-stage#stage-by-stage) gives the CPM exceptions and standalone handover.
+summary returned to the director. The [stage table](study-stages.md#stage-by-stage) gives the CPM exceptions and standalone handover.

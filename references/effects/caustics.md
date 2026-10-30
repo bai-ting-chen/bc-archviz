@@ -6,14 +6,14 @@ through a pool, through patterned glass. Choose the method by the case below; th
 back each method are in §4.
 
 ### Applying REN_02 to caustics
-Apply the [renderer and method procedures](../renderer/renderer-choice.md) to the cases below.
+Apply the renderer and method procedures (`references/renderer/renderer-choice.md`) to the cases below.
 | Case | Method | Why |
 |---|---|---|
 | Large light source, any refractor | Cycles path tracing | unbiased; converges when the key subtends a real angle, never for a sun-sized source |
 | Lamps above calm water, submerged surfaces | **MNEE** | cheap and clean, but under-delivers energy and ignores volumes on the light leg |
 | Sun through a rippled pool | **GN wavefront** `gn_caustics.add_caustic_sheet()` | native, exact, noise-free; MNEE fails outright on real ripples |
-| Sun through glassware (glass, glass of water) | LuxCore, as the row below ([RULES REN_03](../renderer/renderer-choice.md#ren_03-procedure#ren_03-procedure)); `caustic_photons.py` (external, CPU) only when the scene must stay in Cycles | photons were the most faithful of the Cycles-side options on a measured shadow/lit ratio; MNEE and path tracing fall short |
-| **Sun through patterned glass / glass block / several interfaces, room-scale receivers** | **LuxCore PATH + light tracing**, GPU camera paths + CPU light tracing ([LuxCore setup](../renderer/luxcore.md), [RULES REN_03](../renderer/renderer-choice.md#ren_03-procedure#ren_03-procedure)) | unbiased and energy-correct; the only engine that converged |
+| Sun through glassware (glass, glass of water) | LuxCore, as the row below (RULES REN_03); `caustic_photons.py` (external, CPU) only when the scene must stay in Cycles | photons were the most faithful of the Cycles-side options on a measured shadow/lit ratio; MNEE and path tracing fall short |
+| **Sun through patterned glass / glass block / several interfaces, room-scale receivers** | **LuxCore PATH + light tracing**, GPU camera paths + CPU light tracing ([LuxCore setup](../renderer/luxcore.md), RULES REN_03) | unbiased and energy-correct; the only engine that converged |
 
 The measured ranking behind this table is in §4.1.
 
@@ -170,7 +170,7 @@ Model the relief as geometry: bump and normal maps do not bend a caustic.
 ### Generic layers
 | Layer | Reference | Note for this material |
 |---|---|---|
-| Renderer and method choice | [renderer-choice.md](../renderer/renderer-choice.md) | the case table in §1 and the procedure in §4.1 |
+| Renderer and method choice | `references/renderer/renderer-choice.md` | the case table in §1 and the procedure in §4.1 |
 | LuxCore setup | [luxcore.md](../renderer/luxcore.md) | PATH + light tracing; *Use CPUs* on for the caustic (§4.1) |
 
 ## 5. Troubleshooting

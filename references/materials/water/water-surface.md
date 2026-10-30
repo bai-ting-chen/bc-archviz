@@ -2,7 +2,7 @@
 
 ## 1. Overview
 The pool body and its surface: water whose colour comes from depth, a diced top face, and a sunlit
-pool carried by Ocean geometry. Which water file to read: [index.md](../index.md) › Water. Ripples and waves caused by falling water
+pool carried by Ocean geometry. Which water file to read: materials/index.md › Water. Ripples and waves caused by falling water
 or impacts: [water-ripple.md](water-ripple.md); choppy plunge pools: [water-ripple.md](water-ripple.md)
 › Choppy pool.
 

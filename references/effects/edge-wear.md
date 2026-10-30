@@ -58,7 +58,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
   expensive; Bevel-vs-shading-normal is thin and expensive.
 - **Use GN Edge Angle → Proximity → `edge_dist`** — exact metres, clean, cheap and EEVEE-safe.
 - Exception: a *faint* dirty arris on huge meshes that would need dicing — the shader Bevel-normal mask
-  ([concrete.md](../materials/concrete/concrete.md)).
+  (`references/materials/concrete/concrete.md`).
 
 | Method | Result on the test |
 |---|---|
@@ -252,7 +252,7 @@ installed, however good the node tree looks. Record the ratios in the study.
 | Layer | Reference | Note for this material |
 |---|---|---|
 | Per-unit variation and grunge strength | variation.md | weathering shape is gravity-driven; dust and cracks are here |
-| Faint dirty arris on huge meshes | [concrete.md](../materials/concrete/concrete.md) | shader Bevel-normal mask instead of dicing (§4.1) |
+| Faint dirty arris on huge meshes | `references/materials/concrete/concrete.md` | shader Bevel-normal mask instead of dicing (§4.1) |
 | Cracks in glazed tiles | [tiles.md](../materials/tile/tiles.md) | a per-tile Voronoi network, not hand-placed lines |
 
 ## 5. Troubleshooting

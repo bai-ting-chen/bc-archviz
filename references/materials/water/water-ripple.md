@@ -2,12 +2,12 @@
 
 ## 1. Overview
 Ripples and waves on a water surface caused by something: falling water landing, impacts, wind
-near a plunge. Shared by any water material that hits a pool ([water-free-falling-film.md](water-free-falling-film.md),
-[water-attached-film.md](water-attached-film.md), fountains). The pool body and plain wind ripples:
-[water-surface.md](water-surface.md).
+near a plunge. Shared by any water material that hits a pool (water-free-falling-film.md,
+water-attached-film.md, fountains). The pool body and plain wind ripples:
+water-surface.md.
 
 **Use when:** a ripple or wave is caused by something (a landing, an impact, a plunge). Plain wind
-ripples and the pool body: [water-surface.md](water-surface.md).
+ripples and the pool body: water-surface.md.
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and
@@ -38,12 +38,12 @@ Flow:
 | Case | Build | Why |
 |---|---|---|
 | Ripples a few mm high whose job is to break reflections and wobble what is seen through the surface | **bump on the pool's own material** from a float height map | only the slope reads; no extra surface |
-| Wind ripples carrying caustics, or crests seen in silhouette | geometry (Ocean / height field), [water-surface.md](water-surface.md) | caustics and silhouettes need real surface |
+| Wind ripples carrying caustics, or crests seen in silhouette | geometry (Ocean / height field), water-surface.md | caustics and silhouettes need real surface |
 | Rounded chop and boils in a plunge zone | geometry, see §4.3 | amplitude of cm |
 
 - **Never a second water skin over the pool** for ripples: a thin transparent sheet above the pool
   adds its own Fresnel reflection, and its area reads as a lighter rectangle. A thin-wall skin is
-  fine only for small standing features (crowns, [water-splash.md](water-splash.md)).
+  fine only for small standing features (crowns, water-splash.md).
 
 ## 3. Code
 `scripts/blender/materials/water/`:
@@ -130,8 +130,8 @@ Generic layers, ripple settings:
 
 | Layer | Reference | Note for this material |
 |---|---|---|
-| Landing line, crowns, drops | [water-splash.md](water-splash.md) | the impact sources for §4.1 |
-| Pool body, wind ripples as geometry | [water-surface.md](water-surface.md) | plain wind ripples and caustics; the pool body |
+| Landing line, crowns, drops | water-splash.md | the impact sources for §4.1 |
+| Pool body, wind ripples as geometry | water-surface.md | plain wind ripples and caustics; the pool body |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

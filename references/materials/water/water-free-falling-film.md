@@ -6,10 +6,10 @@ of the wall to a pool. Near the lip it is a glassy sheet; as it falls it speeds 
 stretches, meanders sideways, tears into braids, and the lowest band breaks into strings and drops.
 For a still, build it as a **2D field map in the sheet's own coordinates on an analytic carrier
 surface**: a fast, physics-informed approximation, not a simulation (method choice:
-[index.md](../index.md) › Water).
+materials/index.md › Water).
 
 **Use when:** water leaves a lip and falls free to a pool. Water that clings to the wall instead:
-[water-attached-film.md](water-attached-film.md).
+water-attached-film.md.
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and
@@ -82,7 +82,7 @@ values in the study notes (RULES GOV_01).
 - **Landing line** x_L(y) = v0(y)·√(2H/g); impact angle atan(√(2gH)/v0), near vertical.
 - **Along the drop:** speed U = √(v0² + 2gd), thickness h = q/U.
 - **Check the section first:** a low flow clings and wraps under a sharp lip (teapot effect) →
-  [water-attached-film.md](water-attached-film.md).
+  water-attached-film.md.
 
 | Parameter | Value |
 |---|---|

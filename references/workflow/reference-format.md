@@ -37,6 +37,9 @@ nothing to say keeps its heading and says why in one line (e.g. "No code: the la
 - State each rule once, in RULES.md. Cite it as `(RULES MAT_07)`; do not restate it.
 - Refer to sections inside the file as `§N.N`; renumber every reference when a section moves.
 - No project names, study names or client names (RULES GOV_02).
-- No reference loops between skill files (A → B → C → A). Deep nesting is fine. So name
-  troubleshooting.md, RULES.md and skill-maintaining.md in plain text inside a material or effect
-  reference: they link back into the materials and would close a loop.
+- No reference loops between skill files (A → B → C → A). Deep nesting is fine. Links run one
+  way, toward the file that holds the method or procedure the reader needs next: a router to
+  its files, a material to the effect it uses, upstream water to downstream (a falling film links to
+  its splash; the splash names the film). The other direction names the file in plain text, as a
+  backtick path (`references/...`, checked but not a link) when it sits in another folder. Links to SKILL.md and RULES.md never close a loop (both are read first).
+  `scripts/workflow/structure_check.py` reports every loop.

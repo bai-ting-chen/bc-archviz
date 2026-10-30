@@ -251,7 +251,7 @@ Fix: Radiance clamping, not more time (luxcore.md › Fireflies). Clamping is bi
 ### LuxCore crashes at export, `EXCEPTION_ACCESS_VIOLATION` in pyluxcore
 
 Cause: A native mapping references a missing UV layer.
-Fix: Create and validate the referenced UV layer, or correct uvindex before export. See [luxcore.md](../renderer/luxcore.md#native-luxcore-materials-scriptsblendermaterialsluxcorepy#native-luxcore-materials-scriptsblendermaterialsluxcorepy).
+Fix: Create and validate the referenced UV layer, or correct uvindex before export. See [luxcore.md](../renderer/luxcore.md#native-luxcore-materials-scriptsblenderrendererluxcoreluxcorepy).
 
 ### Caustics on a wall look like vertical streaks
 

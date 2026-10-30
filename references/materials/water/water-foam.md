@@ -3,8 +3,8 @@
 ## 1. Overview
 Aerated water on and in a pool: white foam flecks, clear floating bubbles, and dense milky
 whitewater in plunge zones. Shared by every water material that lands in a pool
-([water-free-falling-film.md](water-free-falling-film.md), [water-attached-film.md](water-attached-film.md)).
-Where the impacts are: [water-splash.md](water-splash.md).
+(water-free-falling-film.md, water-attached-film.md).
+Where the impacts are: water-splash.md.
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. The impacts that seed the flecks and bubbles are written once,
@@ -106,7 +106,7 @@ Generic layers, foam settings:
 
 | Layer | Reference | Note for this material |
 |---|---|---|
-| Impacts, crowns, splash | [water-splash.md](water-splash.md) | the impact parents for §4.1 and §4.2; crowns are thin-wall |
+| Impacts, crowns, splash | water-splash.md | the impact parents for §4.1 and §4.2; crowns are thin-wall |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |
@@ -114,7 +114,7 @@ Generic layers, foam settings:
 | Foam in one line of identical discs | one band, one size | impact-spawned, lognormal, irregular (§4.1) |
 | Foam invisible at the final view | sizes under a pixel | size from mm/px (§4.1) |
 | Foam stops where the fall stops | no sideways drift | drift growing with distance (§4.1) |
-| White clumps at strong impacts | crowns as open shells (light trapped), not foam | thin-wall crowns ([water-splash.md](water-splash.md)) |
+| White clumps at strong impacts | crowns as open shells (light trapped), not foam | thin-wall crowns (water-splash.md) |
 | Only white foam, no sparkle far out | no floating bubbles | bubbles (§4.2) |
 | Snow cones with black holes | hard foam switch over a dark trench | soft mask, milky body (§4.3) |
 
