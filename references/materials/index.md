@@ -1,21 +1,22 @@
 # Materials
+Use when: choosing which material or effect file (and helper) to read for a surface, or which water method to build.
 
-Recipes describe node structure and mechanisms; tune scene values in study notes (GOV_01).
-Use all applicable maps at real size with physical surface ranges (MAT_01).
+Recipes describe node structure and mechanisms; tune scene values in study notes (GOV_01). Use all applicable maps at real size with physical surface ranges (MAT_01).
 
 ## Layer assembly (MAT_07)
 - **Colour and roughness:** each layer is a multiplier around 1 on the base, chained in sequence.
-  Older helpers that mix whole BSDFs or MAXIMUM masks (`edge_wear.weathered_concrete`,
-  `add_runoff`) predate MAT_07: migrate them when they are next changed.
+   Older helpers that mix whole BSDFs or MAXIMUM masks (`edge_wear.weathered_concrete`,
+   `add_runoff`) predate MAT_07: migrate them when they are next changed.
 - **Height:** geometry-scale relief goes to the Displacement output ([displacement.md](displacement/displacement.md)),
-  surface texture to a Bump node on the Normal input.
+   surface texture to a Bump node on the Normal input.
 - **Switching off (MAT_07):** a Value node per layer that scales its deviation from 1 does it; an
-  AOV of the layer's multiplier lets you measure what reaches the image ([variation.md](../effects/variation.md)).
+   AOV of the layer's multiplier lets you measure what reaches the image ([variation.md](../effects/variation.md)).
 - **Geometry fields** measured in Geometry Nodes run before modifiers that move the mesh (RULES MAT_08).
 
-Three kinds of reference. **General rules and techniques** (this folder's root) apply to every material.
-**Materials** describe one family each; effects used only by that family live with it (water ripple,
-foam, splash in `water/`). **Effects** (`../effects/`) are layers shared by many materials.
+## Which file
+**General rules and techniques** (this folder's root) apply to every material. **Materials:** pick the family the surface
+is made of; effects used only by that family live with it (water ripple, foam, splash in `water/`). **Effects**
+(`../effects/`) are layers shared by many materials. No row fits: the general rules still apply; a method the skill does not have yet goes through the research loop (RULES RES_01). Say which file and helper you chose and why.
 
 | General rules and techniques | Canonical helper |
 |---|---|
@@ -50,14 +51,13 @@ foam, splash in `water/`). **Effects** (`../effects/`) are layers shared by many
 | [Wet Surfaces](../effects/wet-surfaces.md) | `materials.vegetation.vegetation`, `materials.water.wet` |
 | [Caustics](../effects/caustics.md) | `gn_caustics` / `caustic_photons.py` |
 
-Shared graph/socket helpers: `materials.shared.nodes.G` / `sock`; asset lookup and project state: `archviz`.
-Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.
+Shared graph/socket helpers: `materials.shared.nodes.G` / `sock`; asset lookup and project state: `archviz`. Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.
 [LuxCore materials](../renderer/luxcore.md): `renderer.luxcore.luxcore`; [all helper signatures](../scene/blender-python-helpers.md).
 
 ## Water: which method, which file
-Water comes in three build methods. Choose by the shot, then read the file for the kind of water.
+Water comes in three build methods: choose the method by the shot, then the file by the kind of water. No row fits: a new method is needed (RULES RES_01). Say which method and file you chose and why.
 
-| Method | Use | Cost / limits |
+| Method | Choose when | Cost / limits |
 |---|---|---|
 | **Surface** (shader + diced geometry, Ocean) | pools and still water | fast; reacts to nothing |
 | **Field map** (2D fields in the water's own coordinates on an analytic carrier, numpy or GN) | stills of films, curtains, cascades and their foot | fast, sized to the shot, exact control; a physics-informed approximation, not a simulation |
@@ -71,7 +71,7 @@ Water comes in three build methods. Choose by the shot, then read the file for t
   foam and bubble particles); FLIP Fluids add-on (check the edition); no shipped GN fluid solver in
   5.2. Hybrid plunge zones: [water-splash.md](water/water-splash.md) › Simulated plunge zone.
 
-| Water | File |
+| Water (kind) | File |
 |---|---|
 | Pool, still water, wind ripples | [water-surface.md](water/water-surface.md) |
 | Sheet thrown off a lip, falling free | [water-free-falling-film.md](water/water-free-falling-film.md) |
