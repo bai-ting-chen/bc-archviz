@@ -10,7 +10,7 @@ description: >-
 # bc-archviz
 
 Read [RULES.md](RULES.md), then the task reference below. When the skill is pulled or loaded, follow [skill-maintaining.md](references/workflow/skill-maintaining.md) › Pull, then MIGRATE.md:
-if `MIGRATE.md` is present, check it, apply it and delete it.
+if `MIGRATE.md` holds sections from another machine (their `From:` line), apply and remove only those.
 Method and code live here; study data lives in the current project.
 
 ## Workflow

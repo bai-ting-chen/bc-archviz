@@ -49,19 +49,21 @@ instructions behind.
 ## Pull, then MIGRATE.md (every machine)
 Pulling (run before any edit, on either machine):
 1. `git fetch origin`, then `git pull --ff-only origin main`. Never force. If the pull refuses, stop and report.
-2. If `MIGRATE.md` exists in the skill folder, read it before using the skill. Its "Check after pull" lines are the
-   caveats (moved paths, renamed names, setup) to verify.
-3. Run `python scripts/workflow/structure_check.py` (0 problems) and each check in MIGRATE.md.
-4. Only if steps 1-3 pass: `git rm MIGRATE.md` and commit "Apply MIGRATE: <topic>". This commit goes out with the
-   machine's next push; nothing is pushed automatically. If any step fails: keep MIGRATE.md, report what failed, change nothing else.
+2. If `MIGRATE.md` exists, read it before using the skill. Each section starts with `From: <machine>`
+   (`hostname`). Sections from this machine are notes for the others: leave them untouched.
+3. Apply each section from another machine: its steps, then its "Check after pull" lines, then
+   `python scripts/workflow/structure_check.py` (0 problems).
+4. Only if step 3 passes: remove those sections (the whole file when none is left) and commit "Apply MIGRATE: <topic>".
+   This commit goes out with the machine's next push; nothing is pushed automatically. If any step fails: keep the
+   section, report what failed, change nothing else.
 
 Writing MIGRATE.md (before pushing a change):
 - Pull first (above). If MIGRATE.md holds sections the other machine has not applied, add a new section;
   never rewrite or remove an existing one.
 - If the change can break another clone (moved, renamed or deleted paths or names; changed setup; new install steps),
   write MIGRATE.md in the same commit:
-  `# MIGRATE: <topic>`, then `## What changed` (only what can break), `## Check after pull` (concrete checks or commands),
-  and `## Steps` if an action is needed. End it with "Delete this file after applying it."
+  `# MIGRATE: <topic>`, then `From: <machine>` (`hostname`), then `## What changed` (only what can break), `## Check after pull` (concrete checks or commands),
+  and `## Steps` if an action is needed. The file ends with "Remove each section after applying it; delete this file when none is left."
 - Not a change log. If the change cannot break another clone, write nothing.
 
 ## Helpers changed?

@@ -1,4 +1,5 @@
 # MIGRATE: forward-only, self-contained skill; study closure rebuilt
+From: LAPTOP-25
 
 ## What changed
 - RULES GOV_01: the skill serves new studies only; every existing study counts as finished. New files and folders
@@ -21,6 +22,7 @@
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
 # MIGRATE: skill restructure (5ea2e80, 2026-10-26), if this machine has not applied it
+From: LAPTOP-25
 
 ## What changed
 - Scripts and Blender modules moved into topic folders (`scripts/workflow/`, `research/`, `review/`, `scene/`,
@@ -35,4 +37,4 @@
   local script), replace old skill paths and module names using that list. Finished studies need no changes.
 - Restart Claude Code so it reloads the skill.
 
-Delete this file after applying it.
+Remove each section after applying it; delete this file when none is left.
