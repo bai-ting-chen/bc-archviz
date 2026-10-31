@@ -6,7 +6,7 @@ where a tool lives and how to call it.
 ## Workflow: Rhino → Blender → final
 
 One phase per tool. Each phase names what it hands to the next and the check that must pass first.
-A failed check stops the phase: fix it there (see *When a phase fails*), never carry it forward.
+A failed check stops the phase (RULES PIP_02; see *When a phase fails*).
 
 ### Phase 0. Preflight (every task; apply only the checks it needs)
 Read-only documentation work needs no Blender or Rhino connection.
@@ -46,7 +46,7 @@ Read-only documentation work needs no Blender or Rhino connection.
    `archviz.import_rhino(path)` → layer collections, blocks → instances, named views → cameras,
    materials dropped, mm → m (*Rhino → Blender import* below).
 2. **Hands over:** collections and object names for materials; cameras from the named views.
-3. **Check:** every imported object has faces (0 faces = no cached render mesh); a camera from a
+3. **Check:** every imported mesh, including meshes inside blocks, has faces (0 faces = no cached render mesh); a camera from a
    named view matches Rhino's dir/up/location/FOV; no leftover `V-Ray Infinite Plane`.
 
 ### Phase 3. Look build (Blender)
@@ -93,8 +93,7 @@ Read-only documentation work needs no Blender or Rhino connection.
 `studies/<yymmdd>-<topic>/study-notes.md`: what, proof numbers, traps, open items.
 
 ## When a phase fails
-- **Stop the phase; never carry a failed check into the next one.** Report what failed and what was
-  tried.
+- **Stop the phase** (RULES PIP_02): report what failed and what was tried.
 - **Blender MCP not answering:** inspect the Blender process, port 9876, add-on state and
   *Allow Online Access* before relaunching (`references/workflow/troubleshooting.md`).
 - **Rook call hangs or "dispatcher busy":** the script may still be running (*Rhino reference* ›
@@ -318,10 +317,8 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
   `mklink /J "%USERPROFILE%\.agents\skills\bc-archviz" "%USERPROFILE%\.claude\skills\bc-archviz"`.
   A Codex skill import can leave a stale copy there; replace it. Register the MCP in
   `~/.codex/config.toml` as `[mcp_servers.blender]` with the same command and an
-  `[mcp_servers.blender.env]` table; check with `codex mcp list`. Codex reads `AGENTS.md`, not
-  `CLAUDE.md` or Claude Code's memory, so a project used from Codex gets an `AGENTS.md` that points
-  at those sources and translates Claude-only terms (tool names, "save a memory"). Git operations
-  on the skill go through the `~/.claude` path.
+  `[mcp_servers.blender.env]` table; check with `codex mcp list`. A project used from Codex gets an
+  `AGENTS.md` that only names the skill (work-modes.md › Codex reading this skill).
 - Skill code lives in `~/.claude/skills/bc-archviz`, project data in the current study, and MCP in `%LOCALAPPDATA%/BlenderMCP`.
 
 ## Tested stack baseline

@@ -9,7 +9,11 @@ Every stage starts with a brief and ends with a report; files live in the study'
 - outputs and where they go; the camera(s) the images use;
 - run budget (skill-maintaining.md › Handing work to Codex);
 - done when: the check or image that answers the question;
-- the report to write, and whether training is on.
+- the report to write, and whether training is on;
+- when it applies or swaps a texture, the attach workflow: real size from the asset's metadata; Rhino UVs
+  discarded and `archviz.box_uv(obj, size_m)` on the final mesh (`directional_uv` only for an asked grain axis);
+  no stretch (UV area × size² ≈ world area, feature size in a native crop); Image Texture through a named UV Map,
+  Non-Color for data maps; colour by gains only, never a flat-colour Mix.
 
 A brief for a **user-requested change to an approved state** names that state and the one change,
 says "retune nothing else; if something else must change, stop and report", and carries none of

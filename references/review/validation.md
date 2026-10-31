@@ -23,7 +23,7 @@ Use when: judging a look round against a reference, proving a feature works, or 
    defect, fix only that, and go back to 1.
 5. A change claimed to work gets its control render (VAL_02) before it counts.
 
-### 3. When to stop
+### 3. When to stop (RULES VAL_05)
 - **Done:** region ratios agree, exposure is set, every crop reads like the reference in character
   at final-view pixels, and each claimed feature has its control. A number that matches while the
   image does not is a fail.

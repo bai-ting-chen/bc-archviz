@@ -43,9 +43,9 @@ vendor materials by hand in Blender from the supplied maps (RULES PIP_01). Vendo
 (often obfuscated) are not run.
 - Glossiness → roughness = 1 − gloss (Non-Color). Roughness maps wire directly.
 - **A wired V-Ray map overrides the scalar stored next to it.** The importer carries only the scalar (e.g.
-  reflection glossiness 0.65). A needle card at roughness 0.35 glinted white at grazing sun; its glossiness map
-  (0.136 in the needles → roughness ≥ 0.86) removes the glints and keeps the sheen (control: specular off vs
-  map, same seed).
+  reflection glossiness). Read the map's value over the area that shows and convert that to roughness; a
+  scalar-only card can glint white at grazing sun where the map would keep only a sheen (control: specular off
+  vs map, same seed).
 - Leaf cards: Principled (albedo, roughness, normal, IOR 1.6) **+** Translucent (transmission map, else albedo),
   cut by the opacity map through Mix with Transparent. Green leaves reflect and transmit only ~0.1 each
   ([vegetation.md](../materials/vegetation/vegetation.md)), so Add stays energy-conserving.

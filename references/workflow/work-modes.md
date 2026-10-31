@@ -36,3 +36,15 @@ Claude owns method/research conclusions, proof renders, reference-image analysis
 shape of the skill. Codex implements scripts from short briefs, gathers sources on request and reports
 measurement runs as a numbers table plus one contact sheet. Long output goes to a file with a short
 summary returned to the director. The [stage table](study-stages.md#stage-by-stage) gives the CPM exceptions and standalone handover.
+
+## Codex reading this skill
+Codex reads `AGENTS.md`, not CLAUDE.md or Claude Code's memory. The project's `AGENTS.md` only names this skill
+(`~/.agents/skills/bc-archviz`, a junction to `~/.claude/skills/bc-archviz`; Git goes through the `~/.claude` path).
+Claude-only terms mean:
+
+| Claude term | For Codex |
+|---|---|
+| MCP `execute_blender_code` etc. | the `blender` MCP server in `~/.codex/config.toml` |
+| Skill tool, `/bc-archviz` | read `SKILL.md`, then `RULES.md` |
+| subagent | a separate `codex exec` session |
+| "save a memory" | not used: lasting knowledge goes into this skill (RULES GOV_02) |

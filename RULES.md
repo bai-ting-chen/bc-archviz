@@ -7,7 +7,7 @@ Rule: Keep scene-independent methods, constants, traps and taste; scene results 
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 **GOV_02 — Working With Skill And Project Files**  
-Rule: Publish only generic skill code and method; keep data specific to each project local and unnamed in this skill set.  
+Rule: Publish only generic skill code and method; keep data specific to each project local and unnamed in this skill set. The skill is self-contained: it runs with an empty CLAUDE.md and memory; machine files may name the skill, never its files or sections, and skill rules live only in the skill.  
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 **GOV_03 — Synchronizing This Skill**  
@@ -40,6 +40,10 @@ Read: [agent-lock.md](references/workflow/agent-lock.md)
 
 **PIP_01 — Transferring Rhino Geometry**  
 Rule: Keep source Rhino documents read-only; author materials, lighting, camera look and rendering in Blender.  
+Read: [pipeline.md](references/scene/pipeline.md)
+
+**PIP_02 — A Phase Check Fails**  
+Rule: Stop the phase and report what failed and what was tried; never carry a failed check into the next phase.  
 Read: [pipeline.md](references/scene/pipeline.md)
 
 ### Approval Gates
@@ -130,6 +134,10 @@ Read: [index.md](references/materials/index.md)
 Rule: Measure geometry fields (edge, leak, proximity distances) on the clean mesh, before any modifier that moves or cracks it.  
 Read: [edge-wear.md](references/effects/edge-wear.md)
 
+**MAT_09 — Choosing A Material Method Or File**  
+Rule: Choose from the router's decision table and say which method and file you chose and why; no row fits → RES_01.  
+Read: [index.md](references/materials/index.md)
+
 ### Validation
 
 **VAL_01 — Judging Material Or Effect Character**  
@@ -146,6 +154,10 @@ Read: [validation.md](references/review/validation.md)
 
 **VAL_04 — Diagnosing Odd Behaviour**  
 Rule: Bisect in a minimal control scene before tuning the full scene.  
+Read: [validation.md](references/review/validation.md)
+
+**VAL_05 — Ending A Look Round**  
+Rule: Done when region ratios agree, exposure is set, crops read like the reference at final-view pixels and every claimed feature has its control; after 3 rounds without a clear gain, stop and record why.  
 Read: [validation.md](references/review/validation.md)
 
 ### Assets And Lifecycle

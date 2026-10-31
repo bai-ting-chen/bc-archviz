@@ -84,11 +84,23 @@ def heading_slug(heading):
     return re.sub(r'[^\w\- ]', '', heading.strip().lower()).replace(' ', '-')
 
 
+def file_slugs(headings):
+    """Every anchor of a file; a repeated heading gets GitHub's -1, -2, ... suffix."""
+    out = set()
+    for heading in headings:
+        slug = anchor = heading_slug(heading)
+        n = 0
+        while anchor in out:  # GitHub skips suffixes already taken, even by a literal heading
+            n += 1
+            anchor = f'{slug}-{n}'
+        out.add(anchor)
+    return out
+
+
 def broken_anchors():
     """One problem per link whose #anchor matches no heading of the file it points to."""
     files = [md for md in glob.glob('**/*.md', recursive=True) if not md.startswith('.git') and md != 'MIGRATE.md']
-    slugs = {os.path.normpath(md): {heading_slug(h) for h in re.findall(r'^#+\s+(.*)$', prose(md), re.M)}
-             for md in files}
+    slugs = {os.path.normpath(md): file_slugs(re.findall(r'^#+\s+(.*)$', prose(md), re.M)) for md in files}
     problems = []
     for md in files:
         for m in re.finditer(r'\]\(([^)#\s]*)#([^)\s]+)\)', prose(md)):

@@ -23,7 +23,7 @@ instructions behind.
   prompts say "no extra safeguards without a failure scenario".
 - **State each rule once, in [RULES.md](../../RULES.md).** [SKILL.md](../../SKILL.md) and the references carry only the how-to
   (commands, functions, numbers) and a pointer such as "(RULES AST_03)". A rule repeated in several
-  files drifts apart the first time it changes.
+  files drifts apart the first time it changes. `RULES.md` stays a separate file at the skill root, upper case.
 - **Reference layout:** every material and effect reference follows [reference-format.md](reference-format.md)
   (Overview, Layers and node-editor diagram, Code, Instructions and parameters, Troubleshooting).
 - **Writing patterns:** other references take the pattern from Anthropic's skill guide that fits their
@@ -57,8 +57,8 @@ Pulling (run before any edit, on either machine):
 
 Writing MIGRATE.md (before pushing a change):
 - Pull first (above), so no unapplied MIGRATE.md is in place.
-- If the change can break another clone (moved, renamed or deleted paths or names; changed setup; new install steps;
-  references in memory or CLAUDE.md files), write MIGRATE.md in the same commit:
+- If the change can break another clone (moved, renamed or deleted paths or names; changed setup; new install steps),
+  write MIGRATE.md in the same commit:
   `# MIGRATE: <topic>`, then `## What changed` (only what can break), `## Check after pull` (concrete checks or commands),
   and `## Steps` if an action is needed. End it with "Delete this file after applying it."
 - Not a change log. If the change cannot break another clone, write nothing.
