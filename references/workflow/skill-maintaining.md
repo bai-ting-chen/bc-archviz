@@ -56,7 +56,8 @@ Pulling (run before any edit, on either machine):
    machine's next push; nothing is pushed automatically. If any step fails: keep MIGRATE.md, report what failed, change nothing else.
 
 Writing MIGRATE.md (before pushing a change):
-- Pull first (above), so no unapplied MIGRATE.md is in place.
+- Pull first (above). If MIGRATE.md holds sections the other machine has not applied, add a new section;
+  never rewrite or remove an existing one.
 - If the change can break another clone (moved, renamed or deleted paths or names; changed setup; new install steps),
   write MIGRATE.md in the same commit:
   `# MIGRATE: <topic>`, then `## What changed` (only what can break), `## Check after pull` (concrete checks or commands),
