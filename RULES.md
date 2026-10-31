@@ -56,7 +56,7 @@ Read: [gates.md](references/workflow/gates.md)
 
 **GAT_02 — A Rhino Study Model Is Ready**  
 Rule: Show captures and modelled/omitted items; wait for geometry approval before import.  
-Read: [pipeline.md](references/scene/pipeline.md)
+Read: [gates.md](references/workflow/gates.md)
 
 **GAT_03 — The First Full Material Build Is Ready**  
 Rule: Show schedule, final-camera render, native reference crops and uncertain candidates; wait for approval and re-gate swaps.  
@@ -64,7 +64,7 @@ Read: [gates.md](references/workflow/gates.md)
 
 **GAT_04 — Launching A Final**  
 Rule: Wait for preview approval; test the full frame, render unlimited in the open UI until stopped, then inspect the saved result.  
-Read: [pipeline.md](references/scene/pipeline.md)
+Read: [gates.md](references/workflow/gates.md)
 
 ### Research
 

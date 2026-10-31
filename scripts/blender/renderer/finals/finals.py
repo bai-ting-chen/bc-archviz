@@ -3,7 +3,7 @@ saved passes. LuxCore finals: from_passes.py. pipeline.md > Final render in the 
 
     # in the open UI (via MCP), after building the scene:
     import finals; finals.start_in_ui(out_dir, (2400, 3000))
-    # headless test with exactly the final settings (RULES GAT_04 (4)):
+    # headless test with exactly the final settings (RULES GAT_04 step 2):
     blender -b scene.blend --python finals.py -- test <spp> <out_dir> <W>x<H>
     # after the user stops it:
     blender -b --factory-startup --python finals.py -- denoise <passes.exr> <denoised.exr>

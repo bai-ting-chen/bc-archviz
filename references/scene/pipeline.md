@@ -82,9 +82,9 @@ Read-only documentation work needs no Blender or Rhino connection.
 
 ### Phase 5. Final (Blender UI)
 1. **Gate:** preview, resolution, time budget and expected noise to the user; wait for approval
-   (RULES GAT_04 (1)).
+   (RULES GAT_04 step 1).
 2. **Check before launch:** a short full-frame test with exactly the final's settings, raw and
-   denoised, every surface (GAT_04 (4)).
+   denoised, every surface (GAT_04 step 2).
 3. Launch in the open UI with no limit: *Final render in the open UI* below (Cycles: `finals.py`).
    Linear EXR + graded PNGs go into the study folder.
 4. **Check:** look at the saved result, every surface, before calling it done.
@@ -227,7 +227,7 @@ Cycles: `scripts/blender/renderer/finals/finals.py` does all of this - `start_in
 `-- png` from the saved passes (render-settings.md > Finals with no sample limit). The mechanics:
 1. Before proposing the final, estimate how long the expected quality takes from a measured
    preview (noise ∝ 1/√(samples/px)), so the user knows when stopping is reasonable.
-2. The pre-final full-frame check (RULES GAT_04 (4)) runs the same build script headless at reduced
+2. The pre-final full-frame check (RULES GAT_04 step 2) runs the same build script headless at reduced
    resolution; it caught a broken save helper and a UI-only context error before a multi-hour run.
    Tests and previews run headless (RULES GAT_04), one at a time; tell the user when a CPU-only
    engine leaves the GPU idle — it looks like wasted capacity otherwise.
@@ -331,26 +331,6 @@ These are the recorded baseline versions, not a requirement to reinstall or upgr
 **Rhino = geometry only.** Materials, lights, camera look and render settings live in Blender
 (one place to edit the look; Rhino materials don't translate). Layer/block/object names are the
 hooks; discard .3dm materials. Rhino files are read-only; re-meshing imported meshes is fine.
-
-## GAT_02 procedure
-
-**Rhino → Blender gate.** After the Rhino model is finished, stop and show the user (viewport
-captures + a list of what was modelled and left out); pipe to Blender only after the user approves
-the geometry. Rework in Rhino is cheap, a look-dev round on wrong geometry is not.
-
-## GAT_04 procedure
-
-**Final render gate.** (1) Render a preview, show it, state the final's resolution, time budget and
-expected noise, and **wait for approval** — the user reviews the preview first; a material or light
-change after approval means a new preview. (2) Run the final **in the open Blender UI** so the user
-watches it live; headless renders are for tests, controls and previews. (3) Set **no time or sample
-limit** on the final: it renders until the user stops it, and saving/denoising run on stop. A halt
-time is fixed when the session starts and a finished render cannot be resumed, so a limit can only
-cut the user's choice short. (4) Before any long or unattended final, render a short **full-frame**
-test with exactly the final's settings (raw and denoised) and look at every surface, not only the
-one under discussion. Bring known risks and their tested fixes to the user *before* launch; a fix
-is not withheld because it is not yet approved. Look at the saved result before calling it done or
-sending it anywhere.
 
 ## AST_03 procedure
 
