@@ -1,39 +1,50 @@
-"""Study-local path, size and deletion operations."""
+"""Study file traversal and guarded filesystem operations (Python 3.12+)."""
 import os
-import shutil
 import stat
-import sys
-
-NOTES = ('study-notes.md', 'STUDY_NOTES.md')  # current name first; older studies keep the old one
+from pathlib import Path
 
 
-def notes_path(study):
-    """The study's notes file: the one that exists, else the current name; stops if both exist."""
-    found = [os.path.join(study, n) for n in NOTES if os.path.exists(os.path.join(study, n))]
-    if len(found) > 1:
-        sys.exit(f'two notes files in {study}: merge them into one, then rerun')
-    return found[0] if found else os.path.join(study, NOTES[0])
+def is_link(path):
+    """Identify symlinks and junctions without traversing them."""
+    return path.is_symlink() or path.is_junction()
 
 
-def norm(p):
-    """Case-normalised absolute path."""
-    return os.path.normcase(os.path.normpath(os.path.abspath(p)))
+def checked(path, study):
+    """Require a path strictly inside the study with no link or junction in its ancestry."""
+    path, study = Path(os.path.abspath(path)), Path(os.path.abspath(study))
+    if path == study or not path.resolve().is_relative_to(study.resolve()):
+        raise ValueError(f'path outside study: {path}')
+    for parent in (path, *path.parents):
+        if is_link(parent):
+            raise ValueError(f'link or junction is not allowed: {parent}')
+        if parent == study:
+            return path
+    raise ValueError(f'path outside study: {path}')
 
 
-def size(p):
-    """Bytes of a file or folder."""
-    if os.path.isfile(p):
-        return os.path.getsize(p)
-    return sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(p) for f in fs)
+def entries(folder):
+    """List files, directories and opaque links without walking through links."""
+    found = []
+    for root, dirs, files in os.walk(folder, followlinks=False):
+        found.extend(Path(root) / n for n in dirs + files)
+        dirs[:] = [n for n in dirs if not is_link(Path(root) / n)]
+    return found
 
 
-def remove(p):
-    """Delete a file or folder, clearing read-only flags (vendor files often carry them)."""
-    def unlock(func, path, _):
-        os.chmod(path, stat.S_IWRITE)
-        func(path)
-    if os.path.isdir(p):
-        shutil.rmtree(p, onerror=unlock)
+def size(path):
+    """Count file bytes without following links."""
+    if is_link(path):
+        return 0
+    if path.is_file():
+        return path.stat().st_size
+    return sum(p.stat().st_size for p in entries(path) if not is_link(p) and p.is_file())
+
+
+def remove(path, study):
+    """Delete a checked file or empty directory; propagate failures for a forward-only retry."""
+    path = checked(path, study)
+    path.chmod(stat.S_IWRITE)  # Windows refuses to delete read-only items.
+    if path.is_dir():
+        path.rmdir()
     else:
-        os.chmod(p, stat.S_IWRITE)
-        os.remove(p)
+        path.unlink()

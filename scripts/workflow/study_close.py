@@ -1,80 +1,89 @@
-"""Close a study (RULES AST_02): keep milestones and finals, make them self-contained, delete the rest.
+r"""Close a new study using known-safe deletions only; never write the scene.
 
-    python study_close.py <study> [--keep a.blend ...] [--apply] [--blender <exe>]
-
-Milestones: --keep, else the `.blend` names listed under `## Milestones` in the study notes
-(study-notes.md, or STUDY_NOTES.md in older studies; the closing
-agent writes that list: every final scene plus real milestones). Without a list only the plan runs
-(newest .blend assumed). Without --apply it only prints the plan. With --apply it (1) copies files the milestones
-use from outside the study into library/local/ and repaths them (scripts/blender/scene/io/blend_refs.py),
-(2) deletes: _wip/, other .blend, *.blend1/*.3dmbak, library files no milestone uses, and top-level
-folders holding nothing a milestone uses and no .py/.md/.3dm (vendor copies, sim caches),
-(3) checks every milestone reference still resolves and logs the result in the study notes.
-Kept always: finals/, the study notes, scripts, .3dm, loose top-level files. Never touches anything
-outside the study.
+Usage (Python 3.12+): %LOCALAPPDATA%\BlenderMCP\venv\Scripts\python.exe scripts/workflow/study_close.py <study> [--apply]
 """
 import argparse
 import datetime
+import json
 import os
-import sys
+from pathlib import Path
+from study_files import checked, is_link, remove
+from study_milestones import final_scenes, milestone_images
+from study_prune import plan, large_folders
+from study_refs import scan
 
-from study_files import norm, size, remove, notes_path
-from study_milestones import milestones
-from study_refs import refs, HERE
-from study_prune import plan, KEEP_DIRS, KEEP_EXT
 
-BLENDER = r"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
+def check_plan(saved, current, study):
+    """Require unchanged references, choices and deletions, accepting only items already gone."""
+    for key in ('references', 'finals', 'milestones'):
+        if saved[key] != current[key]:
+            raise ValueError(f'{key} changed; run the plan first')
+    added = set(current['delete']) - set(saved['delete'])
+    retained = [name for name in set(saved['delete']) - set(current['delete']) if (study / name).exists()]
+    if added or retained:
+        raise ValueError(f'delete list changed; run the plan first: {sorted(added) + retained}')
+
+
+def apply(study, saved, moves, scenes, blender):
+    """Move milestones, delete planned items and recheck references; failed deletions are retryable."""
+    for source, target in moves:
+        if source.exists():
+            target.parent.mkdir(exist_ok=True)
+            checked(source, study).rename(checked(target, study))
+    order = sorted(saved['delete'], key=lambda name: (name.endswith('/'), -name.count('/'), name))
+    try:
+        for name in order:
+            path = study / name
+            if path.exists():
+                remove(path, study)
+    except OSError as error:
+        left = [name for name in order if (study / name).exists()]
+        raise ValueError(f'delete failed: {error}\nleft to delete:\n' + '\n'.join(left)) from error
+    after, _ = scan(scenes, study, blender)
+    if after != saved['references']:
+        raise ValueError('references changed after deletion; closure record not written')
+    stamp = datetime.date.today().isoformat()
+    log = (f'# Closed {stamp}\nFinal scene: {saved["finals"]}\nMilestones: {saved["milestones"]}'
+           f'\nDeleted {len(saved["delete"])} items ({sum(saved["delete"].values()) / 1e9:.6f} GB):'
+           + '\n' + '\n'.join(saved['delete']) + '\nBroken references: 0.\n')
+    remove(study / 'close-plan.txt', study)
+    notes = checked(study / 'study-notes.md', study)
+    if 'see closed.md.' not in notes.read_text(encoding='utf-8'):  # a rerun after a failed write adds it once
+        with notes.open('a', encoding='utf-8') as stream:
+            stream.write(f'\nClosed {stamp}: see closed.md.\n')
+    checked(study / 'closed.md', study).write_text(log, encoding='utf-8')  # last: it marks the study closed
 
 
 def main():
-    """Plan, and with --apply carry out, the close of one study."""
-    ap = argparse.ArgumentParser()
-    ap.add_argument('study')
-    ap.add_argument('--keep', nargs='*', default=[])
-    ap.add_argument('--apply', action='store_true')
-    ap.add_argument('--blender', default=BLENDER)
-    a = ap.parse_args()
-    study = norm(a.study)
-    keep = [norm(k) for k in milestones(study, a.keep, a.apply)]
-    data = [refs(b, study, a.blender, False) for b in keep]  # read-only pass first
-    used = {norm(r[1]) for d in data for r in d['refs']}
-    outside = sorted({r[1] for d in data for r in d['refs'] if not norm(r[1]).startswith(study + os.sep)})
-    libs = sorted({lib for d in data for lib in d.get('outside_libraries', [])})
-    if libs:
-        sys.exit('milestones link .blend libraries outside the study; make them local or move them in first: '
-                 + ', '.join(libs))
-    if a.apply:  # relink, copy outside/_wip files in, then plan from the updated references
-        data = [refs(b, study, a.blender, True) for b in keep]
-        used = {norm(r[1]) for d in data for r in d['refs']}
-    cands = plan(study, set(keep), used)
-    total = sum(size(p) for p in cands)
-    print('keep:', *[os.path.basename(k) for k in keep], sep='\n  ')
-    missing = sorted({r[1] for d in data for r in d['refs'] if not r[2]})
-    if missing and not a.apply:
-        print('missing now (relinked by name from inside the study on --apply if found):', *missing, sep='\n  ')
-    if outside and not a.apply:
-        print('outside the study (copied into library/local on --apply):', *outside, sep='\n  ')
-    print(f'delete ({total / 1e9:.2f} GB):', *[os.path.relpath(p, study) for p in cands], sep='\n  ')
-    if not a.apply:
-        return
-    for p in cands:
-        remove(p)
-    for root, dirs, files in os.walk(os.path.join(study, 'library'), topdown=False):
-        if not dirs and not files and root != os.path.join(study, 'library'):
-            os.rmdir(root)
-    after = [refs(b, study, a.blender, False) for b in keep]
-    broken = [r[1] for d in after for r in d['refs'] if not r[2]]
-    stamp = datetime.date.today().isoformat()
-    log = (f'\n## Closed {stamp} (study_close.py)\nMilestones kept: '
-           + ', '.join(f'`{os.path.basename(k)}`' for k in keep)
-           + f'. Deleted {len(cands)} items ({total / 1e9:.2f} GB): _wip, other .blend, unused library'
-           f' files, vendor/cache folders. Files copied in from outside: {sum(len(d["localised"]) for d in data)}.'
-           f' Broken references after close: {len(broken)}.\n')
-    with open(notes_path(study), 'a', encoding='utf-8') as f:
-        f.write(log)
-    print(log)
-    if broken:
-        sys.exit(f'BROKEN references: {broken}')
+    """Read final scenes, print an allow-listed plan and optionally apply its unchanged contents."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('study', type=Path)
+    parser.add_argument('--apply', action='store_true')
+    parser.add_argument('--blender', default=str(Path(os.environ['PROGRAMFILES']) / 'Blender Foundation/Blender 5.2/blender.exe'))
+    args = parser.parse_args()
+    study = Path(os.path.abspath(args.study))
+    if is_link(study) or not study.is_dir():
+        raise ValueError('study must be an existing directory, not a link')
+    if (study / 'closed.md').exists():
+        raise ValueError('already closed: closed.md exists')
+    checked(study / 'study-notes.md', study)
+    plan_file = checked(study / 'close-plan.txt', study)
+    if args.apply and not plan_file.is_file():
+        raise ValueError('run the plan first: close-plan.txt is missing')
+    scenes, moves = final_scenes(study), milestone_images(study)
+    references, used = scan(scenes, study, args.blender)
+    current = dict(finals=[p.name for p in scenes], milestones=[[s.relative_to(study).as_posix(), t.relative_to(study).as_posix()]
+                   for s, t in moves], references=references, delete=plan(study, set(scenes), used, moves))
+    print('milestone renames:', current['milestones'])
+    print(f'delete ({sum(current["delete"].values())} bytes):', *current['delete'], sep='\n  ')
+    for name, count in large_folders(study):
+        print(f'unknown folder kept: {name} ({count / 1e6:.1f} MB)')
+    if args.apply:
+        saved = json.loads(plan_file.read_text(encoding='utf-8'))
+        check_plan(saved, current, study)
+        apply(study, saved, moves, scenes, args.blender)
+    else:
+        plan_file.write_text(json.dumps(current, indent=2) + '\n', encoding='utf-8')
 
 
 if __name__ == '__main__':

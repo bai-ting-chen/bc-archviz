@@ -57,7 +57,7 @@ Read the files for the stage you are in.
 
 ### 5. Final and closure
 - [Pipeline](references/scene/pipeline.md) › Final render in the open UI
-- [Study lifecycle](references/workflow/study-lifecycle.md): the user calls the study finished
+- [Closing a study](references/workflow/study-close.md): the user calls the study finished
 
 ### Skill maintenance
 - [Maintaining](references/workflow/skill-maintaining.md): skill changes, Git, review, sync
@@ -82,6 +82,6 @@ Reference folders and code folders use the same topic names. Each code folder's 
 | 2. Rhino geometry and import | `references/scene/pipeline.md` | `scripts/blender/scene/io/`, `scripts/blender/core/` |
 | 3. Camera, light, materials | `references/scene/lighting-camera.md`, `references/materials/` | `scripts/blender/scene/lighting/`, `scripts/blender/materials/` |
 | 4. Look rounds and controls | `references/renderer/`, `references/review/` | `scripts/blender/renderer/`, `scripts/controls/` |
-| 5. Final and closure | `references/scene/pipeline.md`, `references/workflow/study-lifecycle.md` | `scripts/blender/renderer/finals/`, `scripts/workflow/` |
+| 5. Final and closure | `references/scene/pipeline.md`, `references/workflow/study-close.md` | `scripts/blender/renderer/finals/`, `scripts/workflow/` |
 
 Invocation details live in Pipeline.

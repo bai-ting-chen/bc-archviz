@@ -19,7 +19,7 @@ from water_numeric_check import array
 
 
 def check(out):
-    """Trace both light types, roundtrip irradiance, save graded PNGs and localise a test reference."""
+    """Trace both light types, roundtrip irradiance, save graded PNGs and read a test reference."""
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'blender' / 'scene' / 'io'))
     import blend_refs
     import effects.caustics.caustic_photons as photons
@@ -70,7 +70,7 @@ def check(out):
         finals.start_in_ui(str(out), (80, 100))
     except RuntimeError as error:
         result['unsaved_final_error'] = str(error)
-    # Only owned scratch data may be saved/localised by this control.
+    # Only owned scratch data may be saved by this control.
     study = out / 'study'
     study.mkdir(exist_ok=True)
     source = out / 'outside' / 'image.png'
@@ -82,8 +82,6 @@ def check(out):
         if other != image and other.name not in ('Render Result', 'Viewer Node'):
             bpy.data.images.remove(other)
     bpy.ops.wm.save_as_mainfile(filepath=str(study / 'references.blend'))
-    result['localised'] = blend_refs.localise(str(study))
-    result['localised_bytes'] = hashlib.sha256(Path(bpy.path.abspath(image.filepath)).read_bytes()).hexdigest()
     result['refs'] = [[type(d).__name__, attr, path] for d, attr, path in blend_refs.references()]
     result['udim'] = blend_refs.files_of(type('Tiled', (), dict(source='TILED', tiles=[type('Tile', (), dict(number=1001))()]))(), 'image.<UDIM>.exr')
     # Paths differ between runs; preserve their relative meaning in the baseline.

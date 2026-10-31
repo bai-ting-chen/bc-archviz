@@ -3,7 +3,7 @@
 ### Governance
 
 **GOV_01 — Recording Reusable Knowledge**  
-Rule: Keep scene-independent methods, constants, traps and taste; scene results belong in study notes.  
+Rule: Keep scene-independent methods, constants, traps and taste; scene results belong in study notes. Write for new studies only: treat every existing study as finished, with no code or wording kept for a past one. One-time operations and their consequences go to the user in chat, never into the skill.  
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 **GOV_02 — Working With Skill And Project Files**  
@@ -15,7 +15,7 @@ Rule: Pull before editing, use the per-clone identity, and before editing, pull 
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 **GOV_04 — Extending Code Or Documents**  
-Rule: Keep one module per job and one authority per helper; use focused, readable functions and topic references; prove a refactor by reproducing a saved control baseline exactly.  
+Rule: Keep one module per job and one authority per helper; use focused, readable functions and topic references; prove a refactor by reproducing a saved control baseline exactly. A reference that documents one script shares its name (`study-close.md` ↔ `study_close.py`). Before revising a file, settle its purpose with the user and propose the smallest design that serves it; add a safeguard only for a failure a review has shown.  
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 ### Agent Cooperation
@@ -155,8 +155,8 @@ Rule: Keep every output in its study folder and process artifacts in its _wip; t
 Read: [pipeline.md](references/scene/pipeline.md)
 
 **AST_02 — The User Declares A Study Finished**  
-Rule: List milestones, plan then apply checked cleanup, localize dependencies and verify preserved milestone references.  
-Read: [study-lifecycle.md](references/workflow/study-lifecycle.md)
+Rule: Name the final scene, ask the user for milestone images, check the final scene's references, plan then apply the cleanup of known-safe items only, and mark the study with closed.md.  
+Read: [study-close.md](references/workflow/study-close.md)
 
 **AST_03 — Acquiring Study Assets**  
 Rule: Keep every asset and metadata in that study’s own library for a self-contained handoff.  
@@ -167,7 +167,7 @@ Rule: Use Blender’s extension installer and software folders; delete downloade
 Read: [pipeline.md](references/scene/pipeline.md)
 
 **AST_05 — Naming Study Files And Folders**  
-Rule: Name new files and folders in lowercase kebab-case and Python files in snake_case; `_wip/` keeps its name, and older studies keep their names.  
+Rule: Name new files and folders in lowercase kebab-case and Python files in snake_case; `_wip/` keeps its name.  
 Read: [pipeline.md](references/scene/pipeline.md)
 
 ### Safety

@@ -565,9 +565,9 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `add_terrain(group, material, name='TERRAIN', collection=None)` — An empty mesh object carrying the landform modifier (the GN group makes the geometry).
 
-## `scene.io.blend_refs` — Inside Blender: list a .blend's external files and optionally copy outside-study files into the study.
+## `scene.io.blend_refs` — Read scene references without saving: blender -b scene.blend --python blend_refs.py -- --out refs.json.
 
-- `main()` — Dump references (after optional localising) to JSON.
+- `main()` — Write sorted raw reference paths and their concrete files without changing the scene.
 
 ## `scene.io.max_import` — 3ds Max .max -> Blender: repaired import, units and slots (run in Blender).
 
@@ -576,15 +576,11 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `open_loops(obj, material_index=None)` — Open-edge loops (optionally of one material): z, span, closed, which side the faces are on - holes vs tube ends.
 - `origin_to_root(obj)` — Move the mesh so its root (bbox centre in plan, lowest z) sits at the object origin - for scattering clumps on terrain.
 
-## `scene.io.reference_localise` — Reference localise; implementation for blend_refs.
-
-- `relink(study)` — Repath missing references to a file of the same name found inside the study (outside _wip).
-- `localise(study)` — Copy outside-study (and _wip) references into <study>/library/local/<parent>/ and repath them.
-
 ## `scene.io.reference_paths` — Reference paths; implementation for blend_refs.
 
-- `files_of(d, path)` — Concrete files behind a path: every UDIM tile and every frame of an image sequence.
+- `files_of(d, path)` — Concrete files behind a path: UDIM tiles and all numbered image, volume or mesh-cache sequence frames.
 - `references()` — Yield (datablock, attribute, absolute path) for every external file the .blend needs.
+- `owner_library(owner)` — Return the library owning a datablock or shader node, if linked.
 
 ## `scene.io.rhino_import` — Rhino import: a .3dm brings geometry only. Layers, blocks and named views become collections, instances and cameras; any material that rides along is discarded (materials are built in Blender).
 

@@ -253,10 +253,8 @@ Cycles: `scripts/blender/renderer/finals/finals.py` does all of this - `start_in
 (rebuild from the .3dm via MCP; the names `study_run.py` expects), `.blend`, finals, `study-notes.md`, `library/` (`polyhaven/`, `local/` — every asset the
 study uses, RULES AST_03), `_wip/` (controls, boards, test scripts, crops, measurements,
 downloads — everything the study produces, RULES AST_01). Delete `*.blend1` / `*.3dmbak`.
-Closing a study: `## Milestones` list in study-notes.md, then `study_close.py` (RULES AST_02).
-Names (RULES AST_05): older studies keep `<yymmdd>_<topic>` and `STUDY_NOTES.md`; keep writing
-to that file there, never add a `study-notes.md` beside it. The study scripts read either name
-and stop if a study has both.
+Closing a study: `## Final scene` and `## Milestones` lists in study-notes.md, then `study_close.py`, which writes `closed.md` (RULES AST_02).
+Names follow RULES AST_05.
 
 ## MCP tools
 `execute_blender_code` (assign a dict to `result`), `get_objects_summary`,
@@ -284,7 +282,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Measure | `scripts\research\imgstats.py stats|patch|diff`; `scripts\research\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\research\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `scripts\research\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\workflow\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
-| Maintenance | `scripts\workflow\helper_index.py` (writes [blender-python-helpers.md](blender-python-helpers.md)), `scripts\review\regress_helpers.py` (old vs new helper output), `scripts\workflow\codex_review.py` (Codex reviews a change before push, RULES AGT_01), `scripts\workflow\study_close.py` (close a study: keep milestones, delete the rest, RULES AST_02) |
+| Maintenance | `scripts\workflow\helper_index.py` (writes [blender-python-helpers.md](blender-python-helpers.md)), `scripts\review\regress_helpers.py` (old vs new helper output), `scripts\workflow\codex_review.py` (Codex reviews a change before push, RULES AGT_01), `scripts\workflow\study_close.py` (close a study: keep the final scene and milestone images, delete the rest, write `closed.md`, RULES AST_02) |
 | Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tile/tiles.md). |
 | Controls | `scripts\controls\lighting\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`); `weathering_lab.py` (flat-wall look lab, `-- <out> <tag> [key=value]`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |

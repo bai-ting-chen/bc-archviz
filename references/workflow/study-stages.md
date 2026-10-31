@@ -23,6 +23,6 @@ Who does each stage in each mode; mode and model choice is in work-modes.md.
 | **15. Study notes** | writes Decisions, findings, open items | appends numbers and traps to its report | writes the Decisions section and the user's choices | writes findings, numbers, traps, open items |
 | **16. Skill changes** | edits, `MIGRATE.md`, commits, pushes after Codex's review | reviews | reads Codex's proposed diff, commits and pushes it | drafts the change in the skill folder, uncommitted |
 | **17. Training** (AGT_03) | compares its verdict with Codex's self-judgement, writes lessons | self-judgement at the end of each report | only when the user asks for it in CPM | same |
-| **18. Close a study** (AST_02) | lists the milestones, runs `study_close.py` | — | lists the milestones | runs `study_close.py`, plan first, then `--apply` |
+| **18. Close a study** (AST_02) | names the final scene, asks the user for milestone images, runs `study_close.py` | — | names the final scene, asks the user for milestone images | runs `study_close.py`, plan first, then `--apply` |
 
 The agent working on the files holds AGENT_LOCK (RULES AGT_04); in CPM that is the Codex builder.

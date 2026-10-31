@@ -17,6 +17,10 @@ instructions behind.
   `archviz.project_root()`, never a user folder or a fixed project path. A machine-specific
   resource such as the Render Reference Library gets a default location plus "ask if missing".
 - Code goes into `scripts/` only once it runs on a scene it was not written for.
+- **No one-time operations** (RULES GOV_01): a folder rename or a single migration stays in chat; a note the other
+  machine needs goes in MIGRATE.md.
+- **Purpose first, smallest design** (RULES GOV_04): prefer allow-lists to inference; Codex briefs and review
+  prompts say "no extra safeguards without a failure scenario".
 - **State each rule once, in [RULES.md](../../RULES.md).** [SKILL.md](../../SKILL.md) and the references carry only the how-to
   (commands, functions, numbers) and a pointer such as "(RULES AST_03)". A rule repeated in several
   files drifts apart the first time it changes.
@@ -27,7 +31,7 @@ instructions behind.
 
   | Pattern | Use when | Write it with | Files |
   |---|---|---|---|
-  | Sequential workflow | steps in a fixed order | numbered steps; what each step needs from the one before; a check after each step; how to undo a failed step | pipeline.md, max-import.md, study-lifecycle.md, gates.md, §4 of material and effect references |
+  | Sequential workflow | steps in a fixed order | numbered steps; what each step needs from the one before; a check after each step; how to undo a failed step | pipeline.md, max-import.md, study-close.md, gates.md, §4 of material and effect references |
   | Multi-MCP coordination | one job spans Rhino (Rook), Blender and host tools | one phase per tool; what is handed to the next phase (file, path, names); a check before the next phase; errors handled in one place | pipeline.md (Rhino → Blender) |
   | Iterative refinement | quality improves round by round | measurable criteria first; the check script; the loop (fix, re-render, re-measure); when to stop | validation.md, research-loop.md, the look rounds in pipeline.md |
   | Context-aware selection | same outcome, different method by case | a decision table with its criteria; the fallback; say which was chosen and why | renderer-choice.md, materials/index.md, texture-selection.md, caustics.md §1 |

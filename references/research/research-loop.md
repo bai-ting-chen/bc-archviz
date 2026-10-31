@@ -8,7 +8,7 @@ material gate (RULES GAT_03) and the final render gate (RULES GAT_04).
 A study built from a scripted test scene (no Rhino) has no model gate.
 
 ## The loop (one question at a time)
-1. **Question.** Write it in the study notes (`study-notes.md`, or `STUDY_NOTES.md` in older studies) › Open questions as one testable sentence with a
+1. **Question.** Write it in the study notes (`study-notes.md`) › Open questions as one testable sentence with a
    measurable answer ("does a FLIP plunge read closer to the refs than the procedural one, at what
    bake cost?"). Take the next one from the study's open items, [capabilities.md](../scene/capabilities.md) rows marked
    `research` / `test`, or a failure you just saw. One question per loop.
