@@ -35,5 +35,8 @@ on the mesh with a Subdivision modifier (SIMPLE, adaptive 1 px) last in the stac
 No generic layers apply to this file.
 
 ## 5. Troubleshooting
-This file records no symptoms of its own. The general problems are in troubleshooting.md (named here,
-not linked, so this file adds no reference loop).
+| Symptom | Cause | Fix |
+|---|---|---|
+| A shelf or fin where the surface should be flat | a distance field that drives a fin or a displacement went negative and was amplified (one case: ~100×, a shelf on the floor) | clamp every distance before it drives geometry |
+
+Generic problems: troubleshooting.md (named here, not linked, so this file adds no reference loop).

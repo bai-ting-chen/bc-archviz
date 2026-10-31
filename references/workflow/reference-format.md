@@ -30,8 +30,9 @@ nothing to say keeps its heading and says why in one line (e.g. "No code: the la
 
 ## 5. Troubleshooting
 - A table: Symptom | Cause | Fix, each fix pointing to the `§4.x` that holds it.
-- Then a bullet list of generic problems that show up with this material, linking
-  troubleshooting.md.
+- Then a bullet list of generic problems that show up with this material, naming
+  troubleshooting.md in plain text. A problem that belongs to this material only goes in the table
+  here, not in troubleshooting.md.
 
 ## Writing rules
 - State each rule once, in RULES.md. Cite it as `(RULES MAT_07)`; do not restate it.

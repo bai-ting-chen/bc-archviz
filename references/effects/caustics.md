@@ -183,12 +183,13 @@ Model the relief as geometry: bump and normal maps do not bend a caustic.
 | Pool floor goes black for no visible reason | `caustics_refractive = False` also blocks sky and lamp light reaching submerged surfaces through water | do not switch it off to remove a caustic; the photon bake is the one place it is off on purpose (§4.5) |
 | Path-traced caustic blurred away | Filter Glossy above 0 blurs what path tracing is trying to resolve | Filter Glossy 0 for path-traced caustics; check the method against §4.1 |
 | Caustic looks right but integrates far off | not checked against the energy baseline | energy control and baseline (§4.1) |
-| No sun glints through the glass from the camera side | light type camera rays cannot hit (LuxCore `distant`) | LuxCore `sun` (§4.1) |
+| No sun glints through the glass from the camera side | light type camera rays cannot hit (LuxCore `distant`) | LuxCore `sun` (§4.1), only in an isolated control without an HDRI, never a second daylight source (RULES LGT_02) |
 | LuxCore GPU shows camera paths only, no caustic | *Use CPUs* off; light tracing runs on CPU threads | turn it on; GPU + CPU is the faster caustic (§4.1) |
 | Caustic does not follow a moved light or object | photon bake is a bake, not a shader | re-bake after any light or object change (§4.5) |
 | Caustic lines read as vertical streaks on a wall | grazing angle squeezes shapes 4–5× sideways | judge the pattern on a face-on surface (§4.2) |
 | One bright fold line per ridge set | single-frequency sine | random wave sum, log-uniform λ (§4.2) |
 | Thin straight streak along unit edges | cylindrical lenses at rounded edges and fades | wider fade or larger radii (§4.2) |
 | Flat glow by the far wall, or grey mush | relief not sized to the receiver distance; short waves at high slope | size from the receiver distance; long waves at slope ≈ 0.04 (§4.2) |
+| Submerged surfaces black under lamps | shadow rays cannot pass refraction | MNEE with a diced top plane (§4.3); a transport diagnostic, subject to renderer choice (RULES REN_03) |
 
 Generic problems: troubleshooting.md.

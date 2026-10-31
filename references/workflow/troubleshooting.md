@@ -1,271 +1,199 @@
 # Troubleshooting
 
+Use when: an error message appears, or a render shows something unexpected and the cause is not yet
+known. Generic problems only: a problem that belongs to one material or effect is in that file's
+§5 Troubleshooting.
+
+Each entry: the symptom as you meet it; **Seen as:** the exact text, for problems that print one;
+**Cause**; **Check:** the order to test, where one symptom has several causes; **Fix**.
+
 ## Connection and execution
 
-### MCP port 9876 not listening
+### Blender MCP cannot connect
+Seen as: `Cannot connect to Blender at 127.0.0.1:9876. Ensure Blender is running with the MCP addon enabled and the server started.`
+Cause: nothing listens on port 9876: Blender is closed, the `mcp` add-on is off or its server did not
+start, or *Allow Online Access* is off (needed even for localhost). No crash log is not proof of a
+clean exit.
+Check: Blender process running → add-on enabled with autostart → *Allow Online Access* → port 9876 listening.
+Fix: correct the first check that fails, then relaunch. See [pipeline.md](../scene/pipeline.md) › Install.
 
-Cause: A missing listener has several possible causes; no crash log is not proof of a clean exit.
-Fix: Inspect Blender process, port 9876, add-on state and Allow Online Access before relaunching. See [pipeline.md](../scene/pipeline.md).
+### Blender MCP times out
+Seen as: `Blender connection timed out at 127.0.0.1:9876`
+Cause: Blender is running but has not answered in time: a render or a long script holds it.
+Fix: check what Blender is doing before sending more; never relaunch while a render runs (RULES AGT_04).
+Split long scripts into shorter calls. See [pipeline.md](../scene/pipeline.md) › MCP tools.
 
-### `refmatch.py` / `imgstats.py`: No module named numpy
+### Blender MCP returns nothing or garbage
+Seen as: `Empty response from Blender`, `Invalid response from Blender at 127.0.0.1:9876: …` or
+`Socket error communicating with Blender at 127.0.0.1:9876: …`
+Cause: Blender closed or the add-on failed during the call (on Windows a closed Blender usually gives
+the socket error).
+Fix: check whether Blender is still running and re-read the scene state before retrying a write.
 
-Cause: The host interpreter lacks numpy or Pillow.
-Fix: `pip install numpy pillow` into the MCP venv. See [pipeline.md](../scene/pipeline.md).
+### Host tool cannot import numpy or Pillow
+Seen as: `ModuleNotFoundError: No module named 'numpy'` (or `'PIL'`) from `refmatch.py` / `imgstats.py`
+Cause: the script ran on an interpreter without numpy and Pillow.
+Fix: run host tools with the MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`), or
+`pip install numpy pillow` into that venv. See [pipeline.md](../scene/pipeline.md) › Install.
 
 ### Edited look script fails to run
+Seen as: `syntax error, nothing sent to Blender: <file>:<line>: <msg>` from `study_run.py`
+Cause: a scripted edit appended a `# reason` comment to a line that continues a call, so the rest of
+the call became a comment.
+Fix: put the comment on its own line above the value, or edit with the Edit tool. See
+[pipeline.md](../scene/pipeline.md) › Iteration loop.
 
-Cause: A scripted edit put a `#` comment mid-call.
-Fix: Syntax-check the scripts in the runner (pipeline). See [pipeline.md](../scene/pipeline.md).
+### Poly Haven download fails with HTTP 52x
+Seen as: `HTTP Error 520: …` to `HTTP Error 525: …` from `polyhaven_fetch.py`
+Cause: Cloudflare in front of Poly Haven returned a server-side error.
+Fix: check for a partial or existing download, then retry the same request a bounded number of
+times; stop and report a persistent failure. See [pipeline.md](../scene/pipeline.md) › Assets.
 
-### Poly Haven download `HTTP Error 52x`
+### Script works headless, fails in the UI
+Seen as: `RuntimeError: Operator bpy.ops.… .poll() Context missing active object` from a UI startup script
+Cause: a UI startup script runs operators in a different context from a background run.
+Fix: wrap operators in `temp_override`. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
-Cause: The download endpoint returned a server-side 52x response.
-Fix: Check any existing download, then retry the same request a bounded number of times; stop and report persistent server failures. See [pipeline.md](../scene/pipeline.md).
+### Rook call hangs, "dispatcher busy", or a file won't open
+Seen as: a Rook call that returns nothing for ~2 min, then a timeout or "dispatcher busy"
+Cause: a long script still running on Rhino's UI thread, or a modal dialog (save changes?, crash
+report) blocking every call.
+Check: Rhino process CPU → a dialog on Rhino's screen → the target document's state.
+Fix: wait for active work; a dialog only the user can dismiss. Split future calls and use
+closed-form layouts instead of per-element curve queries. Never blindly retry writes or terminate
+Rhino; that is the user's decision. See [pipeline.md](../scene/pipeline.md) › Rhino reference.
 
-### Script works headless, fails in the UI ("Context missing active object")
+### `bpy_struct[key] = val: id properties not supported` on a GN modifier
+Seen as: `bpy_struct[key] = val: id properties not supported`
+Cause: Geometry Nodes interface inputs need the Blender-version-specific setter.
+Fix: 5.2 inputs: `effects.edge_wear.set_input(mod, name, value)`. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
-Cause: UI startup scripts have a different operator context from background runs.
-Fix: Operators need `temp_override` in a UI startup script (blender-api-traps). See [blender-api-traps.md](../scene/blender-api-traps.md).
-
-### Rook call hangs / "dispatcher busy" / file won't open
-
-Cause: A long script may still be running or a modal dialog may block the dispatcher.
-Fix: Inspect responsiveness, CPU/process state and target state before any further write. Wait for active work; split future calls and use closed-form layouts instead of per-element curve queries. Never blindly retry or terminate Rhino; destructive termination needs the user’s decision. See [pipeline.md](../scene/pipeline.md).
+### LuxCore crashes at export
+Seen as: `EXCEPTION_ACCESS_VIOLATION` in `pyluxcore.pyd`, no Python error
+Cause: a native mapping's `uvindex` points at a missing UV layer (-1).
+Fix: build every UV layer the tree references on every run, even when the map itself is cached; or
+correct `uvindex` before export. See [luxcore.md](../renderer/luxcore.md#native-luxcore-materials-scriptsblenderrendererluxcoreluxcorepy).
 
 ## Camera and lighting
 
 ### Camera framing far off after setting lens shift
+Cause: with `sensor_fit = HORIZONTAL`, `shift_x/shift_y` are fractions of the frame **width** even on a
+portrait frame, and +shift_x moves the frame right.
+Fix: the shift formulas in lighting-camera.md › Recreating a reference › 1. Camera; check by
+projecting a far point with `world_to_camera_view`. See [lighting-camera.md](../scene/lighting-camera.md).
 
-Cause: Shift units/sign trap.
-Fix: Probe with `world_to_camera_view` (lighting-camera). See [lighting-camera.md](../scene/lighting-camera.md).
+### Scripted camera faces the wrong way, or a huge lens shift
+Cause: `matrix_world` is stale after setting the rotation.
+Fix: `view_layer.update()` before reading it (done in `straighten_verticals`). See [lighting-camera.md](../scene/lighting-camera.md).
 
-### One long line runs down the camera axis on floor and ceiling
+### Camera from a Rhino named view frames wider or narrower
+Cause: Rhino's lens length on a square view is the FOV of a 24 mm frame side.
+Fix: same lens with `sensor_width = 24` and a square render; match the frustum. See
+[pipeline.md](../scene/pipeline.md) › Rhino reference.
 
-Cause: A texture's panel joint at UV 0 = world 0.
-Fix: Offset the UVs (materials). See [texture-selection.md](../materials/texture-selection.md).
+### Render white, or exposure ignored
+Cause: `archviz.render_setup` resets the view exposure, so calling it after `physical_camera` wipes it.
+Fix: call `render_setup` before `physical_camera`. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
-### Material/light change has no visible effect
+### Material or light change has no visible effect
+Cause: a stale mesh or dependency graph, so the render still uses the old data.
+Fix: `update_tag()` and `view_layer.update()`, then prove the change with a control (RULES VAL_02).
+See [validation.md](../review/validation.md).
 
-Cause: The mesh or dependency graph may be stale.
-Fix: Check stale mesh/depsgraph state with update_tag() and view_layer.update(); prove the result using VAL_02. See [validation.md](../review/validation.md).
+### Lamp or bulb invisible in the render
+Cause: camera visibility depends on the light type and the Blender version.
+Fix: check `visible_camera` and confirm the actual source in a small control. See [lighting-camera.md](../scene/lighting-camera.md).
+
+### IES or point light much dimmer than the hand calculation
+Cause: its sphere (radius) sits partly inside the ceiling or housing.
+Fix: centre it radius + 2 mm clear (lighting-camera.md › IES). See [lighting-camera.md](../scene/lighting-camera.md).
 
 ### Colour cast from a pool or glass
-
-Cause: A lens seen through water by transmission rays.
-Fix: `interior.lit_once()` (lighting-camera) Ray visibility here is an emitter-path approximation; declare its bias under REN_02. See [lighting-camera.md](../scene/lighting-camera.md).
+Cause: a lens or emitter reaches surfaces through water or glass as *transmission* rays; visibility
+follows the last bounce, so turning diffuse off alone still leaks.
+Fix: `interior.lit_once()` (`visible_diffuse` and `visible_transmission` off). Ray visibility is an
+emitter-path approximation; declare its bias (RULES REN_02). See [lighting-camera.md](../scene/lighting-camera.md).
 
 ### Unwanted scallops on a washed wall
-
-Cause: Spots used as washers.
-Fix: A linear source along the wall (lighting-camera). See [lighting-camera.md](../scene/lighting-camera.md).
+Cause: spots used as wall washers.
+Fix: a linear source along the wall. See [lighting-camera.md](../scene/lighting-camera.md).
 
 ### Image too cold after white balance
-
-Cause: White balance temperature denotes the light rendered neutral; warming depends on the current neutral point and tint.
-Fix: Use the current warming/tint procedure and compare the entire reference image before changing temperature. See [lighting-camera.md](../scene/lighting-camera.md).
-
-### `bpy_struct[key] = val: id properties not supported` on a GN modifier
-
-Cause: The GN interface socket needs the Blender-version-specific setter.
-Fix: 5.2 inputs: `effects.edge_wear.set_input(mod, name, value)`. See [blender-api-traps.md](../scene/blender-api-traps.md).
-
-### IES / point light much dimmer than the hand calc
-
-Cause: Its sphere (radius) is partly inside the ceiling or housing.
-Fix: Centre it radius + 2 mm clear (lighting-camera › IES). See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Scripted camera faces the wrong way / huge lens shift
-
-Cause: `matrix_world` stale after setting rotation.
-Fix: `view_layer.update()` (fixed in `straighten_verticals`). See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Lamp/bulb invisible in render
-
-Cause: Camera visibility depends on light type and Blender version.
-Fix: Check visible_camera and confirm the actual source in a small control. See [lighting-camera.md](../scene/lighting-camera.md).
+Cause: the white-balance temperature names the light rendered neutral; warming depends on the current
+neutral point and tint.
+Fix: use the current warming and tint procedure and compare the whole reference image before changing
+the temperature. See [lighting-camera.md](../scene/lighting-camera.md).
 
 ### Glazing far darker than the reference
+Cause: the room seen through it or the environment it reflects is too dark; Fresnel depends on angle and IOR.
+Check: room lighting → HDRI reflection direction, against the reference.
+Fix: correct the darker of the two; declare any added room light. See [lighting-camera.md](../scene/lighting-camera.md).
 
-Cause: The transmitted room or reflected environment may be too dark; Fresnel depends on angle and IOR.
-Fix: Check room lighting and HDRI reflection direction against the reference; declare any added room light. See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Render white / exposure ignored
-
-Cause: `archviz.render_setup` sets view exposure.
-Fix: Call it before `physical_camera`. See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Light triangles hanging below an arris
-
-Cause: The leak/raycast field was evaluated after chip geometry.
-Fix: Compute the leak field on the clean shell before chip geometry. See [edge-wear.md](../effects/edge-wear.md).
+### An area renders black that is bright in the reference
+Cause: the model may be roofed where the reference is open to the sky.
+Fix: check sky access over that area against the reference. See [lighting-camera.md](../scene/lighting-camera.md).
 
 ### House edge crisp against a soft HDRI backplate
+Cause: the rendered subject and the photographed backplate have different depth-of-field softness.
+Fix: slight DOF in front of the subject (lighting-camera.md › Soft backplate). See [lighting-camera.md](../scene/lighting-camera.md).
 
-Cause: The rendered subject and photographed HDRI backplate have different depth-of-field softness.
-Fix: Slight DOF in front of the subject (lighting-camera.md > Soft backplate). See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Camera from a Rhino named view frames wider/narrower
-
-Cause: Rhino's lens length refers to the frame's short side on a square view.
-Fix: Match the frustum (pipeline.md). See [pipeline.md](../scene/pipeline.md).
-
-## Materials and geometry
-
-### Whole floor/slab gets edge grime
-
-Cause: Object without the GN modifier reads `edge_dist` = 0 = "on an arris".
-Fix: Gate it (edge-wear). See [edge-wear.md](../effects/edge-wear.md).
-
-### Chips read as dark spots
-
-Cause: The fresh-break colour is taken after grime, ink or other darkening layers, so the chip inherits them.
-Fix: Derive it from the clean base, lighter and rougher, with a soft mask. See [edge-wear.md](../effects/edge-wear.md).
-
-### Grunge invisible, or reads as smoke
-
-Cause: Invisible: the remap extremes are rarely reached, fields are averaged or masked. Smoke or blur: isotropic, distorted cloud noise.
-Fix: Normalise by the measured SD and set the gain from the image; build weathering gravity-shaped (run-off). See [variation.md](../effects/variation.md).
-
-### Scan-based grunge brings bands or lines
-
-Cause: The scan itself is directional (board-formed, panels, brushing) and adds its own lines.
-Fix: Check the scan's preview; use a non-directional scan or a procedural field. See [variation.md](../effects/variation.md).
-
-### Strength preview speckles on water or glass
-
-Cause: The layer AOV holds only part of the surface behind a transparent layer; dividing by it explodes.
-Fix: Rescale only dry opaque pixels with plausible multipliers. See [validation.md](../review/validation.md).
+## Materials, geometry and images
 
 ### Imported object has 0 faces
+Cause: the .3dm has no cached render mesh for it.
+Fix: force render meshes in an owned export; extract mesh data without modifying or saving the
+user's document. See [pipeline.md](../scene/pipeline.md) › Rhino reference.
 
-Cause: No cached render mesh in the .3dm.
-Fix: Force render meshes in an owned export mesh. Extract mesh data without modifying or saving the user’s source document. See [pipeline.md](../scene/pipeline.md).
+### Rhino boxes or slabs hang below their datum
+Cause: `Extrusion.Create` follows the curve's plane normal, so a clockwise outline extrudes down.
+Fix: `Surface.CreateExtrusion(curve, Vector3d(0, 0, h))` + `CapPlanarHoles`. See [pipeline.md](../scene/pipeline.md) › Rhino reference.
 
-### GN geometry renders with source's material
+### GN geometry renders with its source's material
+Cause: Object Info and Collection Info geometry keeps the source's materials.
+Fix: a Set Material node on the instanced geometry. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
-Cause: Object Info instances inherit their source material.
-Fix: Set Material. See [blender-api-traps.md](../scene/blender-api-traps.md).
+### One long line runs down the camera axis on floor and ceiling
+Cause: a tiled map's joint line at UV 0 = world 0, which is usually the camera axis.
+Fix: offset the UVs by a fraction of a tile. See [texture-selection.md](../materials/texture-selection.md) › Tiled maps.
 
-### An area renders black that is bright in the ref
-
-Cause: The model may be roofed where the reference is open to the sky.
-Fix: Check sky access. See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Visible joint grid on walls / a curved wall
-
-Cause: Texture tile edges.
-Fix: Rotate/flatten the map (materials › Tiled maps). See [texture-selection.md](../materials/texture-selection.md).
-
-### Printed map stains repeat
-
-Cause: A tiled diffuse with distinctive stains repeats at its tile size.
-Fix: Mix the diffuse part-way toward its own mean, and add a low-frequency tone field. See [variation.md](../effects/variation.md).
+### Visible joint grid on walls or a curved wall
+Cause: the map's tile edges, wherever it repeats in both directions.
+Fix: rotate or flatten the map (texture-selection.md › Tiled maps). See [texture-selection.md](../materials/texture-selection.md).
 
 ### Relief vanishes on a bright wall
+Cause: near display value ~0.8, AgX's highlight roll-off flattens relief shading: grain, steps and fins disappear.
+Fix: match the reference's typical wall, not its brightest patch; lower the base or the exposure. See [physical-ranges.md](../materials/physical-ranges.md).
 
-Cause: Near display value ~0.8, AgX's highlight roll-off flattens relief shading: grain, steps and fins disappear.
-Fix: Match the reference's typical wall, not its brightest patch; lower the base or the exposure. See [physical-ranges.md](../materials/physical-ranges.md).
+### Water, haze or fog volume murky and dark
+Cause: `cycles.volume_bounces` defaults to 0, so Volume Scatter only removes light.
+Fix: 2-4 for absorbing water and light haze; ~8 for dense fog (`atmosphere.volume_render_settings`).
+See [blender-api-traps.md](../scene/blender-api-traps.md).
 
-### Displacement shelf from a negative distance
-
-Cause: A distance field that drives a fin or a displacement went negative and was amplified (one case: ~100×, a shelf on the floor).
-Fix: Clamp every distance before it drives geometry. See [displacement.md](../materials/displacement/displacement.md).
-
-### Water/haze/fog volume murky and dark
-
-Cause: Check the volume-bounce setting for this Blender version.
-Fix: `cycles.volume_bounces` defaults to 0 (blender-api-traps › Render). See [blender-api-traps.md](../scene/blender-api-traps.md).
-
-### Rhino boxes/slabs hang below their datum
-
-Cause: `Extrusion.Create` follows the curve normal.
-Fix: `Surface.CreateExtrusion` (pipeline). See [pipeline.md](../scene/pipeline.md).
-
-### Ripples look fake or stretched
-
-Cause: A shader noise bump or stretched mapping does not reproduce the sampled water geometry.
-Fix: Ocean geometry on a finer mesh, never stretch (water-surface). See [water-surface.md](../materials/water/water-surface.md).
-
-### Imported .max: trunk/twigs missing, leaves rendered as bark, bark squashed
-
-Cause: Stock io_scene_max import.
-Fix: Use `max_import.load` and its checks (max-import.md). See [max-import.md](../scene/max-import.md).
-
-### Back-lit leaves glint white
-
-Cause: The imported glossiness scalar can override the wired map.
-Fix: The importer's stored glossiness scalar used instead of the wired glossiness map (max-import.md › Materials). See [max-import.md](../scene/max-import.md).
-
-### Grass sinks dark / lawn reads grey when wet
-
-Cause: Canopy albedo and grazing-angle wet-film reflection can suppress saturation.
-Fix: Canopy albedo is ~0.05-0.1 (softer AgX look); wet sheen at grazing - darker base ([wet-surfaces.md](../effects/wet-surfaces.md)). See [wet-surfaces.md](../effects/wet-surfaces.md).
-
-### Foam reads as snow cones with black holes
-
-Cause: Spiky short boils + a hard foam switch over a dark trench.
-Fix: Rounded chop, milky subsurface whitewater, soft foam mask ([water-foam.md](../materials/water/water-foam.md)). See [water-foam.md](../materials/water/water-foam.md).
-
-### Black band at a waterline seen through glass
-
-Cause: An open water sheet may expose a dark void below troughs.
-Fix: In whitewater/trough contexts, check for an open water sheet over a void and add the scoped milky body below troughs. Clear pools keep their clear optical body; do not silently make them opaque. See [water-foam.md](../materials/water/water-foam.md).
-
-### Splash drops read as a dark band
-
-Cause: Clear drops in soft light refract the dark surroundings.
-Fix: Fewer, higher, spread ([water-splash.md](../materials/water/water-splash.md)). See [water-splash.md](../materials/water/water-splash.md).
+### Strength preview speckles on water or glass
+Cause: behind a transparent layer the AOV holds only part of the surface; dividing by it explodes.
+Fix: rescale only dry opaque pixels with plausible multipliers. See [validation.md](../review/validation.md).
 
 ### Multilayer EXR seems to hold only Combined
-
 Cause: Blender 5.2 writes multi-part EXRs; the reader opened only the first part.
-Fix: Read every part (`seek_subimage`) with the bundled OpenImageIO. See [blender-api-traps.md](../scene/blender-api-traps.md).
+Fix: read every part (`seek_subimage`) with the bundled OpenImageIO. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
-## LuxCore and caustics
-
-### Submerged surfaces black under lamps
-
-Cause: Shadow rays can't pass refraction.
-Fix: MNEE with a diced top plane (caustics.md). This is a transport/tessellation diagnostic, subject to [renderer selection REN_03](../renderer/renderer-choice.md). See [caustics.md](../effects/caustics.md).
-
-### LuxCore test sun casts but never glints through glass
-
-Cause: `distant` lights are never hit by camera rays.
-Fix: Use the `sun` type (luxcore.md). Use this only in an isolated non-HDRI control (LGT_02), never as a second scene daylight source. See [luxcore.md](../renderer/luxcore.md).
+## LuxCore
 
 ### LuxCore saved image noisy though OIDN ran
+Cause: the denoised image is a separate `DENOISED` pass; a plain save writes the raw pipeline.
+Fix: route `DENOISED` through the compositor. See [luxcore.md](../renderer/luxcore.md).
 
-Cause: The denoised image is a separate DENOISED pass.
-Fix: Route it through the compositor (luxcore.md). See [luxcore.md](../renderer/luxcore.md).
-
-### Caustics a flat glow on far surfaces / one S-shaped bright line per pattern tile
-
-Cause: Relief too steep (focal length cm) / single-frequency pattern.
-Fix: Size relief slope from receiver distance, randomise (caustics.md › Designing a refractive relief). See [caustics.md](../effects/caustics.md).
-
-### Cloudy blotches on smooth walls/ceiling after OIDN (LuxCore)
-
-Cause: Fireflies from caustic-bounce paths.
-Fix: Radiance clamping, not more time (luxcore.md › Fireflies). Clamping is biased; disclose it under REN_02. See [luxcore.md](../renderer/luxcore.md).
-
-### LuxCore crashes at export, `EXCEPTION_ACCESS_VIOLATION` in pyluxcore
-
-Cause: A native mapping references a missing UV layer.
-Fix: Create and validate the referenced UV layer, or correct uvindex before export. See [luxcore.md](../renderer/luxcore.md#native-luxcore-materials-scriptsblenderrendererluxcoreluxcorepy).
-
-### Caustics on a wall look like vertical streaks
-
-Cause: A grazing receiver view stretches the apparent caustic pattern.
-Fix: Seen at a grazing angle; judge on a face-on surface (caustics.md). See [caustics.md](../effects/caustics.md).
+### Cloudy blotches on smooth walls or ceiling after OIDN
+Cause: fireflies from caustic-bounce paths, which OIDN smears into clouds.
+Fix: radiance clamping, not more time (`engine_setup` sets it; luxcore.md › Fireflies). Clamping is
+biased; disclose it (RULES REN_02). See [luxcore.md](../renderer/luxcore.md).
 
 ## Final output
 
 ### Saved final is grainy after a stop or cancel
-
-Cause: Stopping/cancelling may skip the denoiser and compositor.
+Cause: stopping or cancelling may skip the denoiser and the compositor.
 Fix: Cycles: `finals.py -- denoise` from the passes EXR; LuxCore: `from_passes.py`. See [render-settings.md](../renderer/render-settings.md).
 
 ### No-limit final renders only one block ("0/4 tiles")
-
-Cause: Cycles auto-tiling is still enabled.
-Fix: Auto-tiling: tile off + tile size > frame (`finals.setup_unlimited`). See [render-settings.md](../renderer/render-settings.md).
+Cause: Cycles auto-tiling is still on.
+Fix: auto-tile off and tile size above the frame (`finals.setup_unlimited`). See [render-settings.md](../renderer/render-settings.md).

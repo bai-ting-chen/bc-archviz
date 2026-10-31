@@ -154,5 +154,6 @@ perfectly regular units and razor-clean corners read as CG. How: materials/varia
 | Constant-width band or contour ring | fixed extent | slow noise that reaches zero; blob marks (§4.6) |
 | Box-mapped surface looks wrong in relief | normal map used on a box projection | Bump from height (§4.4) |
 | Perfectly regular units read as CG | no per-unit variation or corner dust | per-unit variation and joint dust (§4.7) |
+| Printed stains repeat at the tile size | a tiled diffuse with distinctive stains | mix the diffuse part-way toward its own mean and add a low-frequency tone field |
 
 Generic problems that often show up with this material, in troubleshooting.md.

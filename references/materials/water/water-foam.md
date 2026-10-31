@@ -116,7 +116,8 @@ Generic layers, foam settings:
 | Foam stops where the fall stops | no sideways drift | drift growing with distance (§4.1) |
 | White clumps at strong impacts | crowns as open shells (light trapped), not foam | thin-wall crowns (water-splash.md) |
 | Only white foam, no sparkle far out | no floating bubbles | bubbles (§4.2) |
-| Snow cones with black holes | hard foam switch over a dark trench | soft mask, milky body (§4.3) |
+| Snow cones with black holes | spiky short boils and a hard foam switch over a dark trench | rounded chop (`references/materials/water/water-ripple.md`), soft mask, milky body (§4.3) |
+| Black band at a waterline seen through glass | an open water sheet over a dark void below the troughs | in whitewater and trough contexts, the scoped milky body below the troughs (§4.3); a clear pool keeps its clear body, never made opaque silently |
 
 Generic problems: `references/workflow/troubleshooting.md` (not linked from this file: a link here
 would close a reference loop).

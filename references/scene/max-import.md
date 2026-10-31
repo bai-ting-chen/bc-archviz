@@ -42,6 +42,10 @@ are faces that were not rebuilt.
 vendor materials by hand in Blender from the supplied maps (RULES PIP_01). Vendor MAXScript material libraries
 (often obfuscated) are not run.
 - Glossiness → roughness = 1 − gloss (Non-Color). Roughness maps wire directly.
+- **A wired V-Ray map overrides the scalar stored next to it.** The importer carries only the scalar (e.g.
+  reflection glossiness 0.65). A needle card at roughness 0.35 glinted white at grazing sun; its glossiness map
+  (0.136 in the needles → roughness ≥ 0.86) removes the glints and keeps the sheen (control: specular off vs
+  map, same seed).
 - Leaf cards: Principled (albedo, roughness, normal, IOR 1.6) **+** Translucent (transmission map, else albedo),
   cut by the opacity map through Mix with Transparent. Green leaves reflect and transmit only ~0.1 each
   ([vegetation.md](../materials/vegetation/vegetation.md)), so Add stays energy-conserving.
@@ -75,3 +79,9 @@ vendor materials by hand in Blender from the supplied maps (RULES PIP_01). Vendo
   whose - leave such species out rather than guess.
 - Stems without a map come in grey 0.5: colour them from the clump's leaf-map linear mean.
 - `max_import.origin_to_root(obj)` puts a clump's origin at its root for scattering.
+
+## Troubleshooting
+| Symptom | Cause | Fix |
+|---|---|---|
+| Trunk or twigs missing, leaves rendered as bark, bark squashed | stock `io_scene_max` import | `max_import.load` and its step 2 checks (*What the importer gets wrong*) |
+| Back-lit leaves glint white | the importer's stored glossiness scalar used instead of the wired glossiness map | wire the map (*Materials*) |
