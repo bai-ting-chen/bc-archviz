@@ -55,38 +55,64 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `trace(geom_path, n, seed, source, max_bounce=40)` — Trace n photons from `source` through the exported glass and histogram where they land (background Blender).
 
+## `effects.crack_ribbon` — Compact Cycles crack masks from seeded polylines; avoids expanding every segment into SVM.
+
+- `crack_polylines(seed)` — Return the main unit-arclength polyline and its optional narrower offshoots.
+- `crooked_ribbon_masks(g, F, along, perp, wob, on, C, L, y, seed=3, physical_length=None)` — Sample a seeded crooked polyline mask with fine shader wobble and unchanged nominal widths.
+
 ## `effects.cracks` — Cracks on a concrete wall: shrinkage cracks from the corners of openings, patchy map-cracking over the rest, a dark core, a grime halo and a shallow groove. Works on a weathered_concrete material.
 
 - `crack_masks(g, F, openings, C)` — Core and halo masks for the shrinkage cracks from each opening's corners, plus map-cracking.
-- `add_cracks(mat, openings=(), crack=None)` — On a weathered_concrete material: shrinkage cracks from opening corners + patchy map-cracking; dark core over everything, grime halo, groove. openings: (axis 'x'|'y', plane, u0, u1, v0, v1, top_only[, keep_angles]).
+- `add_cracks(mat, openings=(), crack=None, amount=1.0)` — On a weathered_concrete material: shrinkage cracks from opening corners + patchy map-cracking; dark core over everything, grime halo, groove. openings: (axis 'x'|'y', plane, u0, u1, v0, v1, top_only[, keep_angles]).
+- `apply_crack_masks(mat, g, F, core, halo, C, amount, label)` — Compose crack core, halo and groove under one independent amount.
 
 ## `effects.edge_chips` — Edge chips as real geometry: dice a mesh, then a Geometry Nodes modifier that cuts chips along arrises.
 
 - `dice(obj, size=0.05)` — Subdivide in place by repeated halving of over-long edges (grid fill keeps quads).
 - `input_socket(ng, name, kind, default, subtype=None)` — Add a group input with a default (and an optional unit subtype).
-- `edge_field(b, gi, x0)` — Distance to the nearest convex arris -> `edge_dist`, and the rest position offset by the group's Seed -> `rest_pos` (noise lookups; a per-object Seed decorrelates repeated objects). Measured on outward-normal meshes: convex arrises give a POSITIVE signed angle, inner corners a negative one.
+- `edge_field(b, gi, x0, vertex_junctions=False)` — Distance to the nearest convex arris -> `edge_dist`, and the rest position offset by the group's Seed -> `rest_pos` (noise lookups; a per-object Seed decorrelates repeated objects). Measured on outward-normal meshes: convex arrises give a POSITIVE signed angle, inner corners a negative one.
 - `chip_field(b, gi, rp, dd, seg_scale, bite_scale, soft, prof_end)` — Chips along the arris: segments of the edge chipped (share -> threshold; Noise clusters near 0.5, sd ~0.1), bite noise varies the reach. Returns (chip 0..1, depth profile).
 - `rejoin(b, moved, sep, go, x0, weld_dist)` — Rejoin the displaced band with the untouched interior and weld the seam.
 - `edge_wear_group(name='Edge Wear + Chips', band=0.08, level=3, chip_reach=0.045, chip_depth=0.018, chipped_share=0.55, sharp_deg=30.0, chips=True, bite_scale=22.0, segment_scale=2.2, seed=(0.0, 0.0, 0.0))` — Geometry Nodes modifier: edge field for every point, real chips in the arris band. Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern.
 - `set_input(mod, name, value)` — Blender 5.2: a Geometry Nodes modifier's own input values live at mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the identifier through the group interface. Group defaults are only copied in at creation.
 - `add_edge_wear(obj, group, **inputs)` — Add the modifier; per-object overrides by input name, e.g. add_edge_wear(o, g, Band=0.1).
 
+## `effects.edge_cracks` — Sparse short cracks running inward from clean outside edges.
+
+- `edge_crack_edges(obj, min_angle_deg=30.0)` — Collect world-space (start, end, inward) face edges before dicing or displacement.
+- `add_edge_cracks(mat, edges, amount=1.0, seed=17)` — Add sparse 5-20 cm core/halo cracks from clean (start, end, inward) outside edges.
+
+## `effects.edge_dirt` — Shared edge line and dust layers for convex distance fields and concave AO.
+
+- `edge_vertex_join(g, line_width=LINE_WIDTH, frame=None, loc=(0, 0))` — Return a local outside-junction blend from clean-mesh vertex distance in metres.
+- `edge_dirt_masks(g, dist, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, noise_vec=None, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, noise_scale=NOISE_SCALE, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside')` — Return line, dust and the reusable outside-vertex join (None for AO corners).
+- `corner_dirt_masks(g, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, frame=None, loc=(0, 0), corner_cap=CORNER_MASK_CAP)` — Return shared masks using cross-object AO remapped to a distance-like metre field.
+- `dust_surface(g, surface, dust, frame=None, loc=(0, 0), line=None)` — Apply relative dust/line albedos with line priority, preserving source textures and normals.
+- `add_corner_dirt(mat, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, corner_cap=CORNER_MASK_CAP)` — Add independently switchable shared line/dust layers to a Cycles surface material.
+
 ## `effects.edge_masks` — Edge masks as an emission view: one edge-detection method at a time, for side-by-side comparison (pointiness, inside ambient occlusion, bevel normal, the GN edge distance, the chip mask, damage).
 
 - `mask_material(name, method, radius=0.035)` — Emission view of one edge-detection method, for side-by-side comparison.
 
-## `effects.edge_shading` — Weathered concrete: dirty edges in shading only (from the chip modifier's `edge_dist` field), and a fresh-break material where the modifier cut a chip (`chip` > 0). No extra geometry.
+## `effects.edge_shading` — Concrete edge shading and fresh-break material from clean distance and chip fields.
 
-- `weathered_concrete(name='CONCRETE_WEATHERED', dirt_band=0.035, dirt_amount=0.85, dirt_noise_scale=9.0, stain=True, tex_id='concrete_wall_009')` — concrete_study base (tone, maps, round edges, leak stain) + procedural dirty edges from the GN `edge_dist` field + a fresh-break material where GN cut a chip (`chip` > 0).
+- `weathered_concrete(name='CONCRETE_WEATHERED', line_width=LINE_WIDTH, line_amount=LINE_AMOUNT, dirt_noise_scale=9.0, stain=True, tex_id='concrete_wall_009', dust_width=DUST_WIDTH, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True)` — Layer edge line/dust and fresh-break shading over the concrete study material.
 
 ## `effects.leak_field` — Leak field: per point, how far below the first surface straight above it (a raycast up from just inside the wall) -> `leak_d` and `leak_ok`. Runoff streaks read these to hang drips under drip edges.
 
 - `leak_field_group(name='LEAK FIELD', inset=0.02, reach=6.0)` — GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`. Reused if it exists (other objects' modifiers point at it).
 - `add_leak_field(obj)` — Add LEAK FIELD as the FIRST modifier: run after chips, rays slip through the chip-band seam and a wrong leak_d spreads over whole coarse triangles (light triangles under an arris).
 
+## `effects.round_edges` — Shared scene-sized rounded edges: shader normals or real bevel geometry.
+
+- `set_round_radius(radius=ROUND_RADIUS)` — Set the scene's shared radius in metres before building rounded materials.
+- `round_shader(g, normal=None, rounded_edges=True, loc=(-650, -250), frame=None, label='Round edges (TexEdges)', samples=8)` — Build a rounded shader normal using the shared scene radius.
+- `round_geometry(obj, rounded_edges=True, segments=2, min_angle_deg=30.0)` — Bevel a mesh's real edges using the shared scene radius.
+- `switch_rounding(mat, rounded_edges=True)` — Switch an existing material's shared rounded-normal layer on or off.
+
 ## `effects.runoff` — Runoff: vertical streaks below drip edges, grunge patches and soil splash, all into the grime mask.
 
-- `add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0)` — On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask.
+- `add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0, amount=1.0)` — On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask.
 
 ## `effects.variation` — Variation material helpers; canonical implementations.
 
@@ -106,7 +132,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.concrete.concrete_build` — Concrete build; canonical implementation behind concrete.
 
-- `concrete_study(name='CONCRETE', tex_id='concrete_wall_009', color_mult=(0.76, 0.82, 0.99), normal_strength=0.6, bump_distance=0.004, round_edge=0.0025, chip_spread=0.05, chip_in=(0.4, 0.9), noise_scale=14.0, noise_band=(0.35, 0.6), edge_dark=True, stain=True, stain_mult=1.15, bevel_chips=True, stain_map=('local', 'leakage_tdlbbd1c', 'Leakage_tdlbbd1c_2K_Opacity.jpg'))` — Cast concrete: tone-matched diffuse, wired roughness/normal/height, round edges combined with the normal map, chipped-edge wear and a leak stain driving a worn BRDF.
+- `concrete_study(name='CONCRETE', tex_id='concrete_wall_009', color_mult=(0.76, 0.82, 0.99), normal_strength=0.6, bump_distance=0.004, rounded_edges=True, chip_spread=0.05, chip_in=(0.4, 0.9), noise_scale=14.0, noise_band=(0.35, 0.6), edge_dark=True, stain=True, stain_mult=1.15, bevel_chips=True, stain_map=('local', 'leakage_tdlbbd1c', 'Leakage_tdlbbd1c_2K_Opacity.jpg'))` — Cast concrete: tone-matched diffuse, wired roughness/normal/height, round edges combined with the normal map, chipped-edge wear and a leak stain driving a worn BRDF.
 
 ## `materials.concrete.concrete_tone` — Concrete tone; canonical implementation behind concrete.
 
@@ -178,7 +204,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `materials.shared.nodes` — Nodes material helpers; canonical implementations.
 
 - `sock(sockets, name)` — Active socket by name (Mix nodes keep hidden same-named sockets per data type).
-- `G` — The node-graph builder for shader and Geometry Nodes trees: frames, nodes (inputs by keyword, or properties with n()), images on a named UV map, links, and the math / map range / noise / named-attribute shorthands. G(material) starts the material's tree empty; G(node_tree) adds to an existing tree (a GN group). effects.edge_wear._GN and the effects.edge_wear._math/_range/_noise/_attr functions are thin aliases of this class.
+- `G` — The node-graph builder for shader and Geometry Nodes trees: frames, nodes (inputs by keyword, or properties with n()), images on a named UV map, links, and the math / map range / noise / named-attribute shorthands. G(material) starts the material's tree empty; G(node_tree) adds to an existing tree (a GN group). effects.wear_nodes supplies the shader shorthands with the argument order used by wear builders.
 
 ## `materials.shared.pbr_build` — Pbr build; canonical implementation behind pbr.
 
@@ -195,7 +221,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.stone.granite` — Granite; canonical implementation behind stone.
 
-- `polished_granite(name='GRANITE_POLISHED', grain_m=0.006, roughness=0.04, ior=1.55, base=((0.01, 0.008, 0.007), (0.026, 0.019, 0.015)), flecks=((0.62, (0.055, 0.037, 0.026)), (0.8, (0.13, 0.12, 0.11)), (0.91, (0.34, 0.28, 0.21))))` — Procedural speckled granite in 3-D world space (a solid texture: cut faces and edges agree). Crystals = Voronoi cells of ~grain_m, each coloured by its random value through a constant ramp (black mica / brown feldspar / grey quartz / cream feldspar); a coarse noise drifts the base. Polished = one smooth dielectric (no coat). No Bevel node: the pool lining is a caustic receiver -- round edges come from a geometric Bevel modifier instead.
+- `polished_granite(name='GRANITE_POLISHED', grain_m=0.006, roughness=0.04, ior=1.55, base=((0.01, 0.008, 0.007), (0.026, 0.019, 0.015)), flecks=((0.62, (0.055, 0.037, 0.026)), (0.8, (0.13, 0.12, 0.11)), (0.91, (0.34, 0.28, 0.21))))` — Procedural speckled granite in 3-D world space (a solid texture: cut faces and edges agree). Crystals = Voronoi cells of ~grain_m, each coloured by its random value through a constant ramp (black mica / brown feldspar / grey quartz / cream feldspar); a coarse noise drifts the base. Polished = one smooth dielectric (no coat). For MNEE casters/receivers apply effects.round_edges.round_geometry on the object; the shared scene layer owns the radius.
 
 ## `materials.stone.pavers` — Pavers; canonical implementation behind stone.
 
@@ -458,23 +484,15 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.wood.wood` — Wood material helpers; canonical implementations.
 
-- `coated_wood(name='COATED_PINE', tex_id='coated_pine', coat=0.2, coat_rough=0.04, rough_toward_matte=0.35, albedo_rgb=(0.52, 0.33, 0.17), levels_gamma=0.5, round_edge=0.002, normal_strength=1.0)` — Coated pine: every map wired; levels solved to a natural pine albedo; satin varnish = LOW coat amount with TIGHT gloss (the coat trap); base roughness spread toward matte instead of cheating Fresnel; round edges combined with the normal map.
+- `coated_wood(name='COATED_PINE', tex_id='coated_pine', coat=0.2, coat_rough=0.04, rough_toward_matte=0.35, albedo_rgb=(0.52, 0.33, 0.17), levels_gamma=0.5, rounded_edges=True, normal_strength=1.0)` — Coated pine: every map wired; levels solved to a natural pine albedo; satin varnish = LOW coat amount with TIGHT gloss (the coat trap); base roughness spread toward matte instead of cheating Fresnel; round edges combined with the normal map.
 
-## `materials.wood.wood_arrises` — Wood arrises; canonical implementation behind wood_wear.
-
-- `round_arrises(obj, width=0.0025, segments=2, min_angle_deg=30.0)` — Real rounded arrises. Two segments keep each new edge at 45 deg, so the GN edge field (threshold 30 deg) still finds them.
-
-## `materials.wood.wood_damage` — Wood damage; canonical implementation behind wood_wear.
+## `materials.wood.wood_damage` — Geometry Nodes dents and grain-aligned breaks in wood.
 
 - `wood_wear_group(name='Wood Wear + Breaks', band=0.02, level=3, chip_reach=0.006, chip_depth=0.0025, chipped_share=0.3, break_share=0.5, break_depth=0.0015, grain_stretch=(35.0, 5.0, 35.0), seed=(0.0, 0.0, 0.0), sharp_deg=30.0)` — grain_stretch: noise scale per world axis for break outlines; the small value is the grain axis (the board's long axis), so breaks run long along the grain.
 
-## `materials.wood.wood_shading` — Wood shading; canonical implementation behind wood_wear.
+## `materials.wood.wood_shading` — Worn varnish, edge grime and exposed inner-wood shading.
 
 - `weathered_wood(name='PINE_WEATHERED', wear_band=0.012, wear_amount=0.9, inner_tint=(0.8, 0.6, 0.36), inner_mix=0.3, inner_gain=1.7)` — coated_wood base (levels, satin coat trap) + worn varnish/grime at arrises + inner wood.
-
-## `materials.wood.wood_uv` — Wood uv; canonical implementation behind wood_wear.
-
-- `grain_uv(obj, size, name='BoxUV', axis=None, along='U')` — Kept for existing scripts: archviz.directional_uv, which serves every directional texture (not only wood).
 
 ## `renderer.finals.final_images` — Final images; implementation for finals.
 

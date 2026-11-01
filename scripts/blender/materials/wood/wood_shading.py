@@ -1,6 +1,6 @@
-"""Wood shading; canonical implementation behind wood_wear."""
+"""Worn varnish, edge grime and exposed inner-wood shading."""
 
-from materials.shared import nodes as _mat_nodes
+from materials.shared.nodes import G
 
 from materials.wood import wood as _mat_wood
 
@@ -17,8 +17,8 @@ from effects.wear_nodes import math_ as _math
 def weathered_wood(name="PINE_WEATHERED", wear_band=0.012, wear_amount=0.9,
                    inner_tint=(0.80, 0.60, 0.36), inner_mix=0.30, inner_gain=1.7):
     """coated_wood base (levels, satin coat trap) + worn varnish/grime at arrises + inner wood."""
-    mat = _mat_wood.coated_wood(name=name, round_edge=0)
-    g = _mat_nodes.G(mat.node_tree)                   # add to the existing tree
+    mat = _mat_wood.coated_wood(name=name, rounded_edges=False)
+    g = G(mat.node_tree)                   # add to the existing tree
     nt = mat.node_tree
     coated = next(n for n in nt.nodes if n.label == "Pine + satin varnish coat")
     out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")

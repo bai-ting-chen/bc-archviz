@@ -1,12 +1,13 @@
 """Wood material helpers; canonical implementations."""
 import bpy
+from effects.round_edges import round_shader
 from materials.shared.nodes import G, sock
 from materials.shared.pbr import _ph_maps, solve_levels
 
 
 def coated_wood(name="COATED_PINE", tex_id="coated_pine", coat=0.2, coat_rough=0.04,
                 rough_toward_matte=0.35, albedo_rgb=(0.52, 0.33, 0.17), levels_gamma=0.5,
-                round_edge=0.002, normal_strength=1.0):
+                rounded_edges=True, normal_strength=1.0):
     """Coated pine: every map wired; levels solved to a natural pine albedo; satin
     varnish = LOW coat amount with TIGHT gloss (the coat trap); base roughness spread toward
     matte instead of cheating Fresnel; round edges combined with the normal map."""
@@ -38,11 +39,8 @@ def coated_wood(name="COATED_PINE", tex_id="coated_pine", coat=0.2, coat_rough=0
     nmap = g.node("ShaderNodeNormalMap", (-750, -300), F_REL, Strength=normal_strength)
     nmap.uv_map = "BoxUV"
     g.link(nor.outputs["Color"], nmap.inputs["Color"])
-    relief = nmap.outputs["Normal"]
-    if round_edge:  # Bevel node is invalid on MNEE caustic casters/receivers -- pass 0 there
-        rnd = g.node("ShaderNodeBevel", (-550, -300), F_REL, label="Round edges", Radius=round_edge)
-        g.link(nmap.outputs["Normal"], rnd.inputs["Normal"])
-        relief = rnd.outputs["Normal"]
+    relief = round_shader(g, nmap.outputs['Normal'], rounded_edges=rounded_edges,
+                         loc=(-550, -300), frame=F_REL, label='Round edges', samples=4)
     bsdf = g.node("ShaderNodeBsdfPrincipled", (-250, 200), label="Pine + satin varnish coat")
     g.link(sock(lv.outputs, "Result"), bsdf.inputs["Base Color"])
     g.link(sock(rmix.outputs, "Result"), bsdf.inputs["Roughness"])

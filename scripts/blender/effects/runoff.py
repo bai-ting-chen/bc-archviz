@@ -8,7 +8,7 @@ LEAK = dict(streak_w=14.0, streak_len=0.6, max_len=(0.8, 3.2), top_band=0.2, top
             streak_band=(0.42, 0.58), presence=(0.28, 0.5), fade_pow=1.15)
 
 
-def add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0):
+def add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0, amount=1.0):
     """On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask."""
     L_ = dict(LEAK, **(leak or {}))
     g, F = frame_for(mat, "Runoff streaks, grunge, splash")
@@ -58,7 +58,11 @@ def add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08
     spl = g.math("MULTIPLY", g.range(foot, splash[0], splash[1], (-1200, -5600), splash[2], 0.0, F, smooth=True), vert, (-1050, -5600), F)
     spl.node.label = "soil splash"
     mix = next(n for n in nt.nodes if n.label == "Wear Layered (BRDFLayered)")
-    old = mix.inputs["Fac"].links[0].from_socket
-    m = g.math("MAXIMUM", g.math("MAXIMUM", g.math("MAXIMUM", old, leak, (-100, -4300), F), grg, (50, -4500), F), spl, (200, -4600), F)
+    fac = mix.inputs["Fac"]
+    old = fac.links[0].from_socket if fac.is_linked else fac.default_value
+    layer = g.math('MAXIMUM', g.math('MAXIMUM', leak, grg, (-100, -4500), F), spl, (50, -4600), F)
+    layer = g.math('MULTIPLY', layer, amount, (200, -4600), F)
+    layer.node.label = 'Run-off strength'
+    m = g.math('MAXIMUM', old, layer, (350, -4600), F)
     g.link(m, mix.inputs["Fac"])
     return mat

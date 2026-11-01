@@ -1,17 +1,16 @@
-"""Weathered concrete: dirty edges in shading only (from the chip modifier's `edge_dist` field), and a
-fresh-break material where the modifier cut a chip (`chip` > 0). No extra geometry.
-"""
+"""Concrete edge shading and fresh-break material from clean distance and chip fields."""
 from materials.concrete import concrete as _mat_concrete
-from materials.shared.nodes import G
-from materials.shared.nodes import sock
+from materials.shared.nodes import G, sock
 from effects.wear_nodes import attr, math_, noise, range_
+from effects.edge_dirt import (DUST_AMOUNT, DUST_WIDTH, GRIME_TINT, LINE_AMOUNT, LINE_WIDTH,
+                               dust_surface, edge_dirt_masks)
 
 
-def weathered_concrete(name="CONCRETE_WEATHERED", dirt_band=0.035, dirt_amount=0.85,
-                       dirt_noise_scale=9.0, stain=True, tex_id="concrete_wall_009"):
-    """concrete_study base (tone, maps, round edges, leak stain) + procedural dirty edges from
-    the GN `edge_dist` field + a fresh-break material where GN cut a chip (`chip` > 0)."""
-    mat = _mat_concrete.concrete_study(name=name, tex_id=tex_id, edge_dark=False, stain=stain, bevel_chips=False)
+def weathered_concrete(name="CONCRETE_WEATHERED", line_width=LINE_WIDTH, line_amount=LINE_AMOUNT,
+                       dirt_noise_scale=9.0, stain=True, tex_id="concrete_wall_009",
+                       dust_width=DUST_WIDTH, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True):
+    """Layer edge line/dust and fresh-break shading over the concrete study material."""
+    mat = _mat_concrete.concrete_study(name=name, tex_id=tex_id, edge_dark=False, stain=stain, bevel_chips=False, rounded_edges=rounded_edges)
     g = G(mat.node_tree)                      # add to the existing tree
     nt = mat.node_tree
     mix = next(n for n in nt.nodes if n.label == "Wear Layered (BRDFLayered)")
@@ -29,26 +28,47 @@ def weathered_concrete(name="CONCRETE_WEATHERED", dirt_band=0.035, dirt_amount=0
     chip_m = attr(g, "chip", (x0, y0 - 360), F_FLD)
     chip = range_(g, chip_m, 0.0, 0.0008, (x0 + 250, y0 - 600), F_CHIP, label="chip mask (break edge)")
 
-    band = range_(g, d, 0.0, dirt_band, (x0 + 250, y0 + 300), F_DIRT, 1.0, 0.0,
-                  label="edge band", smooth=True)
-    blot = range_(g, noise(g, rest, dirt_noise_scale, (x0 + 250, y0 + 80), F_DIRT, detail=10,
-                           rough=0.65, label="grime breakup"),
-                  0.36, 0.60, (x0 + 450, y0 + 80), F_DIRT)
-    dirt = math_(g, "MULTIPLY", band, blot, (x0 + 650, y0 + 200), F_DIRT)
-    dirt = math_(g, "MULTIPLY", dirt, dirt_amount, (x0 + 820, y0 + 200), F_DIRT)
+    chip = math_(g, 'MULTIPLY', chip, chips_amount, (x0 + 500, y0 - 600), F_CHIP)
+    chip.node.label = 'Chips strength'
+
+    dirt, dust, vertex_join = edge_dirt_masks(g, d, line_width, dust_width, rest,
+                                 line_amount, dust_amount, dirt_noise_scale,
+                                 F_DIRT, (x0 + 250, y0 + 300))
     no_chip = math_(g, "SUBTRACT", 1.0, chip, (x0 + 820, y0 + 20), F_DIRT, clamp=True)
-    dirt = math_(g, "MULTIPLY", dirt, no_chip, (x0 + 1000, y0 + 150), F_DIRT)  # fresh breaks are clean
+    vertex_line = math_(g, 'MULTIPLY', dirt, vertex_join, (x0 + 1000, y0 - 900), F_DIRT)
+    # Genuine chips remain clean away from junctions; a local line bridges both shader branches.
+    line_allowed = math_(g, 'MAXIMUM', no_chip, vertex_join, (x0 + 820, y0 + 150), F_DIRT)
+    dirt = math_(g, "MULTIPLY", dirt, line_allowed, (x0 + 1000, y0 + 150), F_DIRT)
+    dust = math_(g, "MULTIPLY", dust, no_chip, (x0 + 1000, y0 - 50), F_DIRT)
+    dust.node.label = "dust edge mask"
     dirt.node.label = "dirty edge mask"
-    mask = dirt
+    # Run-off/stain/crack halos keep their existing grime path; edge line colour is now relative.
+    mask = 0.0
     if stain_node is not None:
         mask = math_(g, "MAXIMUM", mask, stain_node.outputs[0], (x0 + 1200, y0 + 150), F_DIRT)
     for l in list(mix.inputs["Fac"].links):
         nt.links.remove(l)
-    g.link(mask, mix.inputs["Fac"])
+    g._in(mix.inputs["Fac"], mask)
     worn = next(n for n in nt.nodes if n.label == "Worn BRDF")
     worn.label = "Grime BRDF"
-    worn.inputs["Base Color"].default_value = (0.105, 0.098, 0.088, 1)
+    worn.inputs["Base Color"].default_value = (*GRIME_TINT, 1)
 
+    brk, mix2 = _fresh_break(g, clean, rest, F_CHIP, x0, y0)
+    g.link(chip, mix2.inputs["Fac"])
+    dusty = dust_surface(g, mix.outputs["Shader"], dust, F_DIRT,
+                          (x0 + 1500, y0 + 200), line=dirt)
+    g.link(dusty, mix2.inputs[1])
+    joined_break = dust_surface(g, brk.outputs['BSDF'], 0.0, F_DIRT,
+                                (x0 + 1500, y0 - 1000), line=vertex_line)
+    g.link(joined_break, mix2.inputs[2])
+    g.link(mix2.outputs["Shader"], out.inputs["Surface"])
+    mat.displacement_method = "BUMP"
+    mat["recipe"] = "procedural dirty edges (shading) + GN-cut chips (geometry)"
+    return mat
+
+
+def _fresh_break(g, clean, rest, F_CHIP, x0, y0):
+    """Build the lighter fracture shader and its final chip blend."""
     brk = g.node("ShaderNodeBsdfPrincipled", (x0 + 900, y0 - 500), F_CHIP,
                  label="Fresh break (lighter, rough)", Roughness=0.95)
     tint = g.node("ShaderNodeMix", (x0 + 650, y0 - 450), F_CHIP, label="break: lighter paste")
@@ -62,10 +82,4 @@ def weathered_concrete(name="CONCRETE_WEATHERED", dirt_band=0.035, dirt_amount=0
     g.link(noise(g, rest, 400.0, (x0 + 450, y0 - 750), F_CHIP, detail=6), bump.inputs["Height"])
     g.link(bump.outputs["Normal"], brk.inputs["Normal"])
     mix2 = g.node("ShaderNodeMixShader", (x0 + 1200, y0 - 300), F_CHIP, label="chips over surface")
-    g.link(chip, mix2.inputs["Fac"])
-    g.link(mix.outputs["Shader"], mix2.inputs[1])
-    g.link(brk.outputs["BSDF"], mix2.inputs[2])
-    g.link(mix2.outputs["Shader"], out.inputs["Surface"])
-    mat.displacement_method = "BUMP"
-    mat["recipe"] = "procedural dirty edges (shading) + GN-cut chips (geometry)"
-    return mat
+    return brk, mix2

@@ -3,6 +3,7 @@
 import os
 
 import bpy
+from effects.round_edges import round_shader
 
 from core.archviz import library
 
@@ -16,7 +17,7 @@ from materials.concrete.concrete_masks import _bevel_chips, _edge_mask
 
 def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
                    color_mult=(0.76, 0.82, 0.99), normal_strength=0.6, bump_distance=0.004,
-                   round_edge=0.0025, chip_spread=0.05, chip_in=(0.40, 0.90),
+                   rounded_edges=True, chip_spread=0.05, chip_in=(0.40, 0.90),
                    noise_scale=14.0, noise_band=(0.35, 0.60),
                    edge_dark=True, stain=True, stain_mult=1.15, bevel_chips=True,
                    stain_map=("local", "leakage_tdlbbd1c", "Leakage_tdlbbd1c_2K_Opacity.jpg")):
@@ -57,11 +58,8 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
                   Distance=bump_distance)
     g.link(hgt.outputs["Color"], bump.inputs["Height"])
     g.link(nmap.outputs["Normal"], bump.inputs["Normal"])
-    rnd = g.node("ShaderNodeBevel", (-650, -250), F_REL, label="Round edges (TexEdges)",
-                 Radius=round_edge)
-    rnd.samples = 8
-    g.link(bump.outputs["Normal"], rnd.inputs["Normal"])
-    relief = rnd.outputs["Normal"]
+    relief = round_shader(g, bump.outputs['Normal'], rounded_edges=rounded_edges,
+                         loc=(-650, -250), frame=F_REL)
 
     # Wear mask = max( chips * noise , edge line , stain )
     mask = None
@@ -77,7 +75,7 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
         g.link(b, mx.inputs[1])
         return mx.outputs["Value"]
 
-    if edge_dark:  # thin dark arris line: spread 3 mm, remap 0.55..0.95 -> 0..0.55
+    if edge_dark:  # thin dark edge line: spread 3 mm, remap 0.55..0.95 -> 0..0.55
         line = _edge_mask(g, 0.003, (-700, -1200), F_WEAR, "Edge Dark curvature")
         line_r = g.node("ShaderNodeMapRange", (-480, -1200), F_WEAR, label="Edge Dark Remap")
         line_r.inputs["From Min"].default_value, line_r.inputs["From Max"].default_value = 0.55, 0.95

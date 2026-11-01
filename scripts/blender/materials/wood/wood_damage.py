@@ -1,12 +1,10 @@
-"""Wood damage; canonical implementation behind wood_wear."""
+"""Geometry Nodes dents and grain-aligned breaks in wood."""
 
 import math
 
 import bpy
 
-from materials.shared.nodes import sock
-
-from effects.edge_wear import _GN
+from materials.shared.nodes import G, sock
 
 from effects.edge_chips import input_socket as _input
 
@@ -37,7 +35,7 @@ def wood_wear_group(name="Wood Wear + Breaks", band=0.02, level=3,
     _input(ng, "Break Depth", "NodeSocketFloat", break_depth, "DISTANCE")
     _input(ng, "Seed", "NodeSocketVector", seed)
     ng.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
-    b = _GN(ng)
+    b = G(ng, clear=False)
     L = b.L
     gi = b.n("NodeGroupInput", (-1600, 0))
     go = b.n("NodeGroupOutput", (3000, 0))

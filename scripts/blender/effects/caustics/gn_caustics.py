@@ -18,8 +18,6 @@ import math
 
 import bpy
 
-from effects.edge_wear import _GN
-from effects.edge_wear import _input
 from materials.shared.nodes import G
 from materials.shared.nodes import sock
 

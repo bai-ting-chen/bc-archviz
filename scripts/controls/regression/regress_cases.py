@@ -40,6 +40,6 @@ CASES = {
     "weathered_concrete": lambda m: m['effects.edge_wear'].weathered_concrete(),
     "mask_edge_dist": lambda m: m['effects.edge_wear'].mask_material("MK", "edge_dist"),
     "mask_damage": lambda m: m['effects.edge_wear'].mask_material("MK2", "damage"),
-    "wood_wear_group": lambda m: m['materials.wood.wood_wear'].wood_wear_group(),
-    "weathered_wood": lambda m: m['materials.wood.wood_wear'].weathered_wood(),
+    "wood_wear_group": lambda m: m['materials.wood.wood_damage'].wood_wear_group(),
+    "weathered_wood": lambda m: m['materials.wood.wood_shading'].weathered_wood(),
 }

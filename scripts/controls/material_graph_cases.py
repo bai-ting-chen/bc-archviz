@@ -99,7 +99,7 @@ def run(topic):
         import core.archviz as archviz
         # Route only this process's asset requests to disposable, measured fixtures.
         archviz.library = lambda *parts: str(folder / "map.png") if Path(parts[-1]).suffix else str(folder)
-        m = importlib.import_module("materials." + topic)
+        m = importlib.import_module("materials." + topic) if topic != "wood_wear" else None
         result = {}
 
         def fresh():
@@ -162,16 +162,20 @@ def run(topic):
                 material("boards_" + str(cylinder), lambda cylinder=cylinder: m.vertical_boards(
                     importlib.import_module("materials.shared.pbr").albedo_material("fixture", "boards", (.4, .4, .4)), cylinder=cylinder))
         elif topic == "wood_wear":
+            from effects.round_edges import round_geometry
+            from materials.wood.wood_damage import wood_wear_group
+            from materials.wood.wood_shading import weathered_wood
+
             fresh()
             obj = cube()
             # Test the authored grain mapping; bevel interpolation of Blender's default
             # cube UVs lands on a rounding tie and varies with BMesh iteration order.
             obj.data.uv_layers.remove(obj.data.uv_layers.active)
-            m.round_arrises(obj)
-            m.grain_uv(obj, 1.0)
+            round_geometry(obj)
+            archviz.directional_uv(obj, 1.0)
             result["geometry"] = mesh_state(obj)
-            result["wear_group"] = group_state(m.wood_wear_group(level=1))
-            material("shader", m.weathered_wood)
+            result["wear_group"] = group_state(wood_wear_group(level=1))
+            material("shader", weathered_wood)
         elif topic == "pbr":
             for label, builder in (
                 ("pbr", lambda: m.pbr_material("fixture")),

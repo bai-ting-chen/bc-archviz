@@ -1,8 +1,7 @@
 """Caustic graph; implementation for gn_caustics."""
 import bpy
-from effects.edge_wear import _GN
-from effects.edge_wear import _input
-from materials.shared.nodes import sock
+from effects.edge_chips import input_socket as _input
+from materials.shared.nodes import G, sock
 
 
 def caustic_sheet_group(name="Wavefront Caustics"):
@@ -22,7 +21,7 @@ def caustic_sheet_group(name="Wavefront Caustics"):
     _input(ng, "Lift", "NodeSocketFloat", 0.001, "DISTANCE")
     _input(ng, "Sun Blur Iterations", "NodeSocketInt", 2)
     ng.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
-    b = _GN(ng)
+    b = G(ng, clear=False)
     L = b.L
     gi = b.n("NodeGroupInput", (-1800, 0))
     go = b.n("NodeGroupOutput", (2600, 0))

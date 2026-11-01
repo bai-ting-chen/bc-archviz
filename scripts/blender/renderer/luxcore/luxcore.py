@@ -2,7 +2,9 @@
 import os, json
 import bpy
 import core.archviz as archviz
-from renderer.luxcore.dust_config import DUST_BAND, DUST_DIST, DUST_HEIGHT, DUST_POWER, DUST_PX, DUST_TINT
+from renderer.luxcore.dust_config import (CORNER_MASK_CAP, DUST_AMOUNT, DUST_GAIN, DUST_PX,
+                                         DUST_SATURATION, DUST_WIDTH, GRIME_TINT, LINE_AMOUNT,
+                                         LINE_GAIN, LINE_WIDTH)
 from renderer.luxcore.dust_uv import _ctx, dust_uv
 from renderer.luxcore.dust_shader import _dust_bake_material
 from renderer.luxcore.dust_bake import bake_dust, _bake_each

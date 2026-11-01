@@ -44,7 +44,7 @@ def input_socket(ng, name, kind, default, subtype=None):
         it.subtype = subtype
 
 
-def edge_field(b, gi, x0):
+def edge_field(b, gi, x0, vertex_junctions=False):
     """Distance to the nearest convex arris -> `edge_dist`, and the rest position offset by the
     group's Seed -> `rest_pos` (noise lookups; a per-object Seed decorrelates repeated objects).
     Measured on outward-normal meshes: convex arrises give a POSITIVE signed angle, inner
@@ -66,6 +66,25 @@ def edge_field(b, gi, x0):
     L(pos.outputs["Position"], seed_v.inputs[0])
     L(gi.outputs["Seed"], seed_v.inputs[1])
     g = b.store(gi.outputs["Geometry"], "edge_dist", "FLOAT", prox.outputs["Distance"], (x0 + 1050, 0))
+    if vertex_junctions:
+        # Sharp-edge valence distinguishes a junction from diced points along a straight arris.
+        sharp = b.n('GeometryNodeSeparateGeometry', (x0 + 400, -700), domain='EDGE')
+        L(gi.outputs['Geometry'], sharp.inputs['Geometry'])
+        L(cmp.outputs[0], sharp.inputs['Selection'])
+        neighbours = b.n('GeometryNodeInputMeshVertexNeighbors', (x0 + 600, -900))
+        junction = b.n('FunctionNodeCompare', (x0 + 800, -900), data_type='INT', operation='GREATER_THAN')
+        L(neighbours.outputs['Vertex Count'], sock(junction.inputs, 'A'))
+        sock(junction.inputs, 'B').default_value = 2
+        points = b.n('GeometryNodeMeshToPoints', (x0 + 1000, -700), mode='VERTICES')
+        L(sharp.outputs['Selection'], points.inputs['Mesh'])
+        L(junction.outputs[0], points.inputs['Selection'])
+        vertex = b.n('GeometryNodeProximity', (x0 + 1200, -700), target_element='POINTS')
+        L(points.outputs['Points'], vertex.inputs['Geometry'])
+        size = b.n('GeometryNodeAttributeDomainSize', (x0 + 1200, -1000), component='POINTCLOUD')
+        L(points.outputs['Points'], size.inputs['Geometry'])
+        valid = b.math('GREATER_THAN', size.outputs['Point Count'], 0.0, (x0 + 1400, -1000))
+        g = b.store(g, 'edge_vertex_dist', 'FLOAT', vertex.outputs['Distance'], (x0 + 1400, 0))
+        g = b.store(g, 'edge_vertex_valid', 'FLOAT', valid, (x0 + 1600, 0))
     return b.store(g, "rest_pos", "FLOAT_VECTOR", seed_v.outputs["Vector"], (x0 + 1250, 0))
 
 
@@ -120,7 +139,7 @@ def edge_wear_group(name="Edge Wear + Chips", band=0.08, level=3, chip_reach=0.0
     go = b.n("NodeGroupOutput", (2700, 0))
 
     # 1. distance to the nearest convex arris
-    g = edge_field(b, gi, -1400)
+    g = edge_field(b, gi, -1400, vertex_junctions=True)
 
     # 2. split off the arris band, densify only that
     in_band = b.n("FunctionNodeCompare", (50, -300), data_type="FLOAT", operation="LESS_THAN")

@@ -37,4 +37,44 @@ From: LAPTOP-25
   local script), replace old skill paths and module names using that list. Finished studies need no changes.
 - Restart Claude Code so it reloads the skill.
 
+# MIGRATE: forward-only shared rounded edges and crooked crack masks
+From: LAPTOP-25
+
+## What changed
+- Removed `materials.wood.wood_arrises` / `round_arrises`. All geometry rounding uses `effects.round_edges.round_edges(obj, method='geometry')`.
+- The shared scene radius is configured with `effects.round_edges.set_round_radius` before building. Defaults remain 2.5 mm, two segments and a 30-degree edge threshold.
+- `effects.cracks.ribbon_masks` is replaced by `effects.crack_ribbon.crooked_ribbon_masks`.
+- Also removed: `materials.wood.wood_wear` (import from `wood_damage` / `wood_shading`), `materials.wood.wood_uv.grain_uv`
+  (use `archviz.directional_uv`), and the private `_GN`/`_input`/`_math`/`_range`/`_noise`/`_attr` re-exports of `effects.edge_wear`.
+- The LuxCore dust bake now stores edge line (R) and dust (G); rebake cached dust PNGs.
+
+## Steps
+- Update external imports/callers of the removed names; use the shared layer directly. Do not recreate forwarding shims.
+
+## Check after pull
+- `rg "round_arrises|wood_arrises" scripts references` finds no callers or references.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
+# MIGRATE: explicit edge-wear builders and lean controls
+From: LAPTOP-25
+
+## What changed
+- `weathered_concrete`: `dirt_band` -> `line_width`, `dirt_amount` -> `line_amount`, `dust_band` -> `dust_width`.
+- `edge_dirt_masks` now returns `(line, dust, vertex_join)`; `corner=False/True` becomes `kind='outside'/'corner'`.
+  All shared dirt builders use `line_width` / `dust_width` instead of `line_w` / `dust_w`.
+- Removed the overloaded `round_edges`: use `round_shader(g, normal, ...)`, `round_geometry(obj, ...)`,
+  or `switch_rounding(material, ...)`; the boolean keyword is `rounded_edges` everywhere.
+- Removed `effects.crack_path` and `crack_profile`; use `effects.crack_ribbon.crack_polylines(seed)` directly.
+- The dirt lab removes `--reference-soffit`, `--cap-control`, `--vertex-before` and their one-off outputs.
+  Scene and native board code now live in `controls/effects/edge_lab_common.py`.
+- No forwarding shims. The protected edge-wear reference still names the old API; follow this section and
+  the regenerated helper index until its owner revises that reference.
+
+## Steps
+- Update external callers to the names and return values above; do not replay controls for finished studies.
+
+## Check after pull
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+- Run `edge_wear_graph_check`, `wood_wear_graph_check`, and the affected helper regressions with local fixtures.
+
 Remove each section after applying it; delete this file when none is left.

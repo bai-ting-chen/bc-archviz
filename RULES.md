@@ -127,7 +127,7 @@ Rule: Add per-unit variation, hide repeats and fade concave-joint dust outward f
 Read: [variation.md](references/effects/variation.md)
 
 **MAT_07 — Composing Material Layers**  
-Rule: Build each look layer as its own term — colour and roughness as multipliers around 1, height as its own displacement or bump term — so each can be switched off for a control.  
+Rule: Build each look layer as its own term — colour and roughness as multipliers around 1, height as its own displacement or bump term — and give each layer an on/off switch in its builder, so the user and every control can turn it off.  
 Read: [index.md](references/materials/index.md)
 
 **MAT_08 — Ordering Geometry Fields**  

@@ -16,8 +16,8 @@ nothing to say keeps its heading and says why in one line (e.g. "No code: the la
 - Assembly bullets only: how the layers combine (RULES MAT_07 layers, MAT_08 geometry fields).
 
 ## 3. Code
-- Script paths under `scripts/`, the builder and its parameter dataclasses, and the control scene that
-  checks the look. Paths stay portable (see skill-maintaining.md).
+- Script paths under `scripts/`, the builder, its parameter dataclasses and its switch per layer
+  (RULES MAT_07), and the control scene that checks the look. Paths stay portable (see skill-maintaining.md).
 - No code listings. Only what a user needs to call or run.
 
 ## 4. Instructions and parameters, per layer

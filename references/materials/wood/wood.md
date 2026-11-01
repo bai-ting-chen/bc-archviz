@@ -2,18 +2,19 @@
 
 ## 1. Overview
 Wood surfaces: coated (varnished) wood, cladding boards, battens and veneers. The look depends on
-the coat and on how the grain is laid on the surface. Wear on wood edges is an effect covered in
-edge-wear.md (plain-text neighbour), not here.
+the coat, on how the grain is laid on the surface and on how its edges wear (§4.5).
 
 ## 2. Layers and node-editor diagram
 This file is a single material family, not a stack. The coat sits on the wood base in `coated_wood()`
 (§4.1), and cladding grain is set by UV (§4.2). The coat rules in §4.3 and §4.4 apply to the same
-coat, so there is no separate diagram.
+coat, so there is no separate diagram. Worn edges (§4.5) use the edge field and chips of
+[edge-wear.md](../../effects/edge-wear.md).
 
 ## 3. Code
 - `scripts/blender/materials/wood/wood.py`: `coated_wood()` (`materials.wood.wood`).
 - `scripts/blender/core/archviz.py`: `archviz.directional_uv`, defined in `core/uv.py`.
-- No control scene is named for this file.
+- Worn edges: `round_geometry(obj)` (`effects/round_edges.py`), `wood_wear_group`
+  (`wood_damage.py`), `weathered_wood` (`wood_shading.py`); control `scripts/controls/material/wood_wear_graph_check.py`.
 
 ## 4. Instructions and parameters, per layer
 
@@ -58,10 +59,17 @@ coat, so there is no separate diagram.
 |---|---|
 | Coat | matte |
 
+### 4.5 Worn edges
+- A real rounded edge (`round_geometry(obj)`), not a shaded one, then `wood_wear_group`: dents on the edges
+  and breaks on up-facing faces, the break noise stretched along the grain so it reads as split timber.
+- Shader (`weathered_wood`): worn edge = varnish off + grime; exposed wood lifted toward a raw tint.
+- The break share responds steeply: a small fraction of the top reads as wear, a little more as damage.
+  Bisect it against a render.
+
 ### Generic layers, wood settings
 | Layer | Reference | Wood note |
 |---|---|---|
-| Wear on wood edges | edge-wear.md (plain text) | covered there, not in this file |
+| Edge field and chips | [edge-wear.md](../../effects/edge-wear.md) | wood uses its own group (§4.5) |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |
@@ -71,5 +79,6 @@ coat, so there is no separate diagram.
 | Grain runs across the boards | plank map grain along V, not set | `along="V"` (§4.2) |
 | Halos on battens and veneers | glossy coat mirrors lenses | matte coat (§4.3) |
 | Dark veneer floor reads light grey at a low angle | satin coat; Fresnel reflects the sky | matte coat (§4.4) |
+| Worn wood reads as damaged | break share too high | bisect the break share (§4.5) |
 
 Generic problems that show up in any material are in troubleshooting.md.

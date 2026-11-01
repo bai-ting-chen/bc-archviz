@@ -100,5 +100,21 @@ edge_wear.add_runoff(both)
 edge_wear.add_cracks(both, openings=OPENINGS, crack={"seed": 5})
 result["runoff_and_cracks"] = dump_material(both)
 
+# Independent switches must compose even when the shared rounded-normal layer is absent.
+for enabled in (False, True):
+    fresh()
+    mat = edge_wear.weathered_concrete(stain=False, rounded_edges=enabled,
+                                      chips_amount=float(enabled))
+    edge_wear.add_runoff(mat, amount=float(enabled))
+    edge_wear.add_cracks(mat, openings=OPENINGS, amount=float(enabled))
+    edge_wear.add_edge_cracks(mat, [((0, 0, 0), (0, 0, 2), (1, 0, 0))], amount=float(enabled))
+    assert mat['edge_crack_count'] > 0
+    strengths = {n.label: n for n in mat.node_tree.nodes if n.label.endswith(' strength')}
+    for label in ('Opening cracks strength', 'Edge cracks strength'):
+        assert strengths[label].outputs[0].default_value == float(enabled)
+    for label in ('Chips strength', 'Run-off strength'):
+        assert strengths[label].inputs[1].default_value == float(enabled)
+    result['stack_' + ('on' if enabled else 'off')] = dump_material(mat)
+
 write(OUT, result)
 print("EDGE_WEAR_GRAPH_CHECK written", OUT, "cases:", sorted(result))

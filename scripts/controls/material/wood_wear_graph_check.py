@@ -1,4 +1,4 @@
-"""Deterministic wood_wear graph/geometry baseline; pass output JSON after --."""
+"""Deterministic wood damage, shading, UV and arris baseline; pass output JSON after --."""
 
 import os as _os
 import sys as _sys

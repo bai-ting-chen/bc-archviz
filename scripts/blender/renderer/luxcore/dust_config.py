@@ -1,13 +1,6 @@
-"""Dust config; canonical implementation behind luxcore."""
+"""Shared line/dust defaults and the LuxCore mask bake resolution."""
+from effects.edge_dirt import (AO_REACH, CORNER_MASK_CAP, DUST_AMOUNT, DUST_GAIN, DUST_SATURATION,
+                               DUST_WIDTH, GRIME_TINT, LINE_AMOUNT, LINE_GAIN, LINE_WIDTH,
+                               RGB_LUMINANCE)  # noqa: F401
 
-DUST_DIST = 0.20                    # m, AO reach = width of the band; 0.12 read as a pencil line
-
-DUST_BAND = (0.55, 0.97)            # AO in the joint .. AO where the dust has faded out
-
-DUST_POWER = 1.2                    # falloff shape: higher = tighter to the corner
-
-DUST_TINT = (0.62, 0.58, 0.52)      # albedo multiplier at full dust (grey-brown)
-
-DUST_HEIGHT = (0.6, 2.6, 1.0, 0.45) # world z from, z to, strength at from, at to: floor > ceiling
-
-DUST_PX = 4096
+DUST_PX = 4096  # square UV mask resolution; R=line, G=dust, B=0

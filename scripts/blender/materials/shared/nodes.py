@@ -11,8 +11,8 @@ class G:
     """The node-graph builder for shader and Geometry Nodes trees: frames, nodes (inputs by
     keyword, or properties with n()), images on a named UV map, links, and the math / map range /
     noise / named-attribute shorthands. G(material) starts the material's tree empty; G(node_tree)
-    adds to an existing tree (a GN group). effects.edge_wear._GN and the effects.edge_wear._math/_range/_noise/_attr
-    functions are thin aliases of this class."""
+    adds to an existing tree (a GN group). effects.wear_nodes supplies the shader
+    shorthands with the argument order used by wear builders."""
 
     def __init__(self, target, clear=None):
         if isinstance(target, bpy.types.Material):
