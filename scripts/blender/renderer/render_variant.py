@@ -162,7 +162,11 @@ def main():
                 src = node.outputs[0]
             em = nt.nodes.new("ShaderNodeEmission")
             out_n = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
-            nt.links.new(src, em.inputs["Color"])
+            if src is None:  # no wear layer linked: show the constant factor
+                f = mix.inputs["Fac"].default_value
+                em.inputs["Color"].default_value = (f, f, f, 1.0)
+            else:
+                nt.links.new(src, em.inputs["Color"])
             nt.links.new(em.outputs["Emission"], out_n.inputs["Surface"])
         sc.view_settings.exposure = 0
         sc.view_settings.view_transform = "Standard"

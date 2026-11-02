@@ -200,7 +200,7 @@ used here with concrete settings.
 | Faint arris disappears in render | darkening just above visibility | set it with a control (§4.10) |
 | Drum or infill does not match the walls | relit instead of given its own albedo | own albedo from the measured ratio (§4.7) |
 | Neutral white turns cyan | bounce colour | correct the albedo toward the reference (§4.11) |
-| No stain on the wall | start height below the visible wall, or fade too fast | raise the start height or slow the fade (§4.5) |
+| No stain on the wall | nothing above the wall within the leak field's reach (`leak_ok` 0), or the wall's own top is the drip edge | view it with `mask_view=attr: leak_ok`; edge-wear.md › Run-off (§4.5) |
 | Streaks look like a regular pattern | noise with no break-up | add the finer break-up before the threshold (§4.5) |
 
 No generic problems are listed in this file. The general list is in troubleshooting.md (named here,
