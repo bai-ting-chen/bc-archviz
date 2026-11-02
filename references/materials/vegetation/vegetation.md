@@ -11,13 +11,13 @@ Specific layers are described in §4. Generic layers are written once, in their 
 used here with vegetation settings.
 
 ```
-                                 VEGETATION
- ┌───────────────────────────────────────────────────────────────────────────┐
- │ SPECIFIC (§4)                          GENERIC (own reference)            │
- │ 1 Leaf-litter scatter → instances      Per-instance tone → variation.md   │
- │ 2 Meadow scatter      → instances      Bare soil → ground.md (plain text) │
- │ 3 Blade material      → grass shading                                     │
- └───────────────────────────────────────────────────────────────────────────┘
+                           VEGETATION — LAYER DIAGRAM
+ ┌─────────────────────────────────────────────────────────────────────────────┐
+ │ SPECIFIC (§4)                          GENERIC (own reference)              │
+ │ 1 Leaf-litter scatter → instances      Tone → variation-per-unit-shading.md │
+ │ 2 Meadow scatter      → instances      Bare soil → ground.md (plain text)   │
+ │ 3 Blade material      → grass shading                                       │
+ └─────────────────────────────────────────────────────────────────────────────┘
    node-editor flow, what each step drives
    leaf litter:  faces ─► Z < limit AND patch noise ─► Instance on Points (1)
                  ─► Object Info › Random tone (generic)
@@ -38,7 +38,7 @@ used here with vegetation settings.
   Leaf litter uses `scatter_objects.py` (`scatter`); the meadow uses `scatter_asset.py`
   (`load_scatter_on_surface`), `meadow_graph.py` (`meadow_layer_group`) and `meadow_objects.py`
   (`meadow_layer`, `frustum_tangents`).
-- Per-instance tone: `scripts/blender/effects/variation.py` (`random_tone_material`).
+- Per-instance tone: `scripts/blender/effects/variation_per_unit_shading.py` (`random_tone_material`).
 - Control: `scripts/controls/material/vegetation_graph_check.py` (deterministic graph and geometry
   baseline).
 
@@ -47,7 +47,7 @@ used here with vegetation settings.
 ### 4.1 Leaf-litter scatter (instances)
 - One GN group: Distribute Points on Faces, with selection = Z below a limit AND a noise patch
   threshold, then Instance on Points with random rotation and scale.
-- Per-instance tone via Object Info › Random, from the generic layer (variation.md).
+- Per-instance tone via Object Info › Random, from the generic layer (variation-per-unit-shading.md).
 - **The patch threshold is knife-edge.** A hair too low blankets the surface; a hair too high clears
   it. Bisect it against a render rather than reasoning about it.
 
@@ -100,7 +100,7 @@ used here with vegetation settings.
 ### Generic layers, vegetation settings
 | Layer | Reference | Vegetation note |
 |---|---|---|
-| Per-instance tone | [variation.md](../../effects/variation.md) | `random_tone_material` on the leaf-litter instances (§4.1) |
+| Per-instance tone | [variation-per-unit-shading.md](../../effects/variation-per-unit-shading.md) | `random_tone_material` on the leaf-litter instances (§4.1) |
 | Bare soil under the grass | ground.md (plain text) | the same 4D noise as the meadow mask (§4.2) |
 
 ## 5. Troubleshooting

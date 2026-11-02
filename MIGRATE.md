@@ -77,4 +77,21 @@ From: LAPTOP-25
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 - Run `edge_wear_graph_check`, `wood_wear_graph_check`, and the affected helper regressions with local fixtures.
 
+# MIGRATE: variation split into tiling, per-unit and surface marks
+From: LAPTOP-25
+
+## What changed
+- Removed `effects.variation` and `references/effects/variation.md`. Use `effects.variation_tiling` (`anti_tile`),
+  `effects.variation_per_unit_shading` (`unit_key`, `set_unit_keys`, `unit_values`, `random_tone_material`) and
+  `effects.variation_surface_marks` (`macro_tone`, `grunge`, `patchy_extent`).
+- References: `variation-tiling.md`, `variation-per-unit-shading.md`, `variation-per-unit-geometry.md`,
+  `variation-surface-marks.md`. RULES MAT_05 and MAT_06 point to them.
+
+## Steps
+- Update external imports and links to the names above; no forwarding shims.
+
+## Check after pull
+- `rg "effects\.variation\b|variation\.md" scripts references` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
 Remove each section after applying it; delete this file when none is left.

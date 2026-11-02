@@ -11,7 +11,7 @@ Specific layers are described in §4. The impacts that seed the flecks and bubbl
 in their own reference, and used here with foam settings.
 
 ```
-                        WATER FOAM, BUBBLES, WHITEWATER
+               WATER FOAM, BUBBLES, WHITEWATER — LAYER DIAGRAM
  ┌──────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                                                            │
  │   §4.1 Foam flecks (surface)            → white flecks, drift past ends  │

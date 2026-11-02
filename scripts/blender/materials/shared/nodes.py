@@ -120,3 +120,34 @@ class G:
         node = self.n("GeometryNodeInputNamedAttribute", loc, data_type=dtype)
         node.inputs["Name"].default_value = name
         return node.outputs[0]
+
+
+def layer_frame(g, label):
+    """Create a stacked layer frame and return its label for the graph builder."""
+    node = g.frame(label)
+    node.location.y = -12000 * (sum(n.type == 'FRAME' for n in g.nt.nodes)-1)
+    return label
+
+
+def layer_switch(g, layer, value, amount, neutral=1.0, frame=None):
+    """Switch a scalar or vector layer and export its AOV."""
+    x, y = value.node.location
+    # Keep each control beside its own input chain, followed by Mix and AOV.
+    used = {(tuple(node.location)) for node in g.nt.nodes
+            if node.parent == (g.frames[frame] if frame else None)}
+    while any((x+dx, y+dy) in used for dx, dy in ((300, 200), (600, 0), (900, 0))):
+        y -= 700
+    if isinstance(amount, (int, float)):
+        node = g.node('ShaderNodeValue', (x + 300, y + 200), frame, label=layer + ' amount')
+        node.outputs[0].default_value = amount
+        amount = node.outputs[0]
+    mix = g.node('ShaderNodeMix', (x + 600, y), frame, label=layer)
+    mix.data_type = 'VECTOR' if value.type == 'VECTOR' else 'FLOAT'
+    g.link(amount, mix.inputs[0])
+    g._in(sock(mix.inputs, 'A'), neutral)
+    g.link(value, sock(mix.inputs, 'B'))
+    result = sock(mix.outputs, 'Result')
+    aov = g.node('ShaderNodeOutputAOV', (x + 900, y), frame)
+    aov.aov_name = aov.name = 'var_' + layer
+    g.link(result, aov.inputs['Color' if value.type == 'VECTOR' else 'Value'])
+    return result

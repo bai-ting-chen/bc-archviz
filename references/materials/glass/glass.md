@@ -11,7 +11,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 used here with glass settings.
 
 ```
-                                GLASS
+                            GLASS — LAYER DIAGRAM
  ┌───────────────────────────────────────────────────────────────────────────┐
  │ PANE (one glazed pane)                                                    │
  │ 1 Clear glazing base    → transmission, IOR, roughness                    │

@@ -16,6 +16,8 @@
   still required in 5.2.
 - Noise Texture values cluster at 0.5 (sd ≈ 0.1): threshold near 0.5.
 - No per-axis Extend: keep once-spanning UVs inside 0..1 with REPEAT.
+- Image Texture › Box picks its face from the object-space normal: feed it Object coordinates, not world
+  Position, or a rotated object projects onto a constant axis (streaks).
 
 - Noise Texture `W` input exists only with `noise_dimensions = "4D"` (KeyError otherwise) - set
   the dimensions first.

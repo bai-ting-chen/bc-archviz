@@ -11,7 +11,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 used here with splash settings.
 
 ```
-                          SPLASH AND THE IMPACT ZONE
+                 SPLASH AND THE IMPACT ZONE — LAYER DIAGRAM
  ┌──────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                                                            │
  │   §4.1 Landing line and impacts         → one strength per impact        │

@@ -9,11 +9,11 @@ Every size is a dial, not a value: a chip is millimetres on a close-up and centi
 Set it from the pixels it covers in the shot and judge the first render (RULES MAT_03).
 
 **Use when:** an edge or corner needs dirt, dust or chips, or a wall needs run-off or cracks. Per-unit
-variation and grunge strength: variation.md.
+variation and grunge strength: variation-per-unit-shading.md, variation-surface-marks.md.
 
 ## 2. Layers and node-editor diagram
 ```
- ┌─ EDGE WEAR ───────────────────────────────────────────────────────┐
+ ┌─ EDGE WEAR — LAYER DIAGRAM ────────────────────────────────────────┐
  │ 4.1 Rounded edge  → normal (shader Bevel) or real bevel geometry   │
  │ 4.2 Edge field    → distance to outside edges and inside corners   │
  │ 4.3 Edge line     → albedo, roughness: thin, dark, at the edge     │
@@ -21,7 +21,7 @@ variation and grunge strength: variation.md.
  │ 4.5 Chips         → mesh along −normal + fresh-break colour        │
  │ 4.6 Run-off       → albedo on vertical faces below a drip edge     │
  │ 4.7 Cracks        → albedo, groove from openings and edges         │
- └───────────────────────────────────────────────────────────────────┘
+ └────────────────────────────────────────────────────────────────────┘
  leak field (4.6) ─► edge field (4.2) ─► chips (4.5) ─► shading masks (4.3, 4.4, 4.6, 4.7)
 ```
 - The leak field runs first, on the clean mesh; any raycast or proximity field runs before modifiers that
@@ -117,7 +117,7 @@ variation and grunge strength: variation.md.
 ### Generic layers
 | Layer | Reference | Note |
 |---|---|---|
-| Per-unit variation, grunge | variation.md | weathering here is gravity-shaped |
+| Per-unit variation, grunge | variation-per-unit-shading.md, variation-surface-marks.md | weathering here is gravity-shaped |
 | Faint edge on huge meshes | `references/materials/concrete/concrete.md` | Bevel-normal mask instead of dicing |
 | Worn wood edges | `references/materials/wood/wood.md` | real bevel and grain-wise breaks |
 | Cracks in glazed tiles | [tiles.md](../materials/tile/tiles.md) | per-tile Voronoi network |

@@ -13,7 +13,7 @@ or dew sits on plants. The water body itself: water-surface.md.
 Specific layers are described in §4. Generic layers are written once, in their own reference.
 
 ```
-                           WET SURFACES
+                          WET SURFACES — LAYER DIAGRAM
  ┌───────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                              GENERIC (own reference)        │
  │ 1 Wet albedo and coat → colour, roughness  Water body → water-surface.md  │

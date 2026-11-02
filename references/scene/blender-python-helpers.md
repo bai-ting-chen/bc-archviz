@@ -85,7 +85,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `effects.edge_dirt` — Shared edge line and dust layers for convex distance fields and concave AO.
 
 - `edge_vertex_join(g, line_width=LINE_WIDTH, frame=None, loc=(0, 0))` — Return a local outside-junction blend from clean-mesh vertex distance in metres.
-- `edge_dirt_masks(g, dist, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, noise_vec=None, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, noise_scale=NOISE_SCALE, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside')` — Return line, dust and the reusable outside-vertex join (None for AO corners).
+- `edge_dirt_masks(g, dist, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, noise_vec=None, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, noise_scale=9.0, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside')` — Return line, dust and the reusable outside-vertex join (None for AO corners).
 - `corner_dirt_masks(g, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, frame=None, loc=(0, 0), corner_cap=CORNER_MASK_CAP)` — Return shared masks using cross-object AO remapped to a distance-like metre field.
 - `dust_surface(g, surface, dust, frame=None, loc=(0, 0), line=None)` — Apply relative dust/line albedos with line priority, preserving source textures and normals.
 - `add_corner_dirt(mat, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, corner_cap=CORNER_MASK_CAP)` — Add independently switchable shared line/dust layers to a Cycles surface material.
@@ -114,9 +114,22 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0, amount=1.0)` — On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask.
 
-## `effects.variation` — Variation material helpers; canonical implementations.
+## `effects.variation_per_unit_shading` — Unit keys and independently hashed material variations.
 
+- `unit_key(g, source='object', attribute='unit_key', vector=None, size=1.0)` — Read a unit key from its source. instancer needs set_unit_keys on the parents; geometry reads a face attribute stored by the build; cell hashes floor(vector / size), size per axis or one number.
+- `set_unit_keys(objects, attribute='unit_key', seed=0)` — Store deterministic keys on the supplied objects or collection instancers.
+- `unit_values(g, key, tint=0.035, roughness=0.05, bump=0.3, offset=1.0, tilt_deg=0.0, amount=1.0)` — Independently hash tint, roughness, bump, lookup-coordinate offsets and optional normal tilt.
 - `random_tone_material(name, c0, c1, roughness=0.6, translucent=0.0)` — Base colour between c0 and c1 per instance (Object Info > Random); optional translucency for leaves.
+
+## `effects.variation_surface_marks` — World-space macro tone, calibrated grunge and patchy mark extents.
+
+- `macro_tone(g, scale_m=4.0, albedo=0.075, roughness=0.05, amount=1.0)` — Return world-space albedo multiplier and roughness addition with one switch.
+- `grunge(g, scale_m=0.5, target_sd=0.05, detail=6.0, rough=0.6, amount=1.0)` — Return grunge normalised by measured noise moments for detail and roughness.
+- `patchy_extent(g, coverage=0.5, scale_m=3.0, softness=0.1, amount=1.0)` — Return a soft mark mask with a calibrated zero-area fraction of one minus coverage.
+
+## `effects.variation_tiling` — Shared offset lookups for image maps, with world-space blending.
+
+- `anti_tile(g, texs, lookups=3, scale_m=1.5, seed=0, amount=1.0)` — Relink image consumers to shared XYZ-offset lookups; amount zero is the original.
 
 ## `effects.wear_nodes` — Thin shorthands for the wear shaders and Geometry Nodes: a frame for one wear layer, and the attribute, noise, map range and math nodes with the argument order the wear builders use.
 
@@ -205,6 +218,8 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `sock(sockets, name)` — Active socket by name (Mix nodes keep hidden same-named sockets per data type).
 - `G` — The node-graph builder for shader and Geometry Nodes trees: frames, nodes (inputs by keyword, or properties with n()), images on a named UV map, links, and the math / map range / noise / named-attribute shorthands. G(material) starts the material's tree empty; G(node_tree) adds to an existing tree (a GN group). effects.wear_nodes supplies the shader shorthands with the argument order used by wear builders.
+- `layer_frame(g, label)` — Create a stacked layer frame and return its label for the graph builder.
+- `layer_switch(g, layer, value, amount, neutral=1.0, frame=None)` — Switch a scalar or vector layer and export its AOV.
 
 ## `materials.shared.pbr_build` — Pbr build; canonical implementation behind pbr.
 

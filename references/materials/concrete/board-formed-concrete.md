@@ -14,18 +14,19 @@ Specific layers are described in §4. Generic layers are written once, in their 
 used here with board-form settings.
 
 ```
-                          BOARD-FORMED CONCRETE
- ┌───────────────────────────────────────────────────────────────────────────┐
- │ SPECIFIC (§4)                         GENERIC (own reference)             │
- │ 1 Base concrete      → colour, rough  Chips at joints   → edge-wear.md    │
- │ 2 Board layout/tilt  → geometry       Dirty joints/edge → edge-wear.md    │
- │ 3 Joint marks        → displacement   Run-off, leaks    → edge-wear.md    │
- │ 4 Grain per board    → bump + ink     Concave dust      → variation.md    │
- │ 5 Board tone         → colour         Per-unit variety  → variation.md    │
- │                                       Wet / dew         → wet-surfaces.md │
- └───────────────────────────────────────────────────────────────────────────┘
+                             BOARD-FORMED CONCRETE — LAYER DIAGRAM
+ ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+ │ SPECIFIC (§4)                         GENERIC (own reference)                            │
+ │ 1 Base concrete      → colour, rough  Chips at joints   → edge-wear.md                   │
+ │ 2 Board layout/tilt  → geometry       Dirty joints/edge → edge-wear.md                   │
+ │ 3 Joint marks        → displacement   Run-off, leaks    → edge-wear.md                   │
+ │ 4 Grain per board    → bump + ink     Concave dust      → edge-wear.md                   │
+ │ 5 Board tone         → colour         Tone key          → variation-per-unit-shading.md  │
+ │                                       Tilt, step        → variation-per-unit-geometry.md │
+ │                                       Wet / dew         → wet-surfaces.md                │
+ └──────────────────────────────────────────────────────────────────────────────────────────┘
    order of evaluation          node-editor output it drives
-   GN: boards as cells (2) ───────────────────────────► mesh (welded, manifold)
+   boards, tilt and step (2) ─────────────────────────► mesh (welded, manifold)
    joints (3) + chips ────────► Displacement output ──► true displacement
                                 (along the board normal; displacement.md)
    grain (4) ─────────────────► Bump ──► Normal ──────► Principled Normal
@@ -43,7 +44,7 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
 ## 3. Code
 - `scripts/blender/materials/concrete/concrete.py`: `vertical_boards(mat, cylinder=(cx, cy, r) | None)`,
   the printed board map for distant walls (its helper is `concrete_boards.py` in the same folder).
-- Board cells as GN geometry have no script in `scripts/` yet; build them in the node editor.
+- Board geometry (§4.2) has no builder yet.
 - Control for the printed map: the `vertical_boards` case in `scripts/controls/regression/regress_cases.py`
   and the `boards_` case in `scripts/controls/material_graph_cases.py`.
 
@@ -60,10 +61,9 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
 
 ### 4.2 Board layout, tilt and offset (geometry)
 - Courses, butt joints, board widths from the formwork drawing or reference.
-- **Boards are never coplanar.** Each tilts about its long axis and sits slightly in or out, so
-  courses step at the joints and catch light differently. This is what reads at a distance.
-- Size it as the **edge excursion** (tilt + offset), not a tilt angle: an angle grows with board width.
-- **Build:** boards as GN cells, welded and manifold.
+- **Boards are never coplanar.** Each tilts and steps, so courses catch light differently; this is what
+  reads at a distance. The wall is one cast surface, so the boards move in Blender:
+  [variation-per-unit-geometry.md](../../effects/variation-per-unit-geometry.md) › step 4.
 
 | Parameter | Value |
 |---|---|
@@ -135,7 +135,7 @@ formwork boards are alike, so neighbours differ (RULES MAT_06):
 final view's mm per pixel: relief finer than a pixel reads only through its tone (RULES MAT_04).
 
 ### 4.5 Board tone (colour)
-- Soft per-board tone from absorbency: a per-unit key, from [variation.md](../../effects/variation.md) (RULES MAT_06).
+- Soft per-board tone from absorbency: the `geometry` key of [variation-per-unit-shading.md](../../effects/variation-per-unit-shading.md) (RULES MAT_06).
 - Small, and never stepping harder than the joints themselves.
 
 ### 4.6 Printed board map (fallback for distant walls)
@@ -154,7 +154,7 @@ final view's mm per pixel: relief finer than a pixel reads only through its tone
 | Dirty joints / edge grime | [edge-wear.md](../../effects/edge-wear.md) | joint band rougher and darker (§4.3) |
 | Run-off streaks | [edge-wear.md](../../effects/edge-wear.md) › Runoff | from each wall's own top; vertical faces only |
 | Joint leaks | [edge-wear.md](../../effects/edge-wear.md) › Runoff | short drips under the horizontal joints, a pattern per joint, ending at the next joint |
-| Concave dust | [variation.md](../../effects/variation.md) (RULES MAT_06) | at inside corners and wall feet |
+| Concave dust | [edge-wear.md](../../effects/edge-wear.md) › Edge dust (RULES MAT_06) | at inside corners and wall feet |
 | Wet / dew | [wet-surfaces.md](../../effects/wet-surfaces.md) | darkens and smooths all layers above |
 
 ## 5. Troubleshooting

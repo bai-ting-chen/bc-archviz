@@ -86,7 +86,7 @@ layer in its own reference (§4.6), so there is no single diagram.
 ### 4.6 Generic layers, stone settings
 | Layer | Reference | Stone note |
 |---|---|---|
-| Per-unit variation | [variation.md](../../effects/variation.md) | per-object random variation on slab floors (§4.4) |
+| Per-unit variation | [variation-per-unit-shading.md](../../effects/variation-per-unit-shading.md) | per-object random variation on slab floors (§4.4) |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

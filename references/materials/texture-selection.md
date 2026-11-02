@@ -40,7 +40,8 @@ Use when: choosing a texture source or method for a surface, then scaling it and
    vein-cut or banded stone (travertine), ribbed or corrugated sheet, woven fabric, long-format
    tiles and pavers. Those take `archviz.directional_uv(obj, size_m, axis)`: U follows the
    element's long axis (or the given world axis) on every face; `along="V"` when the texture's
-   direction runs up the image.
+   direction runs up the image. Shader Image Texture › Box only where UVs cannot be written: it has no
+   tangents (height through Bump), Blend 0.1–0.2, Object coordinates (api-traps).
 6. **Variation:** Object Info Random, Geometry › Random per Island (per plank/tile in one mesh).
 7. **Node trees** in labelled frames (`materials.shared.nodes.G`). Mix nodes keep hidden
    same-named sockets → `materials.shared.nodes.sock()`.

@@ -120,11 +120,11 @@ Read: [scale.md](references/materials/scale.md)
 
 **MAT_05 — Authoring Natural Surface Marks**  
 Rule: Make marks patchy, able to disappear, with physically shaped extents.  
-Read: [variation.md](references/effects/variation.md)
+Read: [variation-surface-marks.md](references/effects/variation-surface-marks.md)
 
 **MAT_06 — Using Repeated Units Or Tiled Maps**  
-Rule: Add per-unit variation, hide repeats and fade concave-joint dust outward from corners in the first pass.  
-Read: [variation.md](references/effects/variation.md)
+Rule: Add per-unit variation, hide repeats and fade concave-joint dust outward from corners in the first pass; ask the user before adding stochastic tiling to a material.  
+Read: [variation-per-unit-shading.md](references/effects/variation-per-unit-shading.md), [variation-per-unit-geometry.md](references/effects/variation-per-unit-geometry.md), [variation-tiling.md](references/effects/variation-tiling.md)
 
 **MAT_07 — Composing Material Layers**  
 Rule: Build each look layer as its own term — colour and roughness as multipliers around 1, height as its own displacement or bump term — and give each layer an on/off switch in its builder, so the user and every control can turn it off.  

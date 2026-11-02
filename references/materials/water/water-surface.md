@@ -14,7 +14,7 @@ Specific layers are described in §4. The impact ripples are written once, in th
 and used here with pool settings.
 
 ```
-                          WATER SURFACE (POOL BODY)
+                  WATER SURFACE (POOL BODY) — LAYER DIAGRAM
  ┌──────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                                                            │
  │   §4.1 Pool water shading (depth tint)  → shader                         │

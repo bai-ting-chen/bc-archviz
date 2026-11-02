@@ -13,7 +13,7 @@ set up as true displacement: displacement.md.
 Specific layers are described in §4. No generic layers apply to this file.
 
 ```
-                            GROUND
+                            GROUND — LAYER DIAGRAM
  ┌───────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                                                             │
  │ 1 Aggregate precast   → material (box map, real size)                     │

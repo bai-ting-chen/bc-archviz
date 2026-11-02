@@ -15,7 +15,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 used here with concrete settings.
 
 ```
-                           CONCRETE (monolithic and burnished)
+              CONCRETE (monolithic and burnished) — LAYER DIAGRAM
  ┌───────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                          GENERIC (own reference)            │
  │ 1  Base recipe and tone  → colour, rough   Concave corners → edge-wear.md │

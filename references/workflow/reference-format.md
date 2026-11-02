@@ -3,6 +3,12 @@
 Every material and effect reference uses the same five sections, in this order. A section with
 nothing to say keeps its heading and says why in one line (e.g. "No code: the layers are node graph only").
 
+A file that is one procedure, not a stack of layers (e.g. variation-tiling.md): the §2 box shows its steps
+in order, joined by arrows (a branch where the route splits) and without `§4.x` numbers, and names the
+output each step feeds; no separate flow block. §4 ("Instructions and parameters") holds the same steps
+numbered, each with its own table, cited as "step N". A file with both (variation-surface-marks.md) draws two
+boxes. Every box header ends in its kind: "— LAYER DIAGRAM" or "— PROCEDURE DIAGRAM".
+
 ## 1. Overview
 - What the look is and which approach it takes, in one short paragraph.
 - Name the neighbouring reference that covers the other case (attached vs falling water, printed fallback).

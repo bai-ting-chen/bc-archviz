@@ -14,7 +14,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 used here with ripple settings.
 
 ```
-                           WATER RIPPLES AND WAVES
+                   WATER RIPPLES AND WAVES — LAYER DIAGRAM
  ┌──────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                                                            │
  │   §4.1 Impact field (float height, mm)  → height image                   │

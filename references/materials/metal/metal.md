@@ -10,7 +10,7 @@ marks are described in this file itself.
 Specific layers are described in §4. No generic layers apply to this file.
 
 ```
-                                  METAL
+                             METAL — LAYER DIAGRAM
  ┌───────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                                                             │
  │ 1 Polished base          → metallic BSDF (F82), roughness                 │

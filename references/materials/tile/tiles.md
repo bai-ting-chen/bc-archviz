@@ -13,12 +13,12 @@ Specific layers are described in §4. This file has no generic layers of its own
 are all specific to this material.
 
 ```
-                                  TILES
+                            TILES — LAYER DIAGRAM
  ┌───────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                                                             │
  │ 1 Mapping    → metre UVs on Rhino meshes (planar, cylinder, annulus)      │
  │ 2 Layout     → Tile ID, Tile UV, Edge (m), Joint, Cell, Tile Size         │
- │ 3 Surface    → glaze, grout, dust, tint, gloss, specks, metre height       │
+ │ 3 Surface    → glaze, grout, dust, tint, gloss, specks, metre height      │
  │ 4 Cracks     → damage masks (tile_damage, kind 1), piece lift and tilt    │
  │ 5 Relief     → displacement of damage only; profile and joints stay bump  │
  │ GENERIC      → none linked from this file                                 │

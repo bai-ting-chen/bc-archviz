@@ -16,7 +16,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 used here with falling-film settings.
 
 ```
-                           FREE-FALLING WATER FILM
+                    FREE-FALLING WATER FILM — LAYER DIAGRAM
  ┌───────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                          GENERIC (own reference)            │
  │ 1 Ballistic carrier   → geometry       Impact rings, waves, chop          │
