@@ -152,10 +152,10 @@ def run(topic):
             m.layout_vector(mat.node_tree, obj=obj)
             result["vector"] = dump_material(mat)
         elif topic == "concrete":
-            for label, kwargs in (("default", {}), ("off", dict(stain=False, bevel_chips=False, edge_dark=False))):
+            for label, kwargs in (("default", {}), ("off", dict(bevel_chips=False, edge_dark=False))):
                 material(label, lambda kwargs=kwargs: m.concrete_study(**kwargs))
             fresh()
-            mat = m.concrete_study(stain=False)
+            mat = m.concrete_study()
             result["retone_gain"] = m.retone(mat, (.4, .45, .5), "fixture")
             result["retone"] = dump_material(mat)
             for cylinder in (None, (1, 2, 3)):

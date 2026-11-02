@@ -22,7 +22,7 @@ used here with concrete settings.
  │ 2  Zone masks (Normal Z) → masks           Runoff, cracks  → edge-wear.md │
  │ 3  Grunge patches        → colour, rough                                  │
  │ 4  Damp band at the foot → colour, rough                                  │
- │ 5  Leak stain            → colour                                         │
+ │ 5  Leak stain            → see Runoff                                     │
  │ 6  Concave-corner grime  → colour (AO)                                    │
  │ 7  Monolithic tone match → own albedo                                     │
  │ 8  Burnished gloss       → roughness, bump                                │
@@ -46,10 +46,6 @@ used here with concrete settings.
 - `scripts/blender/materials/concrete/`: `concrete_build.py` (`concrete_study`), `concrete_tone.py`
   (`retone`, called as `materials.concrete.concrete.retone`), `concrete_masks.py` (edge masks), and
   `concrete.py` (the module the calls go through).
-- The current build (`concrete_build.py`, `concrete_study(stain=True)`) still loads a Megascans leak
-  opacity map through `stain_map`, from the study's `library/local/` (the user downloads it). It raises
-  if the file is missing. The procedural stain of §4.5
-  replaces it; until that is built, the bitmap path is the one that runs.
 - Control: none named in this file.
 
 ## 4. Instructions and parameters, per layer
@@ -114,25 +110,9 @@ used here with concrete settings.
 | Band | world Z threshold, at walls and columns |
 | Top edge | the same ragged noise, not a straight line |
 
-### 4.5 Leak stain (procedural)
-- Leak stains run down vertical faces from joints, cracks and drip edges. Build them as a procedural
-  mask, not a bitmap: nothing to download, no UV set, nothing that can go missing.
-- A noise field in world space, stretched along Z (long streaks, short across), broken up by a finer
-  noise in the same frame, and thresholded into ragged streaks (the threshold rule of §4.3).
-- Streaks fade downward from a start height, so they begin at the top of the wall and never fill the
-  whole face.
-- Mask (1 − |N.z|), so only verticals take a stain and streaks never run on horizontal faces.
-- A Megascans leak map is an alternative only when the user has downloaded one and approves it; ask first.
-- **Not yet tested.** Set the stretch, start height and fade in a control, not by eye in the node
-  preview (RULES VAL_02), and record the values in the study notes.
-
-| Parameter | Value |
-|---|---|
-| Field | world-space noise, stretched along Z; long streaks, short across |
-| Break-up | finer noise in the same frame, summed before a narrow threshold (§4.3) |
-| Start height | top of the wall or the leak source; sized from the shot |
-| Fade | downward from the start height |
-| Mask | (1 − \|N.z\|): verticals only |
+### 4.5 Leak stain
+- Procedural, no bitmap: `add_leak_field` on the object, then `add_runoff` on its `weathered_concrete`
+  material. Method and parameters: [edge-wear.md](../../effects/edge-wear.md) › Run-off.
 
 ### 4.6 Concave-corner grime
 - AO node set to **Outside**, not Inside, × fine noise, into the grunge darkening. Method and related

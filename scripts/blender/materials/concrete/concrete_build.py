@@ -1,11 +1,7 @@
 """Concrete build; canonical implementation behind concrete."""
 
-import os
-
 import bpy
 from effects.round_edges import round_shader
-
-from core.archviz import library
 
 from materials.shared.nodes import G, sock
 
@@ -19,16 +15,15 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
                    color_mult=(0.76, 0.82, 0.99), normal_strength=0.6, bump_distance=0.004,
                    rounded_edges=True, chip_spread=0.05, chip_in=(0.40, 0.90),
                    noise_scale=14.0, noise_band=(0.35, 0.60),
-                   edge_dark=True, stain=True, stain_mult=1.15, bevel_chips=True,
-                   stain_map=("local", "leakage_tdlbbd1c", "Leakage_tdlbbd1c_2K_Opacity.jpg")):
+                   edge_dark=True, bevel_chips=True):
     """Cast concrete: tone-matched diffuse, wired roughness/normal/height, round edges
-    combined with the normal map, chipped-edge wear and a leak stain driving a worn BRDF."""
+    combined with the normal map, and chipped-edge wear driving a worn BRDF."""
     maps, meta = _ph_maps(tex_id)
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     g = G(mat)
     g.frame("Maps (BoxUV, real-world size)", (0.20, 0.24, 0.30))
     g.frame("Surface relief: normal + height bump + round edges", (0.25, 0.22, 0.30))
-    g.frame("Wear mask: chips x noise, edge line, leak stain", (0.30, 0.22, 0.20))
+    g.frame("Wear mask: chips x noise, edge line", (0.30, 0.22, 0.20))
     g.frame("BRDFs", (0.20, 0.28, 0.22))
     F_MAP, F_REL, F_WEAR, F_BRDF = list(g.frames)
 
@@ -61,7 +56,7 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
     relief = round_shader(g, bump.outputs['Normal'], rounded_edges=rounded_edges,
                          loc=(-650, -250), frame=F_REL)
 
-    # Wear mask = max( chips * noise , edge line , stain )
+    # Wear mask = max( chips * noise , edge line ); leak streaks come from effects.runoff
     mask = None
     if bevel_chips:
         mask = _bevel_chips(g, chip_spread, chip_in, noise_scale, noise_band, F_WEAR)
@@ -82,37 +77,6 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
         line_r.inputs["To Max"].default_value = 0.55
         g.link(line, line_r.inputs["Value"])
         mask = _union(mask, line_r.outputs["Result"], (-120, -950))
-
-    if stain:
-        # stain_map: a leak/runoff opacity map under the study's library/ (a Megascans download
-        # needs the user's sign-in). Missing -> stop and say so; never drop the layer silently.
-        stain_path = library(*stain_map)
-        if not os.path.exists(stain_path):
-            raise FileNotFoundError(f"leak-stain map missing: {stain_path} -- download it into the "
-                                    "study library or build with stain=False and tell the user")
-        suv = g.uv("SpanUV", (-900, -1450), F_WEAR)
-        leak = g.img(stain_path,
-                     "Non-Color", (-700, -1450), F_WEAR, suv, "Leak stain (Stain Op)")
-        # v stays inside 0..v_repeat (<1), so REPEAT tiles u (wrap_u 1) and never wraps v (wrap_v 0)
-        sm = g.node("ShaderNodeMath", (-450, -1450), F_WEAR, label="x1.15")
-        sm.operation, sm.use_clamp = "MULTIPLY", True
-        sm.inputs[1].default_value = stain_mult
-        g.link(leak.outputs["Color"], sm.inputs[0])
-        # runoff only streaks vertical faces: weight by 1 - |normal.z|
-        geo = g.node("ShaderNodeNewGeometry", (-700, -1700), F_WEAR)
-        sepn = g.node("ShaderNodeSeparateXYZ", (-500, -1700), F_WEAR)
-        g.link(geo.outputs["Normal"], sepn.inputs["Vector"])
-        vert = g.node("ShaderNodeMapRange", (-320, -1700), F_WEAR, label="vertical faces only")
-        vert.inputs["From Min"].default_value, vert.inputs["From Max"].default_value = 0.3, 0.1
-        absz = g.node("ShaderNodeMath", (-450, -1850), F_WEAR)
-        absz.operation = "ABSOLUTE"
-        g.link(sepn.outputs["Z"], absz.inputs[0])
-        g.link(absz.outputs["Value"], vert.inputs["Value"])
-        smv = g.node("ShaderNodeMath", (-200, -1500), F_WEAR, label="stain (vertical faces)")
-        smv.operation = "MULTIPLY"
-        g.link(sm.outputs["Value"], smv.inputs[0])
-        g.link(vert.outputs["Result"], smv.inputs[1])
-        mask = _union(mask, smv.outputs["Value"], (40, -1100))
 
     clean = g.node("ShaderNodeBsdfPrincipled", (-250, 350), F_BRDF, label="Concrete",
                    IOR=1.5)

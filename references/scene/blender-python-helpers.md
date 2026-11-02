@@ -21,11 +21,11 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `legacy_studies(project)` — Study folder names listed in <project>/library/legacy_studies.txt (# comments allowed).
 - `find_project(starts)` — Project folder for the first start that resolves (see module doc), else None.
 
-## `core.uv` — UV projections for archviz materials: real-world box, directional (grain follows one axis), and the once-per-object span set used by stains.
+## `core.uv` — UV projections for archviz materials: real-world box, directional (grain follows one axis), and the once-per-object span set.
 
 - `directional_uv(obj, size, name='BoxUV', axis=None, along='U')` — Box UVs for DIRECTIONAL textures (wood grain, boards, brushed metal, vein-cut or banded stone, ribbed/corrugated sheet, woven fabric, long-format tiles): U follows one direction on every face — the object's longest dimension, or world `axis` ("X"/"Y"/"Z", e.g. "Z" for vertical cladding). Plain box_uv projects each face along its own dominant axis, which turns the image 90 deg between faces (grain along the top of a plank, across its side). Faces whose normal lies along that direction (end grain) get the other two axes. along="V" for textures whose direction runs up the image. 1 UV unit = `size` metres. Returns the axis used.
 - `box_uv(obj, size=1.0, name='BoxUV')` — Real-world box UVs in world space: 1 UV unit = `size` metres. Each face is projected along its dominant world axis, so tangent-space normal maps and UV-based displacement behave (unlike shader box projection, which has no tangents).
-- `height_span_uv(obj, u_size=4.0, v_repeat=1.0, name='SpanUV')` — Second UV set for once-per-object maps (leak stains): u tiles every `u_size` metres along the face, v runs 0..v_repeat from the object's bottom to its top.
+- `height_span_uv(obj, u_size=4.0, v_repeat=1.0, name='SpanUV')` — Second UV set for once-per-object maps: u tiles every `u_size` metres along the face, v runs 0..v_repeat from the object's bottom to its top.
 
 ## `effects.caustics.caustic_graph` — Caustic graph; implementation for gn_caustics.
 
@@ -96,7 +96,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `effects.edge_shading` — Concrete edge shading and fresh-break material from clean distance and chip fields.
 
-- `weathered_concrete(name='CONCRETE_WEATHERED', line_width=LINE_WIDTH, line_amount=LINE_AMOUNT, dirt_noise_scale=9.0, stain=True, tex_id='concrete_wall_009', dust_width=DUST_WIDTH, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True)` — Layer edge line/dust and fresh-break shading over the concrete study material.
+- `weathered_concrete(name='CONCRETE_WEATHERED', line_width=LINE_WIDTH, line_amount=LINE_AMOUNT, dirt_noise_scale=9.0, tex_id='concrete_wall_009', dust_width=DUST_WIDTH, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True)` — Layer edge line/dust and fresh-break shading over the concrete study material.
 
 ## `effects.leak_field` — Leak field: per point, how far below the first surface straight above it (a raycast up from just inside the wall) -> `leak_d` and `leak_ok`. Runoff streaks read these to hang drips under drip edges.
 
@@ -145,7 +145,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.concrete.concrete_build` — Concrete build; canonical implementation behind concrete.
 
-- `concrete_study(name='CONCRETE', tex_id='concrete_wall_009', color_mult=(0.76, 0.82, 0.99), normal_strength=0.6, bump_distance=0.004, rounded_edges=True, chip_spread=0.05, chip_in=(0.4, 0.9), noise_scale=14.0, noise_band=(0.35, 0.6), edge_dark=True, stain=True, stain_mult=1.15, bevel_chips=True, stain_map=('local', 'leakage_tdlbbd1c', 'Leakage_tdlbbd1c_2K_Opacity.jpg'))` — Cast concrete: tone-matched diffuse, wired roughness/normal/height, round edges combined with the normal map, chipped-edge wear and a leak stain driving a worn BRDF.
+- `concrete_study(name='CONCRETE', tex_id='concrete_wall_009', color_mult=(0.76, 0.82, 0.99), normal_strength=0.6, bump_distance=0.004, rounded_edges=True, chip_spread=0.05, chip_in=(0.4, 0.9), noise_scale=14.0, noise_band=(0.35, 0.6), edge_dark=True, bevel_chips=True)` — Cast concrete: tone-matched diffuse, wired roughness/normal/height, round edges combined with the normal map, and chipped-edge wear driving a worn BRDF.
 
 ## `materials.concrete.concrete_tone` — Concrete tone; canonical implementation behind concrete.
 

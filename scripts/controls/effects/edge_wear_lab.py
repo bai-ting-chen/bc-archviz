@@ -100,9 +100,9 @@ def _materials(wall, column, floor, archviz):
         edges = edge_crack_edges(ob) if ob != floor else []
         if ob == floor:
             from materials.concrete.concrete import concrete_study
-            mat = concrete_study(name='Floor material', stain=False, edge_dark=False, bevel_chips=False)
+            mat = concrete_study(name='Floor material', edge_dark=False, bevel_chips=False)
         else:
-            mat = weathered_concrete(name=ob.name + ' material', stain=False)
+            mat = weathered_concrete(name=ob.name + ' material')
         add_corner_dirt(mat)
         ob.data.materials.clear()
         ob.data.materials.append(mat)

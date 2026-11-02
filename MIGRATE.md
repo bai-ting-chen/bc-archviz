@@ -94,4 +94,20 @@ From: LAPTOP-25
 - `rg "effects\.variation\b|variation\.md" scripts references` finds nothing.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
+# MIGRATE: bitmap leak stain removed from concrete
+From: LAPTOP-25
+
+## What changed
+- `concrete_study()` lost `stain`, `stain_mult` and `stain_map`; `weathered_concrete()` lost `stain`. The Megascans
+  leak map (`library/local/leakage_tdlbbd1c`) is no longer loaded. Leak streaks come only from `add_leak_field` +
+  `add_runoff` (edge-wear.md › Run-off).
+- `render_variant.py stain=off` now cuts the run-off `leak streak mask`.
+
+## Steps
+- Drop `stain=`, `stain_mult=` and `stain_map=` from external calls to these two builders.
+
+## Check after pull
+- `rg "stain_map|stain_mult|stain=(True|False)" scripts` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
 Remove each section after applying it; delete this file when none is left.

@@ -134,10 +134,10 @@ def main():
                 for l in list(n.inputs["Fac"].links):
                     nt.links.remove(l)
                 n.inputs["Fac"].default_value = 0.0
-    if opts.get("stain") == "off":  # negative control: no leak stain in the wear mask
+    if opts.get("stain") == "off":  # negative control: no run-off leak streaks in the grime mask
         for m in bpy.data.materials:
             nt = m.node_tree
-            n = nt and next((n for n in nt.nodes if n.label == "stain (vertical faces)"), None)
+            n = nt and next((n for n in nt.nodes if n.label == "leak streak mask"), None)
             if n:
                 for l in list(n.outputs[0].links):
                     to = l.to_socket

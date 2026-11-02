@@ -107,13 +107,13 @@ def _specimens(archviz):
     from materials.concrete.concrete import concrete_study
     from effects.edge_wear import weathered_concrete, add_corner_dirt
     mats = []
-    column = weathered_concrete(stain=False)
+    column = weathered_concrete()
     add_corner_dirt(column)
     _material_box(archviz, 'Concrete column', (-0.35, 0.35, 1.1), (0.6, 0.6, 2.2), column, field=True)
     mats.append(column)
     for name, pos, dims in [('Floor', (0, -0.5, -0.1), (5, 5, 0.2)),
                              ('Wall', (0, 0.75, 1.5), (5, 0.2, 3))]:
-        mat = concrete_study(name=name, edge_dark=False, stain=False, bevel_chips=False)
+        mat = concrete_study(name=name, edge_dark=False, bevel_chips=False)
         add_corner_dirt(mat)
         mats.append(mat)
         _material_box(archviz, name, pos, dims, mat)

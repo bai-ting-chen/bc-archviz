@@ -4,9 +4,8 @@ not names or layout), plus evaluated vertex positions of the GN wear groups.
 
   1. snapshot the current code:  git archive HEAD scripts | tar -x -C <dir>/old
   2. assets: a project folder whose library/ holds polyhaven/textures/{concrete_wall_009,
-     coated_pine, gray_rocks}, polyhaven/hdris/kloppenheim_06_puresky and local/leakage_tdlbbd1c
-     (polyhaven_fetch.py; the leak map is a Megascans download) -- a throwaway copy, since
-     albedo_material caches into meta.json
+     coated_pine, gray_rocks} and polyhaven/hdris/kloppenheim_06_puresky (polyhaven_fetch.py)
+     -- a throwaway copy, since albedo_material caches into meta.json
   3. blender -b --factory-startup --python regress_helpers.py -- dump <scripts/blender> <project> <out.json>
      using each snapshot's own regress_helpers.py and matching scripts/blender directory.
      A pre-package snapshot uses its pre-package runner; the current runner uses canonical materials modules.

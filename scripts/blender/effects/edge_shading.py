@@ -7,14 +7,13 @@ from effects.edge_dirt import (DUST_AMOUNT, DUST_WIDTH, GRIME_TINT, LINE_AMOUNT,
 
 
 def weathered_concrete(name="CONCRETE_WEATHERED", line_width=LINE_WIDTH, line_amount=LINE_AMOUNT,
-                       dirt_noise_scale=9.0, stain=True, tex_id="concrete_wall_009",
+                       dirt_noise_scale=9.0, tex_id="concrete_wall_009",
                        dust_width=DUST_WIDTH, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True):
     """Layer edge line/dust and fresh-break shading over the concrete study material."""
-    mat = _mat_concrete.concrete_study(name=name, tex_id=tex_id, edge_dark=False, stain=stain, bevel_chips=False, rounded_edges=rounded_edges)
+    mat = _mat_concrete.concrete_study(name=name, tex_id=tex_id, edge_dark=False, bevel_chips=False, rounded_edges=rounded_edges)
     g = G(mat.node_tree)                      # add to the existing tree
     nt = mat.node_tree
     mix = next(n for n in nt.nodes if n.label == "Wear Layered (BRDFLayered)")
-    stain_node = next((n for n in nt.nodes if n.label == "stain (vertical faces)"), None)
     out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
     clean = next(n for n in nt.nodes if n.label == "Concrete")
 
@@ -42,13 +41,10 @@ def weathered_concrete(name="CONCRETE_WEATHERED", line_width=LINE_WIDTH, line_am
     dust = math_(g, "MULTIPLY", dust, no_chip, (x0 + 1000, y0 - 50), F_DIRT)
     dust.node.label = "dust edge mask"
     dirt.node.label = "dirty edge mask"
-    # Run-off/stain/crack halos keep their existing grime path; edge line colour is now relative.
-    mask = 0.0
-    if stain_node is not None:
-        mask = math_(g, "MAXIMUM", mask, stain_node.outputs[0], (x0 + 1200, y0 + 150), F_DIRT)
+    # Run-off and crack halos keep their existing grime path; edge line colour is now relative.
     for l in list(mix.inputs["Fac"].links):
         nt.links.remove(l)
-    g._in(mix.inputs["Fac"], mask)
+    g._in(mix.inputs["Fac"], 0.0)
     worn = next(n for n in nt.nodes if n.label == "Worn BRDF")
     worn.label = "Grime BRDF"
     worn.inputs["Base Color"].default_value = (*GRIME_TINT, 1)

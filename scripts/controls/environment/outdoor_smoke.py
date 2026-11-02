@@ -54,7 +54,7 @@ archviz.box_uv(hut, 2.0)
 wear.add_leak_field(hut)                                   # first, on the clean shell
 wear.add_edge_wear(hut, wear.edge_wear_group("SMOKE WEAR", band=0.08, level=3), Seed=(1.0, 2.0, 3.0))
 assert hut.modifiers[0].name == "LEAK FIELD", [m.name for m in hut.modifiers]
-conc = wear.weathered_concrete("SMOKE_CONCRETE", stain=False, tex_id="concrete_wall_006")
+conc = wear.weathered_concrete("SMOKE_CONCRETE", tex_id="concrete_wall_006")
 _mat_concrete.retone(conc, (0.28, 0.28, 0.28), "concrete_wall_006")
 wear.add_runoff(conc)
 wv = [v.co for v in hut.data.vertices if abs(v.co.y + 1.45) < 0.01]    # recessed window face

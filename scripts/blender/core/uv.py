@@ -1,5 +1,5 @@
 """UV projections for archviz materials: real-world box, directional (grain follows one axis), and
-the once-per-object span set used by stains.
+the once-per-object span set.
 
 1 UV unit = `size` metres everywhere, so a texture keeps its scale across objects.
 """
@@ -66,7 +66,7 @@ def box_uv(obj, size=1.0, name="BoxUV"):
 
 
 def height_span_uv(obj, u_size=4.0, v_repeat=1.0, name="SpanUV"):
-    """Second UV set for once-per-object maps (leak stains): u tiles every `u_size` metres
+    """Second UV set for once-per-object maps: u tiles every `u_size` metres
     along the face, v runs 0..v_repeat from the object's bottom to its top."""
     import bmesh
     mw = obj.matrix_world

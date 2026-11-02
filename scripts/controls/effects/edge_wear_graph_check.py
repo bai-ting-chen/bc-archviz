@@ -67,7 +67,7 @@ result["modifier_inputs"] = modifier_inputs(mod)
 result["modifier_dice_faces"] = edge_wear.dice(obj, size=0.5)
 
 fresh()
-result["weathered"] = dump_material(edge_wear.weathered_concrete(stain=False))
+result["weathered"] = dump_material(edge_wear.weathered_concrete())
 
 for method in ("pointiness", "ao_inside", "bevel", "edge_dist", "chip", "damage"):
     fresh()
@@ -77,7 +77,7 @@ fresh()
 result["leak_group"] = {"tree": dump_tree(edge_wear.leak_field_group())}
 
 fresh()
-wall_mat = edge_wear.weathered_concrete(stain=False)
+wall_mat = edge_wear.weathered_concrete()
 wall = bpy.data.meshes.new("LeakWall")
 wall.from_pydata([(0, 0, 0), (1, 0, 0), (1, 0.2, 0), (0, 0.2, 0), (0, 0, 2), (1, 0, 2), (1, 0.2, 2), (0, 0.2, 2)],
                  [], [(0, 1, 2, 3), (4, 5, 6, 7), (0, 1, 5, 4), (2, 3, 7, 6), (0, 3, 7, 4), (1, 2, 6, 5)])
@@ -90,12 +90,12 @@ result["runoff_leak_group"] = {"tree": dump_tree(edge_wear.leak_field_group())}
 result["runoff_modifiers"] = [m.name for m in leak_obj.modifiers]
 
 fresh()
-crack_mat = edge_wear.weathered_concrete(stain=False)
+crack_mat = edge_wear.weathered_concrete()
 edge_wear.add_cracks(crack_mat, openings=OPENINGS)
 result["cracks"] = dump_material(crack_mat)
 
 fresh()
-both = edge_wear.weathered_concrete(stain=False)
+both = edge_wear.weathered_concrete()
 edge_wear.add_runoff(both)
 edge_wear.add_cracks(both, openings=OPENINGS, crack={"seed": 5})
 result["runoff_and_cracks"] = dump_material(both)
@@ -103,7 +103,7 @@ result["runoff_and_cracks"] = dump_material(both)
 # Independent switches must compose even when the shared rounded-normal layer is absent.
 for enabled in (False, True):
     fresh()
-    mat = edge_wear.weathered_concrete(stain=False, rounded_edges=enabled,
+    mat = edge_wear.weathered_concrete(rounded_edges=enabled,
                                       chips_amount=float(enabled))
     edge_wear.add_runoff(mat, amount=float(enabled))
     edge_wear.add_cracks(mat, openings=OPENINGS, amount=float(enabled))
