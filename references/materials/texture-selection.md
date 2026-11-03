@@ -22,7 +22,8 @@ Use when: choosing a texture source or method for a surface, then scaling it and
 1. **Shortlist from a contact sheet:** Poly Haven thumbnails
    (`cdn.polyhaven.com/asset_img/thumbs/<id>.png?width=300`) for 10-20 candidates in one image.
    `api.polyhaven.com/assets?t=textures` filtered by id/tags finds what `polyhaven_fetch.py
-   search <category>` misses.
+   search <category>` misses. When Poly Haven has no good fit, shortlist Quixel Megascans the same
+   way (`fab_sheet.py`, pipeline.md › Assets); their listings state the scan size.
 2. **Open the colour map itself**, not the sphere thumbnail or the tags — a "white, clean" tag can
    sit on painted boards or a weathered, stained surface. Check its features against the table.
 3. **Judge the map by its measured mean, not its thumbnail.** Average the diffuse map in linear

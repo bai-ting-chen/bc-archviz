@@ -178,6 +178,10 @@ Read: [pipeline.md](references/scene/pipeline.md)
 Rule: Name new files and folders in lowercase kebab-case and Python files in snake_case; `_wip/` keeps its name.  
 Read: [pipeline.md](references/scene/pipeline.md)
 
+**AST_06 — Choosing Quixel Assets From Fab**  
+Rule: Read the Fab catalog only in the built-in browser and hand the user a candidate list, preferred first, with each Megascans id; the user reviews and downloads. Never sign in to Fab or download on the user's behalf.  
+Read: [pipeline.md](references/scene/pipeline.md)
+
 ### Safety
 
 **SAF_01 — Operating The User’s Blender**  

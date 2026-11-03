@@ -184,9 +184,27 @@ Read-only documentation work needs no Blender or Rhino connection.
   arm, nor_gl, disp; `meta.json` has `dimensions_mm`. `search` matches categories only. For
   names and tags, query `api.polyhaven.com/assets?t=textures|hdris` and choose from a thumbnail
   contact sheet ([index.md](../materials/index.md)). HTTP 520–525 is Cloudflare: retry the same call.
-- Others in `library/local/<name>/` with a `meta.json` stating the source: IES light files and Megascans
-  (Quixel Megascans on Fab). The user downloads Megascans by hand. Ask before using any asset; never
-  sign in to Fab or download on the user's behalf.
+- Others in `library/local/<name>/` with a `meta.json` stating the source: IES light files and
+  Quixel assets from Fab. Ask before using any asset.
+- **Quixel on Fab (RULES AST_06).** Two sellers: `Quixel Megascans` (about 11,000 materials, 8,900
+  3D models and plants, 2,200 decals, 500 brushes; Blender takes the texture-set zip, FBX or glTF)
+  and `Quixel Megaplants` (40 Unreal procedural trees; only those listing `usd` import into Blender).
+  Plain HTTP gets a Cloudflare 403, so the catalog is read in the built-in browser:
+  1. Open `https://www.fab.com/sellers/Quixel%20Megascans` in the built-in browser. No sign-in.
+  2. Send the text of `scripts/scene/assets/fab-search.js` with `javascript_tool` once per tab,
+     then call `await fabSearch({q, type, category, max})` (options in the file header). Each row
+     holds the Megascans id (e.g. `zcgmefc`, read from the download file name), title, category, tags,
+     formats, scan size, texel density, maps, plant species, Fab link and thumbnail. Rows cost about
+     1 s each; Fab pages hold 24, followed until `max`. Category slugs: copy one from a row's
+     `category` path (`a/b` → `a--b`).
+  3. Save the rows to `<study>/_wip/fab/<topic>.json`, then
+     `python scripts/scene/assets/fab_sheet.py <topic>.json <topic>-sheet.png` (MCP venv python)
+     and judge the candidates from the sheet, as with Poly Haven (texture-selection.md step 1).
+  4. Hand the user the candidate list: preferred first, each with its id, title, scan size, the
+     reason, and the Fab link. Megaplants have no id: give the USD file name, and check that it
+     names the listed species (one Fab listing serves another species' file).
+  5. The user reviews and downloads the ones they choose into the study's `library/local/`.
+     Check the downloaded file names against the ids before building.
 - **Where:** the study's own `library/` (RULES AST_03) — `ARCHVIZ_PROJECT=<study> polyhaven_fetch.py …`,
   `archviz.set_project(<study>)` in Blender. Run from inside a study, both find it without the
   setting (`projectpath`: the search stops at the study folder); a shared `library/` above is
@@ -285,7 +303,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tile/tiles.md). |
 | Controls | `scripts\controls\lighting\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`); `weathering_lab.py` (flat-wall look lab, `-- <out> <tag> [key=value]`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
-| Assets | `scripts\scene\assets\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); others `<study>\library\local\` with a `meta.json` |
+| Assets | `scripts\scene\assets\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); Quixel on Fab: `scripts\scene\assets\fab-search.js` (built-in browser) and `fab_sheet.py` (contact sheet); others `<study>\library\local\` with a `meta.json` |
 | Video research | `scripts\research\yt_learn.py` |
 
 ## Install
