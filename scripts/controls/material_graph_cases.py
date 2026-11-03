@@ -17,6 +17,22 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "blender"))
 from graph_dump import dump_material, dump_tree, value, write
 
+# topic -> the facade module whose builders the topic's cases call (wood_wear imports its own)
+TOPIC_MODULES = {
+    "concrete": "materials.concrete.concrete",
+    "glass": "materials.glass.glass",
+    "ground": "materials.ground.ground",
+    "luxcore": "renderer.luxcore.luxcore",
+    "pbr": "materials.shared.pbr",
+    "stone": "materials.stone.stone",
+    "tile_damage": "materials.tile.tile_damage",
+    "tile_layout": "materials.tile.tile_layout",
+    "tile_mapping": "materials.tile.tile_mapping",
+    "tile_nodes": "materials.tile.tile_nodes",
+    "vegetation": "materials.vegetation.vegetation",
+    "water": "materials.water.water",
+}
+
 
 def mesh_state(obj):
     """Record geometry, UVs, normals, attributes and modifier settings."""
@@ -50,28 +66,33 @@ def group_state(group):
 def import_smoke(topic):
     """Import material owners and direct callers; check control imports without running renders."""
     scripts = Path(__file__).resolve().parents[1]
-    for path in sorted((scripts / "blender" / "materials").glob("*.py")):
-        importlib.import_module("materials." + path.stem)
+    for path in sorted((scripts / "blender" / "materials").glob("*/*.py")):
+        if path.stem != "__init__":
+            importlib.import_module("materials." + path.parent.name + "." + path.stem)
+    module = TOPIC_MODULES.get(topic)
+    if module is None:
+        print("IMPORT_SMOKE", topic, [])
+        return
+    package, _, leaf = module.rpartition(".")
     callers = []
     for path in sorted(scripts.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8-sig"))
         relevant = []
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
-                if any(alias.name == "materials." + topic for alias in node.names):
+                if any(alias.name == module for alias in node.names):
                     relevant.append(node)
             elif isinstance(node, ast.ImportFrom):
                 name = node.module or ""
-                facade_import = name == "materials." + topic or (node.level == 1 and name == topic)
-                package_import = (name == "materials" or (node.level == 1 and not name)) and any(
-                    alias.name == topic for alias in node.names)
+                facade_import = name == module
+                package_import = name == package and any(alias.name == leaf for alias in node.names)
                 if facade_import or package_import:
                     relevant.append(node)
         if not relevant:
             continue
         if scripts / "blender" in path.parents:
-            module = ".".join(path.relative_to(scripts / "blender").with_suffix("").parts)
-            importlib.import_module(module)
+            caller = ".".join(path.relative_to(scripts / "blender").with_suffix("").parts)
+            importlib.import_module(caller)
         else:
             # Controls have top-level scene/render operations: import only their declarations.
             for node in relevant:
@@ -99,7 +120,7 @@ def run(topic):
         import core.archviz as archviz
         # Route only this process's asset requests to disposable, measured fixtures.
         archviz.library = lambda *parts: str(folder / "map.png") if Path(parts[-1]).suffix else str(folder)
-        m = importlib.import_module("materials." + topic) if topic != "wood_wear" else None
+        m = importlib.import_module(TOPIC_MODULES[topic]) if topic != "wood_wear" else None
         result = {}
 
         def fresh():
