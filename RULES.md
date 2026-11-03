@@ -28,10 +28,6 @@ Read: [work-modes.md](references/workflow/work-modes.md)
 Rule: Every code change gets a fresh review. Weigh each finding, and disclose any finding you reject. If the reviewer is the same model that wrote the code, say so.  
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
-**AGT_03 — Codex Reports On A Finished Stage**  
-Rule: In Normal mode Claude trains its own judgement from Codex's reports. In CPM, training runs only when the user asks for it.  
-Read: [codex-coaching.md](references/review/codex-coaching.md)
-
 **AGT_04 — File Ownership**  
 Rule: Only one agent may own Blender, Rhino, scripts or any project or study file at a time; the owner holds the machine lock. If another agent holds it, stop and tell the user. Never delete a lock that may still be live or whose owner is unknown.  
 Read: [agent-lock.md](references/workflow/agent-lock.md)

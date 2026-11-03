@@ -9,7 +9,7 @@ Every stage starts with a brief and ends with a report; files live in the study'
 - outputs and where they go; the camera(s) the images use;
 - run budget (skill-maintaining.md › Handing work to Codex);
 - done when: the check or image that answers the question;
-- the report to write, and whether training is on;
+- the report to write;
 - when it applies or swaps a texture, the attach workflow: real size from the asset's metadata; Rhino UVs
   discarded and `archviz.box_uv(obj, size_m)` on the final mesh (`directional_uv` only for an asked grain axis);
   no stretch (UV area × size² ≈ world area, feature size in a native crop); Image Texture through a named UV Map,
@@ -28,11 +28,9 @@ skipped only for a stage that leaves no code behind (a preview or render from sa
 
 **Stage report** (Codex → Claude, `report-<stage>.md`, ≤ 20 lines on top, detail below):
 - what was done, files changed;
-- one line per image: "this shows X" (codex-coaching.md);
+- one line per image: "this shows X";
 - the deciding numbers, with the control's noise floor;
-- open issues and risks, worst first;
-- with training on: *Self-judgement* — what still differs from the ref or intent, worst first,
-  and the next step with why.
+- open issues and risks, worst first.
 
 **Source list** (for the research gate, `_wip/research/<topic>-sources.md`):
 - the question in one sentence;
@@ -52,5 +50,4 @@ albedo and roughness, the reference crop it matches, and "in doubt" with the can
 - full-resolution evidence: frames or crops saved beside the note, not only text.
 
 **Review** (fresh Codex reviewer, `review-<stage>.md`): findings only, most severe first, with
-file:line, against the brief, [RULES.md](../../RULES.md) and [blender-api-traps.md](../scene/blender-api-traps.md). With training on, the reviewer also
-opens the images and checks them against the design intent (codex-coaching.md › Reviewing).
+file:line, against the brief, [RULES.md](../../RULES.md) and [blender-api-traps.md](../scene/blender-api-traps.md).

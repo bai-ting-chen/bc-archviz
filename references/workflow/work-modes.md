@@ -1,4 +1,4 @@
-# Work modes — who does what (RULES AGT_02, AGT_03)
+# Work modes — who does what (RULES AGT_02)
 
 The split between Claude and Codex for each stage of a study, in both modes ([study stages](study-stages.md)). RULES AGT_02 holds the
 rule; this file is the detail. How to launch the sessions: [skill-maintaining.md](skill-maintaining.md) › Handing work to Codex.
