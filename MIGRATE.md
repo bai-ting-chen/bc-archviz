@@ -141,4 +141,17 @@ From: LAPTOP-25
 - `rg "caustic_photons|photon_(bake|geometry|grid|shading|trace)" scripts references` finds nothing.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
+# MIGRATE: fab_sheet.py renamed asset_sheet.py
+From: LAPTOP-25
+
+## What changed
+- `scripts/scene/assets/fab_sheet.py` is now `asset_sheet.py`; it tiles Fab and Maxtree rows.
+
+## Steps
+- Point any local note or script that calls `fab_sheet.py` at `asset_sheet.py`; no shim.
+
+## Check after pull
+- `rg "fab_sheet" scripts references` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
 Remove each section after applying it; delete this file when none is left.

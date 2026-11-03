@@ -182,8 +182,8 @@ Read: [pipeline.md](references/scene/pipeline.md)
 Rule: Name new files and folders in lowercase kebab-case and Python files in snake_case; `_wip/` keeps its name.  
 Read: [pipeline.md](references/scene/pipeline.md)
 
-**AST_06 — Choosing Quixel Assets From Fab**  
-Rule: Read the Fab catalog only in the built-in browser and give each Quixel candidate its Megascans id in the MAT_10 list; the user reviews and downloads. Never sign in to Fab or download on the user's behalf.  
+**AST_06 — Choosing Assets The User Downloads (Quixel, Maxtree)**  
+Rule: Read the catalog (Fab only in the built-in browser), pick, and send the candidates in one list as in MAT_10, plants and models included, each with the id the user searches by; the user reviews and downloads. Never sign in to a shop or download on the user's behalf.  
 Read: [pipeline.md](references/scene/pipeline.md)
 
 ### Safety

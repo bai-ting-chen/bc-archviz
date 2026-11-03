@@ -185,7 +185,7 @@ Read-only documentation work needs no Blender or Rhino connection.
   names and tags, query `api.polyhaven.com/assets?t=textures|hdris` and choose from a thumbnail
   contact sheet ([index.md](../materials/index.md)). HTTP 520–525 is Cloudflare: retry the same call.
 - Others in `library/local/<name>/` with a `meta.json` stating the source: IES light files and
-  Quixel assets from Fab. Ask before using any asset.
+  assets the user downloads (Quixel, Maxtree). Ask before using any asset.
 - **Quixel on Fab (RULES AST_06).** Two sellers: `Quixel Megascans` (about 11,000 materials, 8,900
   3D models and plants, 2,200 decals, 500 brushes; Blender takes the texture-set zip, FBX or glTF)
   and `Quixel Megaplants` (40 Unreal procedural trees; only those listing `usd` import into Blender).
@@ -198,13 +198,26 @@ Read-only documentation work needs no Blender or Rhino connection.
      1 s each; Fab pages hold 24, followed until `max`. Category slugs: copy one from a row's
      `category` path (`a/b` → `a--b`).
   3. Save the rows to `<study>/_wip/fab/<topic>.json`, then
-     `python scripts/scene/assets/fab_sheet.py <topic>.json <topic>-sheet.png` (MCP venv python)
+     `python scripts/scene/assets/asset_sheet.py <topic>.json <topic>-sheet.png` (MCP venv python)
      and judge the candidates from the sheet, as with Poly Haven (texture-selection.md step 1).
   4. Add the fits to the candidate list (RULES MAT_10; format in texture-selection.md step 1) with
      each Fab link. Megaplants have no id: give the USD file name, and check that it names the
      listed species (one Fab listing serves another species' file).
   5. The user reviews and downloads the ones they choose into the study's `library/local/`.
      Check the downloaded file names against the ids before building.
+- **Maxtree (RULES AST_06).** About 2,400 plant models (single models and whole volumes), read
+  over plain HTTP from the shop's public Store API. Its own search knows Latin names only, so:
+  1. `python scripts/scene/assets/maxtree_search.py <study>/_wip/maxtree search <words>
+     [--category Conifers] [--min-height 300 --max-height 800] [--out <topic>.json]`. The first
+     run fetches the whole catalog into `catalog.json` (about 2 min; refetched after 7 days).
+     Words match the model name, Latin and common names and categories; heights are per variant, in cm.
+  2. Each row holds the id (the model name, e.g. `V113_Olea_europaea_03`), common names, volume,
+     categories, variants with polygons and height, formats, price, link and thumbnail. Single
+     models list before volume packs.
+  3. `asset_sheet.py <topic>.json <topic>-sheet.png`, then send the candidate list with each id,
+     its volume (the user may own the whole volume), the height range and the link.
+  4. The user downloads the chosen models into the study's `library/local/`; check the file names
+     against the ids.
 - **Where:** the study's own `library/` (RULES AST_03) — `ARCHVIZ_PROJECT=<study> polyhaven_fetch.py …`,
   `archviz.set_project(<study>)` in Blender. Run from inside a study, both find it without the
   setting (`projectpath`: the search stops at the study folder); a shared `library/` above is
@@ -303,7 +316,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tile/tiles.md). |
 | Controls | `scripts\controls\lighting\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`); `weathering_lab.py` (flat-wall look lab, `-- <out> <tag> [key=value]`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
-| Assets | `scripts\scene\assets\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); Quixel on Fab: `scripts\scene\assets\fab-search.js` (built-in browser) and `fab_sheet.py` (contact sheet); others `<study>\library\local\` with a `meta.json` |
+| Assets | `scripts\scene\assets\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); Quixel on Fab: `scripts\scene\assets\fab-search.js` (built-in browser); Maxtree: `maxtree_search.py`; both: `asset_sheet.py` (contact sheet); others `<study>\library\local\` with a `meta.json` |
 | Video research | `scripts\research\yt_learn.py` |
 
 ## Install

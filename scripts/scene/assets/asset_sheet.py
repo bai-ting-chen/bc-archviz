@@ -1,29 +1,30 @@
-"""Tile Fab thumbnails from fab-search.js rows into one labelled contact sheet.
+"""Tile asset thumbnails into one labelled contact sheet.
 
+Rows come from fab-search.js (Quixel on Fab) or maxtree_search.py --out (Maxtree).
 Usage (MCP venv python, it has Pillow):
-    python fab_sheet.py <rows.json> <sheet.png> [--cols 4]
-Thumbnails are cached next to the sheet in thumbs/. Each tile is labelled with the
-Megascans id (or the download file for Megaplants), the title and the scan size.
+    python asset_sheet.py <rows.json> <sheet.png> [--cols 4]
+Thumbnails are cached next to the sheet in thumbs/. Each tile is labelled with the asset id
+(or the download file for Megaplants), the title and the real size.
 """
 import argparse
 import json
 import os
 import urllib.request
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-THUMB_HOST = "https://media.fab.com/"  # the only host thumbnails are fetched from
-TILE_W, TILE_H = 320, 180              # px, Fab's 16:9 previews
+THUMB_HOSTS = ("https://media.fab.com/", "https://maxtree.org/wp-content/uploads/")  # the only hosts fetched from
+TILE_W, TILE_H = 320, 180              # px, 16:9; other shapes are fitted inside
 LABEL_H = 34                           # px, two text lines under each tile
 UA = {"User-Agent": "ArchvizBlenderPipeline/0.1"}
 
 
 def tile_key(row, index):
-    """Name a row by its Megascans id, else its download file, else its position."""
+    """Name a row by its asset id, else its download file, else its position."""
     return row.get("id") or os.path.splitext(row.get("file") or "")[0] or f"row{index:03d}"
 
 
 def cache_name(url):
-    """Cache a thumbnail under its own Fab image uid, so rows never share a file."""
+    """Cache a thumbnail under its own image file name (unique per image on both hosts)."""
     return url.rstrip("/").rsplit("/", 1)[-1] if url else ""
 
 
@@ -31,8 +32,8 @@ def fetch_thumb(url, dst):
     """Download one thumbnail into the cache unless it is already there."""
     if os.path.exists(dst):
         return
-    if not url or not url.startswith(THUMB_HOST):
-        raise ValueError(f"not a Fab thumbnail: {url}")
+    if not url or not url.startswith(THUMB_HOSTS):
+        raise ValueError(f"not a known thumbnail host: {url}")
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     with urllib.request.urlopen(urllib.request.Request(url, headers=UA)) as r:
         data = r.read()
@@ -43,11 +44,11 @@ def fetch_thumb(url, dst):
 def draw_tile(sheet, draw, font, row, key, path, x, y):
     """Paste one thumbnail at (x, y) with its two label lines below."""
     try:
-        img = Image.open(path).convert("RGB").resize((TILE_W, TILE_H))
-        sheet.paste(img, (x, y))
+        img = ImageOps.contain(Image.open(path).convert("RGB"), (TILE_W, TILE_H))
+        sheet.paste(img, (x + (TILE_W - img.width) // 2, y + (TILE_H - img.height) // 2))
     except (OSError, ValueError):
         draw.text((x + 8, y + 8), "no thumbnail", fill="white", font=font)
-    scan = row.get("scan") or row.get("species") or ""
+    scan = row.get("scan") or row.get("size") or row.get("species") or ""
     draw.text((x + 4, y + TILE_H + 2), key, fill="yellow", font=font)
     draw.text((x + 4, y + TILE_H + 17), f"{row['title'][:34]}  {scan}", fill="white", font=font)
 
