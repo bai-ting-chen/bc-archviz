@@ -8,7 +8,8 @@ Usage:
     python maxtree_search.py <study>/_wip/maxtree fetch
     python maxtree_search.py <study>/_wip/maxtree search <words> [--category Conifers]
         [--min-height 300] [--max-height 800] [--top 24] [--out rows.json]
-Words match the model name, Latin and common names and categories (all words must match).
+Words match the model name, Latin and common names, the species a volume holds, variant names
+and categories (all words must match).
 Heights are in cm, per variant; a model matches when any variant lies in the range.
 """
 import argparse
@@ -24,10 +25,11 @@ UA = {"User-Agent": "ArchvizBlenderPipeline/0.1"}
 PAGE = 100          # the Store API's largest page
 PAUSE_S = 0.5       # between pages, to stay gentle on the shop
 STALE_DAYS = 7      # refetch the catalog when it is older than this
-SCHEMA = 2          # bump when model_row changes, so old caches are refetched
+SCHEMA = 3          # bump when model_row changes, so old caches are refetched
 
 VARIANT = re.compile(r"(MT_\w+):\s*\(\s*Polygons:\s*(\d+)\s*\),\s*\(\s*Height:\s*(\d+)\s*cm\s*\)")
 COMMON = re.compile(r"referred to as ([^.]+)\.")
+SPECIES = re.compile(r"([A-Z][a-z]+(?: [a-z×.-]+)+)\s*\[([^\]]+)\]")  # "Latin name[Common, names]"
 VOLUME = re.compile(r"FROM\s+(Plant Models Vol \d+|[A-Z][\w ]+ Vol \d+)")
 
 
@@ -45,12 +47,14 @@ def model_row(p):
     volume = VOLUME.search(short)
     image = p["images"][0] if p["images"] else {}
     latin = re.sub(r"^V\d+_|_\d+$", "", p["name"]).replace("_", " ")
-    common = common.group(1).strip() if common else ""
+    species = SPECIES.findall(desc)  # every species in the model or volume
+    common = common.group(1).strip() if common else ", ".join(c for _, c in species)
     return {
         "id": p["name"],
         "title": common.split(",")[0] or latin,  # the sheet's second label line
         "latin": latin,
         "common": common,
+        "species": [f"{latin_name} [{names}]" for latin_name, names in species],
         "categories": [html.unescape(c["name"]) for c in p["categories"]],
         "volume": volume.group(1) if volume else "",
         "pack": not volume and " Vol " in f" {p['name']} ",  # a whole volume, not one model
@@ -96,7 +100,8 @@ def load_catalog(folder):
 
 def matches(row, words, category, lo, hi):
     """Whether a row has every word, the category and a variant in the height range (cm)."""
-    text = " ".join([row["id"], row["latin"], row["common"], *row["categories"]]).lower()
+    names = [row["id"], row["latin"], row["common"], *row["species"], *row["categories"]]
+    text = " ".join(names + [v["name"] for v in row["variants"]]).lower()
     if not all(w.lower() in text for w in words):
         return False
     if category and category.lower() not in (c.lower() for c in row["categories"]):
