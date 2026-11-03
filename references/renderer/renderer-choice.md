@@ -10,7 +10,7 @@
 ## REN_02 procedure
 
 **Unbiased first.** Order: (a) Cycles path tracing; (b) native physically based approximations
-   (for example, MNEE or GN wavefront caustics; see [caustics.md](../effects/caustics.md)) only when (a) cannot converge — state why and the bias;
+   (for example, GN wavefront caustics on a water body; see [caustics.md](../effects/caustics.md)) only when (a) cannot converge — state why and the bias;
    (c) external tools only when nothing native works — tell the user. Fakes (light-path tricks,
    projected patterns) only as a declared fallback. The point of the studies is renders that
    hold up as physics, so a bias must always be named, never hidden.

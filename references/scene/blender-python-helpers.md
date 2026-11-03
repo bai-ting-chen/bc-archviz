@@ -39,22 +39,6 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `caustic_sheet_material(name='CAUSTIC_SHEET', floor_tex=None, floor_tile_m=2.0, wall_albedo=(0.6, 0.79, 0.83), floor_albedo=(0.5, 0.5, 0.5))` — Transparent + Emission(albedo * E / pi). Floor albedo from the same world-box-mapped texture the floor uses (or `floor_albedo` without one -- set it to the floor's real albedo); walls a constant glaze colour (`wall_albedo`, a pale cyan pool tile, linear).
 
-## `effects.caustics.photon_bake` — Photon bake; implementation for caustic_photons.
-
-- `bake_irradiance(npy_paths, exr_path, sigma_cells=1.0)` — Merge photon grids, smooth by sigma_cells, write the irradiance EXR (W/m2).
-
-## `effects.caustics.photon_geometry` — Photon geometry; implementation for caustic_photons.
-
-- `export_geometry(path, surfaces=SURFACES, axis=(0.0, 0.0), grid=None)` — `surfaces` {object: eta}; `grid` overrides GRID (receiver plane x0, y0, size, res, z) and is stored with the geometry so the tracer, bake and material all use the same one.
-
-## `effects.caustics.photon_shading` — Photon shading; implementation for caustic_photons.
-
-- `add_caustic_light(mat, exr_path, scale=1.0, albedo_label='Pine + satin varnish coat')` — Adds Emission = albedo * E / pi on up-facing faces, E sampled at world XY from the map. `albedo_label`: label of the receiver's BSDF whose Base Color input carries the albedo (the default is materials.wood.wood.coated_wood's).
-
-## `effects.caustics.photon_trace` — Photon trace; implementation for caustic_photons.
-
-- `trace(geom_path, n, seed, source, max_bounce=40)` — Trace n photons from `source` through the exported glass and histogram where they land (background Blender).
-
 ## `effects.crack_ribbon` — Compact Cycles crack masks from seeded polylines; avoids expanding every segment into SVM.
 
 - `crack_polylines(seed)` — Return the main unit-arclength polyline and its optional narrower offshoots.

@@ -52,7 +52,7 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 | [Variation: Per Unit, Geometry](../effects/variation-per-unit-geometry.md) | no builder yet |
 | [Variation: Surface Marks](../effects/variation-surface-marks.md) | `effects.variation_surface_marks` |
 | [Wet Surfaces](../effects/wet-surfaces.md) | `materials.vegetation.vegetation`, `materials.water.wet` |
-| [Caustics](../effects/caustics.md) | `gn_caustics` / `caustic_photons.py` |
+| [Caustics](../effects/caustics.md) | `gn_caustics`; LuxCore `renderer.luxcore` |
 
 Shared graph/socket helpers: `materials.shared.nodes.G` / `sock`; asset lookup and project state: `archviz`. Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.
 [LuxCore materials](../renderer/luxcore.md): `renderer.luxcore.luxcore`; [all helper signatures](../scene/blender-python-helpers.md).

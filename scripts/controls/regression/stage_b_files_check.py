@@ -1,4 +1,4 @@
-"""Deterministic file and numeric controls for photon, final-image and reference helpers."""
+"""Deterministic file and numeric controls for final-image and reference helpers."""
 
 import os as _os
 import sys as _sys
@@ -14,45 +14,31 @@ import sys
 import bpy
 import numpy as np
 
-from graph_dump import dump_material
 from water_numeric_check import array
 
 
 def check(out):
-    """Trace both light types, roundtrip irradiance, save graded PNGs and read a test reference."""
+    """Roundtrip a float gradient EXR, save graded PNGs and read a test reference."""
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'blender' / 'scene' / 'io'))
     import blend_refs
-    import effects.caustics.caustic_photons as photons
     import renderer.finals.finals as finals
     result = {}
-    geom = str(out / 'photons.npz')
-    result['export'] = photons.export_geometry(geom, grid=dict(res=24, size=.9, x0=-.45, y0=-.45, z=.73))
-    with np.load(geom, allow_pickle=True) as data:
-        result['geometry'] = {k: data[k].tolist() for k in data.files}
-    result['fresnel'] = [photons._fresnel(c, eta) for c in [0., .4, .8, 1.] for eta in [.75, 1.5]]
-    paths = []
-    for name, source in dict(sun=dict(type='sun', dir=[.2, .1, 1], half_angle_deg=.2665, irradiance=100),
-                             area=dict(type='area', centre=[0, 0, 1.7], normal=[0, 0, -1], size=.1, power=50)).items():
-        grid, stats = photons.trace(geom, 200, 42, source)
-        result[name] = dict(grid=array(grid), stats=stats)
-        path = str(out / (name + '.npy'))
-        np.save(path, grid)
-        photons._save_grid(path)
-        paths.append(path)
     exr = str(out / 'irradiance.exr')
-    result['bake'] = photons.bake_irradiance(paths, exr)
-    mat = bpy.data.materials.new('photon receiver')
-    mat.use_nodes = True
-    nt = mat.node_tree
-    bsdf = nt.nodes.get('Principled BSDF')
-    bsdf.label = 'control albedo'
-    color = nt.nodes.new('ShaderNodeRGB')
-    nt.links.new(color.outputs[0], bsdf.inputs['Base Color'])
-    photons.add_caustic_light(mat, exr, albedo_label='control albedo')
-    photons.add_caustic_light(mat, exr, albedo_label='control albedo')
-    result['receiver'] = dump_material(mat)
-    # Compare PNG bytes and linear EXR pixels; EXR container metadata can vary.
     sc = bpy.context.scene
+    img = bpy.data.images.new('control gradient', width=24, height=24, float_buffer=True)
+    px = np.ones((24 * 24, 4), np.float32)
+    px[:, :3] = np.linspace(0, 100, 24 * 24, dtype=np.float32)[:, None]
+    img.pixels.foreach_set(px.ravel())
+    settings = sc.render.image_settings
+    previous = {k: getattr(settings, k) for k in ('file_format', 'color_mode', 'color_depth', 'exr_codec')}
+    settings.file_format = 'OPEN_EXR'
+    settings.color_mode = 'RGBA'
+    settings.color_depth = '32'
+    settings.exr_codec = 'ZIP'
+    img.save_render(exr, scene=sc)
+    for k, v in previous.items():
+        setattr(settings, k, v)
+    # Compare PNG bytes and linear EXR pixels; EXR container metadata can vary.
     finals.png_from_exr(exr, str(out / 'graded'))
     result['png_sha256'] = hashlib.sha256((out / 'graded.png').read_bytes()).hexdigest()
     img = bpy.data.images.load(exr, check_existing=False)

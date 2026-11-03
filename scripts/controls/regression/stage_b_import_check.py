@@ -11,7 +11,7 @@ import importlib
 from pathlib import Path
 import sys
 
-FACADES = ('effects.caustics.caustic_photons', 'scene.lighting.interior', 'scene.environment.scatter',
+FACADES = ('scene.lighting.interior', 'scene.environment.scatter',
            'effects.caustics.gn_caustics', 'materials.glass.glassware', 'renderer.finals.finals',
            'scene.environment.terrain', 'blend_refs', 'materials.water.film', 'materials.water.foot',
            'materials.water.mesh', 'materials.water.shading', 'materials.water.fragments')
@@ -47,7 +47,7 @@ def check():
     # Ground shaders depend on terrain's private helpers, not only its public API.
     for name in ('materials.ground.ground', 'materials.ground.meadow_ground', 'materials.water.build', 'effects.caustics.gn_caustics'):
         importlib.import_module(name)
-    print('STAGE B IMPORT SMOKE:', len(checked), 'caller import statements; 13 facades')
+    print('STAGE B IMPORT SMOKE:', len(checked), 'caller import statements; 12 facades')
     return checked
 
 

@@ -124,4 +124,21 @@ From: LAPTOP-25
 - `rg "caustic_photons\b.*_(stem|load_grid)|photons\._(stem|load_grid)" scripts` finds nothing.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
+# MIGRATE: caustics down to two methods; photon bake deleted
+From: LAPTOP-25
+
+## What changed
+- Caustics use GN wavefront (sun through a water body) or LuxCore (all glass, lamps); MNEE and the photon
+  bake are no longer caustics methods. Deleted: `effects.caustics.caustic_photons` and `photon_bake`,
+  `photon_geometry`, `photon_grid`, `photon_shading`, `photon_trace` (supersedes the section above).
+  MNEE code outside caustics (`glass_of_water_mnee`, `render_variant.py mnee=off`) is unchanged.
+
+## Steps
+- Delete stale `__pycache__` in `scripts/blender/effects/caustics/`. External photon-bake callers: render
+  the glass in LuxCore instead; no shims.
+
+## Check after pull
+- `rg "caustic_photons|photon_(bake|geometry|grid|shading|trace)" scripts references` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
 Remove each section after applying it; delete this file when none is left.

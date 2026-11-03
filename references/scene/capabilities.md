@@ -17,7 +17,7 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Edge chips (geometry) | GN band subdivision + Set Position; per-object `Seed` | solid |
 | Displacement | Displacement + adaptive subdivision | solid, fast |
 | Tiling by real height | `height_span_uv` + REPEAT | solid |
-| Caustics | GN wavefront (pools); glassware → LuxCore ([RULES REN_03](../renderer/renderer-choice.md)), `caustic_photons.py` as the Cycles-only fallback | solid |
+| Caustics | GN wavefront for sun through a water body; all glass and lamps → LuxCore ([RULES REN_03](../renderer/renderer-choice.md)) | solid |
 | Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH, GPU + CPU light tracing (luxcore.md), energy-checked ([caustics.md](../effects/caustics.md)) | solid |
 | Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh (materials › Glass block) | solid |
 | Baked procedural textures for LuxCore (terrazzo, smooth concrete, sand mortar) | numpy seamless colour + roughness maps | test |
