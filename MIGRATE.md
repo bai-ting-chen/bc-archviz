@@ -110,4 +110,18 @@ From: LAPTOP-25
 - `rg "stain_map|stain_mult|stain=(True|False)" scripts` finds nothing.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
+# MIGRATE: caustic_photons drops two private re-exports
+From: LAPTOP-25
+
+## What changed
+- `effects.caustics.caustic_photons` no longer re-exports `_stem` and `_load_grid`; import them from
+  `effects.caustics.photon_grid`. Headings in `caustics.md` renamed (§1 › Choosing the method, §4 steps 1–4).
+
+## Steps
+- Update external imports of the two names; no forwarding shims.
+
+## Check after pull
+- `rg "caustic_photons\b.*_(stem|load_grid)|photons\._(stem|load_grid)" scripts` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
 Remove each section after applying it; delete this file when none is left.

@@ -38,7 +38,7 @@ Untested: Caustica, Reblend (photon caustics in Cycles builds), Octane.
 
 ## 3. Code
 - GN wavefront: `scripts/blender/effects/caustics/gn_caustics.py`:
-  `add_caustic_sheet(caster, receivers, occluders, sun_obj, ior, floor_tex, floor_albedo)`.
+  `add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=…, floor_tex=…, floor_albedo=…)`.
 - Photon bake: `scripts/blender/effects/caustics/caustic_photons.py`: `export_geometry`, `trace`
   (command line), `bake_irradiance`, `add_caustic_light`; the stages are in step 3d.
 - MNEE: water caster `materials.water.water.water_surface`, glassware
