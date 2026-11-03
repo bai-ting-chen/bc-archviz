@@ -29,6 +29,7 @@ Read the files for the stage you are in.
 - [Agent exchange documents](references/workflow/agent-exchange.md): brief, report and review formats
 - [Gates](references/workflow/gates.md): what to show the user at GAT_01–04
 - [Agent lock](references/workflow/agent-lock.md): before touching Blender or study files
+- [Sources](references/workflow/sources.md): every asset and research source, and where its procedure lives
 - Writing Blender code: [Blender Python helpers](references/scene/blender-python-helpers.md) (use these first),
   [Blender API traps](references/scene/blender-api-traps.md) (check before running)
 - [Troubleshooting](references/workflow/troubleshooting.md): errors and unexpected images
