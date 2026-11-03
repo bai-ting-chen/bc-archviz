@@ -22,6 +22,11 @@ def tile_key(row, index):
     return row.get("id") or os.path.splitext(row.get("file") or "")[0] or f"row{index:03d}"
 
 
+def cache_name(url):
+    """Cache a thumbnail under its own Fab image uid, so rows never share a file."""
+    return url.rstrip("/").rsplit("/", 1)[-1] if url else ""
+
+
 def fetch_thumb(url, dst):
     """Download one thumbnail into the cache unless it is already there."""
     if os.path.exists(dst):
@@ -49,6 +54,9 @@ def draw_tile(sheet, draw, font, row, key, path, x, y):
 
 def build_sheet(rows, out, cols):
     """Fetch every row's thumbnail and write the tiled sheet to out."""
+    if not rows:
+        print("no rows: the search found nothing, no sheet written")
+        return
     thumbs = os.path.join(os.path.dirname(os.path.abspath(out)), "thumbs")
     lines = -(-len(rows) // cols)  # ceiling division
     sheet = Image.new("RGB", (cols * TILE_W, lines * (TILE_H + LABEL_H)), "black")
@@ -56,7 +64,7 @@ def build_sheet(rows, out, cols):
     font = ImageFont.load_default()
     for i, row in enumerate(rows):
         key = tile_key(row, i)
-        path = os.path.join(thumbs, key + ".jpg")
+        path = os.path.join(thumbs, cache_name(row.get("thumb")) or key + ".jpg")
         try:
             fetch_thumb(row.get("thumb"), path)
         except Exception as ex:
@@ -67,7 +75,8 @@ def build_sheet(rows, out, cols):
 
 
 def main():
-    p = argparse.ArgumentParser()
+    """Command line: rows JSON in, contact sheet PNG out."""
+    p =argparse.ArgumentParser()
     p.add_argument("rows")
     p.add_argument("out")
     p.add_argument("--cols", type=int, default=4)
