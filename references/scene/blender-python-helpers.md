@@ -100,7 +100,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `effects.leak_field` — Leak field: per point, how far below the first surface straight above it (a raycast up from just inside the wall) -> `leak_d` and `leak_ok`. Runoff streaks read these to hang drips under drip edges.
 
-- `leak_field_group(name='LEAK FIELD', inset=0.02, reach=6.0)` — GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`. Reused if it exists (other objects' modifiers point at it).
+- `leak_field_group(name='LEAK FIELD', inset=0.02, reach=6.0)` — GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`; a miss falls back to the object's top (Top Fallback). Reused if it exists (other objects' modifiers point at it).
 - `add_leak_field(obj)` — Add LEAK FIELD as the FIRST modifier: run after chips, rays slip through the chip-band seam and a wrong leak_d spreads over whole coarse triangles (light triangles under an arris).
 
 ## `effects.round_edges` — Shared scene-sized rounded edges: shader normals or real bevel geometry.

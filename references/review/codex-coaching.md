@@ -34,6 +34,12 @@ topic reference; this file holds **how to look and how to check**.
   displacement, modifier or geometry change can break one element far from where you are looking.
   - The trap: a relief control was judged on wall crops; one board end, bottom left of the frame,
     displaced several cm into a wedge on the deck — builder, reviewer and director all missed it.
+- **A changed neighbour relights the unchanged ones.** When a change darkens or brightens one object, the
+  beauty of untouched objects nearby moves with the bounce light, above the repeat floor. Prove those
+  objects unchanged at their inputs (per-point fields, an AOV, or a render with bounces 0), then explain
+  the beauty delta as indirect light; a beauty diff alone neither proves nor disproves it.
+  - The trap: a fix gave two plain walls dark streaks; the untouched walls beside them rendered ~1 % off
+    the repeat floor, and the check was left failing although their leak fields were bit-identical.
 - **Look up the API before the one allowed run.** Before writing render or output setup, grep
   [blender-api-traps.md](../scene/blender-api-traps.md) for the property and reuse the skill's helpers (`finals.py` savers) or the study's
   last working script; probe the scene in-process before spending a frame.

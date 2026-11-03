@@ -97,9 +97,12 @@ variation and grunge strength: variation-per-unit-shading.md, variation-surface-
 | Fresh break | clean base × ~1.15, roughness ~0.95 |
 
 ### 4.6 Run-off
-- Streaks start where water leaves a surface. With eaves, sills or rakes above: `add_leak_field` raycasts up
-  to the drip edge (`leak_d`), then `add_runoff`. A wall whose top is the drip edge: build from its stored
-  top and foot instead.
+- Streaks start where water leaves a surface. `add_leak_field` raycasts up from inside the wall to the first
+  face above (`leak_d`), then `add_runoff`. Rays see only the object's own mesh: a sill, rake or eave counts
+  only when it is part of the wall's object; a closed wall hits its own top face.
+- A wall with no thickness (a single-face plane, a mesh open at the top) hits nothing: the modifier's
+  `Top Fallback` (on by default) measures `leak_d` from the object's top instead. Sills on such a wall
+  are not found; for streaks under them, give the wall thickness.
 - Gravity-shaped: streaks stretched down (~×14 across, ×0.6 down), each its own length (~1–3 m), clustered
   and patchy along the wall; vertical faces only. Isotropic noise alone reads as smoke.
 - On a sunlit wall streaks need full strength to read.
@@ -133,6 +136,8 @@ variation and grunge strength: variation-per-unit-shading.md, variation-surface-
 | Identical chips on repeated objects | same noise lookups | seed per object (§4.5) |
 | Dark spot at each chip | fresh break from the grimed colour | fresh break from the clean base (§4.5) |
 | Light triangles hanging from an edge | leak field after the chips | leak field first (§4.6) |
+| No streaks on a wall | `Top Fallback` off on a wall with no thickness, or the drip edge is another object | fallback on, or join the edge into the wall's object (§4.6) |
+| No streaks under a sill | the wall is a single plane: rays find no sill | give the wall thickness (§4.6) |
 | Weathering reads as smoke | isotropic noise | gravity-shaped streaks (§4.6) |
 | Two cracks read as one line | opposite pair | a few, not symmetric (§4.7) |
 | Cracks look drawn | straight paths | kinked, wobbling, branching path (§4.7) |
