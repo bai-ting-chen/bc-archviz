@@ -101,8 +101,9 @@ variation and grunge strength: variation-per-unit-shading.md, variation-surface-
   face above (`leak_d`), then `add_runoff`. Rays see only the object's own mesh: a sill, rake or eave counts
   only when it is part of the wall's object; a closed wall hits its own top face.
 - A wall with no thickness (a single-face plane, a mesh open at the top) hits nothing: the modifier's
-  `Top Fallback` (on by default) measures `leak_d` from the object's top instead. Sills on such a wall
-  are not found; for streaks under them, give the wall thickness.
+  `Top Fallback` (on by default) measures `leak_d` from the object's highest point instead: one top per
+  object, and sills are not found. A stepped sheet needs one object per height; streaks under sills need
+  a wall with thickness. Heights are world metres, so an unapplied rotation is fine.
 - Gravity-shaped: streaks stretched down (~×14 across, ×0.6 down), each its own length (~1–3 m), clustered
   and patchy along the wall; vertical faces only. Isotropic noise alone reads as smoke.
 - On a sunlit wall streaks need full strength to read.
