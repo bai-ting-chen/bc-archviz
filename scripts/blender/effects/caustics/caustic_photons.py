@@ -17,31 +17,21 @@ Source json: {"type": "sun", "dir": [x,y,z] (towards light), "half_angle_deg": 0
           or {"type": "area", "centre": [...], "normal": [...] (facing the scene),
               "size": m, "power": W}
 """
+import json
+import os
+import sys
+
+if __name__ == "__main__":   # command line: make scripts/blender importable
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+import numpy as np
 
 # Compatibility imports; each implementation has one owner (GOV_04).
-from effects.caustics.photon_grid import SURFACES, GRID, _stem, _save_grid, _load_grid  # noqa: F401
+from effects.caustics.photon_grid import SURFACES, GRID, _save_grid  # noqa: F401
 from effects.caustics.photon_geometry import export_geometry  # noqa: F401
 from effects.caustics.photon_trace import _fresnel, trace  # noqa: F401
 from effects.caustics.photon_bake import bake_irradiance  # noqa: F401
 from effects.caustics.photon_shading import add_caustic_light  # noqa: F401
-import json
-import math
-import os
-import sys
-
-import numpy as np
-
-
-# --- 1. geometry export (inside Blender) -----------------------------------------------------
-
-
-# --- 2. tracer (runs in a background Blender for mathutils.bvhtree) -------------------------
-
-
-# --- 3. bake (inside Blender: writes a float EXR) -------------------------------------------
-
-
-# --- 4. feed the map back into the receiver's material --------------------------------------
 
 
 if __name__ == "__main__" and "--" in sys.argv:

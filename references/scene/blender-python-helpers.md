@@ -37,7 +37,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `effects.caustics.caustic_shading` — Caustic shading; implementation for gn_caustics.
 
-- `caustic_sheet_material(name='CAUSTIC_SHEET', floor_tex=None, floor_tile_m=2.0, wall_albedo=(0.6, 0.79, 0.83), floor_albedo=(0.5, 0.5, 0.5))` — Transparent + Emission(albedo * E / pi). Floor albedo from the same world-box-mapped texture the floor uses (or `floor_albedo` without one -- set it to the floor's real albedo); walls a constant glaze colour.
+- `caustic_sheet_material(name='CAUSTIC_SHEET', floor_tex=None, floor_tile_m=2.0, wall_albedo=(0.6, 0.79, 0.83), floor_albedo=(0.5, 0.5, 0.5))` — Transparent + Emission(albedo * E / pi). Floor albedo from the same world-box-mapped texture the floor uses (or `floor_albedo` without one -- set it to the floor's real albedo); walls a constant glaze colour (`wall_albedo`, a pale cyan pool tile, linear).
 
 ## `effects.caustics.photon_bake` — Photon bake; implementation for caustic_photons.
 

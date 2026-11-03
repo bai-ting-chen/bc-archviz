@@ -14,11 +14,3 @@ point direction (slightly too crisp), matte receivers only.
 from effects.caustics.caustic_graph import caustic_sheet_group  # noqa: F401
 from effects.caustics.caustic_shading import caustic_sheet_material  # noqa: F401
 from effects.caustics.caustic_objects import add_caustic_sheet  # noqa: F401
-import math
-
-import bpy
-
-from materials.shared.nodes import G
-from materials.shared.nodes import sock
-
-

@@ -89,7 +89,7 @@ used here with glass settings.
 - Stack bond, 10 mm joints, perimeter bands ≥ 15 mm, panels ≤ ~15 m².
 - Curved walls: the concave-side joint stays constant and the convex one opens, E = (L + g)(1 + s/r) − L.
   With g 10 / E 25 mm, the inner radius is ≥ ~1.05 m (190 units), ≥ ~1.33 m (240).
-- Model the relief as geometry (caustics.md › Designing a refractive relief). Leave a fraction of a
+- Model the relief as geometry (caustics.md › Step 2. Design the relief). Leave a fraction of a
   millimetre of air between mortar and glass so the surfaces never coincide.
 
 | Parameter | Value |
@@ -120,7 +120,7 @@ used here with glass settings.
 | Layer | Reference | Note for this material |
 |---|---|---|
 | Glass under a water film | [water-attached-film.md](../water/water-attached-film.md) | wetted face IOR 1.14 |
-| Refractive relief design | caustics.md › Designing a refractive relief | glass block relief is modelled as geometry (§4.4) |
+| Refractive relief design | caustics.md › Step 2. Design the relief | glass block relief is modelled as geometry (§4.4) |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

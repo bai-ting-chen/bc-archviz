@@ -3,13 +3,16 @@ import json
 import os
 
 
+# object name -> IOR ratio across that surface (back / front medium, normals point to the front); names match glassware.glass_of_water
 SURFACES = {"GLASS_TUMBLER": 1.52, "GLASS_WATER_INTERFACE": 1.52 / 1.333, "WATER_SURFACE": 1.333}
 
 
+# receiver plane in m: corner x0, y0, side size, res cells per side, height z (glass_of_water's table top)
 GRID = {"x0": -0.45, "y0": -0.45, "size": 0.90, "res": 900, "z": 0.7300}   # 1 mm cells
 
 
 def _stem(path):
+    """The path without a stage extension (.npy, .npz, .exr)."""
     return path[:-4] if path.lower().endswith((".npy", ".npz", ".exr")) else path
 
 
@@ -21,6 +24,7 @@ def _save_grid(path):
 
 
 def _load_grid(path):
+    """Read the <file>.grid.json written beside a stage's output into GRID, if present."""
     p = _stem(path) + ".grid.json"
     if os.path.exists(p):
         with open(p) as f:

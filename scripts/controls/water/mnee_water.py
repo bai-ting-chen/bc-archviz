@@ -1,14 +1,15 @@
+"""Control: does light from a lamp above reach a submerged receiver (pool floor) through flat water?
 
+The camera views the floor obliquely (no specular image of the lamp in frame); a "no water" case gives
+the expected irradiance. Result on Blender 5.2.2: box 0, one flat quad 0, diced 40x40 plane lit.
+Rerun after a Blender upgrade: blender -b --factory-startup --python scripts/controls/water/mnee_water.py
+"""
 import os as _os
 import sys as _sys
 _CONTROLS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
 for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'tile', 'material', 'effects', 'water', 'lighting', 'environment', 'regression')]:
     if _d not in _sys.path:
         _sys.path.append(_d)
-# Rerun after a Blender upgrade: blender -b --factory-startup --python scripts/controls/water/mnee_water.py
-# Control: does light from a lamp above reach a submerged receiver (pool floor) through flat water?
-# Camera views the floor obliquely (no specular image of the lamp in frame); a "no water" case gives
-# the expected irradiance. Result on Blender 5.2.2: box 0, one flat quad 0, diced 40x40 plane lit.
 import math
 import os
 import sys
@@ -23,6 +24,7 @@ from _scene import black_scene, render_linear, white_lambert  # noqa: E402
 
 
 def box(name, x0, y0, z0, x1, y1, z1, top_only=False, cuts=0):
+    """Axis-aligned box in m; `top_only` keeps its top face, subdivided `cuts` times."""
     me = bpy.data.meshes.new(name)
     bm = bmesh.new()
     bmesh.ops.create_cube(bm, size=1.0)
@@ -42,9 +44,8 @@ def box(name, x0, y0, z0, x1, y1, z1, top_only=False, cuts=0):
 
 
 def run(kind="SPOT", water="plane", mnee=True, volume=False, caustics=True, samples=512, blur=0.0, smooth=True, cuts=0):
+    """Render one case; return the floor centre's linear rgb and its relative noise."""
     sc = black_scene(samples, 64)
-    import importlib
-    importlib.reload(_mat_water)
     sc.cycles.blur_glossy = blur
     sc.cycles.caustics_refractive = caustics
     floor = box("floor", -2, -2, -1.3, 2, 2, -1.2)          # pool floor (receiver), Lambert 0.8
@@ -72,9 +73,11 @@ def run(kind="SPOT", water="plane", mnee=True, volume=False, caustics=True, samp
     else:
         ld.size = 0.1
     ld.cycles.is_caustics_light = mnee
-    lo = bpy.data.objects.new("L", ld); sc.collection.objects.link(lo)
+    lo = bpy.data.objects.new("L", ld)
+    sc.collection.objects.link(lo)
     lo.location = (0, 0, 2.0)
-    cam = bpy.data.objects.new("cam", bpy.data.cameras.new("cam")); sc.collection.objects.link(cam)
+    cam = bpy.data.objects.new("cam", bpy.data.cameras.new("cam"))
+    sc.collection.objects.link(cam)
     cam.data.lens = 50
     cam.location = (0.0, -3.0, 1.0)
     cam.rotation_euler = (math.radians(90 - math.degrees(math.atan2(2.2, 3.0))), 0, 0)   # aim at floor centre

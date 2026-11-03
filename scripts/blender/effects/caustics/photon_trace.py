@@ -4,6 +4,10 @@ import math
 import numpy as np
 from effects.caustics.photon_grid import GRID
 
+AIM_RADIUS = 0.10      # m: photons aim inside this disc around the glass (covers the tumbler's bounding sphere)
+SUN_START = 0.6        # m: sun photons start this far from the glass toward the sun
+MAX_RAY = 3.0          # m: longest segment between two glass hits
+
 
 def _fresnel(cos_i, eta):
     """Unpolarised dielectric Fresnel. eta = n1/n2. Returns (R, cos_t) ; R = 1 on TIR."""
@@ -43,8 +47,7 @@ def trace(geom_path, n, seed, source, max_bounce=40):
         d_sun = Vector(source["dir"]).normalized()
         u = d_sun.orthogonal().normalized()
         v = d_sun.cross(u)
-        R_launch = 0.10                                   # covers the tumbler's bounding sphere
-        A = math.pi * R_launch ** 2
+        A = math.pi * AIM_RADIUS ** 2
         phi = source["irradiance"] * A / n                # W per photon
         cone = math.radians(source["half_angle_deg"])
     else:
@@ -52,12 +55,12 @@ def trace(geom_path, n, seed, source, max_bounce=40):
         lu = ln.orthogonal().normalized()
         lv = ln.cross(lu)
         L_size = source["size"]
-        A_t, R_t = math.pi * 0.10 ** 2, 0.10
+        A_t = math.pi * AIM_RADIUS ** 2
 
     for i in range(n):
         if source["type"] == "sun":
-            r, a = R_launch * math.sqrt(rng.random()), 2 * math.pi * rng.random()
-            o = centre + u * (r * math.cos(a)) + v * (r * math.sin(a)) + d_sun * 0.6
+            r, a = AIM_RADIUS * math.sqrt(rng.random()), 2 * math.pi * rng.random()
+            o = centre + u * (r * math.cos(a)) + v * (r * math.sin(a)) + d_sun * SUN_START
             # direction: uniform inside the solar disc
             ca = 1.0 - rng.random() * (1.0 - math.cos(cone))
             sa, b = math.sqrt(max(0.0, 1 - ca * ca)), 2 * math.pi * rng.random()
@@ -65,7 +68,7 @@ def trace(geom_path, n, seed, source, max_bounce=40):
             p_w = phi
         else:
             o = lc + lu * ((rng.random() - 0.5) * L_size) + lv * ((rng.random() - 0.5) * L_size)
-            r, a = R_t * math.sqrt(rng.random()), 2 * math.pi * rng.random()
+            r, a = AIM_RADIUS * math.sqrt(rng.random()), 2 * math.pi * rng.random()
             dvec = centre - o
             tu = dvec.normalized().orthogonal().normalized()
             tv = dvec.normalized().cross(tu)
@@ -79,7 +82,7 @@ def trace(geom_path, n, seed, source, max_bounce=40):
         launched_power += p_w
         hit_any = False
         for _ in range(max_bounce):
-            loc, nf, idx, dist = bvh.ray_cast(o, w, 3.0)
+            loc, nf, idx, dist = bvh.ray_cast(o, w, MAX_RAY)
             if loc is None:
                 break
             hit_any = True
