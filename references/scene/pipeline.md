@@ -200,9 +200,9 @@ Read-only documentation work needs no Blender or Rhino connection.
   3. Save the rows to `<study>/_wip/fab/<topic>.json`, then
      `python scripts/scene/assets/fab_sheet.py <topic>.json <topic>-sheet.png` (MCP venv python)
      and judge the candidates from the sheet, as with Poly Haven (texture-selection.md step 1).
-  4. Hand the user the candidate list: preferred first, each with its id, title, scan size, the
-     reason, and the Fab link. Megaplants have no id: give the USD file name, and check that it
-     names the listed species (one Fab listing serves another species' file).
+  4. Add the fits to the candidate list (RULES MAT_10; format in texture-selection.md step 1) with
+     each Fab link. Megaplants have no id: give the USD file name, and check that it names the
+     listed species (one Fab listing serves another species' file).
   5. The user reviews and downloads the ones they choose into the study's `library/local/`.
      Check the downloaded file names against the ids before building.
 - **Where:** the study's own `library/` (RULES AST_03) — `ARCHVIZ_PROJECT=<study> polyhaven_fetch.py …`,

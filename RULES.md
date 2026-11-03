@@ -134,6 +134,10 @@ Read: [edge-wear.md](references/effects/edge-wear.md)
 Rule: Choose from the router's decision table and say which method and file you chose and why; no row fits → RES_01.  
 Read: [index.md](references/materials/index.md)
 
+**MAT_10 — Proposing Material Candidates**  
+Rule: Send every material candidate for the user's review in one list across all sources (Poly Haven, Quixel and others), preferred first, each with its source, id, real size and why it fits; list only real fits, so one fit is a list of one. Build only from the user's picks.  
+Read: [texture-selection.md](references/materials/texture-selection.md)
+
 ### Validation
 
 **VAL_01 — Judging Material Or Effect Character**  
@@ -179,7 +183,7 @@ Rule: Name new files and folders in lowercase kebab-case and Python files in sna
 Read: [pipeline.md](references/scene/pipeline.md)
 
 **AST_06 — Choosing Quixel Assets From Fab**  
-Rule: Read the Fab catalog only in the built-in browser and hand the user a candidate list, preferred first, with each Megascans id; the user reviews and downloads. Never sign in to Fab or download on the user's behalf.  
+Rule: Read the Fab catalog only in the built-in browser and give each Quixel candidate its Megascans id in the MAT_10 list; the user reviews and downloads. Never sign in to Fab or download on the user's behalf.  
 Read: [pipeline.md](references/scene/pipeline.md)
 
 ### Safety
