@@ -11,7 +11,8 @@ that carries a relief is in `references/materials/glass/glass.md`.
 | Case | Method | Why |
 |---|---|---|
 | Sun through a water body (pool, pond, water feature) onto matte surfaces below | GN wavefront (step 3b) | native, noise-free, energy-exact for one refraction |
-| Any glass (glassware, patterned glass, glass block), lamps, or several interfaces | LuxCore (step 3a) | unbiased, energy-correct; the only engine that converged (step 1) |
+| Glass (glassware, patterned glass, glass block), lamps, or several interfaces, when the caustic carries the shot (RULES REN_03) | LuxCore (step 3a) | unbiased, energy-correct; the only engine that converged (step 1) |
+| Glass whose caustic does not carry the shot | stay in Cycles; no caustics method | Cycles renders the glass; its caustic stays faint or absent |
 
 ## 2. Layers and node-editor diagram
 ```
