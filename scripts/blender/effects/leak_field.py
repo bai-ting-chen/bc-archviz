@@ -1,7 +1,7 @@
 """Leak field: per point, how far below the first surface straight above it (a raycast up from just
 inside the wall) -> `leak_d` and `leak_ok`. Runoff streaks read these to hang drips under drip edges.
 
-Rays go world-up and leak_d is in world metres, so an unapplied rotation or scale is fine. A closed wall's
+Rays go world-up; inset, reach and leak_d are world metres, so an unapplied rotation or uniform scale is fine. A closed wall's
 ray hits its own top face from inside. A wall with no thickness (a single-face plane, a mesh open at the
 top) hits nothing; with Top Fallback on, its leak_d is measured from the object's highest point, one top
 per object (a stepped sheet needs one object per height, or thickness).
@@ -38,14 +38,16 @@ def leak_field_group(name="LEAK FIELD", inset=0.02, reach=6.0):
     up = b.n("FunctionNodeTransformDirection", (-450, -700)); b.L(inv.outputs[0], up.inputs[1])
     up.inputs[0].default_value = (0, 0, 1)
     up_n = b.n("ShaderNodeVectorMath", (-300, -700), operation="NORMALIZE"); b.L(up.outputs[0], up_n.inputs[0])
+    # object units per world metre: inset and reach are given in metres
+    per_m = b.n("ShaderNodeVectorMath", (-300, -900), operation="LENGTH"); b.L(up.outputs[0], per_m.inputs[0])
     ins = b.n("ShaderNodeVectorMath", (-800, -400), operation="SCALE")
-    b.L(nrm, ins.inputs[0]); ins.inputs["Scale"].default_value = -inset
+    b.L(nrm, ins.inputs[0]); b.L(b.math("MULTIPLY", per_m.outputs["Value"], -inset, (-950, -550)), ins.inputs["Scale"])
     src = b.n("ShaderNodeVectorMath", (-650, -350), operation="ADD")
     b.L(pos, src.inputs[0]); b.L(ins.outputs[0], src.inputs[1])
     ray = b.n("GeometryNodeRaycast", (-250, -250), data_type="FLOAT")
     b.L(gi.outputs[0], ray.inputs["Target Geometry"]); b.L(src.outputs[0], ray.inputs["Source Position"])
     b.L(up_n.outputs[0], ray.inputs["Ray Direction"])
-    ray.inputs["Ray Length"].default_value = reach
+    b.L(b.math("MULTIPLY", per_m.outputs["Value"], reach, (-450, -950)), ray.inputs["Ray Length"])
 
     def world_z(vec, loc):
         """World Z (m) of an object-space point."""
