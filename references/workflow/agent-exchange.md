@@ -1,12 +1,12 @@
 # Study documents for agent exchange
 
-The brief, bug brief, report and review formats are ai-work-modes › exchange.md. This file adds
-what a study needs on top. Run folders live in the study's `_wip/codex/` (`--out <study>\_wip\codex\<tag>`).
+What a study adds to the brief and the report, and the study's own documents. Codex run folders live
+in the study's `_wip/codex/`.
 
 ## Brief additions
 - **Helpers:** Reads lists [blender-python-helpers.md](../scene/blender-python-helpers.md) and the
   interface in real units; the brief names the camera(s) the images use.
-- **Tools:** a run that drives Blender or Rhino launches with `--needs blender` / `--needs rook` and `--lock "<what it drives>"`.
+- **Tools:** the brief names the programs the run drives (Blender, Rhino through Rook).
 - **Textures:** when the run applies or swaps a texture, the attach workflow: real size from the
   asset's metadata; Rhino UVs discarded and `archviz.box_uv(obj, size_m)` on the final mesh
   (`directional_uv` only for an asked grain axis); no stretch (UV area × size² ≈ world area, feature

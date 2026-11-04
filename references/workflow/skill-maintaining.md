@@ -74,20 +74,9 @@ old and the new code, then compare; its docstring has the steps).
 Keep one builder per job (one dielectric, one socket helper, one node-graph builder `materials.shared.nodes.G`, one
 `archviz.read_meta`, `archviz.use_gpu`); extend it rather than writing a second.
 
-## Review (RULES AGT_01)
-Who reviews whom, the launcher and the verifying review: ai-work-modes › review.md. For this skill:
-- **Every reviewer gets [review-checklist.md](review-checklist.md):**
-  `python ~/.claude/skills/ai-work-modes/scripts/codex_run.py review --cwd <skill folder> --commit <sha> --checklist references/workflow/review-checklist.md`
-  (`--base origin/main` for everything unpushed, `--uncommitted` for the working tree). Run it after
-  committing, before pushing.
-- A new technique also needs its control render (VAL_02).
-
-## Handing work to Codex (RULES AGT_02)
-Briefs, launching, run states and the machine lock: ai-work-modes. Study additions (run folder,
-helpers, texture workflow, checks line, render budget): [agent-exchange.md](agent-exchange.md).
-Who does each stage: [study-stages.md](study-stages.md). In CPM a stage's reviewer starts as soon
-as its report lands, while the builder goes on with the next stage on other files; the next stage
-starts by weighing that review.
+## Review
+A reviewer of a skill change checks [review-checklist.md](review-checklist.md). A new technique also
+needs its control render (VAL_02).
 
 ## Commit and push
 Commit messages say what changed and why. End them with the session's attribution line, if

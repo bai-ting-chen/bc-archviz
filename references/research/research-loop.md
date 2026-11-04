@@ -1,8 +1,8 @@
 # Research loop — running studies alone
 
 How one agent (Claude or Codex) runs research, studies and experiments end to end without a human
-or a second model in the loop: when the user is away, or the other model is out of tokens
-(RULES AGT_02). The rules still hold; this file is the order of work and the decisions you make
+or a second model in the loop: when the user is away, or the other model is out of tokens.
+The rules still hold; this file is the order of work and the decisions you make
 yourself. Stop points that stay: the research gate (RULES GAT_01), the Rhino model gate (RULES GAT_02), the
 material gate (RULES GAT_03) and the final render gate (RULES GAT_04).
 A study built from a scripted test scene (no Rhino) has no model gate.
@@ -30,8 +30,7 @@ A study built from a scripted test scene (no Rhino) has no model gate.
 8. **Next question** — back to 1. Keep a short log `STUDY/_wip/loop-log.md` (time, question,
    verdict, files) so the user and the other model can catch up in one read.
 9. **Skill changes** (skill-maintaining.md): pull first, one topic per reference, [capabilities.md](../scene/capabilities.md) row
-   with its state, `MIGRATE.md` action if a receiving machine must act, commit as `bai-ting-chen`, push. Review per RULES AGT_01; with
-   one model available run the review in a fresh session of that model and say it was same-model.
+   with its state, `MIGRATE.md` action if a receiving machine must act, commit as `bai-ting-chen`, push.
 
 ## Decisions you make alone
 Method choice, numbers, look tuning, HDRI and texture choice, adding a control, abandoning a dead
@@ -40,12 +39,11 @@ each with one line of why.
 
 ## Decisions you never make alone
 Closing the research or material gate, final renders (preview gate), approving Rhino geometry, deleting user data or other studies'
-files, writes to GitHub other than this skill's repo, paid purchases or sign-ins, and working in
-Blender, Rhino, scripts or files another agent holds (machine lock, RULES AGT_04).
+files, writes to GitHub other than this skill's repo, and paid purchases or sign-ins.
 
 ## Ending a session
 Leave the study resumable cold: study-notes.md current, loop-log updated, no half-written module
-(finish or revert it), machine lock released, `studies/README.md` entry updated, a short summary
+(finish or revert it), `studies/README.md` entry updated, a short summary
 for the user at the top of the latest report.
 
 

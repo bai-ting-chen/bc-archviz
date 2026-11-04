@@ -25,7 +25,7 @@ size and unknown folders over 100 MB (kept; delete one only if the user asks).
 Check: the deletion list holds only the four kinds in the table, and no `.blend` you mean to keep (one missing
 from `## Final scene` is deleted as an old version).
 
-**Step 4. Apply.** Hold the machine lock (RULES AGT_04), close the final scene in every Blender, then add `--apply`.
+**Step 4. Apply.** Close the final scene in every Blender, then add `--apply`.
 If it says the plan changed, rerun step 3. If a delete fails (a locked file), close the program holding it and
 rerun `--apply`.
 Check: `closed.md` reports 0 broken references.

@@ -15,19 +15,19 @@ Method and code live here; study data lives in the current project.
 
 ## Workflow
 GAT_xx = a user approval gate ([RULES.md](RULES.md)).
-Work mode (the user's choice, RULES AGT_02, ai-work-modes skill) → Research →
-GAT_01 → Rhino geometry → GAT_02 → import/camera/light/materials → GAT_03 → look rounds and
-control proof → GAT_04 → open-UI final → study notes → user-declared closure.
-Each stage opens with a brief and closes with a report (ai-work-modes, plus [study documents](references/workflow/agent-exchange.md)).
+Research → GAT_01 → Rhino geometry → GAT_02 → import/camera/light/materials → GAT_03 → look
+rounds and control proof → GAT_04 → open-UI final → study notes → user-declared closure.
+
+Work mode: if the ai-work-modes skill is installed, it handles modes, briefs, Codex runs, reviews and the machine
+lock, and the stage table and study documents below plug into it. Without it, Claude works alone.
 
 ## Task router
 Read the files for the stage you are in.
 
 ### General
-- Work modes, briefs, Codex runs, reviews, machine lock: the **ai-work-modes** skill
-- [Study stages](references/workflow/study-stages.md): each stage's split between models
+- [Study stages](references/workflow/study-stages.md): each stage's split between Claude and Codex
 - [Study documents](references/workflow/agent-exchange.md): brief additions, source list, material schedule, research note
-- [Review checklist](references/workflow/review-checklist.md): what every reviewer checks
+- [Review checklist](references/workflow/review-checklist.md): what a reviewer of this skill checks
 - [Gates](references/workflow/gates.md): what to show the user at GAT_01–04
 - [Sources](references/workflow/sources.md): every asset and research source, and where its procedure lives
 - Writing Blender code: [Blender Python helpers](references/scene/blender-python-helpers.md) (use these first),

@@ -1,7 +1,6 @@
-# Review checklist (RULES AGT_01)
+# Review checklist
 
-Passed to every reviewer of a bc-archviz change (`codex_run.py review --checklist`, or a Claude
-reviewer's prompt). Read SKILL.md, RULES.md, references/workflow/skill-maintaining.md and
+What a reviewer of a bc-archviz change checks. Read SKILL.md, RULES.md, references/workflow/skill-maintaining.md and
 references/scene/blender-api-traps.md first. Report each finding with file:line and a concrete
 failure scenario:
 

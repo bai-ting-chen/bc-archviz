@@ -13,7 +13,6 @@ Read-only documentation work needs no Blender or Rhino connection.
 ```
 - [ ] Read [RULES.md](../../RULES.md) and the references/ file for the task — both live in THIS skill folder,
       not the project; skim [blender-api-traps.md](blender-api-traps.md) before writing node/GN code
-- [ ] Machine lock free or mine (RULES AGT_04, ai-work-modes `agent_lock.py check`); take it before working in Blender, Rhino, scripts or files
 - [ ] Blender open, MCP on 9876 (get_blendfile_summary_datablocks)
 - [ ] Rhino: which document is open, is it modified? A user's file stays untouched — write
       the study geometry with File3dm (Phase 1)
@@ -349,7 +348,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
   A Codex skill import can leave a stale copy there; replace it. Register the MCP in
   `~/.codex/config.toml` as `[mcp_servers.blender]` with the same command and an
   `[mcp_servers.blender.env]` table; check with `codex mcp list`. A project used from Codex gets an
-  `AGENTS.md` that only names the skills. Link `ai-work-modes` the same way (same `mklink /J` with its name); Claude-only terms for Codex: ai-work-modes SKILL.md.
+  `AGENTS.md` that only names the skill.
 - Skill code lives in `~/.claude/skills/bc-archviz`, project data in the current study, and MCP in `%LOCALAPPDATA%/BlenderMCP`.
 
 ## Tested stack baseline

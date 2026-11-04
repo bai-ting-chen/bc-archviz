@@ -20,7 +20,7 @@ Fix: correct the first check that fails, then relaunch. See [pipeline.md](../sce
 ### Blender MCP times out
 Seen as: `Blender connection timed out at 127.0.0.1:9876`
 Cause: Blender is running but has not answered in time: a render or a long script holds it.
-Fix: check what Blender is doing before sending more; never relaunch while a render runs (RULES AGT_04).
+Fix: check what Blender is doing before sending more; never relaunch while a render runs.
 Split long scripts into shorter calls. See [pipeline.md](../scene/pipeline.md) › MCP tools.
 
 ### Blender MCP returns nothing or garbage

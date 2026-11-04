@@ -1,6 +1,6 @@
 # Study stages — who does what
 
-Who does each stage in the two-model modes. Roles, modes, runs and reviews: ai-work-modes. In Claude only or Codex only, the one model does both columns.
+Who does each stage when Claude and Codex work together. When one model works alone, it does both columns.
 
 ## Stage by stage
 
@@ -18,10 +18,9 @@ Who does each stage in the two-model modes. Roles, modes, runs and reviews: ai-w
 | **10. Material gate** (GAT_03) | shows the schedule, first-pass render, native crops, candidate sheets; waits for approval | renders the first pass, crops and candidate sheets | same, from Codex's sheets; passes the choices on | writes the schedule ([format](agent-exchange.md)), renders the first pass, crops and candidates |
 | **11. Proof** (RULES VAL_02, VAL_01) | decides which controls prove the feature | renders controls, writes the numbers table + diff crops | same | same |
 | **12. Look round** | tunes only approved materials; judges final camera + native crops vs ref, names the worst defect, sets the next fix | applies the fix, rerenders | same, from the stage report's sheet | same |
-| **13. Code review** (RULES AGT_01) | reviews Codex's code via a fresh subagent | reviews Claude's code (launcher `review`, [checklist](review-checklist.md)) | none; reads only the review's findings summary | a fresh read-only Codex reviewer per stage; the builder weighs the findings |
+| **13. Code review** ([checklist](review-checklist.md)) | reviews Codex's code via a fresh subagent | reviews Claude's code | none; reads only the review's findings summary | a fresh read-only Codex reviewer per stage; the builder weighs the findings |
 | **14. Preview + final** (GAT_04) | shows the preview, states resolution/time/noise, launches the final in the open UI | the full-frame test with final settings | shows the preview and asks; tells Codex to launch | full-frame test; launches the UI final (`finals.py`) |
 | **15. Study notes** | writes Decisions, findings, open items | appends numbers and traps to its report | writes the Decisions section and the user's choices | writes findings, numbers, traps, open items |
 | **16. Skill changes** | edits, `MIGRATE.md`, commits, pushes after Codex's review | reviews | reads Codex's proposed diff, commits and pushes it | drafts the change in the skill folder, uncommitted |
 | **17. Close a study** (AST_02) | names the final scene, asks the user for milestone images, runs `study_close.py` | — | names the final scene, asks the user for milestone images | runs `study_close.py`, plan first, then `--apply` |
 
-The agent working on the files holds the machine lock (RULES AGT_04); in CPM that is the Codex builder.

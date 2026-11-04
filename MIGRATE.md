@@ -163,6 +163,8 @@ From: LAPTOP-25
   documents (`agent-exchange.md`) and the new `references/workflow/review-checklist.md`.
 - Removed: `references/workflow/work-modes.md`, `references/workflow/agent-lock.md`, `scripts/workflow/codex_review.py`
   (now `ai-work-modes/scripts/codex_run.py review --checklist references/workflow/review-checklist.md`).
+- RULES AGT_01, AGT_02 and AGT_04 are removed: modes, review and the machine lock live only in ai-work-modes.
+  bc-archviz installed alone works as Claude only.
 - The machine lock moved from `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` to `%LOCALAPPDATA%\ai-work-modes\agent-lock.txt`.
 
 ## Steps
