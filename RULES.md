@@ -20,17 +20,20 @@ Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 ### Agent Cooperation
 
+Modes, briefs and reports, Codex runs, reviews and the machine lock follow the **ai-work-modes** skill
+(`~/.claude/skills/ai-work-modes`). This skill adds the study stages, the study documents and the review checklist.
+
 **AGT_02 — Choosing A Working Mode**  
-Rule: At the start of each project the user chooses Normal or CPM mode (Codex Priority Mode: Claude directs, Codex does all hands-on work), and the mode holds until the user switches or the round ends. Only one Codex builder works at a time, and each handoff follows the documented roles.  
-Read: [work-modes.md](references/workflow/work-modes.md)
+Rule: The user names the mode (Normal, CPM, Claude only, Codex only); it holds until the user switches or the round ends. Each study stage is split between the models as the stage table says.  
+Read: [study-stages.md](references/workflow/study-stages.md), ai-work-modes
 
 **AGT_01 — Code Review**  
-Rule: Every code change gets a fresh review. Weigh each finding, and disclose any finding you reject. If the reviewer is the same model that wrote the code, say so.  
+Rule: Every code change gets a fresh review against [review-checklist.md](references/workflow/review-checklist.md). Weigh each finding, and disclose any finding you reject. If the reviewer is the same model that wrote the code, say so.  
 Read: [skill-maintaining.md](references/workflow/skill-maintaining.md)
 
 **AGT_04 — File Ownership**  
-Rule: Only one agent may own Blender, Rhino, scripts or any project or study file at a time; the owner holds the machine lock. If another agent holds it, stop and tell the user. Never delete a lock that may still be live or whose owner is unknown.  
-Read: [agent-lock.md](references/workflow/agent-lock.md)
+Rule: Only one agent may drive Blender, Rhino, scripts or any project or study file at a time; it holds the ai-work-modes machine lock. If another agent holds it, stop and tell the user. Never delete a lock that may still be live or whose owner is unknown.  
+Read: ai-work-modes › agent-lock.md
 
 ### Pipeline
 

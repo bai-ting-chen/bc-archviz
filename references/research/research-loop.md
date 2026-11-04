@@ -41,11 +41,11 @@ each with one line of why.
 ## Decisions you never make alone
 Closing the research or material gate, final renders (preview gate), approving Rhino geometry, deleting user data or other studies'
 files, writes to GitHub other than this skill's repo, paid purchases or sign-ins, and working in
-Blender, Rhino, scripts or files another agent holds (AGENT_LOCK, RULES AGT_04).
+Blender, Rhino, scripts or files another agent holds (machine lock, RULES AGT_04).
 
 ## Ending a session
 Leave the study resumable cold: study-notes.md current, loop-log updated, no half-written module
-(finish or revert it), AGENT_LOCK deleted, `studies/README.md` entry updated, a short summary
+(finish or revert it), machine lock released, `studies/README.md` entry updated, a short summary
 for the user at the top of the latest report.
 
 

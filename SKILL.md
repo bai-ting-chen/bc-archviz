@@ -15,20 +15,20 @@ Method and code live here; study data lives in the current project.
 
 ## Workflow
 GAT_xx = a user approval gate ([RULES.md](RULES.md)).
-[Work mode](references/workflow/work-modes.md) (the user's choice, RULES AGT_02) → Research →
+Work mode (the user's choice, RULES AGT_02, ai-work-modes skill) → Research →
 GAT_01 → Rhino geometry → GAT_02 → import/camera/light/materials → GAT_03 → look rounds and
 control proof → GAT_04 → open-UI final → study notes → user-declared closure.
-Each stage opens with a brief and closes with a report ([agent exchange documents](references/workflow/agent-exchange.md)).
+Each stage opens with a brief and closes with a report (ai-work-modes, plus [study documents](references/workflow/agent-exchange.md)).
 
 ## Task router
 Read the files for the stage you are in.
 
 ### General
-- [Work modes](references/workflow/work-modes.md): who does what, Normal or CPM
+- Work modes, briefs, Codex runs, reviews, machine lock: the **ai-work-modes** skill
 - [Study stages](references/workflow/study-stages.md): each stage's split between models
-- [Agent exchange documents](references/workflow/agent-exchange.md): brief, report and review formats
+- [Study documents](references/workflow/agent-exchange.md): brief additions, source list, material schedule, research note
+- [Review checklist](references/workflow/review-checklist.md): what every reviewer checks
 - [Gates](references/workflow/gates.md): what to show the user at GAT_01–04
-- [Agent lock](references/workflow/agent-lock.md): before touching Blender or study files
 - [Sources](references/workflow/sources.md): every asset and research source, and where its procedure lives
 - Writing Blender code: [Blender Python helpers](references/scene/blender-python-helpers.md) (use these first),
   [Blender API traps](references/scene/blender-api-traps.md) (check before running)
@@ -67,7 +67,7 @@ Reference folders and code folders use the same topic names. Each code folder's 
 
 | Topic | Reference folder | Code folder |
 |---|---|---|
-| Workflow, study tools, Codex review | `references/workflow/` | `scripts/workflow/` |
+| Workflow, study tools | `references/workflow/` | `scripts/workflow/` |
 | Research (reference matching, solving, video) | `references/research/` | `scripts/research/` |
 | Scene: Rhino and Max import, camera, lighting, environment | `references/scene/` | `scripts/blender/core/`, `scripts/blender/scene/`, `scripts/scene/` |
 | Materials, one folder per family | `references/materials/` | `scripts/blender/materials/` |

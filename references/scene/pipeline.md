@@ -13,7 +13,7 @@ Read-only documentation work needs no Blender or Rhino connection.
 ```
 - [ ] Read [RULES.md](../../RULES.md) and the references/ file for the task — both live in THIS skill folder,
       not the project; skim [blender-api-traps.md](blender-api-traps.md) before writing node/GN code
-- [ ] `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` absent or mine (RULES AGT_04); create it before working in Blender, Rhino, scripts or files
+- [ ] Machine lock free or mine (RULES AGT_04, ai-work-modes `agent_lock.py check`); take it before working in Blender, Rhino, scripts or files
 - [ ] Blender open, MCP on 9876 (get_blendfile_summary_datablocks)
 - [ ] Rhino: which document is open, is it modified? A user's file stays untouched — write
       the study geometry with File3dm (Phase 1)
@@ -312,7 +312,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Measure | `scripts\research\imgstats.py stats|patch|diff`; `scripts\research\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\research\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `scripts\research\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\workflow\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
-| Maintenance | `scripts\workflow\helper_index.py` (writes [blender-python-helpers.md](blender-python-helpers.md)), `scripts\review\regress_helpers.py` (old vs new helper output), `scripts\workflow\codex_review.py` (Codex reviews a change before push, RULES AGT_01), `scripts\workflow\study_close.py` (close a study: keep the final scene and milestone images, delete the rest, write `closed.md`, RULES AST_02) |
+| Maintenance | `scripts\workflow\helper_index.py` (writes [blender-python-helpers.md](blender-python-helpers.md)), `scripts\review\regress_helpers.py` (old vs new helper output), `scripts\workflow\study_close.py` (close a study: keep the final scene and milestone images, delete the rest, write `closed.md`, RULES AST_02) |
 | Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tile/tiles.md). |
 | Controls | `scripts\controls\lighting\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`); `weathering_lab.py` (flat-wall look lab, `-- <out> <tag> [key=value]`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
@@ -349,7 +349,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
   A Codex skill import can leave a stale copy there; replace it. Register the MCP in
   `~/.codex/config.toml` as `[mcp_servers.blender]` with the same command and an
   `[mcp_servers.blender.env]` table; check with `codex mcp list`. A project used from Codex gets an
-  `AGENTS.md` that only names the skill (work-modes.md › Codex reading this skill).
+  `AGENTS.md` that only names the skills. Link `ai-work-modes` the same way (same `mklink /J` with its name); Claude-only terms for Codex: ai-work-modes SKILL.md.
 - Skill code lives in `~/.claude/skills/bc-archviz`, project data in the current study, and MCP in `%LOCALAPPDATA%/BlenderMCP`.
 
 ## Tested stack baseline

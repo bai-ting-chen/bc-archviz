@@ -15,7 +15,7 @@ and, once it is used, a procedure in its topic reference.
 | 3ds Max files | models from the user's own libraries | local files | per file | user | [max-import.md](../scene/max-import.md) |
 | IES files | measured light distributions | manufacturer sites | per manufacturer | user or agent | [lighting-camera.md](../scene/lighting-camera.md) |
 
-Candidate lists: RULES MAT_10. "Agent" is whoever builds in the current work mode ([work-modes.md](work-modes.md)).
+Candidate lists: RULES MAT_10. "Agent" is whoever builds in the current work mode ([study-stages.md](study-stages.md)).
 
 ## Research
 | Source | Gives | Access | Procedure |

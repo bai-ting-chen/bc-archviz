@@ -154,4 +154,27 @@ From: LAPTOP-25
 - `rg "fab_sheet" scripts references` finds nothing.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
+# MIGRATE: work modes moved to the ai-work-modes skill
+From: LAPTOP-25
+
+## What changed
+- Work modes, briefs and reports, Codex runs, reviews and the machine lock now live in a separate skill,
+  `ai-work-modes` (`github.com/bai-ting-chen/ai-work-modes`). bc-archviz keeps the study stages, the study
+  documents (`agent-exchange.md`) and the new `references/workflow/review-checklist.md`.
+- Removed: `references/workflow/work-modes.md`, `references/workflow/agent-lock.md`, `scripts/workflow/codex_review.py`
+  (now `ai-work-modes/scripts/codex_run.py review --checklist references/workflow/review-checklist.md`).
+- The machine lock moved from `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` to `%LOCALAPPDATA%i-work-modesgent-lock.txt`.
+
+## Steps
+- Clone the skill: `git clone https://github.com/bai-ting-chen/ai-work-modes "%USERPROFILE%\.claude\skillsi-work-modes"`,
+  then set the per-clone identity (skill-maintaining.md › Before editing).
+- Link it for Codex: `mklink /J "%USERPROFILE%\.agents\skillsi-work-modes" "%USERPROFILE%\.claude\skillsi-work-modes"`.
+- In `~/.codex/AGENTS.md`, add a "Work modes" section that names the ai-work-modes skill (it does not sync through git).
+- If `%LOCALAPPDATA%\BlenderMCP\AGENT_LOCK` exists and no agent is working, delete it.
+- Delete stale `scripts/workflow/__pycache__/codex_review.*`.
+
+## Check after pull
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+- `python %USERPROFILE%\.claude\skillsi-work-modes\scriptsgent_lock.py check` runs.
+
 Remove each section after applying it; delete this file when none is left.
