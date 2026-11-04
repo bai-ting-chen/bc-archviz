@@ -6,7 +6,7 @@ what a study needs on top. Run folders live in the study's `_wip/codex/` (`--out
 ## Brief additions
 - **Helpers:** Reads lists [blender-python-helpers.md](../scene/blender-python-helpers.md) and the
   interface in real units; the brief names the camera(s) the images use.
-- **Tools:** a run that drives Blender or Rhino launches with `--needs blender` / `--needs rook` and `--lock`.
+- **Tools:** a run that drives Blender or Rhino launches with `--needs blender` / `--needs rook` and `--lock "<what it drives>"`.
 - **Textures:** when the run applies or swaps a texture, the attach workflow: real size from the
   asset's metadata; Rhino UVs discarded and `archviz.box_uv(obj, size_m)` on the final mesh
   (`directional_uv` only for an asked grain axis); no stretch (UV area × size² ≈ world area, feature
