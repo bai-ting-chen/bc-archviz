@@ -206,9 +206,9 @@ Read-only documentation work needs no Blender or Rhino connection.
      file name, and check that it names the listed species (one Fab listing serves another
      species' file).
   5. After the user's picks, get their download links in the built-in browser. Fab needs an Epic
-     sign-in in the pane itself (a sign-in in the user's own browser does not carry over):
-     signed in, the site menu shows the user's avatar; otherwise ask the user to sign in in the
-     pane. In a fab.com tab send `fab-search.js`, then `scripts/scene/assets/fab-download.js`, then
+     sign-in in the pane itself (a sign-in in the user's own browser does not carry over);
+     `fabDownloadLinks` stops with "not signed in" if it is missing: then show the pane and ask
+     the user to sign in. In a fab.com tab send `fab-search.js`, then `scripts/scene/assets/fab-download.js`, then
      `await fabDownloadLinks(picks)` with the picked rows, each `file` set to the chosen file. It
      adds each listing to the user's library and returns the rows with a signed link and size.
   6. The links expire within minutes: save the result straight away to

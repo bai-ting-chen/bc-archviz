@@ -36,6 +36,7 @@ async function fabFileLink(uid, listing, fileName) {
 }
 
 async function fabDownloadLinks(picks) {
+  if ((await fetch("/i/users/me")).status !== 200) throw new Error("not signed in to Fab in this pane");
   const out = [];
   for (const pick of picks) {
     const uid = pick.link.split("/listings/")[1];
