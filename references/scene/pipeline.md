@@ -205,12 +205,15 @@ Read-only documentation work needs no Blender or Rhino connection.
      resolution, so name a smaller one when 2K is enough). Megaplants have no id: give the USD
      file name, and check that it names the listed species (one Fab listing serves another
      species' file).
-  5. After the user's picks, download them in the built-in browser. Fab needs an Epic sign-in:
-     if the listing page shows `Sign up`, ask the user to sign in in the pane. On each picked
-     listing click `Add to My Library`, then `Download` and the chosen format and resolution.
-     The first time, find where the pane saved the file and write that folder here.
-  6. Unzip each into the study's `library/local/<id>/` with a `meta.json` (source, Fab link, id,
-     scan size) and check the file names against the ids before building.
+  5. After the user's picks, download them in the built-in browser. Fab needs an Epic sign-in
+     in the pane itself (a sign-in in the user's own browser does not carry over): signed in, the
+     site menu shows the user's avatar; otherwise ask the user to sign in in the pane. On each
+     picked listing click `Add to My Library`, then `Download` and the file's download icon.
+     The pane saves to `%USERPROFILE%\Downloads`, first as `<random>.tmp`, renamed to the real
+     file name up to a minute later; wait for the real name.
+  6. Unzip each into the study's `library/local/<id>/`, add a `meta.json` (source, Fab link, id,
+     scan size), check the map names carry the id (their case differs, e.g. `pjEfK0`), then
+     delete the zip from Downloads.
 - **Maxtree (RULES AST_06).** About 2,400 plant models (single models and whole volumes), read
   over plain HTTP from the shop's public Store API. Its own search knows Latin names only, so:
   1. `python scripts/scene/assets/maxtree_search.py <study>/_wip/maxtree search <words>
