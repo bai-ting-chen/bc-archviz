@@ -205,15 +205,19 @@ Read-only documentation work needs no Blender or Rhino connection.
      resolution, so name a smaller one when 2K is enough). Megaplants have no id: give the USD
      file name, and check that it names the listed species (one Fab listing serves another
      species' file).
-  5. After the user's picks, download them in the built-in browser. Fab needs an Epic sign-in
-     in the pane itself (a sign-in in the user's own browser does not carry over): signed in, the
-     site menu shows the user's avatar; otherwise ask the user to sign in in the pane. On each
-     picked listing click `Add to My Library`, then `Download` and the file's download icon.
-     The pane saves to `%USERPROFILE%\Downloads`, first as `<random>.tmp`, renamed to the real
-     file name up to a minute later; wait for the real name.
-  6. Unzip each into the study's `library/local/<id>/`, add a `meta.json` (source, Fab link, id,
-     scan size), check the map names carry the id (their case differs, e.g. `pjEfK0`), then
-     delete the zip from Downloads.
+  5. After the user's picks, get their download links in the built-in browser. Fab needs an Epic
+     sign-in in the pane itself (a sign-in in the user's own browser does not carry over):
+     signed in, the site menu shows the user's avatar; otherwise ask the user to sign in in the
+     pane. In a fab.com tab send `fab-search.js`, then `scripts/scene/assets/fab-download.js`, then
+     `await fabDownloadLinks(picks)` with the picked rows, each `file` set to the chosen file. It
+     adds each listing to the user's library and returns the rows with a signed link and size.
+  6. The links expire within minutes: save the result straight away to
+     `<study>/_wip/fab/<topic>-links.json` and run
+     `python scripts/scene/assets/fab_fetch.py <topic>-links.json` (MCP venv python, env
+     `ARCHVIZ_PROJECT=<study>`). It saves each pick to `library/local/<id>/` (the file name
+     without `.zip` for Megaplants), checks the size, unzips, writes `meta.json` and deletes the
+     zip. No save dialog. Check the map names carry the id (their case differs, e.g. `pjEfK0`),
+     then delete the links file.
 - **Maxtree (RULES AST_06).** About 2,400 plant models (single models and whole volumes), read
   over plain HTTP from the shop's public Store API. Its own search knows Latin names only, so:
   1. `python scripts/scene/assets/maxtree_search.py <study>/_wip/maxtree search <words>
@@ -325,7 +329,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tile/tiles.md). |
 | Controls | `scripts\controls\lighting\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`); `weathering_lab.py` (flat-wall look lab, `-- <out> <tag> [key=value]`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
-| Assets | `scripts\scene\assets\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); Quixel on Fab: `scripts\scene\assets\fab-search.js` (built-in browser); Maxtree: `maxtree_search.py`; both: `asset_sheet.py` (contact sheet); others `<study>\library\local\` with a `meta.json` |
+| Assets | `scripts\scene\assets\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); Quixel on Fab: `scripts\scene\assets\fab-search.js`, `fab-download.js` (built-in browser), then `fab_fetch.py` → `<study>\library\local\<id>\`; Maxtree: `maxtree_search.py`; both: `asset_sheet.py` (contact sheet); others `<study>\library\local\` with a `meta.json` |
 | Video research | `scripts\research\yt_learn.py` |
 
 ## Install
