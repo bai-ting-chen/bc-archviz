@@ -26,12 +26,12 @@ Use when: choosing a texture source or method for a surface, then scaling it and
    pipeline.md › Assets); their listings state the scan size. Then send the fits from both
    sources as one candidate list for review (RULES MAT_10), for example:
 
-   | Pick | Source | Id | Asset | Real size | Why it fits |
-   |---|---|---|---|---|---|
-   | 1 | Quixel | `sbqktep0` | Smooth Concrete | 0.4 × 0.4 m | pale, even, no tie holes |
-   | 2 | Poly Haven | `concrete_floor_02` | Concrete Floor 02 | 2 × 2 m | larger scan, less repeat |
+   | Pick | Source | Id | Asset | Real size | Download | Why it fits |
+   |---|---|---|---|---|---|---|
+   | 1 | Quixel | `pjefk0` | Smooth Concrete | 1 × 1 m | `smooth_concrete_pjefk0_4k.zip`, 36 MB | pale, even, no tie holes |
+   | 2 | Poly Haven | `concrete_floor_02` | Concrete Floor 02 | 2 × 2 m | 2K maps | larger scan, less repeat |
 
-   Poly Haven ids download directly; the user downloads Quixel ids. Steps 2–8 run on the picks.
+   The agent downloads the picks (RULES AST_06). Steps 2–8 run on the picks.
 2. **Open the colour map itself**, not the sphere thumbnail or the tags — a "white, clean" tag can
    sit on painted boards or a weathered, stained surface. Check its features against the table.
 3. **Judge the map by its measured mean, not its thumbnail.** Average the diffuse map in linear

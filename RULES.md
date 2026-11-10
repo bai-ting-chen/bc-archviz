@@ -168,8 +168,8 @@ Read: [pipeline.md](references/scene/pipeline.md)
 Rule: Name new files and folders in lowercase kebab-case and Python files in snake_case; `_wip/` keeps its name.  
 Read: [pipeline.md](references/scene/pipeline.md)
 
-**AST_06 — Choosing Assets The User Downloads (Quixel, Maxtree)**  
-Rule: Read the catalog (Fab only in the built-in browser), pick, and send the candidates in one list as in MAT_10, plants and models included, each with the id the user searches by; the user reviews and downloads. Never sign in to a shop or download on the user's behalf.  
+**AST_06 — Choosing Shop Assets (Quixel, Maxtree)**  
+Rule: Read the catalog (Fab only in the built-in browser), pick, and send the candidates in one list as in MAT_10, plants and models included, each with its id, and for Quixel the download file and size. Download nothing before the user's picks. Quixel is free: the agent downloads the picks in the built-in browser, where the user signs in to Fab; the picks approve adding them to the library under the Fab Standard License. Maxtree is paid: the user buys and downloads. Never sign in, enter credentials or buy.  
 Read: [pipeline.md](references/scene/pipeline.md)
 
 ### Safety

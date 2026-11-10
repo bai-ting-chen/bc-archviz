@@ -9,7 +9,7 @@
 //   category  Fab category slug, e.g. "nature-plants--plants"; omit for all
 //   q         keywords
 //   max       rows to return (Fab pages hold 24; pages are followed until max)
-//   details   true (default): fetch scan size, maps and the Megascans id per row (3 requests each)
+//   details   true (default): fetch scan size, maps, Megascans id, download file and size_mb per row (3 requests each)
 
 const FAB_PAGE = 24;        // fixed by Fab: larger counts are ignored
 const FAB_PAUSE_MS = 250;   // between requests, to stay gentle on the API
@@ -52,10 +52,11 @@ function fabFacts(html) {
   };
 }
 
-async function fabDownloadNames(uid, formats) {
+// Download files ({name, size} in bytes) of the first format that has any, largest resolution first.
+async function fabDownloadFiles(uid, formats) {
   for (const code of FAB_ID_FORMATS.filter(c => formats.includes(c))) {
     const d = await fabJson(`/i/listings/${uid}/asset-formats/${code}`);
-    if (d && d.files && d.files.length) return d.files.map(f => f.name);
+    if (d && d.files && d.files.length) return d.files;
   }
   return [];
 }
@@ -93,9 +94,10 @@ async function fabSearch({seller = "Quixel Megascans", type, category, q, max = 
     if (details) {
       const d = await fabJson(`/i/listings/${h.uid}`);
       Object.assign(row, fabFacts(d && d.description));
-      const names = await fabDownloadNames(h.uid, formats);
-      row.id = names.map(n => fabIdFromName(n, h.title)).find(Boolean) || null;
-      row.file = names[0] || null;
+      const files = await fabDownloadFiles(h.uid, formats);
+      row.id = files.map(f => fabIdFromName(f.name, h.title)).find(Boolean) || null;
+      row.file = files[0] ? files[0].name : null;
+      row.size_mb = files[0] ? Math.round(files[0].size / 1e6) : null;
     }
     rows.push(row);
   }

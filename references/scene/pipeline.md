@@ -184,10 +184,11 @@ Read-only documentation work needs no Blender or Rhino connection.
   names and tags, query `api.polyhaven.com/assets?t=textures|hdris` and choose from a thumbnail
   contact sheet ([index.md](../materials/index.md)). HTTP 520–525 is Cloudflare: retry the same call.
 - Others in `library/local/<name>/` with a `meta.json` stating the source: IES light files and
-  assets the user downloads (Quixel, Maxtree). Ask before using any asset.
-- **Quixel on Fab (RULES AST_06).** Two sellers: `Quixel Megascans` (about 11,000 materials, 8,900
-  3D models and plants, 2,200 decals, 500 brushes; Blender takes the texture-set zip, FBX or glTF)
-  and `Quixel Megaplants` (40 Unreal procedural trees; only those listing `usd` import into Blender).
+  Quixel and Maxtree downloads. Ask before using any asset.
+- **Quixel on Fab (RULES AST_06).** Free under the Fab Standard License since November 2026. Two
+  sellers: `Quixel Megascans` (about 11,000 materials, 8,900 3D models and plants, 2,200 decals,
+  500 brushes; Blender takes the texture-set zip, FBX or glTF) and `Quixel Megaplants` (40 Unreal
+  procedural trees; only those listing `usd` import into Blender).
   Plain HTTP gets a Cloudflare 403, so the catalog is read in the built-in browser:
   1. Open `https://www.fab.com/sellers/Quixel%20Megascans` in the built-in browser. No sign-in.
   2. Send the text of `scripts/scene/assets/fab-search.js` with `javascript_tool` once per tab,
@@ -200,10 +201,16 @@ Read-only documentation work needs no Blender or Rhino connection.
      `python scripts/scene/assets/asset_sheet.py <topic>.json <topic>-sheet.png` (MCP venv python)
      and judge the candidates from the sheet, as with Poly Haven (texture-selection.md step 1).
   4. Add the fits to the candidate list (RULES MAT_10; format in texture-selection.md step 1) with
-     each Fab link. Megaplants have no id: give the USD file name, and check that it names the
-     listed species (one Fab listing serves another species' file).
-  5. The user reviews and downloads the ones they choose into the study's `library/local/`.
-     Check the downloaded file names against the ids before building.
+     each Fab link, download file and size (`file`, `size_mb`; the first file is the largest
+     resolution, so name a smaller one when 2K is enough). Megaplants have no id: give the USD
+     file name, and check that it names the listed species (one Fab listing serves another
+     species' file).
+  5. After the user's picks, download them in the built-in browser. Fab needs an Epic sign-in:
+     if the listing page shows `Sign up`, ask the user to sign in in the pane. On each picked
+     listing click `Add to My Library`, then `Download` and the chosen format and resolution.
+     The first time, find where the pane saved the file and write that folder here.
+  6. Unzip each into the study's `library/local/<id>/` with a `meta.json` (source, Fab link, id,
+     scan size) and check the file names against the ids before building.
 - **Maxtree (RULES AST_06).** About 2,400 plant models (single models and whole volumes), read
   over plain HTTP from the shop's public Store API. Its own search knows Latin names only, so:
   1. `python scripts/scene/assets/maxtree_search.py <study>/_wip/maxtree search <words>
