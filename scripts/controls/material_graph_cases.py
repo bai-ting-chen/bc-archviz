@@ -198,11 +198,12 @@ def run(topic):
             result["wear_group"] = group_state(wood_wear_group(level=1))
             material("shader", weathered_wood)
         elif topic == "pbr":
+            from materials.glass.clear_glass import clear_glass
             for label, builder in (
                 ("pbr", lambda: m.pbr_material("fixture")),
                 ("tint", lambda: m.pbr_material("fixture", tint=(.8, .9, 1))),
                 ("dielectric", lambda: m.dielectric("dielectric")),
-                ("glass", m.glass_material),
+                ("glass", clear_glass),
                 ("simple", lambda: m.simple_material("simple", (.2, .3, .4))),
                 ("spec", lambda: m.material_from_spec({"type": "simple", "name": "spec", "color": (.2, .3, .4)})),
                 ("spec_ph", lambda: m.material_from_spec("ph:fixture")),
@@ -211,8 +212,23 @@ def run(topic):
                 ("albedo", lambda: m.albedo_material("fixture", "albedo", (.4, .5, .6)))):
                 material(label, builder)
             fresh()
-            mat = m.glass_material()
-            result["glass_edit"] = dump_material(m.glass_material(tint=(1, .9, .8)))
+            mat = clear_glass()
+            result["glass_edit"] = dump_material(clear_glass(tint=(1, .9, .8)))
+            user_node = mat.node_tree.nodes.new("ShaderNodeValue")
+            edited = clear_glass(tint=(.8, 1, .9), roughness=.12, ior=1.45)
+            assert edited == mat
+            assert user_node in edited.node_tree.nodes[:]
+            b = m._principled_of(edited)
+            assert abs(b.inputs["IOR"].default_value - 1.45) < 1e-6
+            assert abs(b.inputs["Roughness"].default_value - .12) < 1e-6
+            assert b.inputs["Transmission Weight"].default_value == 1.0
+            assert all(abs(a - c) < 1e-6 for a, c in zip(b.inputs["Base Color"].default_value, (.8, 1, .9, 1)))
+            assert m.material_from_spec("glass") == mat
+            spec_mat = m.material_from_spec({"type": "glass", "name": "glass-spec", "tint": (.9, 1, .95), "roughness": .2, "ior": 1.4})
+            spec_bsdf = m._principled_of(spec_mat)
+            assert abs(spec_bsdf.inputs["IOR"].default_value - 1.4) < 1e-6
+            assert abs(spec_bsdf.inputs["Roughness"].default_value - .2) < 1e-6
+            assert all(abs(a - c) < 1e-6 for a, c in zip(spec_bsdf.inputs["Base Color"].default_value, (.9, 1, .95, 1)))
             result["levels"] = m.solve_levels(str(folder / "map.png"), (.4, .5, .6))
             result["mean"] = m.map_mean("fixture")
             result["cached_mean"] = m.map_mean("fixture")

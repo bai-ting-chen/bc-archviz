@@ -5,7 +5,7 @@ Anisotropy is directional roughness: parallel microscopic grooves spread light a
 grooves more than along them. On metal it stretches reflected highlights; on glass it also
 stretches the blur of objects seen through the surface. It describes an aggregate microfacet
 response, not the lensing or silhouette of individually visible ribs. Visible relief belongs
-to the material's geometry or bump method (`references/materials/glass/glass.md`).
+to the material's geometry (`references/materials/glass/glass-relief.md`).
 
 Both the Glass BSDF and Principled transmission support directional blur.
 
@@ -37,7 +37,7 @@ Colour, IOR, metal response and surface relief remain the material's terms (RULE
   switches the effect off and a later call with the amount alone restores it.
 - `scripts/blender/materials/shared/dielectric.py`: `dielectric(..., anisotropy=None,
   rotation=0.0, tangent=None)`. `anisotropy=None` leaves the legacy graph unchanged; explicit zero
-  turns the effect off. `glass_material()` keeps its existing arguments; apply the effect to
+  turns the effect off. `clear_glass()` has no anisotropy arguments; apply the effect to
   its BSDF when needed.
 - `scripts/controls/effects/anisotropy_lab.py`: headless Cycles, `--out <folder> --case glass`,
   `metal` (both Principled), `glass-bsdf` or `metallic`. Default 1024 samples, 768 px frames. Writes off/on/rotated/

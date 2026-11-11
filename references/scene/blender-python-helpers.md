@@ -149,7 +149,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.glass.clear_glass` — Clear glass; canonical implementation behind glass.
 
-- `clear_glass(name='GLASS', ior=1.52)` — Soda-lime glass via materials.shared.pbr.dielectric (white, IOR 1.52 by default).
+- `clear_glass(name='GLASS', tint=(1.0, 1.0, 1.0), roughness=0.0, ior=1.52)` — Build or edit clear glass in place; use tint for coloured glass and preserve added nodes.
 
 ## `materials.glass.glass_assembly` — Glass assembly; implementation for glassware.
 
@@ -191,7 +191,6 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `materials.shared.dielectric` — Dielectric; canonical implementation behind pbr.
 
 - `dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None, *, anisotropy=None, rotation=0.0, tangent=None)` — The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled, transmission 1. `tint` multiplies every crossing, so keep it within a few % of white.
-- `glass_material(name='Glass_Clear', tint=(0.92, 0.96, 0.97), roughness=0.0)` — Clear glass (IOR 1.52); the default tint is slightly green, for thick panes. An existing material is edited in place (nodes the user added stay); a new one is built by dielectric.
 
 ## `materials.shared.map_measure` — Map measure; canonical implementation behind pbr.
 

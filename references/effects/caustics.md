@@ -4,8 +4,8 @@
 Caustics are the light patterns a refractor focuses onto a receiver: sun through a pool, glass or
 patterned glass. Two methods: the fast one, GN wavefront in Cycles, for sunlight through a water body;
 the accurate one, LuxCore, for everything else (RULES REN_02, REN_03). Say which and why, then build and
-check it (§4). The engine rules are in `references/renderer/renderer-choice.md`; the glass-block wall
-that carries a relief is in `references/materials/glass/glass.md`.
+check it (§4). The engine rules are in `references/renderer/renderer-choice.md`; how to shape a
+glass relief is in `references/materials/glass/glass-relief.md`.
 
 ### Choosing the method
 | Case | Method | Why |
@@ -33,7 +33,7 @@ that carries a relief is in `references/materials/glass/glass.md`.
 - GN wavefront: `scripts/blender/effects/caustics/gn_caustics.py`:
   `add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=…, floor_tex=…, floor_albedo=…)`.
 - LuxCore: `renderer.luxcore.engine.engine_setup` ([luxcore.md](../renderer/luxcore.md)).
-- Relief: no builder; modelled geometry (step 2).
+- Relief: no builder; modelled geometry (`references/materials/glass/glass-relief.md`).
 - Regression: `scripts/controls/regression/stage_b_graph_check.py` (sheet graph and overlay).
 
 ## 4. Instructions and parameters
@@ -44,32 +44,23 @@ that carries a relief is in `references/materials/glass/glass.md`.
   LuxCore GPU caustic cache 40 % (−24 % bias, blur); LuxCore BIDIR 105 % (noise); Cycles path tracing
   ~1000 %; Cycles CPU path guiding ~3500 % (fireflies only); Cycles MNEE −82 % (gives up after one interface).
 
-### Step 2. Design the relief (patterned glass, glass block, wavy acrylic)
-- **Model it as geometry.** In LuxCore a normal map bends the caustic but gives dark seams and no
-  parallax (luxcore.md).
+### Step 2. Size the relief (patterned glass, glass block, wavy acrylic)
+- Shaping the relief (wave sum, pattern families, border fade, variants) is in
+  `references/materials/glass/glass-relief.md`. This step sets its wavelength and slope for the light
+  pattern.
 - **Each curved patch is a lens:** f ≈ 1 / ((n − 1)·κ), with κ ≈ A(2π/λ)² for amplitude A and
   wavelength λ. The network is sharpest at one to a few focal lengths; far beyond, patches overlap into a
   flat glow. Size the relief from the receiver distance (1.5–3 m in a room) for one of the looks below.
-  From inside the glass still reads rippled: 0.5° moves a tree 30 m away by 25 cm.
-- **One frequency draws fold lines.** A sine sends most of its light to its maximum deflection: one bright
-  line per ridge set, repeated per tile. Sum ~12 waves instead: random direction, log-uniform λ, amplitude
-  ∝ λ^0.8, a slow depth envelope (1 ± 0.45), scaled to the target RMS slope; a mild vertical stretch reads
-  as poured glass.
 - **Preview in numpy first:** deflection = (n − 1)∇h per face, land at x + D·θ, histogram, blur by the
   sun's angular size; seconds per D. Over a 6×6 patch of units measure the share of light landing outside
   its own unit (tangling) and p99/mean (line contrast).
-- **Pattern families** (trade names Wave, Iceberg, Bubble, Diamond, Pristal, Quadra):
-  - *Wave*: a few long cosines. Horizontal crests throw vertical streaks, diagonal crests cross into
-    loops; mixing both 1:1 across the wall breaks any single direction.
-  - *Iceberg*: ridged noise, h = −√(f² + (0.08·rms)²) of a sum of broad cosines; crisp crossing lines.
-  - *Diamond, Pristal, Quadra*: prisms, sharp-edged repeating patches.
+- **Direction:** horizontal crests throw vertical streaks; diagonal crests cross into loops.
 - **Straight features draw straight lines.** Rounded block edges, cavity corners and the fade to the
-  border are cylindrical lenses; one that focuses at the receiver casts a thin streak. Fade over ≥ 25 mm
-  (shorter lenses into bright square outlines) and use larger radii.
+  border are cylindrical lenses; one that focuses at the receiver casts a thin streak, and a short fade
+  lenses into bright square outlines.
 - **Lay tilt varies reflections, not caustics:** a hollow block's two parallel faces shift its light by
   millimetres. Vary the caustics through the relief.
-- **Variants:** ~16 reliefs as block definitions, placed at random with 180° turns and flips (64 looks),
-  instanced. Instanced relief is cheap to trace (flat boxes only 1.1–1.3× faster, luxcore.md).
+- Instanced relief is cheap to trace (flat boxes only 1.1–1.3× faster, luxcore.md).
 
 | Look | λ | Slope | Notes |
 |---|---|---|---|
@@ -126,8 +117,8 @@ that carries a relief is in `references/materials/glass/glass.md`.
 | Submerged surfaces black under lamps | Cycles shadow rays cannot pass refraction; GN wavefront is sun only | LuxCore (step 3a) |
 | Caustic looks right, integrates far off | never checked | energy check (step 4) |
 | Caustic lines read as vertical streaks | grazing view | judge it face-on (step 4) |
-| One bright fold line per ridge set | single-frequency sine | random wave sum (step 2) |
-| Thin straight streaks along unit edges | rounded edges and fades focus | wider fade, larger radii (step 2) |
+| One bright fold line per ridge set | single-frequency sine | random wave sum (glass-relief.md step 2) |
+| Thin straight streaks along unit edges | rounded edges and fades focus | wider fade, larger radii (glass-relief.md step 3) |
 | Flat glow or grey mush by the far wall | relief not sized to the receiver distance | size it; long waves at slope ≈ 0.04 (step 2) |
 
 Generic problems: troubleshooting.md.

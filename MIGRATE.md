@@ -218,4 +218,24 @@ From: LAPTOP-25
 - `rg -i "\bdew" scripts references` finds nothing.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
+# MIGRATE: one clear-glass builder; glass references split
+From: LAPTOP-25
+
+## What changed
+- `glass_material` is deleted (from `materials.shared.dielectric` and `materials.shared.pbr`). The one builder is
+  `materials.glass.glass.clear_glass(name="GLASS", tint=(1, 1, 1), roughness=0.0, ior=1.52)`.
+- `clear_glass`: the second positional argument is now `tint`, not `ior`. The default is white (the old
+  `glass_material` default was green, (0.92, 0.96, 0.97)) and the default material name is `GLASS`, not `Glass_Clear`.
+- The `"glass"` material spec builds through `clear_glass`, so it is white by default.
+- References: cast relief and glass block left `glass.md` for `glass-relief.md` and `glass-block.md`; liquid in glass
+  moved to `water-attached-film.md` §4.2; caustics.md step 2 is now "Size the relief".
+
+## Steps
+- In external calls replace `glass_material(...)` with `clear_glass(...)`; pass `ior=` by keyword; pass `tint=` for
+  green glass. No shim. Delete stale `__pycache__` in `scripts/blender/materials/`.
+
+## Check after pull
+- `rg "glass_material" scripts references` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
 Remove each section after applying it; delete this file when none is left.

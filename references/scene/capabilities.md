@@ -20,9 +20,9 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Tiling by real height | `height_span_uv` + REPEAT | solid |
 | Caustics | GN wavefront for sun through a water body; all glass and lamps → LuxCore ([RULES REN_03](../renderer/renderer-choice.md)) | solid |
 | Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH, GPU + CPU light tracing (luxcore.md), energy-checked ([caustics.md](../effects/caustics.md)) | solid |
-| Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh (materials › Glass block) | solid |
+| Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh ([glass-block.md](../materials/glass/glass-block.md), [glass-relief.md](../materials/glass/glass-relief.md)) | solid |
 | Baked procedural textures for LuxCore (terrazzo, smooth concrete, sand mortar) | numpy seamless colour + roughness maps | test |
-| Tangled glass-block caustics across units | long-wave relief at higher slope (Wave/Iceberg mix), sized by a thin-lens sim ([caustics.md](../effects/caustics.md) › Step 2. Design the relief) | test |
+| Tangled glass-block caustics across units | long-wave relief at higher slope (Wave/Iceberg mix), sized by a thin-lens sim ([caustics.md](../effects/caustics.md) › Step 2. Size the relief) | test |
 | Clean caustic renders without OIDN blotches | LuxCore radiance clamping (camera paths only) | solid, measured |
 | Concave-corner dust | AO band × noise × height; Cycles live or baked for LuxCore (`renderer.luxcore.luxcore.bake_dust`) | test |
 | Anti-tiling | LuxCore Randomized Tiling (native); Cycles: noise-mixed lookups / hex tiling built from nodes | LuxCore test, Cycles untested |

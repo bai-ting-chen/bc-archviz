@@ -1,10 +1,11 @@
 # Glass
 
 ## 1. Overview
-Glass in five cases: the clear glazing base (transmission, IOR, roughness), the optical distortion of
-glazing (roller waves and pillowing), cast glass relief, pressed glass block walls, and liquid in
-glass. The first three are layers of one pane; the block and the liquid are objects of their own.
-Glass under a water film is covered by [water-attached-film.md](../water/water-attached-film.md).
+A flat glazed pane in two layers: the clear glass base, and the surface distortion real glazing has
+(roller waves and pillowing). Neighbours: patterned, cast or pressed relief is in
+[glass-relief.md](glass-relief.md); hollow glass block units and walls are in
+[glass-block.md](glass-block.md); water on or behind glass is in
+[water-attached-film.md](../water/water-attached-film.md).
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and
@@ -13,128 +14,81 @@ used here with glass settings.
 ```
                             GLASS — LAYER DIAGRAM
  ┌───────────────────────────────────────────────────────────────────────────┐
- │ PANE (one glazed pane)                                                    │
- │ 1 Clear glazing base    → transmission, IOR, roughness                    │
- │ 2 Roller waves, pillow  → bump                                            │
- │ 3 Cast relief           → relief (folds, creases, crinkle)                │
- │                                                                           │
- │ OBJECTS (own geometry)                                                    │
- │ 4 Glass block units     → geometry (two pressed halves, sealed)           │
- │ 5 Liquid in glass       → three surfaces (glass, interface, water)        │
+ │ SPECIFIC (§4)                                                             │
+ │   §4.1 Clear glass base          → transmission, IOR, tint, roughness     │
+ │   §4.2 Roller waves, pillowing   → bump                                   │
+ │ GENERIC (own reference)                                                   │
+ │   Directional blur               → anisotropy.md                          │
+ │   Relief (patterned, cast)       → glass-relief.md                        │
+ │   Water on the glass             → water-attached-film.md                 │
  └───────────────────────────────────────────────────────────────────────────┘
-   pane: base (1) ─► Principled transmission and IOR; roller wave + dome (2) ─► Bump
-   cast relief (3) ─► tiles, faded at the border ─► relief over the untouched body
-   block (4) and liquid (5): built as geometry; no shader layer stack
+   base (§4.1) ─► Principled: Base Color, IOR, Transmission, Roughness
+   roller wave + dome (§4.2) ─► Bump ─► Principled Normal
 ```
 
-- Assembly, pane: the cast relief (§4.3) is built tile by tile, each tile its own cast, so the grid
-  meets the untouched body at a faded border.
-- Assembly, block and liquid: each is its own object, separate from the pane layers above.
+- The distortion is added to a finished base material; it changes the normal only, plus a trace of
+  roughness.
+- Off switch (RULES MAT_07): the base alone is the pane without §4.2; on a built material, mute the
+  Bump node labelled "roller wave + pillowing".
 
 ## 3. Code
-- `scripts/blender/materials/glass/`: `glass.py` (module `materials.glass.glass`),
-  `glass_distortion.py` (`glass_distortion(mat, obj)`), `glass_assembly.py` (`glass_of_water`),
-  `glassware.py` (`glassware.glass_of_water()`).
-- Glass block units: no script is named in this file.
-- Control: none named in this file.
+- `scripts/blender/materials/glass/` (module `materials.glass.glass`):
+  - `clear_glass(name, tint, roughness, ior)`: the one clear-glass builder (§4.1).
+  - `glass_distortion(mat, obj, wave_period, wave_amp_mm, pillow_mm, roughness)`: adds §4.2 to `mat`,
+    with the dome centred on `obj`.
+  - `glass_shell(objs, thickness)`: turns solid lamp globes into thin shells; its use is in
+    `references/scene/lighting-camera.md`.
+- Controls: `scripts/controls/material/glass_graph_check.py` (node-graph baseline of the base, the
+  shell and the distortion); `scripts/controls/environment/outdoor_smoke.py` renders a distorted pane.
 
 ## 4. Instructions and parameters, per layer
+Table values are starting points; size them from the shot (RULES MAT_03) and record the final values
+in the study notes (RULES GOV_01).
 
-### 4.1 Clear glazing base
-- Principled transmission 1, IOR 1.52, roughness 0. Thin Film for coated glazing (to try).
-- For directional see-through blur at nonzero roughness, use [anisotropy.md](../../effects/anisotropy.md).
+### 4.1 Clear glass base
+- One builder for every clear glass. Coloured glass is the same builder with a tint.
+- The tint multiplies the light at every crossing, so two panes in a row square it. Stay within a
+  few percent of white; thick or low-grade glass leans green.
+- A material that already exists under that name is edited in place, so nodes added by hand stay.
 
 | Parameter | Value |
 |---|---|
-| Transmission | 1 |
-| IOR | 1.52 |
-| Roughness | 0 |
-| Thin Film | for coated glazing (to try) |
+| `ior` | 1.52 (soda-lime) |
+| `tint` | white (1, 1, 1); slight green for thick panes |
+| `roughness` | 0 |
+| Transmission | 1 (set by the builder) |
 
 ### 4.2 Roller waves and pillowing (bump)
-- Glazing is not optically flat. Float glass has roller waves (~0.1 mm peak-to-valley over ~0.3 m,
-  ~1 mrad slope). The visible wobble of real windows is insulated-unit **pillowing**: panes bowed a few
-  mm, strongest towards the frame.
-- `materials.glass.glass.glass_distortion(mat, obj)` gives a bump of a sine roller wave plus a dome over
-  the pane. 0.25 mm of wave read as blinds; the dome carries the effect.
-- A glass that "looks too reflective" is usually a dark room behind it. Fresnel is physical; distortion
-  and something to reflect make it read.
+- Glazing is not optically flat, and a perfectly flat pane reads as CG. Two things bend its
+  reflections: **roller waves** from the float line (a fine, regular ripple) and **pillowing** of an
+  insulated unit (each pane bowed, strongest towards the frame).
+- The dome carries the effect. The roller wave only breaks up straight reflected lines; too much of it
+  draws stripes across the pane.
+- The dome is centred on `obj`'s bounding box and skips its thinnest axis, the glass thickness. Panes
+  that share the material must have the same thin axis.
+- Judge it on a reflection with straight lines in it (a mullion, a horizon, a neighbouring façade).
 
 | Parameter | Value |
 |---|---|
-| Roller wave | ~0.1 mm peak-to-valley over ~0.3 m; ~1 mrad slope |
-| Pillowing | panes bowed a few mm, strongest towards the frame |
-| Wave amplitude | 0.25 mm read as blinds; the dome carries the effect |
-
-### 4.3 Cast glass relief
-- Multi-scale: soft folds λ 8–40 cm, ridged creases, and very weak crinkle. Each tile has its own cast,
-  faded flat over ~30 mm at the border so the grid meets the untouched body.
-- Strong fine crinkle reads as squiggles.
-- A slight roughness on the dry faces gives the satin haze of cast glass.
-- Sized for the final view (RULES MAT_03).
-
-| Parameter | Value |
-|---|---|
-| Soft folds | λ 8–40 cm |
-| Creases | ridged |
-| Crinkle | very weak |
-| Border fade | ~30 mm, flat |
-| Dry-face roughness | ~0.05 |
-
-### 4.4 Glass block units (geometry)
-- Pressed hollow unit: two pressed halves fused hot and sealed hollow (partial vacuum). The pattern is
-  on the **inner** faces; outer faces are smooth with slight pressing waviness; coated sides key to the
-  mortar.
-- Common units 190×190×80 mm (2.3 kg) and 240×240×80 (4.1 kg): from the weight, ~8 mm face glass and
-  ~7 mm sides.
-- Stack bond, 10 mm joints, perimeter bands ≥ 15 mm, panels ≤ ~15 m².
-- Curved walls: the concave-side joint stays constant and the convex one opens, E = (L + g)(1 + s/r) − L.
-  With g 10 / E 25 mm, the inner radius is ≥ ~1.05 m (190 units), ≥ ~1.33 m (240).
-- Model the relief as geometry (caustics.md › Step 2. Design the relief). Leave a fraction of a
-  millimetre of air between mortar and glass so the surfaces never coincide.
-
-| Parameter | Value |
-|---|---|
-| Unit sizes | 190×190×80 mm (2.3 kg); 240×240×80 mm (4.1 kg) |
-| Face / side glass | ~8 mm / ~7 mm (from the weight) |
-| Bond and joints | stack bond, 10 mm joints |
-| Perimeter band | ≥ 15 mm |
-| Panel area | ≤ ~15 m² |
-| Joint on a curve | E = (L + g)(1 + s/r) − L; g 10 / E 25 mm |
-| Minimum inner radius | ≥ ~1.05 m (190); ≥ ~1.33 m (240) |
-| Mortar-to-glass gap | a fraction of a millimetre |
-
-### 4.5 Liquid and glassware
-- Cycles has no nested-IOR priority, so model three surfaces: GLASS (1.52), INTERFACE below the
-  waterline (1.52/1.333) and WATER_SURFACE (1.333), built by `glassware.glass_of_water()`. Check the
-  normals per wall.
-- Re-lathe Rhino glassware at a high segment count for close-ups.
-
-| Parameter | Value |
-|---|---|
-| GLASS | IOR 1.52 |
-| INTERFACE below the waterline | IOR 1.52/1.333 |
-| WATER_SURFACE | IOR 1.333 |
-| Glassware segments | high count for close-ups |
+| `wave_period` | 0.30 m |
+| `wave_amp_mm` | 0.05 mm (real float glass ~0.1 mm peak to valley, ~1 mrad slope) |
+| `pillow_mm` | 2 mm (real units bow a few mm) |
+| `roughness` | 0.01 |
 
 ### Generic layers, glass settings
 | Layer | Reference | Note for this material |
 |---|---|---|
-| Glass under a water film | [water-attached-film.md](../water/water-attached-film.md) | wetted face IOR 1.14 |
-| Refractive relief design | caustics.md › Step 2. Design the relief | glass block relief is modelled as geometry (§4.4) |
+| Directional see-through blur | [anisotropy.md](../../effects/anisotropy.md) | reeded or brushed glass too fine to model; needs roughness above 0 |
+| Relief | [glass-relief.md](glass-relief.md) | patterned, cast and pressed glass: geometry, not bump |
+| Water on the glass | [water-attached-film.md](../water/water-attached-film.md) | the wetted face takes the IOR ratio 1.14 |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |
 |---|---|---|
-| Glass looks too reflective | dark room behind it | Fresnel is physical; add distortion and something to reflect (§4.2) |
-| Pane reads as blinds | roller wave too strong (0.25 mm) | let the dome carry the effect (§4.2) |
-| Cast glass reads as squiggles | strong fine crinkle | keep the crinkle very weak (§4.3) |
-| Cast glass has no satin haze | dry faces fully glossy | slight roughness on the dry faces (§4.3) |
-| Hard tile edge on cast glass | no border fade | fade flat over ~30 mm at the border (§4.3) |
-| Block mortar and glass flicker or z-fight | surfaces coincide | leave a fraction of a millimetre of air (§4.4) |
-| Curved block joints wrong | convex joint not opened | E = (L + g)(1 + s/r) − L; check the inner radius (§4.4) |
-| Water in glass looks wrong at the waterline | nested IOR not handled | three surfaces: glass, interface, water (§4.5) |
-| Glassware faceted in close-up | low segment count | re-lathe at a high count (§4.5) |
+| Pane reads as blinds or stripes | roller wave too strong (0.25 mm does it) | lower `wave_amp_mm`; let the dome carry the effect (§4.2) |
+| Reflections are ruler-straight, pane reads as CG | no distortion | add §4.2 |
+| Glass turns green or dark through several panes | tint multiplied at every crossing | tint closer to white (§4.1) |
+| Dome runs through the glass thickness | panes sharing the material have different thin axes | one material per orientation (§4.2) |
 
-No generic problems are listed in this file. The general list is in troubleshooting.md (named here,
-not linked, so this file adds no reference loop).
+- Glass that looks too reflective, or shows nothing: `references/scene/lighting-camera.md` › Glass and
+  what it shows. Other generic problems are in troubleshooting.md.

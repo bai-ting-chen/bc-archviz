@@ -33,7 +33,9 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 | [Stone](stone/stone.md) | `materials.stone.stone` |
 | [Wood](wood/wood.md) | `materials.wood.wood` |
 | [Metal](metal/metal.md) | `materials.metal.metal` |
-| [Glass](glass/glass.md) | `materials.glass.glass` |
+| [Glass](glass/glass.md) (flat pane) | `materials.glass.glass` |
+| [Glass Relief](glass/glass-relief.md) (patterned, cast, pressed) | no builder; modelled geometry |
+| [Glass Block](glass/glass-block.md) | no builder; modelled geometry |
 | [Fabric](fabric/fabric.md) | `materials.fabric.fabric` |
 | [Ground](ground/ground.md) | `materials.ground.ground` |
 | [Vegetation](vegetation/vegetation.md) | `materials.vegetation.vegetation` |
@@ -79,7 +81,7 @@ Water comes in three build methods: choose the method by the shot, then the file
 |---|---|
 | Pool, still water, wind ripples | [water-surface.md](water/water-surface.md) |
 | Sheet thrown off a lip, falling free | [water-free-falling-film.md](water/water-free-falling-film.md) |
-| Film clinging to a wall or glass; low overflow into a trench | [water-attached-film.md](water/water-attached-film.md) |
+| Film clinging to a wall or glass; water against any transparent object; low overflow into a trench | [water-attached-film.md](water/water-attached-film.md) |
 | Ripples and waves from impacts; choppy plunge pools | [water-ripple.md](water/water-ripple.md) |
 | Foam, floating bubbles, whitewater | [water-foam.md](water/water-foam.md) |
 | Landing line, crowns, splash; simulated plunge zones | [water-splash.md](water/water-splash.md) |

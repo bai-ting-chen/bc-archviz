@@ -10,7 +10,7 @@ for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'til
 
 CASES = {
     "pbr_material": lambda m: m['materials.shared.pbr'].pbr_material("concrete_wall_009"),
-    "glass_material": lambda m: m['materials.shared.pbr'].glass_material(),
+    "glass": lambda m: m['materials.shared.pbr'].material_from_spec("glass"),
     "simple_material": lambda m: m['materials.shared.pbr'].simple_material("S", (0.5, 0.4, 0.3)),
     "material_from_spec": lambda m: m['materials.shared.pbr'].material_from_spec({"type": "simple", "name": "S2", "color": (.2, .2, .2)}),
     "world_hdri": lambda m: m['core.archviz'].world_hdri("kloppenheim_06_puresky"),

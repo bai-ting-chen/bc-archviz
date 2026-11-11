@@ -19,7 +19,7 @@ used here with attached-film settings.
  ┌──────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                                                            │
  │   §4.1 Film height field on the wall    → geometry, ropes, roll waves    │
- │   §4.2 Glass and film IOR               → shading (transmission)         │
+ │   §4.2 Water on a transparent object    → shading (interface IOR)        │
  │   §4.3 Overflow rim strip               → geometry, clinging film        │
  │ GENERIC (own reference)                                                  │
  │   Landing: crowns, splash               → water-splash.md                │
@@ -32,7 +32,7 @@ Flow:
 ```
    wall surface ──► raycast front-most surface along −N, (u, z) grid ──► depth, low-passed (§4.1)
    depth + thickness (§4.1) ──► film surface, kept ≥ wall + 0.3 mm
-   wetted glass face (§4.2) and film surface ──► transmission IOR
+   wetted face of a transparent object (§4.2) and film surface ──► transmission IOR
    rim strip (§4.3): pond band → roll over the crest → film down the wall
    film lands ──► generic layers (splash, ripples, foam)
 ```
@@ -44,8 +44,8 @@ Flow:
 
 ## 3. Code
 No builder or control script yet: index.md › Water lists the attached film as "none yet"
-(raycast height field). The glass-under-water IOR (§4.2) is `glass_of_water()` in
-`scripts/blender/materials/glass/glass_assembly.py`.
+(raycast height field). The one built example of the interface rule (§4.2) is a glass of water:
+`glassware.glass_of_water()` in `scripts/blender/materials/glass/`.
 
 ## 4. Instructions and parameters, per layer
 Table values are starting points; size them from the shot (RULES MAT_03) and record the final values
@@ -81,14 +81,23 @@ in the study notes (RULES GOV_01).
 | Low-pass (capillary scale) | σ ≈ 5 mm |
 | Clearance wall to film | ≥ 0.3 mm |
 
-### 4.2 Glass and film IOR (shading)
-- **Glass under water in Cycles** (no nested IOR): the wetted glass face gets IOR 1.52/1.333 = 1.14,
-  the film surface 1.333 (as `glass_of_water`, §3).
+### 4.2 Water on a transparent object (shading)
+- Cycles has no nested-IOR priority: it cannot tell that a ray leaving glass enters water, not air.
+  Wherever water touches another transparent solid (a film on glass, a drink in a tumbler, a pool
+  against a glass wall), give each surface the IOR of the step it really is:
+  - the solid's dry faces: its own IOR;
+  - the wetted face, shared by solid and water: the ratio of the two;
+  - the water's free surface: 1.333.
+- Model the wetted face once, as one surface with the ratio. Two coincident surfaces refract twice.
+- Check the normals of every wall; a flipped one inverts its step.
+- Lathe round vessels at a high segment count for close-ups (`glass_of_water(segments=…)`).
 
 | Parameter | Value |
 |---|---|
-| Wetted glass face IOR | 1.14 (1.52 / 1.333) |
-| Film surface IOR | 1.333 |
+| Glass, dry faces | 1.52 |
+| Wetted glass face | 1.14 (1.52 / 1.333) |
+| Water free surface | 1.333 |
+| Vessel segments, close-up | 256 |
 
 ### 4.3 Overflow edge and rim strip (geometry)
 - **Spill:** head h over a sharp crest → q ≈ 1.84·h^1.5 (m²/s); brink depth ≈ 0.715 × critical
@@ -125,6 +134,8 @@ Generic layers, attached-film settings:
 | Calm water bends nothing; film reads as clear glass | flat sheet of constant thickness: a parallel plate | uneven thickness between the two faces (§4.1) |
 | Squiggly contour-like highlights | fine relief + roll waves too strong | roll waves ~0.2 mm, ropes λ 2–9 cm (§4.1) |
 | Wet patterned glass looks clearer than dry | film smooths folds it should keep | film follows broad relief, fills only the fine one (§4.1) |
+| Water against glass looks wrong at the waterline | nested IOR not handled | three surfaces: dry, wetted, free (§4.2) |
+| Vessel faceted in close-up | low segment count | re-lathe at a high count (§4.2) |
 | Strong flow falls free in front of the units below | set-back lip | free-falling film file: [water-free-falling-film.md](water-free-falling-film.md) |
 | Moderate flow wraps under a sharp lip and rejoins the face below | teapot effect | check the section before choosing the flow (§4.1) |
 | Dark frame round a trench | wide curb top under a few mm of water | knife edge ~10 mm (§4.3) |

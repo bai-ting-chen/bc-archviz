@@ -1,6 +1,6 @@
 """Material spec; canonical implementation behind pbr."""
 
-from materials.shared.dielectric import glass_material
+from materials.glass.clear_glass import clear_glass
 
 from materials.shared.pbr_build import pbr_material
 
@@ -12,8 +12,8 @@ def material_from_spec(spec):
         if spec.startswith("ph:"):
             return pbr_material(spec[3:])
         if spec == "glass":
-            return glass_material()
+            return clear_glass()
         raise ValueError(spec)
     spec = dict(spec)
     kind = spec.pop("type")
-    return {"ph": lambda **k: pbr_material(**k), "glass": glass_material, "simple": simple_material}[kind](**spec)
+    return {"ph": lambda **k: pbr_material(**k), "glass": clear_glass, "simple": simple_material}[kind](**spec)
