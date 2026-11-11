@@ -32,14 +32,17 @@ Colour, IOR, metal response and surface relief remain the material's terms (RULE
 
 ## 3. Code
 - `scripts/blender/effects/anisotropy.py`: `anisotropy(bsdf, amount, rotation, tangent)`.
-  Principled, Glass and Metallic BSDFs; sets amount, rotation and tangent.
+  Principled, Glass and Metallic BSDFs; sets amount, rotation and tangent. `rotation=None` and
+  `tangent=None` (the defaults) keep the rotation and the linked tangent, so `anisotropy(bsdf, 0)`
+  switches the effect off and a later call with the amount alone restores it.
 - `scripts/blender/materials/shared/dielectric.py`: `dielectric(..., anisotropy=None,
-  rotation=0.0, tangent=(1, 0, 0))`. `None` leaves the legacy graph unchanged; explicit zero
+  rotation=0.0, tangent=None)`. `anisotropy=None` leaves the legacy graph unchanged; explicit zero
   turns the effect off. `glass_material()` keeps its existing arguments; apply the effect to
   its BSDF when needed.
-- `scripts/controls/effects/anisotropy_lab.py`: headless Cycles, `--out <folder> --case glass`
-  or `--case metal`. Default 1024 samples, 768 px frames. Writes off/on/rotated/
+- `scripts/controls/effects/anisotropy_lab.py`: headless Cycles, `--out <folder> --case glass`,
+  `metal` (both Principled), `glass-bsdf` or `metallic`. Default 1024 samples, 768 px frames. Writes off/on/rotated/
   repeated-off PNGs, a native-crop pair in that order, feature/noise diffs and measurement JSON.
+  It fails when the broad blur axis differs from step 3.
 
 ## 4. Instructions and parameters
 1. **Choose the response.** Use the existing
@@ -83,7 +86,7 @@ Colour, IOR, metal response and surface relief remain the material's terms (RULE
    | Parameter | Starting value and measured effect |
    |---|---|
    | `amount` | 0 off; 0.8 produces a directional width split in the control |
-   | `amount`, Glass BSDF | the same 0.8 splits far more (edge widths 53 / 5 px against 32 / 12 px on Principled); start lower |
+   | `amount`, Glass BSDF | the same 0.8 splits far more (broad / narrow edge widths 52 / 5 px against 32 / 12 px on Principled); start lower |
    | `rotation` | 0 initially; 0.25 turns = 90 degrees, swaps the broad and narrow axes |
    | Metal settings | retain the material's own anisotropy and brush-streak values |
 

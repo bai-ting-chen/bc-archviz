@@ -6,7 +6,7 @@ from materials.shared.principled import _principled_of
 from effects.anisotropy import anisotropy as set_anisotropy
 
 def dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None,
-               *, anisotropy=None, rotation=0.0, tangent=(1.0, 0.0, 0.0)):
+               *, anisotropy=None, rotation=0.0, tangent=None):
     """The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled,
     transmission 1. `tint` multiplies every crossing, so keep it within a few % of white."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)

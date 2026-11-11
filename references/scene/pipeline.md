@@ -370,10 +370,9 @@ Verified on Blender 5.3.0 with factory-startup headless checks: helper imports, 
 graph controls, API probes, the photometric and MNEE controls, and BlendLuxCore 2.11.1 (graph check
 and a 256 px render). Verified in the open UI through MCP: a no-limit Cycles final started with
 `finals.start_in_ui`, stopped from the viewer, its passes saved, then denoised and graded from the
-passes. The helper regression dump builds all 41 cases. Not verified: the Esc cancel path, a LuxCore final in the open
-UI, import_3dm and the asset-dependent controls. The fog control's Mie
-reading came out about 3 % lower than the earlier baseline, cause unknown: re-measure before
-relying on a fog number.
+passes. The helper regression dump ran with 37 of its 41 cases; the other 4 need assets that were
+not in the library (regress_helpers.py lists them). Not verified: those 4 cases, the Esc cancel
+path, a LuxCore final in the open UI, import_3dm and the asset-dependent controls.
 
 ## PIP_01 procedure
 

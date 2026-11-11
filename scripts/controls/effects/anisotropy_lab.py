@@ -1,4 +1,4 @@
-"""Directional blur control: blender -b --factory-startup --python anisotropy_lab.py -- --out DIR --case glass|metal."""
+"""Directional blur control: blender -b --factory-startup --python anisotropy_lab.py -- --out DIR --case glass|metal|glass-bsdf|metallic."""
 import argparse
 import json
 from pathlib import Path
@@ -38,6 +38,22 @@ def _emission(name, value):
     return mat
 
 
+def _single_bsdf(name, node_type, roughness):
+    """A material whose surface is one BSDF node of the given type."""
+    mat = bpy.data.materials.new(name)
+    tree = mat.node_tree
+    tree.nodes.clear()
+    node = tree.nodes.new(node_type)
+    node.inputs['Roughness'].default_value = roughness
+    out = tree.nodes.new('ShaderNodeOutputMaterial')
+    tree.links.new(node.outputs[0], out.inputs['Surface'])
+    return mat, node
+
+
+# Blur axis that widens at rotation 0 with the tangent along X (anisotropy.md step 3).
+BROAD_AXIS = {'glass': 'x', 'metal': 'x', 'glass-bsdf': 'y', 'metallic': 'x'}
+
+
 def _grid(reflection):
     # Reuse the backlit grid on either side of the surface for transmission/reflection.
     # Metres: 0.20 setback, 0.12-wide lines; stagger the layers to avoid coincident faces.
@@ -66,22 +82,29 @@ def _scene(case, variant, samples):
     sc.render.image_settings.color_mode = 'RGB'
     sc.render.image_settings.color_depth = '8'
     ortho_camera(3, 1.15)
-    _grid(case == 'metal')
+    reflective = case in ('metal', 'metallic')
+    _grid(reflective)
     amount = 0.0 if variant.startswith('off') else .8
     rotation = .25 if variant == 'rotated' else 0.0  # turns; quarter turn = 90 degrees
     if case == 'glass':
         mat = dielectric('rough-glass', roughness=.24, anisotropy=amount,
                          rotation=rotation, tangent=(1, 0, 0))
+    elif case == 'glass-bsdf':
+        mat, node = _single_bsdf('rough-glass-bsdf', 'ShaderNodeBsdfGlass', .24)
+        anisotropy(node, amount, rotation, (1, 0, 0))
     else:
-        mat = bpy.data.materials.new('rough-metal')
-        node = mat.node_tree.nodes.get('Principled BSDF')
-        node.inputs['Metallic'].default_value = 1
+        if case == 'metal':
+            mat = bpy.data.materials.new('rough-metal')
+            node = mat.node_tree.nodes.get('Principled BSDF')
+            node.inputs['Metallic'].default_value = 1
+        else:
+            mat, node = _single_bsdf('rough-metallic-bsdf', 'ShaderNodeBsdfMetallic', .12)
         node.inputs['Base Color'].default_value = (.67, .64, .60, 1)
         node.inputs['Roughness'].default_value = .12
-        # Exercise the UV path as well as the glass control's explicit world axis.
+        # Exercise the UV path as well as the glass controls' explicit world axis.
         anisotropy(node, amount, rotation, 'directional-uv')
     pane = _box(case + '-plate', (0, 0, 0), (1, 1, .01), mat)
-    if case == 'metal':
+    if reflective:
         directional_uv(pane, 1, name='directional-uv', axis='X')
     sc.cycles.seed = 41 if variant == 'off-repeat' else 17
     return sc
@@ -133,7 +156,8 @@ def _measure(out, prefix):
                                im[392:490, 180:300].reshape(-1, 3)])
     noise = float(np.abs(roi(images['off']) - roi(images['off-repeat'])).mean())
     feature = float(np.abs(roi(images['off']) - roi(images['on'])).mean())
-    result = dict(widths_px=widths, noise_width_px=noise_width,
+    broad_axis = max('xy', key=lambda a: widths['on'][a])
+    result = dict(widths_px=widths, broad_axis=broad_axis, noise_width_px=noise_width,
                   noise_mae_percent=noise * 100, feature_mae_percent=feature * 100,
                   swaps=swapped, passes=swapped and min(separation) > noise_width and feature > noise)
     # Native crops in order off / on / rotated; resolution stays below 1280 px.
@@ -148,7 +172,7 @@ def main():
     """Render off/on/quarter-turn/repeated-off and measure display-PNG edge widths."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--case', choices=['glass', 'metal'], required=True)
+    parser.add_argument('--case', choices=sorted(BROAD_AXIS), required=True)
     parser.add_argument('--samples', type=int, default=1024)
     args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:])
     args.out.mkdir(parents=True, exist_ok=True)
@@ -168,6 +192,7 @@ def main():
     (args.out / (prefix + '-measurements.json')).write_text(json.dumps(result, indent=2))
     print('ANISOTROPY_RESULT', json.dumps(result), flush=True)
     assert result['passes'], 'Directional blur failed noise-floor or rotation check'
+    assert result['broad_axis'] == BROAD_AXIS[args.case], 'Broad blur axis differs from anisotropy.md step 3'
 
 
 if __name__ == '__main__':

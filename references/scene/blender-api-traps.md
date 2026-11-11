@@ -87,9 +87,8 @@
   an output socket via `tree.interface.new_socket("Image", in_out="OUTPUT",
   socket_type="NodeSocketColor")`, a `NodeGroupOutput` node, then `scene.compositing_node_group
   = tree` and `scene.render.use_compositing = True` (`scene.node_tree` is gone).
-- Compositor effects live in `scene.compositor_effects`. The `scene.compositing_node_group`
-  property used by `final_images.py` still assigns and renders a group, but logs a
-  DeprecationWarning (removal planned for 6.0).
+- The `scene.compositing_node_group` property used by `final_images.py` still assigns and renders
+  a group, but logs a DeprecationWarning (removal planned for 6.0).
 - `render.render("INVOKE_DEFAULT")` from a startup-script timer renders but may open no render
   window: switch the largest area to `IMAGE_EDITOR` showing `Render Result` to watch it.
 - Headless runs load user prefs unless `--factory-startup` (which disables add-ons, CPU device —
@@ -125,10 +124,11 @@
   (`scene.compositing_node_group`) runs.
 - **Blender's render cancel skips the compositor** (Esc, status-bar ✕): `render_cancel` fires,
   `render_complete` does not, and the composited Render Result is the uncomposited image.
-- **Operators in a `--python` startup script with UI** see no active object in their context
-  (`mode_set.poll()` fails: "Context missing active object"), unlike `-b`. Wrap them:
-  `bpy.context.temp_override(window=w, screen=w.screen, object=ob, active_object=ob,
-  selected_objects=[ob], edit_object=ob)` (`renderer.luxcore.luxcore._ctx`). Test UI-run code in the UI
+- **After a `--python` startup script with UI loads a file** (`open_mainfile`, `read_homefile`), its
+  operators see no active object, even after `view_layer.objects.active = ob` (`mode_set.poll()`
+  fails: "Context missing active object"). `-b` does not do this, nor does a script that loads no
+  file. Wrap them: `bpy.context.temp_override(window=w, screen=w.screen, object=ob, active_object=ob,
+  selected_objects=[ob], edit_object=ob)` (`renderer.luxcore.dust_uv._ctx`). Test UI-run code in the UI
   once — a headless pass proves nothing about it.
 - An object with **no material slots bakes nothing** ("No active image found"): give it a
   temporary slot for the bake material.
