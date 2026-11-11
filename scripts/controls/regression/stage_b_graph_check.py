@@ -22,6 +22,7 @@ import bpy
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
+WATER = HERE.parent / 'water'
 sys.path.insert(0, str(HERE.parent.parent / 'blender'))
 sys.path.insert(0, str(HERE))
 from graph_dump import dump_material, dump_tree, value, write
@@ -101,10 +102,10 @@ def main():
     write(out / 'materials.water.json', water_check(out))
     # Existing controls reset the scene; run them after all graph/numeric snapshots.
     sys.argv = ['falling_film_check.py', '--', str(out), 'res=64', 'samples=2']
-    runpy.run_path(str(HERE / 'falling_film_check.py'), run_name='__main__')
+    runpy.run_path(str(WATER / 'falling_film_check.py'), run_name='__main__')
     capture = io.StringIO()
     with contextlib.redirect_stdout(capture):
-        runpy.run_path(str(HERE / 'mnee_water.py'), run_name='__main__')
+        runpy.run_path(str(WATER / 'mnee_water.py'), run_name='__main__')
     measurements = [line for line in capture.getvalue().splitlines() if line.startswith('MNEE-TEST')]
     assert len(measurements) == 6
     write(out / 'mnee.json', measurements)

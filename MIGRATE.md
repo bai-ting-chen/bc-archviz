@@ -198,9 +198,9 @@ From: LAPTOP-25
 - The executable reports Blender 5.3.0; MCP connects to that instance after the add-on is enabled.
 - `python -m compileall -q scripts` passes; `python scripts/workflow/structure_check.py` reports 0 problems.
 - `python scripts/workflow/helper_index.py` regenerates the helper index.
-- Run every `*_graph_check.py` except `edge_wear` (needs an asset), `luxcore` (needs its extension) and
-  `stage_b` (fails: its `falling_film_check.py` is missing), and the four cases of `anisotropy_lab.py`
-  (needs `nvidia-smi`), with `-b --factory-startup` and each script's own arguments after `--`;
+- Run every `*_graph_check.py` except `edge_wear` (needs an asset) and `luxcore` (needs its extension),
+  and the four cases of `anisotropy_lab.py` (needs `nvidia-smi`), with `-b --factory-startup` and each
+  script's own arguments after `--`;
   for LuxCore use its installed extension and verify a small render.
 
 # MIGRATE: dew removed from vegetation
