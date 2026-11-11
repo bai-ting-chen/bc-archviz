@@ -44,7 +44,6 @@ is the durable part; its dial positions belong to whichever study last used it.
 | Meadow on terrain (multi-species, upright) | native Scatter on Surface + patch / bare-soil / pad / frustum masks (`scatter.meadow_layer_group`) | solid |
 | Modelled grass blades | Principled + Translucent, per-instance tone + dry patches (`materials.vegetation.vegetation.blade_material`) | solid |
 | Wet lawn / wet ground | dry^gamma + water coat (`materials.vegetation.vegetation.WET`, `materials.ground.ground.ground_material(wet_gamma)`) | solid, control-proved |
-| Dew near camera | effective-reflectance glossy beads faded by distance (declared approximation) | test |
 | Volumetric fog / mist | Volume Scatter Mie, sigma = 3.912/V (`atmosphere.fog_volume`) | solid, control-proved (1.000) |
 | Runoff / leak streaks below drip edges | GN raycast drip-edge field + streak shader (`effects.edge_wear.add_leak_field`, `add_runoff`) | solid, control-proved |
 | Concrete cracks | corner shrinkage cracks + patchy Voronoi map-cracking (`effects.edge_wear.add_cracks`) | solid, control-proved |

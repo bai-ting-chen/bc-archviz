@@ -32,8 +32,7 @@ used here with vegetation settings.
 
 ## 3. Code
 - `scripts/blender/materials/vegetation/`: `vegetation.py` (entry point `blade_material`, imported
-  from `blade_build.py`; config in `blade_config.py`, wet and dew in `blade_wet.py` and
-  `blade_dew.py`).
+  from `blade_build.py`; config in `blade_config.py`, wet film in `blade_wet.py`).
 - `scripts/blender/scene/environment/`: `scatter.py` is the import point for leaf litter and meadow.
   Leaf litter uses `scatter_objects.py` (`scatter`); the meadow uses `scatter_asset.py`
   (`load_scatter_on_surface`), `meadow_graph.py` (`meadow_layer_group`) and `meadow_objects.py`

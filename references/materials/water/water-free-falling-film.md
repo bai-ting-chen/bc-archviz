@@ -221,7 +221,7 @@ values in the study notes (RULES GOV_01).
 | Impact rings, waves, chop | [water-ripple.md](water-ripple.md) | sources = the film's own landing row, weighted by thickness |
 | Foam, floating bubbles | [water-foam.md](water-foam.md) | clustered at impacts, drifting past both ends of the fall |
 | Crowns, splash, landing line | [water-splash.md](water-splash.md) | landing line from §4.1 and the bottom row of §4.6 |
-| Wet wall behind the water | [wet-surfaces.md](../../effects/wet-surfaces.md) › Wet wall behind falling water | the wall behind the whole footprint, not the film's distance |
+| Wet wall behind the water | [wet-surfaces.md](../../effects/wet-surfaces.md) › Wet extent (§4.2) | the wall behind the whole footprint, not the film's distance |
 | Pool body | [water-surface.md](water-surface.md) | clear pool, absorption, Ocean |
 
 ## 5. Troubleshooting

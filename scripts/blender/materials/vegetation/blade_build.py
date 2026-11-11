@@ -8,12 +8,10 @@ from materials.shared.nodes import sock
 
 from materials.vegetation.blade_config import BLADE
 
-from materials.vegetation.blade_dew import _dew
-
 from materials.vegetation.blade_wet import _wet
 
-def blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dew=None, dry_patch=0.55):
-    """Thin blade: Principled + Translucent (Add); per-instance value 0.8-1.15 and a patchy straw mix; optional wet film / dew."""
+def blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dry_patch=0.55):
+    """Thin blade: Principled + Translucent (Add); per-instance value 0.8-1.15 and a patchy straw mix; optional wet film."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     g = G(mat)
     out = g.n("ShaderNodeOutputMaterial", (1300, 0))
@@ -53,6 +51,5 @@ def blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dew=None
     tl = g.n("ShaderNodeBsdfTranslucent", (750, -150)); g.link(sock(tg.outputs, "Result"), tl.inputs["Color"])
     add = g.n("ShaderNodeAddShader", (950, 0))
     g.link(p.outputs[0], add.inputs[0]); g.link(tl.outputs[0], add.inputs[1])
-    shader = _dew(g, add.outputs[0], dew) if dew else add.outputs[0]
-    g.link(shader, out.inputs[0])
+    g.link(add.outputs[0], out.inputs[0])
     return mat

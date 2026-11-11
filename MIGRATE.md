@@ -201,4 +201,19 @@ From: LAPTOP-25
 - Run the self-contained `*_graph_check.py` controls and both cases of `anisotropy_lab.py`
   with `-b --factory-startup`; for LuxCore use its installed extension and verify a small render.
 
+# MIGRATE: dew removed from vegetation
+From: LAPTOP-25
+
+## What changed
+- `blade_material()` lost its `dew` argument; `DEW_GRASS`, `DEW_BROAD` and `materials.vegetation.blade_dew` are deleted.
+- `wet-surfaces.md` now has two sections: §4.1 Wet look, §4.2 Wet extent (the former wet surround and wet wall).
+
+## Steps
+- Drop `dew=` from external calls to `blade_material`; no shim. Delete stale `__pycache__` in
+  `scripts/blender/materials/vegetation/`.
+
+## Check after pull
+- `rg -i "\bdew" scripts references` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
 Remove each section after applying it; delete this file when none is left.

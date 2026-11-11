@@ -326,7 +326,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.vegetation.blade_build` — Blade build; canonical implementation behind vegetation.
 
-- `blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dew=None, dry_patch=0.55)` — Thin blade: Principled + Translucent (Add); per-instance value 0.8-1.15 and a patchy straw mix; optional wet film / dew.
+- `blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dry_patch=0.55)` — Thin blade: Principled + Translucent (Add); per-instance value 0.8-1.15 and a patchy straw mix; optional wet film.
 
 ## `materials.water.build` — One entry point: a free-falling water film with its foot, pool ripples, wet-wall proxy and motion blur (references/materials/water/water-free-falling-film.md and the files it links).
 
@@ -479,7 +479,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `smooth_flat(obj, sharp_deg=30.0)` — Shade smooth but keep edges sharper than `sharp_deg` split: a box stays geometrically flat (top normals exactly vertical) while counting as 'smooth normals' -- required by MNEE casters.
 
-## `materials.water.wet` — Wet-wall proxy behind falling water (references/effects/wet-surfaces.md › Wet wall behind falling water).
+## `materials.water.wet` — Wet-wall proxy behind falling water (references/effects/wet-surfaces.md › Wet extent).
 
 - `WetParams` — Cell size, wall gap and splash-band shape of the wet-wall proxy.
 - `wet_mask(lip, pool_z, p, s, z)` — True on the wall where it is wet: behind the curtain (ragged ends, runoff fingers) and a splash band.

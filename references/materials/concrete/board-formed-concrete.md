@@ -23,7 +23,7 @@ used here with board-form settings.
  │ 4 Grain per board    → bump + ink     Concave dust      → edge-wear.md                   │
  │ 5 Board tone         → colour         Tone key          → variation-per-unit-shading.md  │
  │                                       Tilt, step        → variation-per-unit-geometry.md │
- │                                       Wet / dew         → wet-surfaces.md                │
+ │                                       Wet               → wet-surfaces.md                │
  └──────────────────────────────────────────────────────────────────────────────────────────┘
    order of evaluation          node-editor output it drives
    boards, tilt and step (2) ─────────────────────────► mesh (welded, manifold)
@@ -155,7 +155,7 @@ final view's mm per pixel: relief finer than a pixel reads only through its tone
 | Run-off streaks | [edge-wear.md](../../effects/edge-wear.md) › Runoff | from each wall's own top; vertical faces only |
 | Joint leaks | [edge-wear.md](../../effects/edge-wear.md) › Runoff | short drips under the horizontal joints, a pattern per joint, ending at the next joint |
 | Concave dust | [edge-wear.md](../../effects/edge-wear.md) › Edge dust (RULES MAT_06) | at inside corners and wall feet |
-| Wet / dew | [wet-surfaces.md](../../effects/wet-surfaces.md) | darkens and smooths all layers above |
+| Wet | [wet-surfaces.md](../../effects/wet-surfaces.md) | darkens and smooths all layers above |
 
 ## 5. Troubleshooting
 Generic problems are in troubleshooting.md. These are specific to this material:

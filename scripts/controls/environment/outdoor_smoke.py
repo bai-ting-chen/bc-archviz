@@ -9,7 +9,7 @@ for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'til
 #   ARCHVIZ_PROJECT=<folder with library/polyhaven: concrete_wall_006, grass_ground, forest_ground_05,
 #   hdris/kloofendal_misty_morning> blender -b --factory-startup --python scripts/controls/environment/outdoor_smoke.py -- <out.png>
 # A box hut with one opening on a landform hill, a meadow of procedural blades (no vendor assets),
-# wet grass + near dew, weathered concrete with chips, runoff leaks and cracks, distorted glass,
+# wet grass, weathered concrete with chips, runoff leaks and cracks, distorted glass,
 # Mie fog. Asserts the GN fields and instances exist; renders a small frame to look at.
 import math
 import os
@@ -90,9 +90,9 @@ cam.rotation_euler = (Vector((0, 0, 1.6)) - cam.location).to_track_quat("-Z", "Y
 archviz.physical_camera(cam, 100, 8.0, 8.0 ** 2 / 2 ** 11.0, 40.0, focus_distance=16)
 archviz.straighten_verticals(cam)
 
-# meadow of procedural blades: wet + dew
+# meadow of procedural blades: wet
 blades = bpy.data.collections.new("SMOKE_BLADES"); sc.collection.children.link(blades)
-mat = vegetation.blade_material("SMOKE_BLADE", colour=(0.10, 0.16, 0.04), wet=vegetation.WET, dew=vegetation.DEW_GRASS)
+mat = vegetation.blade_material("SMOKE_BLADE", colour=(0.10, 0.16, 0.04), wet=vegetation.WET)
 for i in range(4):
     bm = bmesh.new()
     for k in range(9):
