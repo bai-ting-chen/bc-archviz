@@ -174,7 +174,7 @@ def edge_wear_group(name="Edge Wear + Chips", band=0.08, level=3, chip_reach=0.0
 
 
 def set_input(mod, name, value):
-    """Blender 5.2: a Geometry Nodes modifier's own input values live at
+    """A Geometry Nodes modifier's own input values live at
     mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the
     identifier through the group interface. Group defaults are only copied in at creation."""
     ident = next(i.identifier for i in mod.node_group.interface.items_tree

@@ -6,6 +6,7 @@ is the durable part; its dial positions belong to whichever study last used it.
 
 | Effect | Technique | State |
 |---|---|---|
+| Directional roughness | shared [anisotropy](../effects/anisotropy.md) on a BSDF; reflection and glass transmission | control: reflection and transmission |
 | Daylight | HDRI scaled to real lux, rotated to place its sun; the sole natural light | solid |
 | Specified light fixtures | manufacturer IES on a point light at 177.83/683 W (`interior.ies_light`), candela reproduced 1.000; room direct illuminance = hand calc ±1 % | solid |
 | Linear fixtures (cove, linear pendant) | the IES split into N point lights at lumens/N along the run | solid |

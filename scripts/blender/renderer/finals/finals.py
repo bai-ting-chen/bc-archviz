@@ -5,7 +5,7 @@ saved passes. LuxCore finals: from_passes.py. pipeline.md > Final render in the 
     import finals; finals.start_in_ui(out_dir, (2400, 3000))
     # headless test with exactly the final settings (RULES GAT_04 step 2):
     blender -b scene.blend --python finals.py -- test <spp> <out_dir> <W>x<H>
-    # after the user stops it:
+    # after the user stops it (absolute paths: relative ones are not found):
     blender -b --factory-startup --python finals.py -- denoise <passes.exr> <denoised.exr>
     blender -b scene.blend --python finals.py -- png <denoised.exr> <out_base>
 
@@ -19,14 +19,20 @@ Traps it handles (render-settings.md):
 - A multilayer image reports size 0 until its pixels load: read the size with OpenImageIO.
 """
 
-# Compatibility imports; each implementation has one owner (GOV_04).
-from renderer.finals.final_settings import setup_unlimited  # noqa: F401
-from renderer.finals.final_session import _STATE, _save, _on_complete, _on_cancel, remove_handlers, start_in_ui, stop_in_ui  # noqa: F401
-from renderer.finals.final_images import denoise_from_passes, png_from_exr  # noqa: F401
 import os
 import sys
 
 import bpy
+
+# Run as `blender --python finals.py -- ...`, the package root (scripts/blender) is not on the path yet.
+_PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _PACKAGE_ROOT not in sys.path:
+    sys.path.insert(0, _PACKAGE_ROOT)
+
+# Compatibility imports; each implementation has one owner (GOV_04).
+from renderer.finals.final_settings import setup_unlimited  # noqa: E402,F401
+from renderer.finals.final_session import _STATE, _save, _on_complete, _on_cancel, remove_handlers, start_in_ui, stop_in_ui  # noqa: E402,F401
+from renderer.finals.final_images import denoise_from_passes, png_from_exr  # noqa: E402,F401
 
 
 if bpy.app.background and "--" in sys.argv and os.path.basename(__file__) in " ".join(sys.argv):

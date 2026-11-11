@@ -42,6 +42,7 @@ used here with glass settings.
 
 ### 4.1 Clear glazing base
 - Principled transmission 1, IOR 1.52, roughness 0. Thin Film for coated glazing (to try).
+- For directional see-through blur at nonzero roughness, use [anisotropy.md](../../effects/anisotropy.md).
 
 | Parameter | Value |
 |---|---|

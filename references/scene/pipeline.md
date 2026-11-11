@@ -315,7 +315,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 ## Stack
 | Piece | Where |
 |---|---|
-| Blender | `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` |
+| Blender | `C:\Program Files\Blender Foundation\Blender 5.3\blender.exe` |
 | MCP | server `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\blender-mcp.exe` (user scope, `claude mcp get blender`); add-on `mcp` autostarts on 127.0.0.1:9876 (needs Prefs → *Allow Online Access*) |
 | Helpers (run in Blender) | `scripts/blender/`: `archviz` (assets, import, UVs, camera and rendering), `interior` (photometric lighting), `scatter`, `terrain`, `atmosphere`, `glassware`, caustic solvers, `render_variant`, `finals`, `from_passes`. Materials use the canonical `materials` package; see [family map](../materials/index.md). |
 | Outdoor | `terrain`, `scatter`, `atmosphere`; `materials.ground.ground` and `materials.vegetation.vegetation` for shading. |
@@ -333,7 +333,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Video research | `scripts\research\yt_learn.py` |
 
 ## Install
-- Blender: `winget install --id BlenderFoundation.Blender --version 5.2.2 --exact` — winget
+- Blender: `winget install --id BlenderFoundation.Blender --version 5.3.0 --exact` — winget
   upgrades in place; use the portable zip for side-by-side versions.
 - download.blender.org can answer winget with **403**. Fetch the same MSI from an official
   mirror (`mirrors.ocf.berkeley.edu/blender/release/…`, `mirror.clarkson.edu/blender/…`) and
@@ -366,9 +366,14 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 - Skill code lives in `~/.claude/skills/bc-archviz`, project data in the current study, and MCP in `%LOCALAPPDATA%/BlenderMCP`.
 
 ## Tested stack baseline
-The pre-restructure skill was verified on Blender 5.2.2 LTS, Blender Lab MCP 1.0.3,
-import_3dm 0.0.18, BlendLuxCore 2.11.1, RTX 3060 Ti 8 GB (OptiX), Windows 10/11.
-These are the recorded baseline versions, not a requirement to reinstall or upgrade on receiving machines.
+Verified on Blender 5.3.0 with factory-startup headless checks: helper imports, self-contained
+graph controls, API probes, the photometric and MNEE controls, and BlendLuxCore 2.11.1 (graph check
+and a 256 px render). Verified in the open UI through MCP: a no-limit Cycles final started with
+`finals.start_in_ui`, stopped from the viewer, its passes saved, then denoised and graded from the
+passes. The helper regression dump builds all 41 cases. Not verified: the Esc cancel path, a LuxCore final in the open
+UI, import_3dm and the asset-dependent controls. The fog control's Mie
+reading came out about 3 % lower than the earlier baseline, cause unknown: re-measure before
+relying on a fog number.
 
 ## PIP_01 procedure
 

@@ -4,7 +4,7 @@ What a reviewer of a bc-archviz change checks. Read SKILL.md, RULES.md, referenc
 references/scene/blender-api-traps.md first. Report each finding with file:line and a concrete
 failure scenario:
 
-1. **Correctness bugs in the code:** wrong Blender 5.2 API use (see blender-api-traps.md), broken
+1. **Correctness bugs in the code:** wrong Blender 5.3 API use (see blender-api-traps.md), broken
    node links, unit errors (mm vs m, lux, lumens, EV), paths that only work on one machine.
 2. **Breaks of the skill's own rules:** a project, study, client or user-folder name in the skill;
    a scene-specific number presented as a rule (RULES GOV_01); a rule stated outside RULES.md

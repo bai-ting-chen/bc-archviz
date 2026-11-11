@@ -1,6 +1,7 @@
-# Blender 5.2 API traps
+# Blender API traps
 
 ## Nodes
+- Principled BSDF has 34 inputs; Glass BSDF has 10. Resolve sockets by name, not a saved index.
 - GN modifier inputs: `mod["Socket_N"]` fails; values live at `mod.properties.inputs.<id>.value`
   (empty `.name`; resolve via `node_group.interface.items_tree`) → `effects.edge_wear.set_input`. Group defaults
   are copied only at modifier creation. New code re-hits this with `mod[ident] = v`.
@@ -10,10 +11,10 @@
 - Capture Attribute: socket index 1 is Selection — link by name.
 - Object/Collection Info geometry keeps source materials → Set Material.
 - Bump invert is a property (`bump.invert`), not a socket.
-- `ShaderNodeSeparateRGB` / `CombineRGB` no longer exist in 5.2 (`Node type … undefined`): use
+- `ShaderNodeSeparateRGB` / `CombineRGB` no longer exist (`Node type … undefined`): use
   Separate/Combine Color — or Separate XYZ when the material must also convert to LuxCore.
 - `Material.use_nodes` / `World.use_nodes` log a DeprecationWarning (removal planned for 6.0);
-  still required in 5.2.
+  new materials and worlds already have nodes enabled.
 - Noise Texture values cluster at 0.5 (sd ≈ 0.1): threshold near 0.5.
 - No per-axis Extend: keep once-spanning UVs inside 0..1 with REPEAT.
 - Image Texture › Box picks its face from the object-space normal: feed it Object coordinates, not world
@@ -21,7 +22,7 @@
 
 - Noise Texture `W` input exists only with `noise_dimensions = "4D"` (KeyError otherwise) - set
   the dimensions first.
-- Random Value (GN) has one output named "Value" in 5.2 (`outputs[1]` is out of range).
+- Random Value (GN) has one output named "Value" (`outputs[1]` is out of range).
 - Volume Scatter `phase = "MIE"` adds the `Diameter` input (um); set the phase first.
 - Vector Rotate `rotation_type` for an arbitrary axis is `"AXIS_ANGLE"` (not `"AXIS"`).
 - Principled `subsurface_method = "BURLEY"` works on open sheets (water surfaces); Random Walk
@@ -35,8 +36,6 @@
   `obj.cycles.use_adaptive_subdivision` no longer exists and raises AttributeError.
   It works only while that modifier is **last** in the stack; anywhere else it is evaluated as plain
   subdivision at render levels before the modifiers after it.
-- After changing modifier inputs in background scripts: `obj.update_tag()` +
-  `view_layer.update()` before reading evaluated meshes.
 - `matrix_world` is stale right after a script sets `location`/`rotation_euler`: call
   `view_layer.update()` before reading it (`straighten_verticals` read a camera as pointing straight
   down: yaw −90°, lens shift −2·10¹⁶, black frame).
@@ -88,6 +87,9 @@
   an output socket via `tree.interface.new_socket("Image", in_out="OUTPUT",
   socket_type="NodeSocketColor")`, a `NodeGroupOutput` node, then `scene.compositing_node_group
   = tree` and `scene.render.use_compositing = True` (`scene.node_tree` is gone).
+- Compositor effects live in `scene.compositor_effects`. The `scene.compositing_node_group`
+  property used by `final_images.py` still assigns and renders a group, but logs a
+  DeprecationWarning (removal planned for 6.0).
 - `render.render("INVOKE_DEFAULT")` from a startup-script timer renders but may open no render
   window: switch the largest area to `IMAGE_EDITOR` showing `Render Result` to watch it.
 - Headless runs load user prefs unless `--factory-startup` (which disables add-ons, CPU device —
@@ -109,7 +111,7 @@
 - Edit skill/script files as UTF-8; several skill files use CRLF (use the Edit tool, or
   `newline=''` when scripting).
 
-## Output and UI scripts (5.2)
+## Output and UI scripts
 - **Multilayer EXR is a media type now:** `image_settings.media_type = "MULTI_LAYER_IMAGE"`
   first, then `file_format = "OPEN_EXR_MULTILAYER"` (setting the format alone raises "enum not
   found"); set `media_type = "IMAGE"` back before saving PNGs. `Render Result.save_render()`
@@ -118,7 +120,7 @@
   The file is **multi-part**: every pass is its own part, so a reader that opens only the first
   part sees Combined alone and concludes the AOVs are missing. Loop `seek_subimage(i, 0)` and take
   the part name from `spec.getattribute("name")`. OpenImageIO ships with Blender: no pip install.
-- **File Output (5.2):** inputs are `file_output_items.new(socket_type, name)` (FLOAT, RGBA …), the
+- **File Output:** inputs are `file_output_items.new(socket_type, name)` (FLOAT, RGBA …), the
   format is `node.format.media_type` then `file_format`; it writes only when the scene compositor
   (`scene.compositing_node_group`) runs.
 - **Blender's render cancel skips the compositor** (Esc, status-bar ✕): `render_cancel` fires,

@@ -6,7 +6,7 @@ for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'til
     if _d not in _sys.path:
         _sys.path.append(_d)
 # Rerun after a Blender upgrade: blender -b --factory-startup --python scripts/controls/lighting/ies_units.py
-# Control: how Cycles 5.2 scales an IES Texture on a light, and which way the profile points.
+# Control: how Cycles scales an IES Texture on a light, and which way the profile points.
 # Synthetic LM-63 files with a known candela value; illuminance on a white Lambert plane read
 # from the linear render (pixel = albedo * E / pi), as in light_units.py.
 # Prediction from intern/cycles/util/ies.cpp: candela * 4*pi/177.83 (D65 efficacy), times the

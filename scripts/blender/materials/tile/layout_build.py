@@ -44,7 +44,7 @@ def layout_group(name="TileLayout"):
     socket("Jitter Rotation", "INPUT", default=0, minimum=0).subtype = "ANGLE"
     offset_socket = socket("Row Offset", "INPUT", default=0)
     offset_socket.description = "Any real value wraps; usual range 0 to 1"
-    # Bundled 5.2 RNA documents no soft bounds on interface float sockets.
+    # RNA documents no soft bounds on interface float sockets.
     if hasattr(offset_socket, "soft_min") and hasattr(offset_socket, "soft_max"):
         offset_socket.soft_min, offset_socket.soft_max = 0, 1
     socket("Rotation", "INPUT", default=0).subtype = "ANGLE"

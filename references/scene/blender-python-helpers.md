@@ -27,6 +27,10 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `box_uv(obj, size=1.0, name='BoxUV')` — Real-world box UVs in world space: 1 UV unit = `size` metres. Each face is projected along its dominant world axis, so tangent-space normal maps and UV-based displacement behave (unlike shader box projection, which has no tangents).
 - `height_span_uv(obj, u_size=4.0, v_repeat=1.0, name='SpanUV')` — Second UV set for once-per-object maps: u tiles every `u_size` metres along the face, v runs 0..v_repeat from the object's bottom to its top.
 
+## `effects.anisotropy` — Directional microfacet roughness shared by reflective and transmissive materials.
+
+- `anisotropy(bsdf, amount=0.0, rotation=0.0, tangent=(1.0, 0.0, 0.0))` — Set directional roughness; rotation is in turns, tangent a world vector or UV-map name.
+
 ## `effects.caustics.caustic_graph` — Caustic graph; implementation for gn_caustics.
 
 - `caustic_sheet_group(name='Wavefront Caustics')` — GN group: refract water vertices, raycast to receivers and sun, store E = E_sun T A_perp / A_landed.
@@ -58,7 +62,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `chip_field(b, gi, rp, dd, seg_scale, bite_scale, soft, prof_end)` — Chips along the arris: segments of the edge chipped (share -> threshold; Noise clusters near 0.5, sd ~0.1), bite noise varies the reach. Returns (chip 0..1, depth profile).
 - `rejoin(b, moved, sep, go, x0, weld_dist)` — Rejoin the displaced band with the untouched interior and weld the seam.
 - `edge_wear_group(name='Edge Wear + Chips', band=0.08, level=3, chip_reach=0.045, chip_depth=0.018, chipped_share=0.55, sharp_deg=30.0, chips=True, bite_scale=22.0, segment_scale=2.2, seed=(0.0, 0.0, 0.0))` — Geometry Nodes modifier: edge field for every point, real chips in the arris band. Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern.
-- `set_input(mod, name, value)` — Blender 5.2: a Geometry Nodes modifier's own input values live at mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the identifier through the group interface. Group defaults are only copied in at creation.
+- `set_input(mod, name, value)` — A Geometry Nodes modifier's own input values live at mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the identifier through the group interface. Group defaults are only copied in at creation.
 - `add_edge_wear(obj, group, **inputs)` — Add the modifier; per-object overrides by input name, e.g. add_edge_wear(o, g, Band=0.1).
 
 ## `effects.edge_cracks` — Sparse short cracks running inward from clean outside edges.
@@ -186,7 +190,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.shared.dielectric` — Dielectric; canonical implementation behind pbr.
 
-- `dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None)` — The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled, transmission 1. `tint` multiplies every crossing, so keep it within a few % of white.
+- `dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None, *, anisotropy=None, rotation=0.0, tangent=(1.0, 0.0, 0.0))` — The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled, transmission 1. `tint` multiplies every crossing, so keep it within a few % of white.
 - `glass_material(name='Glass_Clear', tint=(0.92, 0.96, 0.97), roughness=0.0)` — Clear glass (IOR 1.52); the default tint is slightly green, for thick panes. An existing material is edited in place (nodes the user added stay); a new one is built by dielectric.
 
 ## `materials.shared.map_measure` — Map measure; canonical implementation behind pbr.

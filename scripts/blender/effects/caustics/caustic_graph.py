@@ -68,7 +68,7 @@ def caustic_sheet_group(name="Wavefront Caustics"):
     cap = b.n("GeometryNodeCaptureAttribute", (-350, 200), domain="FACE")
     cap.capture_items.new("FLOAT", "A_perp")
     L(oi.outputs["Geometry"], cap.inputs["Geometry"])
-    L(aperp, cap.inputs["A_perp"])   # by name: index 1 is the new Selection socket in 5.2
+    L(aperp, cap.inputs["A_perp"])   # by name: index 1 is the Selection socket
 
     # 2. where each wavefront vertex lands, and whether the sun reaches it at all
     rc = b.n("GeometryNodeRaycast", (-600, -500))

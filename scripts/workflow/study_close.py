@@ -59,7 +59,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('study', type=Path)
     parser.add_argument('--apply', action='store_true')
-    parser.add_argument('--blender', default=str(Path(os.environ['PROGRAMFILES']) / 'Blender Foundation/Blender 5.2/blender.exe'))
+    parser.add_argument('--blender', default=str(Path(os.environ['PROGRAMFILES']) / 'Blender Foundation/Blender 5.3/blender.exe'))
     args = parser.parse_args()
     study = Path(os.path.abspath(args.study))
     if is_link(study) or not study.is_dir():

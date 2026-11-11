@@ -179,4 +179,26 @@ From: LAPTOP-25
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 - `python %USERPROFILE%\.claude\skills\ai-work-modes\scripts\agent_lock.py check` runs.
 
+# MIGRATE: Blender 5.3.0 runtime
+From: LAPTOP-25
+
+## What changed
+- Blender 5.3.0 is now the skill's version. Setup commands and the default executable in
+  `scripts/workflow/study_close.py` target its install directory.
+- Another clone can fail to launch Blender from that path or lack the MCP add-on and renderer/import
+  extensions in the new version's user directory. Extensions need their own compatibility check.
+
+## Steps
+- Install Blender 5.3.0; follow `references/scene/pipeline.md` for the executable path and install command.
+- Reinstall the MCP add-on and required extensions there. Check LuxCore separately with
+  `references/renderer/luxcore.md` before choosing that engine.
+- Update local launcher/MCP executable paths to the installed executable and restart the MCP connection.
+
+## Check after pull
+- The executable reports Blender 5.3.0; MCP connects to that instance after the add-on is enabled.
+- `python -m compileall -q scripts` passes; `python scripts/workflow/structure_check.py` reports 0 problems.
+- `python scripts/workflow/helper_index.py` regenerates the helper index.
+- Run the self-contained `*_graph_check.py` controls and both cases of `anisotropy_lab.py`
+  with `-b --factory-startup`; for LuxCore use its installed extension and verify a small render.
+
 Remove each section after applying it; delete this file when none is left.

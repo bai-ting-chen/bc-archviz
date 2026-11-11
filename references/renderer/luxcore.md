@@ -2,7 +2,9 @@
 
 When to choose LuxCore: renderer-choice.md.
 
-## Install (BlendLuxCore 2.11, official support for Blender 4.5 LTS and 5.2 LTS)
+## Install (BlendLuxCore 2.11)
+- BlendLuxCore does not list Blender 5.3 as supported; 2.11.1 loads and renders on 5.3.0. After
+  updating either, rerun `scripts/controls/material/luxcore_graph_check.py` and a small render.
 - `gh release download <tag> -R LuxCoreRender/BlendLuxCore -p "BlendLuxCore-*.zip"` into an
   empty folder; compare the asset's sha256 (`gh release view --json assets`).
 - `blender -b -c extension install-file -r user_default --enable <zip>`. On first enable it

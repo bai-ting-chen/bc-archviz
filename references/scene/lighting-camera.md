@@ -57,7 +57,7 @@ One constant everywhere: **683 lm per Blender W** (lights, HDRI lux, camera expo
   controls).
 - **Target illuminance** (these are the world, so they carry everywhere): full sun 80-100 klux,
   overcast daylight 10-20 klux, a bright north-lit studio ~2 klux, a tabletop studio ~500 lux.
-- Sky Texture `MULTIPLE_SCATTERING` (5.2 name): calibrate with a white-plane render.
+- Sky Texture `MULTIPLE_SCATTERING`: calibrate with a white-plane render.
 
 ## Artificial light (formulas measured to 0.2 %, `scripts/controls/lighting/light_units.py`)
 When the fixture is specified, use its IES file (*IES profiles* below) — it carries the beam and
@@ -194,7 +194,7 @@ EV100 by the shutter.
 
 ## Fog and mist (`atmosphere.fog_volume`, control `scripts/controls/lighting/fog_koschmieder.py`)
 - Fog/mist droplets 5-20 um: Mie scattering, strongly forward, no absorption (white). Volume
-  Scatter, phase **Mie** (native in 5.2, Cycles) with the droplet diameter.
+  Scatter, phase **Mie** (Cycles) with the droplet diameter.
 - Density = extinction coefficient sigma = 3.912 / V (Koschmieder, V = visibility, 2 %
   contrast). Control: absorption-only transmission through 29 m = exp(-sigma d) to 1.000.
   Dense fog V ~150 m: an object at 27 m keeps ~half its contrast, 80 m almost nothing.

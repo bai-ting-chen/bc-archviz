@@ -6,7 +6,7 @@ for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'til
     if _d not in _sys.path:
         _sys.path.append(_d)
 # Rerun after a Blender upgrade: blender -b --factory-startup --python scripts/controls/lighting/light_units.py
-# Control: how Cycles 5.2 scales light power. Irradiance on a white Lambert plane read from the
+# Control: how Cycles scales light power. Irradiance on a white Lambert plane read from the
 # linear render (pixel = albedo * E / pi). World must be truly black: a new world's 0.05 grey
 # background adds pi*0.05 = 0.157 W/m2 (first seen as a mysterious +8 %).
 import math

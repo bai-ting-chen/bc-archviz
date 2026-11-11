@@ -5,7 +5,7 @@
     atmosphere.volume_render_settings()
 
 Radiation fog and mist are water droplets of ~5-20 um: Mie scattering, strongly forward-peaked,
-no absorption (white). Blender 5.2's Volume Scatter has a native Mie phase function with a droplet
+no absorption (white). Volume Scatter has a native Mie phase function with a droplet
 diameter input (Cycles). Density = extinction coefficient from the visibility (Koschmieder):
 sigma = 3.912 / V (V = meteorological visibility, contrast threshold 2 %). Fog is thickest low
 down and in hollows and thins to clear air at its top; patchy, never a uniform wall (RULES MAT_05).

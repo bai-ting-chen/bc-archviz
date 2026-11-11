@@ -2,7 +2,7 @@
 stone, stone tiles, steel, pool water with depth tint, steam.
 
 Photometry follows archviz.LM_PER_W (683 lm per Blender W), the same constant the physical camera
-uses, so light power and exposure stay consistent. Measured in Cycles 5.2 (scripts/controls/lighting/light_units.py):
+uses, so light power and exposure stay consistent. Measured in Cycles (scripts/controls/lighting/light_units.py):
   * point / spot: power is for the FULL sphere; the spot cone only masks it
     -> a fixture putting F lm into a cone of full angle a needs P = F/683 * 4pi / (2pi(1 - cos a/2)).
   * area: Lambert emitter, P = total emitted flux (E on axis = P / (pi d^2)); `spread` focuses it.

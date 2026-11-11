@@ -47,13 +47,14 @@ Specific layers are described in §4. No generic layers apply to this file.
 | Edge tint | brighter, warmer than the base |
 
 ### 4.2 Brushed anisotropy
-- Anisotropic, with the tangent from a directional UV along the part's length.
+- Directional roughness method: [anisotropy.md](../../effects/anisotropy.md); use a directional UV along the part's length.
 - Brush streaks in roughness: noise stretched ~400:1.
 
 | Parameter | Value |
 |---|---|
 | Anisotropy | ~0.75 |
 | Tangent | directional UV along the part's length |
+| Rotation | 0.25 turn, so highlights stretch across the brushing |
 | Brush streak stretch | ~400:1 |
 
 ### 4.3 Edge bevel

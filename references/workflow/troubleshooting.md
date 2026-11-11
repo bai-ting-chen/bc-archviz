@@ -65,8 +65,8 @@ Rhino; that is the user's decision. See [pipeline.md](../scene/pipeline.md) › 
 
 ### `bpy_struct[key] = val: id properties not supported` on a GN modifier
 Seen as: `bpy_struct[key] = val: id properties not supported`
-Cause: Geometry Nodes interface inputs need the Blender-version-specific setter.
-Fix: 5.2 inputs: `effects.edge_wear.set_input(mod, name, value)`. See [blender-api-traps.md](../scene/blender-api-traps.md).
+Cause: a Geometry Nodes modifier's inputs cannot be set as `mod["Socket_N"] = value`.
+Fix: set them with `effects.edge_wear.set_input(mod, name, value)`. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
 ### LuxCore crashes at export
 Seen as: `EXCEPTION_ACCESS_VIOLATION` in `pyluxcore.pyd`, no Python error
@@ -174,7 +174,7 @@ Cause: behind a transparent layer the AOV holds only part of the surface; dividi
 Fix: rescale only dry opaque pixels with plausible multipliers. See [validation.md](../review/validation.md).
 
 ### Multilayer EXR seems to hold only Combined
-Cause: Blender 5.2 writes multi-part EXRs; the reader opened only the first part.
+Cause: Blender writes multi-part EXRs; the reader opened only the first part.
 Fix: read every part (`seek_subimage`) with the bundled OpenImageIO. See [blender-api-traps.md](../scene/blender-api-traps.md).
 
 ## LuxCore

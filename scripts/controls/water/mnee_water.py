@@ -1,7 +1,7 @@
 """Control: does light from a lamp above reach a submerged receiver (pool floor) through flat water?
 
 The camera views the floor obliquely (no specular image of the lamp in frame); a "no water" case gives
-the expected irradiance. Result on Blender 5.2.2: box 0, one flat quad 0, diced 40x40 plane lit.
+the expected irradiance. Control result: box 0, one flat quad 0, diced 40x40 plane lit.
 Rerun after a Blender upgrade: blender -b --factory-startup --python scripts/controls/water/mnee_water.py
 """
 import os as _os

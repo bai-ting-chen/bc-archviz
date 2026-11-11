@@ -1,4 +1,4 @@
-# Render settings (Cycles 5.2)
+# Render settings (Cycles)
 
 `archviz.render_setup(width, height, samples, look, exposure=0.0)`: GPU, adaptive threshold,
 OptiX denoise, AgX, bounces 12. It **sets view exposure** - call it before `physical_camera`.
@@ -46,8 +46,8 @@ caustics off, Fast GI, `volume_biased`, shadow-transparent glass. Unbiased: Russ
 (`min_light_bounces`), adaptive sampling, blue-noise pattern, denoising (post).
 
 ## Memory
-VRAM first (RULES SAF_02). Tools: `texture_limit_render`, `texture_resolution_render` (5.2);
-5.2 Texture Cache (`render.use_texture_cache`; auto-generate writes `.tx` beside each image — set
+VRAM first (RULES SAF_02). Tools: `texture_limit_render`, `texture_resolution_render`;
+Texture Cache (`render.use_texture_cache`; auto-generate writes `.tx` beside each image — set
 Preferences `texture_cache_directory` first to keep `library/` clean); a large `tile_size`
 (small tiles are slow on GPU); instances (Alt+D); `use_persistent_data` for re-render loops.
 

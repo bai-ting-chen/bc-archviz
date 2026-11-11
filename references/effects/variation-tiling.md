@@ -2,8 +2,8 @@
 
 ## 1. Overview
 Stochastic tiling: one image map is read (looked up) two or three times at random offsets, and a slow noise
-chooses which copy shows where, so its repeats no longer line up on a grid (RULES MAT_06). Cycles has no node for it (5.2
-manual); it is built from nodes.
+chooses which copy shows where, so its repeats no longer line up on a grid (RULES MAT_06). Cycles has no node for it;
+it is built from nodes.
 
 **Use when:** one image map covers a continuous surface and its repeat shows.
 

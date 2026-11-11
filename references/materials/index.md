@@ -46,6 +46,7 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 
 | Effects (shared) | Canonical helper |
 |---|---|
+| [Anisotropy](../effects/anisotropy.md) | `effects.anisotropy` |
 | [Edge Wear](../effects/edge-wear.md) | `effects.edge_wear` |
 | [Variation: Tiling](../effects/variation-tiling.md) | `effects.variation_tiling` |
 | [Variation: Per Unit, Shading](../effects/variation-per-unit-shading.md) | `effects.variation_per_unit_shading` |
@@ -71,8 +72,8 @@ Water comes in three build methods: choose the method by the shot, then the file
   simulation workflow as a separate job rather than pushing a field map toward it.
 - Simulation tools: Ocean (open-water wind waves, cannot react to objects); Dynamic Paint *Waves*
   (ripples from objects touching water, stack after Ocean); Mantaflow (built-in FLIP with spray,
-  foam and bubble particles); FLIP Fluids add-on (check the edition); no shipped GN fluid solver in
-  5.2. Hybrid plunge zones: [water-splash.md](water/water-splash.md) › Simulated plunge zone.
+  foam and bubble particles); FLIP Fluids add-on (check the edition); no shipped GN fluid solver.
+  Hybrid plunge zones: [water-splash.md](water/water-splash.md) › Simulated plunge zone.
 
 | Water (kind) | File |
 |---|---|

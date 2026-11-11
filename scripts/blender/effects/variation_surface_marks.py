@@ -3,7 +3,7 @@ import math
 from statistics import NormalDist
 from materials.shared.nodes import layer_frame, layer_switch
 
-# One octave measured on variation_lab's 64 m XY plane at 512 x 512 pixels, Blender 5.2.
+# One octave measured on variation_lab's 64 m XY plane at 512 x 512 pixels.
 SD1 = 0.1174030453
 NOISE_MEAN = 0.5
 

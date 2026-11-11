@@ -1,7 +1,7 @@
 ---
 name: bc-archviz
 description: >-
-  Photoreal architectural visualization in Blender 5.2 with Cycles and LuxCore,
+  Photoreal architectural visualization in Blender 5.3 with Cycles and LuxCore,
   with Rhino as the geometry source. Use when the user asks to create or revise an
   architectural render or animation, or wants to maintain this skill (pull, edit, push).
 ---
@@ -47,7 +47,7 @@ Read the files for the stage you are in.
 ### 3. Camera, light and materials (→ GAT_03)
 - [Lighting and camera](references/scene/lighting-camera.md): HDRI, lumens/IES, camera, reference solve, fog
 - [Materials](references/materials/index.md): general rules, material families (water in `materials/water/`) and
-  shared effects (`references/effects/`: edge wear, variation, wet surfaces, caustics); the index routes all three
+  shared effects (`references/effects/`: edge wear, variation, wet surfaces, caustics, anisotropy); the index routes all three
 
 ### 4. Look rounds and controls (→ GAT_04)
 - [Renderer choice](references/renderer/renderer-choice.md): Cycles, or LuxCore for caustics
