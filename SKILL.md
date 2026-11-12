@@ -43,6 +43,7 @@ Read the files for the stage you are in.
 ### 2. Rhino geometry and import (→ GAT_02)
 - [Pipeline](references/scene/pipeline.md): setup, MCP, runtime checks, Rhino import, assets
 - [Max import](references/scene/max-import.md): 3ds Max assets
+- [Terrain](references/scene/terrain.md): naturally sloped ground around a building pad
 
 ### 3. Camera, light and materials (→ GAT_03)
 - [Lighting and camera](references/scene/lighting-camera.md): HDRI, lumens/IES, camera, reference solve, fog

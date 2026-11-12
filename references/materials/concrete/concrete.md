@@ -5,7 +5,7 @@ Plain, jointless concrete in two looks: **monolithic** cast-in-place concrete (b
 cast-in-place frames) and **burnished or polished white** concrete (microcement, soffits). The base
 recipe is `concrete_study()`: a mapped base with tone matched to the reference, roughness mixed between
 map and a constant, and a normal chain; world-space masks place grunge, damp and grime. Concrete with
-board marks that resolve in frame is covered by board-formed-concrete.md.
+board marks that resolve in frame is covered by board-formed-concrete.md. Exposed-aggregate precast is in §4.12.
 
 **Use when:** a plain or jointless concrete surface, monolithic or burnished. Board marks that
 resolve in frame: board-formed-concrete.md.
@@ -29,6 +29,7 @@ used here with concrete settings.
  │ 9  Trowel marks          → tone, roughness                                │
  │ 10 Arris dirt            → colour (edge mask)                             │
  │ 11 Bounce correction     → albedo                                         │
+ │ 12 Aggregate precast     → mapped surface, soffit slot                     │
  └───────────────────────────────────────────────────────────────────────────┘
    order of evaluation                       node-editor output it drives
    zone masks (2) ─► grunge (3), damp (4), stain (5), concave (6) ─► colour multipliers
@@ -180,6 +181,15 @@ used here with concrete settings.
 | Fix | albedo corrected toward the reference |
 | Not used | relighting |
 
+### 4.12 Exposed-aggregate precast
+- For columns and slab edges, box-map the same aggregate map at real size on the fascia and soffit bands.
+- Assign downward faces to a second material slot using the settings below.
+
+| Parameter | Value |
+|---|---|
+| Soffit test | Normal Z < −0.5 |
+| Soffit material | smoother, darker concrete |
+
 ### Generic layers, concrete settings
 | Layer | Reference | Note for this material |
 |---|---|---|
@@ -199,6 +209,7 @@ used here with concrete settings.
 | Burnished variation missing in render | judged in the node preview; lighting swallows the tone | judge in a render (§4.8) |
 | Faint arris disappears in render | darkening just above visibility | set it with a control (§4.10) |
 | Drum or infill does not match the walls | relit instead of given its own albedo | own albedo from the measured ratio (§4.7) |
+| Soffits look like the fascia | one material slot | assign the soffit slot (§4.12) |
 | Neutral white turns cyan | bounce colour | correct the albedo toward the reference (§4.11) |
 | No stain on the wall | no leak field on the object, or `leak_ok` 0 | view it with `mask_view=attr: leak_ok`; edge-wear.md › Run-off (§4.5) |
 | Streaks look like a regular pattern | presence and length too even | vary `presence` and `max_len` in `add_runoff(leak=…)`; edge-wear.md › Run-off (§4.5) |

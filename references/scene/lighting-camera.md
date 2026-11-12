@@ -156,6 +156,7 @@ the manufacturer's file a render's illuminance is the fixture's, not a guess fro
   its light out onto the ceiling instead of into the water.
 
 ## Camera
+- For a hill, stand down the slope with the crest against the sky; keep the generated grid edge out of frame.
 - `physical_camera(cam, iso, f, shutter, focal)`: `EV100 = log2(N²/t) - log2(ISO/100)`,
   `exposure = log2(683/1.2) - EV100`; the same f-stop drives DOF.
 - **Typical EV100 by condition** — the most portable numbers in this file, because they describe

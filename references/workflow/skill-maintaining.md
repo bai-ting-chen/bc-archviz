@@ -31,7 +31,7 @@ instructions behind.
 
   | Pattern | Use when | Write it with | Files |
   |---|---|---|---|
-  | Sequential workflow | steps in a fixed order | numbered steps; what each step needs from the one before; a check after each step; how to undo a failed step | pipeline.md, max-import.md, study-close.md, gates.md, §4 of material and effect references |
+  | Sequential workflow | steps in a fixed order | numbered steps; what each step needs from the one before; a check after each step; how to undo a failed step | pipeline.md, max-import.md, terrain.md, study-close.md, gates.md, §4 of material and effect references |
   | Multi-MCP coordination | one job spans Rhino (Rook), Blender and host tools | one phase per tool; what is handed to the next phase (file, path, names); a check before the next phase; errors handled in one place | pipeline.md (Rhino → Blender) |
   | Iterative refinement | quality improves round by round | measurable criteria first; the check script; the loop (fix, re-render, re-measure); when to stop | validation.md, research-loop.md, the look rounds in pipeline.md |
   | Context-aware selection | same outcome, different method by case | a decision table with its criteria; the fallback; say which was chosen and why | renderer-choice.md, materials/index.md, texture-selection.md, caustics.md §1 |

@@ -4,7 +4,7 @@
 Two looks share this file. Leaf litter and foliage are small leaves scattered over surfaces; grass
 and meadow cover terrain as a sward of blade clumps. Both are instanced: a scatter places copies of
 a leaf or clump and masks where they land. The bare soil that shows through the grass comes from the
-ground shader, not from this file (ground.md, plain-text neighbour).
+ground shader, `materials.ground.ground`.
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and
@@ -15,7 +15,7 @@ used here with vegetation settings.
  ┌─────────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                          GENERIC (own reference)              │
  │ 1 Leaf-litter scatter → instances      Tone → variation-per-unit-shading.md │
- │ 2 Meadow scatter      → instances      Bare soil → ground.md (plain text)   │
+ │ 2 Meadow scatter      → instances      Bare soil → materials.ground.ground  │
  │ 3 Blade material      → grass shading                                       │
  └─────────────────────────────────────────────────────────────────────────────┘
    node-editor flow, what each step drives
@@ -100,7 +100,7 @@ used here with vegetation settings.
 | Layer | Reference | Vegetation note |
 |---|---|---|
 | Per-instance tone | [variation-per-unit-shading.md](../../effects/variation-per-unit-shading.md) | `random_tone_material` on the leaf-litter instances (§4.1) |
-| Bare soil under the grass | ground.md (plain text) | the same 4D noise as the meadow mask (§4.2) |
+| Bare soil under the grass | `materials.ground.ground` | the same 4D noise as the meadow mask (§4.2) |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

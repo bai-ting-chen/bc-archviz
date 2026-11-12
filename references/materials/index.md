@@ -37,7 +37,7 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 | [Glass Relief](glass/glass-relief.md) (patterned, cast, pressed) | no builder; modelled geometry |
 | [Glass Block](glass/glass-block.md) | no builder; modelled geometry |
 | [Fabric](fabric/fabric.md) | `materials.fabric.fabric` |
-| [Ground](ground/ground.md) | `materials.ground.ground` |
+| Ground shader | `materials.ground.ground` |
 | [Vegetation](vegetation/vegetation.md) | `materials.vegetation.vegetation` |
 | Water: [Surface](water/water-surface.md) | `materials.water.water` |
 | Water: [Free-Falling Film](water/water-free-falling-film.md) | `materials.water.build.falling_film` (`materials.water.curtain`, `materials.water.film`, `materials.water.fragments`) |

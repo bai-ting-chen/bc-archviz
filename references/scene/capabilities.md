@@ -40,7 +40,7 @@ is the durable part; its dial positions belong to whichever study last used it.
 | 3ds Max assets (vegetation) | io_scene_max + `max_import` repairs (bands, IDs, slots, UV channel), materials rebuilt by hand from maps; checked on 4 models 25–320 MB | solid |
 | Foliage cards | Principled + Translucent (transmission map) cut by opacity; roughness from the glossiness map | solid, control-proved |
 | Wet surround, splashes, dried marks | analytic edge distance mask; dry**1.4 + coat film IOR 1.33; patchy by noise | test |
-| Hill / landform around a building pad | GN smoothstep fall on noise-warped pad distance (`terrain`) | solid |
+| Hill / landform around a building pad | GN smoothstep fall on noise-warped pad distance ([terrain](terrain.md)) | solid |
 | Meadow on terrain (multi-species, upright) | native Scatter on Surface + patch / bare-soil / pad / frustum masks (`scatter.meadow_layer_group`) | solid |
 | Modelled grass blades | Principled + Translucent, per-instance tone + dry patches (`materials.vegetation.vegetation.blade_material`) | solid |
 | Wet lawn / wet ground | dry^gamma + water coat (`materials.vegetation.vegetation.WET`, `materials.ground.ground.ground_material(wet_gamma)`) | solid, control-proved |
