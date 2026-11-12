@@ -4,8 +4,7 @@
 A flat glazed pane in two layers: the clear glass base, and the surface distortion real glazing has
 (roller waves and pillowing). Neighbours: patterned, cast or pressed relief is in
 [glass-relief.md](glass-relief.md); hollow glass block units and walls are in
-[glass-block.md](glass-block.md); water on or behind glass is in
-[water-attached-film.md](../water/water-attached-film.md).
+[glass-block.md](glass-block.md).
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and
@@ -20,7 +19,6 @@ used here with glass settings.
  │ GENERIC (own reference)                                                   │
  │   Directional blur               → anisotropy.md                          │
  │   Relief (patterned, cast)       → glass-relief.md                        │
- │   Water on the glass             → water-attached-film.md                 │
  └───────────────────────────────────────────────────────────────────────────┘
    base (§4.1) ─► Principled: Base Color, IOR, Transmission, Roughness
    roller wave + dome (§4.2) ─► Bump ─► Principled Normal
@@ -80,7 +78,6 @@ in the study notes (RULES GOV_01).
 |---|---|---|
 | Directional see-through blur | [anisotropy.md](../../effects/anisotropy.md) | reeded or brushed glass too fine to model; needs roughness above 0 |
 | Relief | [glass-relief.md](glass-relief.md) | patterned, cast and pressed glass: geometry, not bump |
-| Water on the glass | [water-attached-film.md](../water/water-attached-film.md) | the wetted face takes the IOR ratio 1.14 |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |
