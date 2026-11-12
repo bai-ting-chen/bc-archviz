@@ -1,10 +1,7 @@
 # Water foam, bubbles and whitewater
 
 ## 1. Overview
-Aerated water on and in a pool: white foam flecks, clear floating bubbles, and dense milky
-whitewater in plunge zones. Shared by every water material that lands in a pool
-(water-free-falling-film.md, water-attached-film.md).
-Where the impacts are: water-splash.md.
+Foam, bubbles and whitewater in a pool. Where the impacts are: water-splash.md.
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. The impacts that seed the flecks and bubbles are written once,

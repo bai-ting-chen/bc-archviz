@@ -1,10 +1,8 @@
 # Vegetation
 
 ## 1. Overview
-Two looks share this file. Leaf litter and foliage are small leaves scattered over surfaces; grass
-and meadow cover terrain as a sward of blade clumps. Both are instanced: a scatter places copies of
-a leaf or clump and masks where they land. The bare soil that shows through the grass comes from the
-ground shader, `materials.ground.ground`.
+Leaf litter, foliage, grass and meadow. The bare soil between them is the ground shader,
+`materials.ground.ground`.
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and

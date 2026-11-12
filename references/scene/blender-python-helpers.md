@@ -102,6 +102,72 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0, amount=1.0)` — On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask.
 
+## `effects.surface_wear` — Independent surface-wear layers sharing procedural and grayscale-image factor inputs.
+
+- `WearLayer` — One layer's switch, metre sizes and 0–1 strength; binary chips use strength for coverage.
+- `wear_factor(g, kind, settings, vector=None, components=None)` — Return a switched wear factor; binary hybrid chips vary coverage instead of transparency.
+- `apply_surface_wear(g, shader, layers, under_shader=None, vector=None)` — Compose requested layers on a Principled shader; return the resulting Surface socket.
+- `grunge(g, scale_m=0.5, target_sd=0.05, detail=6.0, rough=0.6, amount=1.0)` — Return the legacy calibrated grunge multiplier, preserving existing callers exactly.
+
+## `effects.surface_wear_atlas` — Pack chosen decal colour and opacity maps without changing their physical aspect ratios.
+
+- `StampAtlas` — RGBA atlas with physical sizes, metre cell spacing and 0–1 occupied-cell probability.
+- `build_stamp_atlas(project, asset_ids, path, tile_px=768, **scatter)` — Pack 4K colour/opacity into a derived tone, deposit-data or chip-opacity atlas.
+
+## `effects.surface_wear_chips` — Resolve bare-substrate signals verified against each flaked-paint scan's BaseColor.
+
+- `flaked_paint_masks(asset_ids=tuple(WORN_SCAN_LEVELS), project=None)` — Resolve per-scan Roughness polarity: white is exposed substrate, black is intact paint.
+
+## `effects.surface_wear_defaults` — Per-layer source choices and local default assets; missing-id logs are deduplicated per process.
+
+- `report_missing(asset_id, search)` — Log a named default's procedural fallback and Fab search once per missing id.
+- `default_field(g, kind, settings, vector, frame)` — Load the layer's default mask, blend dried-mark zones, or use the procedural fallback.
+
+## `effects.surface_wear_deposits` — Irregular deposit bodies and uneven rims without radial or circular primitives.
+
+- `deposit_profile(g, body, rim, tone, frame=None)` — Keep a faint deposit body inside a stronger dark rim, with scan/noise tone variation.
+- `deposit_distance(g, vector, scale_m, frame=None)` — Return a continuous warped blob distance and tone, before body/rim plateaus are applied.
+- `irregular_deposits(g, vector, scale_m, frame=None)` — Warp a multiscale noise domain into varied, sometimes merged blobs with broken rims.
+
+## `effects.surface_wear_extent` — Location and patch extents shared by every surface-wear source.
+
+- `WearExtent` — World-metre wear location; edge_distance is a clean-mesh distance socket when available.
+- `face_z(g, frame=None)` — Return world shading-normal Z, independent of the projected mask coordinates.
+- `patch_extent(g, vector, scale_m, frame=None, black=0.46, white=0.66)` — Return a slow patch field with real zero regions, rather than uniform modulation.
+- `location_extent(g, kind, settings, frame=None)` — Gate feet, floor patches and supplied soffit-edge distances; dried marks exclude undersides.
+
+## `effects.surface_wear_fields` — Procedural surface-wear factors in surface coordinates measured in metres.
+
+- `procedural_field(g, kind, vector, scale_m, scratch_width_m, frame, region=False)` — Return a 0–1 wear profile, or the continuous pre-profile dried-mark driver for regions.
+
+## `effects.surface_wear_hybrid` — One hybrid definition: procedural region multiplied by a full-range stochastic scan interior.
+
+- `HybridSource` — Stochastic interiors, contrast/mean remap, normalized region edges and binary flake cutoff.
+- `hybrid_field(g, kind, layer, vector, extent, frame=None, amount=None)` — Return region, scan interior, drying-edge rim and their exact region-times-interior product.
+- `scratch_hybrid(g, layer, vector, frame=None)` — Keep the held scratch hybrid's existing 0.7–1.0 scan modulation unchanged.
+
+## `effects.surface_wear_masks` — Canonical grayscale image loader for surface-wear masks.
+
+- `mask_dimensions_m(size_m)` — Return width and height in metres from a square scalar or rectangular pair.
+- `MaskSource` — Grayscale data image, levels and real-world mapping (size_m in metres per tile).
+- `image_mask(g, mask, vector=None, frame=None, row=0, mapped_vector=None)` — Load a Non-Color mask in surface metres or named real-world box/directional UVs.
+- `mask_field(g, mask, vector=None, frame=None, crossed=False, row=0)` — Return one image field, or its union with a rotated/offset copy for crossing scratches.
+- `asset_mask(asset_id, map_name='Mask', project=None)` — Resolve a local 4K scan mask at its metadata scan size; return None when its map is missing.
+- `asset_maps(asset_id, map_names, project=None)` — Resolve named local 4K maps and their metadata once; return None for a missing map.
+- `scan_size_m(metadata)` — Read square or rectangular scan dimensions, converting m/cm/mm metadata to metres.
+- `surface_coordinates(g, frame=None)` — Project world metres onto the dominant face plane for walls, tops and soffits.
+
+## `effects.surface_wear_stamps` — Neighbour-aware, nonperiodic decal placement in metre-space surface coordinates.
+
+- `StampSource` — Non-default decal pools and chip threshold retained independently from hybrid regions.
+- `stamps_field(g, kind, layer, vector, extent, frame=None)` — Select explicit decal deposits or scan-outline chips, never called by a hybrid source.
+- `scatter_stamps(g, vector, atlas, seed=17, vertical=False, extent=None, frame=None)` — Sum 3x3 neighbour stamps with seeded choice, rotation, scale, offsets and cell density.
+- `deposit_stamps(g, vector, settings, extent, frame=None)` — Select down-aligned wall decals or freely rotated floor stains; undersides are gated later.
+
+## `effects.surface_wear_tiling` — Shared stochastic scan sampling through the canonical loader and offset generator.
+
+- `stochastic_mask(g, masks, vector, settings, frame=None)` — Blend three rotated, offset, scale-jittered lookups with independent slow world noise.
+
 ## `effects.variation_per_unit_shading` — Unit keys and independently hashed material variations.
 
 - `unit_key(g, source='object', attribute='unit_key', vector=None, size=1.0)` — Read a unit key from its source. instancer needs set_unit_keys on the parents; geometry reads a face attribute stored by the build; cell hashes floor(vector / size), size per axis or one number.
@@ -109,14 +175,15 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `unit_values(g, key, tint=0.035, roughness=0.05, bump=0.3, offset=1.0, tilt_deg=0.0, amount=1.0)` — Independently hash tint, roughness, bump, lookup-coordinate offsets and optional normal tilt.
 - `random_tone_material(name, c0, c1, roughness=0.6, translucent=0.0)` — Base colour between c0 and c1 per instance (Object Info > Random); optional translucency for leaves.
 
-## `effects.variation_surface_marks` — World-space macro tone, calibrated grunge and patchy mark extents.
+## `effects.variation_surface_marks` — World-space macro tone and patchy mark extents; grunge remains import-compatible.
 
 - `macro_tone(g, scale_m=4.0, albedo=0.075, roughness=0.05, amount=1.0)` — Return world-space albedo multiplier and roughness addition with one switch.
-- `grunge(g, scale_m=0.5, target_sd=0.05, detail=6.0, rough=0.6, amount=1.0)` — Return grunge normalised by measured noise moments for detail and roughness.
 - `patchy_extent(g, coverage=0.5, scale_m=3.0, softness=0.1, amount=1.0)` — Return a soft mark mask with a calibrated zero-area fraction of one minus coverage.
 
 ## `effects.variation_tiling` — Shared offset lookups for image maps, with world-space blending.
 
+- `lookup_offsets(count, seed=0)` — Return seeded XYZ lookup offsets shared by offset-only and rotated map sampling.
+- `randomized_vectors(g, vector, count=3, seed=0, scale_jitter=0.12, frame=None)` — Rotate, slightly rescale and offset independent metre-space image lookups.
 - `anti_tile(g, texs, lookups=3, scale_m=1.5, seed=0, amount=1.0)` — Relink image consumers to shared XYZ-offset lookups; amount zero is the original.
 
 ## `effects.wear_nodes` — Thin shorthands for the wear shaders and Geometry Nodes: a frame for one wear layer, and the attribute, noise, map range and math nodes with the argument order the wear builders use.

@@ -1,8 +1,7 @@
 # Pipeline capabilities
 
-What this pipeline can do and which technique does it. Every row was proved with a control
-render (RULES VAL_02), not assumed. This is a capability index, not a settings list — the technique
-is the durable part; its dial positions belong to whichever study last used it.
+What the pipeline can do and which technique does it; each row was proved with a control render
+(RULES VAL_02).
 
 | Effect | Technique | State |
 |---|---|---|

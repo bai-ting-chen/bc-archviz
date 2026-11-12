@@ -1,9 +1,7 @@
 # Variation: tiling
 
 ## 1. Overview
-Stochastic tiling: one image map is read (looked up) two or three times at random offsets, and a slow noise
-chooses which copy shows where, so its repeats no longer line up on a grid (RULES MAT_06). Cycles has no node for it;
-it is built from nodes.
+Hiding the repeat of an image map on a continuous surface.
 
 **Use when:** one image map covers a continuous surface and its repeat shows.
 

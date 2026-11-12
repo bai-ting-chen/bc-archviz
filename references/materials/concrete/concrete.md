@@ -1,14 +1,10 @@
 # Concrete
 
 ## 1. Overview
-Plain, jointless concrete in two looks: **monolithic** cast-in-place concrete (basements, car parks,
-cast-in-place frames) and **burnished or polished white** concrete (microcement, soffits). The base
-recipe is `concrete_study()`: a mapped base with tone matched to the reference, roughness mixed between
-map and a constant, and a normal chain; world-space masks place grunge, damp and grime. Concrete with
-board marks that resolve in frame is covered by board-formed-concrete.md. Exposed-aggregate precast is in §4.12.
+Concrete without board marks: monolithic cast-in-place (§4.2–§4.7), burnished or polished (§4.8–§4.11)
+and exposed-aggregate precast (§4.12).
 
-**Use when:** a plain or jointless concrete surface, monolithic or burnished. Board marks that
-resolve in frame: board-formed-concrete.md.
+**Use when:** board marks are not visible. Board marks that resolve in frame: board-formed-concrete.md.
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and
@@ -193,6 +189,7 @@ used here with concrete settings.
 ### Generic layers, concrete settings
 | Layer | Reference | Note for this material |
 |---|---|---|
+| Surface wear | [surface-wear.md](../../effects/surface-wear.md) | grunge, scratches, dried marks and worn-through coatings |
 | Concave corners | [edge-wear.md](../../effects/edge-wear.md) › Concave corners | method behind §4.6 |
 | Runoff streaks, cracks | [edge-wear.md](../../effects/edge-wear.md) › §4.9–4.11 | for the weathered scanned base (§4.1) |
 

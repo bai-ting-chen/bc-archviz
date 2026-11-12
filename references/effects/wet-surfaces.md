@@ -1,10 +1,7 @@
 # Wet Surfaces
 
 ## 1. Overview
-A wet surface is darker, more saturated and glossier than the same surface dry: light reflects inside the
-water film and is absorbed again (Lekner & Dorf 1988; Jensen et al. 1999). Two layers build it: the wet look
-(what wet does to the material) and the wet extent (the mask that says where). The water body itself is in the
-water reference (water-surface.md).
+A surface wet with a thin film of water. The water body itself: water-surface.md.
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference.
@@ -37,6 +34,8 @@ Specific layers are described in §4. Generic layers are written once, in their 
 
 ## 4. Instructions and parameters, per layer
 ### 4.1 Wet look
+- Why: light reflects inside the water film and is absorbed again, so wet reads darker, more
+  saturated and glossier (Lekner & Dorf 1988; Jensen et al. 1999).
 - Colour: wet = dry ** gamma (Gamma node). Albedo falls non-linearly: a bright surface darkens less than a
   dark one, which a plain multiply cannot do.
 - A water film on top: Principled coat, IOR 1.33.
@@ -64,8 +63,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 - **Splash fades with distance.** Splash drops (Voronoi) thin out away from the water. Above a pool the splash
   band is low and fades past both ends of the fall; it never covers the whole wall.
 - **Gate by height** so canopies and far floors stay dry.
-- **Dried marks** are blobs darker at their rim (coffee ring), with faint tide rings beyond the wet band and a
-  scum band at the waterline on vertical faces. Drawn as lines they read as contours.
+- Dried marks and tide rings: [surface-wear.md](surface-wear.md) §4.3.
 - Keep the proxy a plain hidden mesh referenced by the wetness GN and replace its mesh data in place. Deleting
   the object empties every reference and the noise term draws blotches.
 
@@ -81,7 +79,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 | Layer | Reference | Note for this material |
 |---|---|---|
 | Water body (pool, clear water) | water-surface.md | the wet surfaces are here; the water itself is there |
-| Patchy extent of wet, stains, dried marks | RULES MAT_05 | slow noise that reaches zero; blob marks (§4.2) |
+| Patchy extent of wet | RULES MAT_05 | slow noise that reaches zero (§4.2) |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |
@@ -91,7 +89,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 | Wall behind falling water stays dry | mask from distance to the water; the sheet stands off the wall | proxy on the wall face over the whole footprint (§4.2) |
 | Constant-width band, or a straight wet/dry line | wet width fixed | slow noise drives the width; wander and run-off fingers at the ends (§4.2) |
 | Whole wall wet | splash not limited | low splash band, fading past the ends (§4.2) |
-| Dried marks read as contour lines | marks drawn as lines | blobs darker at their rim (§4.2) |
+| Dried marks read as contour lines | marks drawn as lines | surface-wear.md §4.3 |
 | Canopies or far floors wet | no height gate | gate by height (§4.2) |
 | Blotches in the wetness noise term | proxy object deleted, references emptied | replace the proxy's mesh data in place (§4.2) |
 

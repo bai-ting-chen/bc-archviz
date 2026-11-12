@@ -1,9 +1,8 @@
 # Variation: per unit, geometry
 
 ## 1. Overview
-Repeated units that really sit unevenly: each tilts and steps in or out a little, so courses catch light
-differently and step at the joints. Rhino or Blender, from how the units are modelled (step 1). Tone and
-roughness per unit: [variation-per-unit-shading.md](variation-per-unit-shading.md).
+Repeated units that really tilt and step in or out. Tone and roughness per unit:
+[variation-per-unit-shading.md](variation-per-unit-shading.md).
 
 **Use when:** the unevenness must show at the joints or in raking light, where a shading tilt reads flat.
 

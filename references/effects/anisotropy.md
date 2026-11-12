@@ -1,16 +1,12 @@
 # Anisotropy
 
 ## 1. Overview
-Anisotropy is directional roughness: parallel microscopic grooves spread light across the
-grooves more than along them. On metal it stretches reflected highlights; on glass it also
-stretches the blur of objects seen through the surface. It describes an aggregate microfacet
-response, not the lensing or silhouette of individually visible ribs. Visible relief belongs
-to the material's geometry (`references/materials/glass/glass-relief.md`).
+Directional roughness: highlights, and the blur seen through glass, stretch across fine parallel
+grooves.
 
-Both the Glass BSDF and Principled transmission support directional blur.
-
-**Use when:** brushed or ground metal; reeded, fluted or ribbed glass whose ribs are too small
-to model at the shot's distance; brushed or linearly ground glass; brushed acrylic (RULES MAT_03, MAT_04).
+**Use when:** brushed or ground metal; reeded, fluted or ribbed glass whose ribs are too small to model
+at the shot's distance; brushed or linearly ground glass; brushed acrylic (RULES MAT_03, MAT_04). Ribs
+large enough to see are geometry: `references/materials/glass/glass-relief.md`.
 **Not when:** clear float glass, or evenly frosted or sandblasted glass with no preferred direction.
 
 ## 2. Layers and node-editor diagram

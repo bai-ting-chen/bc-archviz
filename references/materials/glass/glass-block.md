@@ -1,8 +1,7 @@
 # Glass block
 
 ## 1. Overview
-Hollow pressed glass block: the unit, and a wall laid from it. The unit is geometry with real glass
-thickness and an air cavity, so it is modelled, not shaded. The relief on its inner faces is in
+Hollow glass blocks and walls laid from them. The relief on their inner faces is in
 [glass-relief.md](glass-relief.md); the plain glass is `glass.md` §4.1.
 
 ## 2. Layers and node-editor diagram

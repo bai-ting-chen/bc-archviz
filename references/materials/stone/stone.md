@@ -1,12 +1,10 @@
 # Stone
 
 ## 1. Overview
-Stone surfaces: long-strip pavers, polished speckled granite, large stone tiles, slab floors and
-honed limestone or marble. Each look is its own material, chosen by the stone's finish and how it is
-laid. The glazed, layout-driven tile system is a different case (tiles.md, plain-text neighbour).
+Natural stone: pavers, slabs, large-format stone tiles, polished granite, honed limestone and marble;
+one material per stone and finish.
 
-**Use when:** stone pavers, slabs, polished granite or large-format stone tiles. Glazed tile with a
-computed layout, cracks and relief: tiles.md (plain text).
+**Use when:** natural stone. Glazed tile with a set-out layout: tiles.md (plain text).
 
 ## 2. Layers and node-editor diagram
 This file has no stack. Each entry (§4.1 to §4.5) is one material with its own set of inputs, and

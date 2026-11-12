@@ -1,100 +1,67 @@
 # Metal
 
 ## 1. Overview
-Two metal looks. **Polished steel** is a metallic base with low roughness and smooth shading. **Brushed
-anodised metal around water** adds brush anisotropy, bevels, water marks on tops and verticals, dust in
-the joints and a little per-part tone, sized for the final view (RULES MAT_03). The water and grime
-marks are described in this file itself.
+Metal, polished or brushed. Both are one material; only roughness and anisotropy change (§4.2).
 
 ## 2. Layers and node-editor diagram
-Specific layers are described in §4. No generic layers apply to this file.
-
 ```
-                             METAL — LAYER DIAGRAM
- ┌───────────────────────────────────────────────────────────────────────────┐
- │ SPECIFIC (§4)                                                             │
- │ 1 Polished base          → metallic BSDF (F82), roughness                 │
- │ 2 Brushed streaks        → anisotropy, roughness                          │
- │ 3 Edge bevel             → geometry, hardened normals                     │
- │ 4 Water marks            → colour, roughness                              │
- │ 5 Joint dust and tone    → colour (AO), per-part tone                     │
- └───────────────────────────────────────────────────────────────────────────┘
-   tangent along the part's length (2) ─► anisotropy
-   brush noise (2) ─► roughness
-   bevel (3) ─► hardened normals ─► Principled Normal
-   base (1) × per-part tone (5) ─► Base Color (edge tint brighter, warmer)
-   water marks (4) + joint dust (5) ─► colour multipliers ─► Base Color
+ +-- METAL — LAYER DIAGRAM ------------------------------------------------+
+ | SPECIFIC                                                               |
+ | 4.1 Base clean metal       → metallic response, colour, roughness       |
+ | 4.2 Brush streaks          → anisotropy, roughness                       |
+ | GENERIC                                                                |
+ | edge-wear.md               → rounded normal/geometry, edge line, dust  |
+ | surface-wear.md            → grunge, scratches, marks: colour, roughness |
+ | variation-surface-marks.md → macro tone: colour                         |
+ +------------------------------------------------------------------------+
 ```
+Clean mesh → edge fields → rounding geometry/normal → BSDF Normal.
+Base (§4.1) → surface marks and edge masks → BSDF Base Color / Roughness.
+Directional UV and streak noise (§4.2) → BSDF Tangent / Anisotropy / Roughness → Surface.
 
-- The edge tint of the metallic BSDF is brighter and warmer than the base colour (§4.1).
+- Compose the terms at those inputs (RULES MAT_07); geometry-field order follows RULES MAT_08.
 
 ## 3. Code
-- `scripts/blender/materials/metal/metal.py`: `polished_steel(...)` (module `materials.metal.metal`).
-- Brushed, bevel and water-mark layers: no script is named in this file.
-- Control: none named in this file.
+- `scripts/blender/materials/metal/metal.py`: `materials.metal.metal.polished_steel(name="metal")`
+  builds the base; smooth shading is set on the object separately.
+- Brush and generic layers are applied separately through their linked effect references; the base
+  builder exposes no switches for them. No complete metal control scene is named here.
 
 ## 4. Instructions and parameters, per layer
 
-### 4.1 Polished base
-- `materials.metal.metal.polished_steel()`: Metallic BSDF F82, low roughness, shade smooth.
-- Edge tint brighter and warmer than the base.
+### 4.1 Base clean metal
+- Use the builder in §3; polished-steel colour numbers live in
+  [physical-ranges.md](../physical-ranges.md).
 
 | Parameter | Value |
 |---|---|
 | BSDF | Metallic, F82 |
-| Roughness | low |
+| Roughness | low for polished; increase for a brushed finish |
 | Shading | smooth |
 | Edge tint | brighter, warmer than the base |
 
-### 4.2 Brushed anisotropy
-- Directional roughness method: [anisotropy.md](../../effects/anisotropy.md); use a directional UV along the part's length.
-- Brush streaks in roughness: noise stretched ~400:1.
+### 4.2 Brush streaks
+- Method: [anisotropy.md](../../effects/anisotropy.md).
 
-| Parameter | Value |
+| Parameter | Metal starting value |
 |---|---|
-| Anisotropy | ~0.75 |
+| Anisotropy | ~0.75 for brushed; 0 for polished |
 | Tangent | directional UV along the part's length |
 | Rotation | 0.25 turn, so highlights stretch across the brushing |
-| Brush streak stretch | ~400:1 |
-
-### 4.3 Edge bevel
-- Bevel with hardened normals.
-
-| Parameter | Value |
-|---|---|
-| Bevel width | 1–2 mm |
-| Normals | hardened |
-
-### 4.4 Water marks
-- Coffee rings, with the rim stronger. Tide lines of dried puddles on tops. Drip or tea streaks on
-  verticals.
-- Spots under ~3 px vanish: at ~3 mm/px they need 8–25 mm.
-
-| Parameter | Value |
-|---|---|
-| Coffee rings | rim stronger |
-| Tide lines | on tops |
-| Drip / tea streaks | on verticals |
-| Spot size | 8–25 mm at ~3 mm/px (under ~3 px vanish) |
-
-### 4.5 Joint dust and per-part tone
-- AO dust in the joints.
-- ±6 % per-part tone.
-
-| Parameter | Value |
-|---|---|
-| Joint dust | AO in joints |
-| Per-part tone | ±6 % |
+| Streak noise stretch | ~400:1, driving roughness |
 
 ### Generic layers, metal settings
-No generic layers apply to this file.
+| Layer | Reference | Note for this material |
+|---|---|---|
+| Surface wear | [surface-wear.md](../../effects/surface-wear.md) | grunge, scratches, dried marks and worn-through coatings |
+| Rounded edge/bevel, edge line, dust in joints | [edge-wear.md](../../effects/edge-wear.md) | keep the clean metal base beneath the wear |
+| Macro tone | [variation-surface-marks.md](../../effects/variation-surface-marks.md) | vary base colour and roughness |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |
 |---|---|---|
-| Water marks missing at the final view | spots under ~3 px | size them to 8–25 mm at ~3 mm/px (§4.4) |
-| Brush lines run across the part | tangent not along the part's length | directional UV along the part's length (§4.2) |
-| Edges look sharp and unbroken | no bevel | 1–2 mm bevel with hardened normals (§4.3) |
+| Metal looks faceted | flat object shading | shade smooth (§4.1) |
+| Brush lines run across the part | tangent not along its length | align the directional UV (§4.2) |
+| Brushed finish has no directional blur | roughness or anisotropy is zero | check both settings (§4.1, §4.2) |
 
-No generic problems are listed in this file. The general list is in troubleshooting.md (named here,
-not linked, so this file adds no reference loop).
+Wear problems are in the effect references above; generic render problems in troubleshooting.md.

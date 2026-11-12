@@ -1,11 +1,8 @@
 # Research loop — running studies alone
 
-How one agent (Claude or Codex) runs research, studies and experiments end to end without a human
-or a second model in the loop: when the user is away, or the other model is out of tokens.
-The rules still hold; this file is the order of work and the decisions you make
-yourself. Stop points that stay: the research gate (RULES GAT_01), the Rhino model gate (RULES GAT_02), the
-material gate (RULES GAT_03) and the final render gate (RULES GAT_04).
-A study built from a scripted test scene (no Rhino) has no model gate.
+One agent running research and studies alone, when the user is away or the other model is out of
+tokens. The gates still stop the work: research, Rhino model, material and final render (RULES
+GAT_01–GAT_04); a study built from a scripted test scene has no model gate.
 
 ## The loop (one question at a time)
 1. **Question.** Write it in the study notes (`study-notes.md`) › Open questions as one testable sentence with a

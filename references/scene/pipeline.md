@@ -189,10 +189,13 @@ Read-only documentation work needs no Blender or Rhino connection.
   sellers: `Quixel Megascans` (about 11,000 materials, 8,900 3D models and plants, 2,200 decals,
   500 brushes; Blender takes the texture-set zip, FBX or glTF) and `Quixel Megaplants` (40 Unreal
   procedural trees; only those listing `usd` import into Blender).
-  Plain HTTP gets a Cloudflare 403, so the catalog is read in the built-in browser:
-  1. Open `https://www.fab.com/sellers/Quixel%20Megascans` in the built-in browser. No sign-in.
-  2. Send the text of `scripts/scene/assets/fab-search.js` with `javascript_tool` once per tab,
-     then call `await fabSearch({q, type, category, max})` (options in the file header). Each row
+  Plain HTTP gets a Cloudflare 403, so the catalog is read in the app's built-in browser pane
+  (`mcp__Claude_Browser__*`). It runs on this machine and works while hidden; Claude in Chrome is not
+  used, since it drives whichever Chrome is connected to the account, possibly on another machine:
+  1. Open `https://www.fab.com/sellers/Quixel%20Megascans` in the pane.
+  2. Send the text of `scripts/scene/assets/fab-search.js` with `javascript_tool`, followed by the
+     call `await fabSearch({q, type, category, max})` in the same call: declarations need not
+     survive to the next call (options in the file header). Each row
      holds the Megascans id (e.g. `zcgmefc`, read from the download file name), title, category, tags,
      formats, scan size, texel density, maps, plant species, Fab link and thumbnail. Rows cost about
      1 s each; Fab pages hold 24, followed until `max`. Category slugs: copy one from a row's
@@ -205,10 +208,10 @@ Read-only documentation work needs no Blender or Rhino connection.
      resolution, so name a smaller one when 2K is enough). Megaplants have no id: give the USD
      file name, and check that it names the listed species (one Fab listing serves another
      species' file).
-  5. After the user's picks, get their download links in the built-in browser. Fab needs an Epic
-     sign-in in the pane itself (a sign-in in the user's own browser does not carry over);
-     `fabDownloadLinks` stops with "not signed in" if it is missing: then show the pane and ask
-     the user to sign in. In a fab.com tab send `fab-search.js`, then `scripts/scene/assets/fab-download.js`, then
+  5. After the user's picks, get their download links in the same pane tab. `fabDownloadLinks`
+     stops with "not signed in" if the pane has no Fab sign-in: then show the pane and ask the user
+     to sign in there once, with "remember me" ticked so it lasts (or to import only the fab.com and
+     epicgames.com cookies through the pane's ⋮ menu). In one call send `fab-search.js`, `scripts/scene/assets/fab-download.js` and
      `await fabDownloadLinks(picks)` with the picked rows, each `file` set to the chosen file. It
      adds each listing to the user's library and returns the rows with a signed link and size.
   6. The links expire within minutes: save the result straight away to
@@ -329,7 +332,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tile/tiles.md). |
 | Controls | `scripts\controls\lighting\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`); `weathering_lab.py` (flat-wall look lab, `-- <out> <tag> [key=value]`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
-| Assets | `scripts\scene\assets\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); Quixel on Fab: `scripts\scene\assets\fab-search.js`, `fab-download.js` (built-in browser), then `fab_fetch.py` → `<study>\library\local\<id>\`; Maxtree: `maxtree_search.py`; both: `asset_sheet.py` (contact sheet); others `<study>\library\local\` with a `meta.json` |
+| Assets | `scripts\scene\assets\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); Quixel on Fab: `scripts\scene\assets\fab-search.js`, `fab-download.js` (built-in pane), then `fab_fetch.py` → `<study>\library\local\<id>\`; Maxtree: `maxtree_search.py`; both: `asset_sheet.py` (contact sheet); others `<study>\library\local\` with a `meta.json` |
 | Video research | `scripts\research\yt_learn.py` |
 
 ## Install

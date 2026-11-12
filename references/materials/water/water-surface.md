@@ -1,13 +1,10 @@
 # Water surface (pools, still water)
 
 ## 1. Overview
-The pool body and its surface: water whose colour comes from depth, a diced top face, and a sunlit
-pool carried by Ocean geometry. Which water file to read: materials/index.md › Water. Ripples and waves caused by falling water
-or impacts: [water-ripple.md](water-ripple.md); choppy plunge pools: [water-ripple.md](water-ripple.md)
-› Choppy pool.
+The pool body: water coloured by its depth, the water surface, wind ripples.
 
-**Use when:** the pool body and its tint, or wind ripples with no impact source. Ripples from a
-landing, impact or plunge: [water-ripple.md](water-ripple.md).
+**Use when:** the pool itself, or ripples with no cause. Ripples from a landing, impact or plunge:
+[water-ripple.md](water-ripple.md).
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. The impact ripples are written once, in their own reference,

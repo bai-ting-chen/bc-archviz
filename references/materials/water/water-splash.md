@@ -1,10 +1,9 @@
 # Water splash and the impact zone
 
 ## 1. Overview
-Where falling water meets a pool: the landing line, crowns, splash drops, and (when a still is not
-enough) a simulated plunge zone. Shared by water-free-falling-film.md,
-water-attached-film.md and fountains. Ripples from the impacts:
-[water-ripple.md](water-ripple.md); foam and bubbles: [water-foam.md](water-foam.md).
+Falling water landing in a pool: the landing line, crowns and drops, and a simulated plunge zone when a
+still is not enough. Ripples from the impacts: [water-ripple.md](water-ripple.md); foam and bubbles:
+[water-foam.md](water-foam.md).
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and

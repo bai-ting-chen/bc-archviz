@@ -1,9 +1,7 @@
 # Fabric
 
 ## 1. Overview
-Sheer curtain cloth: light, high-albedo fabric that lets light through, so a lit room behind it
-glows through the curtain. The lit room behind and what it shows are covered in lighting-camera.md
-(› Glass and what it shows, plain-text neighbour).
+Sheer curtain fabric. The lit room seen through it: lighting-camera.md › Glass and what it shows.
 
 ## 2. Layers and node-editor diagram
 This file is a single layer: one sheer-curtain material, with no stack and no generic layers of its

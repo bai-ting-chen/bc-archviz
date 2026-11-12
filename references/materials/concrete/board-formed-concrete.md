@@ -1,13 +1,9 @@
 # Board-formed concrete
 
 ## 1. Overview
-Concrete poured into moulds built from timber boards. The hardened surface is a negative cast of
-the formwork: each board's face, its tilt and offset, the joints between boards, and the wood grain.
-Treat it as **relief plus a faint print**, wherever boards are large enough in frame to resolve. A
-printed board map is only a fallback for distant or small walls (§4.6).
+Concrete cast against timber boards, with board marks that show in the shot.
 
-**Use when:** a concrete wall shows board marks that resolve in frame. A plain or jointless wall:
-[concrete.md](concrete.md).
+**Use when:** board marks resolve in frame. Plain or jointless concrete: [concrete.md](concrete.md).
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and

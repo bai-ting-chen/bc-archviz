@@ -1,5 +1,5 @@
 // Search Quixel assets on Fab and return candidate rows with their Megascans id.
-// Fab sits behind Cloudflare, so this runs inside a fab.com tab of the built-in browser
+// Fab sits behind Cloudflare, so this runs inside a fab.com tab of the built-in browser pane
 // (javascript_tool), where the site's own JSON API answers. No sign-in is needed.
 // Usage: send this file's text followed by one call, e.g.
 //   await fabSearch({q: "concrete", type: "material", category: "building-human-made--concrete", max: 48})

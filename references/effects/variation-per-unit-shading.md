@@ -1,9 +1,8 @@
 # Variation: per unit, shading
 
 ## 1. Overview
-Repeated units (brick, tile, plank, board, glass block, panel, leaf) each get their own tone, roughness,
-bump, map offset and normal tilt from one key per unit (RULES MAT_06). Shading only: units that really tilt
-or step are variation-per-unit-geometry.md.
+Repeated units (brick, tile, plank, board, glass block, panel, leaf), each with its own tone and
+roughness. Units that really tilt or step: variation-per-unit-geometry.md.
 
 **Use when:** a surface is made of separate units that look identical.
 

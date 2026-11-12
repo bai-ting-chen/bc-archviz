@@ -50,6 +50,7 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 |---|---|
 | [Anisotropy](../effects/anisotropy.md) | `effects.anisotropy` |
 | [Edge Wear](../effects/edge-wear.md) | `effects.edge_wear` |
+| [Surface Wear](../effects/surface-wear.md) | `effects.surface_wear` |
 | [Variation: Tiling](../effects/variation-tiling.md) | `effects.variation_tiling` |
 | [Variation: Per Unit, Shading](../effects/variation-per-unit-shading.md) | `effects.variation_per_unit_shading` |
 | [Variation: Per Unit, Geometry](../effects/variation-per-unit-geometry.md) | no builder yet |

@@ -1,9 +1,8 @@
 # Glass relief
 
 ## 1. Overview
-Glass whose surface is shaped on purpose: patterned, cast and pressed glass, the inner faces of glass
-block, wavy acrylic. The relief is a height field modelled as geometry; this file is how to shape it.
-Sizing a relief for the light pattern it throws is in [caustics.md](../../effects/caustics.md) step 2.
+Glass with a shaped surface: patterned, cast and pressed glass, the inner faces of glass block, wavy
+acrylic. Sizing a relief for the light pattern it throws: [caustics.md](../../effects/caustics.md) step 2.
 
 **Use when:** the relief is large enough to see at the shot's distance. Ribs too fine to resolve are
 [anisotropy.md](../../effects/anisotropy.md); the slight wobble of flat glazing is `glass.md` §4.2.

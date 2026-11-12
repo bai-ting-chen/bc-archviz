@@ -1,14 +1,12 @@
 # Attached water film (walls, glass, overflow edges)
 
 ## 1. Overview
-Water that clings: a film running down a wall or glass, and a low overflow that wraps round a crest
-and down a trench wall. Physics first (RULES RES_01), then geometry + shading in Cycles. Water that
-leaves the lip and falls free is covered by [water-free-falling-film.md](water-free-falling-film.md).
-Where the film lands: [water-splash.md](water-splash.md), [water-ripple.md](water-ripple.md),
+Water that clings to a surface: a film running down a wall or glass, an overflow wrapping round a
+crest. Where it lands: [water-splash.md](water-splash.md), [water-ripple.md](water-ripple.md),
 [water-foam.md](water-foam.md).
 
-**Use when:** water clings to a wall, a sheet of glass or an overflow edge. Water that leaves a lip
-and falls free: [water-free-falling-film.md](water-free-falling-film.md).
+**Use when:** the water stays on the surface. Water that leaves a lip and falls free:
+[water-free-falling-film.md](water-free-falling-film.md).
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and

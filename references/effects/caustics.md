@@ -1,11 +1,8 @@
 # Caustics
 
 ## 1. Overview
-Caustics are the light patterns a refractor focuses onto a receiver: sun through a pool, glass or
-patterned glass. Two methods: the fast one, GN wavefront in Cycles, for sunlight through a water body;
-the accurate one, LuxCore, for everything else (RULES REN_02, REN_03). Say which and why, then build and
-check it (§4). The engine rules are in `references/renderer/renderer-choice.md`; how to shape a
-glass relief is in `references/materials/glass/glass-relief.md`.
+Light patterns a refractor focuses onto a receiver: sun through a pool, glass or patterned glass. Choose
+the method below (RULES REN_02, REN_03), say which and why, then build and check it (§4).
 
 ### Choosing the method
 | Case | Method | Why |

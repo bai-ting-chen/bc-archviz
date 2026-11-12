@@ -1,10 +1,35 @@
 """Shared offset lookups for image maps, with world-space blending."""
 import random
+import math
 from materials.shared.nodes import layer_frame, layer_switch, sock
 
 MASK_MEAN = 0.5  # measured Noise Texture centre
 MASK_HALF_RANGE = 0.12  # approximately two measured SDs; avoid a constant blend
 OFFSET_SPAN = 32.0  # texture-coordinate units; decorrelate neighbouring lookups
+
+
+def lookup_offsets(count, seed=0):
+    """Return seeded XYZ lookup offsets shared by offset-only and rotated map sampling."""
+    rng = random.Random(seed)
+    return [tuple(rng.uniform(-OFFSET_SPAN, OFFSET_SPAN) for _ in range(3)) for _ in range(count)]
+
+
+def randomized_vectors(g, vector, count=3, seed=0, scale_jitter=.12, frame=None):
+    """Rotate, slightly rescale and offset independent metre-space image lookups."""
+    rng = random.Random(seed + 7919)
+    result = []
+    for row, offset in enumerate(lookup_offsets(count, seed)):
+        rotation = g.node('ShaderNodeVectorRotate', (-2100, -700*row), frame)
+        rotation.rotation_type = 'AXIS_ANGLE'
+        rotation.inputs['Axis'].default_value = (0, 0, 1)
+        rotation.inputs['Angle'].default_value = rng.uniform(-math.pi, math.pi)
+        g.link(vector, rotation.inputs['Vector'])
+        scale = g.node('ShaderNodeVectorMath', (-1800, -700*row), frame)
+        scale.operation = 'SCALE'
+        scale.inputs['Scale'].default_value = rng.uniform(1-scale_jitter, 1+scale_jitter)
+        g.link(rotation.outputs[0], scale.inputs[0])
+        result.append(_shift(g, scale.outputs[0], (*offset[:2], 0), frame, row))
+    return result
 
 
 def _lookup(g, tex, vector, frame, row):
@@ -68,8 +93,7 @@ def _blend_masks(g, lookups, scale_m, amount, frame):
 def anti_tile(g, texs, lookups=3, scale_m=1.5, seed=0, amount=1.0):
     """Relink image consumers to shared XYZ-offset lookups; amount zero is the original."""
     frame = layer_frame(g, 'VARIATION: TILING')
-    rng = random.Random(seed)
-    offsets = [tuple(rng.uniform(-OFFSET_SPAN, OFFSET_SPAN) for _ in range(3)) for _ in range(lookups-1)]
+    offsets = lookup_offsets(lookups-1, seed)
     masks, switch = _blend_masks(g, lookups, scale_m, amount, frame)
     default_uv = None
     shifted_vectors = {}

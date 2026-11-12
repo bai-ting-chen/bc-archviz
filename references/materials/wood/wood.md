@@ -1,8 +1,7 @@
 # Wood
 
 ## 1. Overview
-Wood surfaces: coated (varnished) wood, cladding boards, battens and veneers. The look depends on
-the coat, on how the grain is laid on the surface and on how its edges wear (§4.5).
+Wood: coated wood, cladding boards, battens and veneers.
 
 ## 2. Layers and node-editor diagram
 This file is a single material family, not a stack. The coat sits on the wood base in `coated_wood()`
@@ -69,6 +68,7 @@ coat, so there is no separate diagram. Worn edges (§4.5) use the edge field and
 ### Generic layers, wood settings
 | Layer | Reference | Wood note |
 |---|---|---|
+| Surface wear | [surface-wear.md](../../effects/surface-wear.md) | grunge, scratches, dried marks and worn-through coatings |
 | Edge field and chips | [edge-wear.md](../../effects/edge-wear.md) | wood uses its own group (§4.5) |
 
 ## 5. Troubleshooting

@@ -10,9 +10,12 @@ numbered, each with its own table, cited as "step N". A file with both (variatio
 boxes. Every box header ends in its kind: "— LAYER DIAGRAM" or "— PROCEDURE DIAGRAM".
 
 ## 1. Overview
-- What the look is and which approach it takes, in one short paragraph.
-- Name the neighbouring reference that covers the other case (attached vs falling water, printed fallback).
-- **Use when:** one line, only when the file is easy to confuse with a neighbour.
+- What the file covers, in one or two sentences: the subject and its variants, e.g. "Metal, polished or
+  brushed." It routes the reader; it does not describe the look.
+- Leave out properties, recipe details and method (BSDF settings, tints, masks, builders): they live in
+  §2–§4. A sentence that would be true of any render of the subject says nothing.
+- **Use when:** one line, only when the file is easy to confuse with a neighbour; it names that
+  neighbour, so the overview does not repeat it.
 
 ## 2. Layers and node-editor diagram
 - An ASCII box with the **specific** layers (described in this file, marked `§4.x`) and the **generic**

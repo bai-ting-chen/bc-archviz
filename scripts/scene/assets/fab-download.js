@@ -1,5 +1,5 @@
 // Add the user's picked Quixel listings to their Fab library and return a direct download link per pick.
-// Runs in a fab.com tab of the built-in browser where the user is signed in, after fab-search.js
+// Runs in a fab.com tab of the built-in browser pane, where the user is signed in, after fab-search.js
 // (reuses fabJson). The links are signed and expire within minutes: save the result as JSON and run
 // fab_fetch.py on it at once.
 // Usage: send fab-search.js, then this file's text, then
@@ -36,7 +36,7 @@ async function fabFileLink(uid, listing, fileName) {
 }
 
 async function fabDownloadLinks(picks) {
-  if ((await fetch("/i/users/me")).status !== 200) throw new Error("not signed in to Fab in this pane");
+  if ((await fetch("/i/users/me")).status !== 200) throw new Error("not signed in to Fab in this browser");
   const out = [];
   for (const pick of picks) {
     const uid = pick.link.split("/listings/")[1];

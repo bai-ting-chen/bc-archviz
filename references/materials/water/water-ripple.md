@@ -1,13 +1,9 @@
 # Water ripples and waves
 
 ## 1. Overview
-Ripples and waves on a water surface caused by something: falling water landing, impacts, wind
-near a plunge. Shared by any water material that hits a pool (water-free-falling-film.md,
-water-attached-film.md, fountains). The pool body and plain wind ripples:
-water-surface.md.
+Ripples and waves caused by something: falling water landing, impacts, wind near a plunge.
 
-**Use when:** a ripple or wave is caused by something (a landing, an impact, a plunge). Plain wind
-ripples and the pool body: water-surface.md.
+**Use when:** the ripple has a cause. Plain wind ripples and the pool body: water-surface.md.
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and

@@ -1,15 +1,11 @@
 # Edge wear: edge line, edge dust, chips, run-off and cracks
 
 ## 1. Overview
-Weathering that follows the shape of an object; Blender has no edge-wear node, so this is a recipe. Edges are
-slightly rounded; every edge, outside or inside, gets a thin dark line and a wider, lighter dust; outside
-edges chip; walls get run-off below their drip edge and cracks from openings and edges.
+Wear that follows the edges of an object: rounded edges, edge lines and dust, chips, run-off below
+drip edges, and cracks.
 
-Every size is a dial, not a value: a chip is millimetres on a close-up and centimetres across a courtyard.
-Set it from the pixels it covers in the shot and judge the first render (RULES MAT_03).
-
-**Use when:** an edge or corner needs dirt, dust or chips, or a wall needs run-off or cracks. Per-unit
-variation and grunge strength: variation-per-unit-shading.md, variation-surface-marks.md.
+**Use when:** the wear follows edges, corners or drip lines. Wear across the face of a surface:
+surface-wear.md.
 
 ## 2. Layers and node-editor diagram
 ```
@@ -26,6 +22,8 @@ variation and grunge strength: variation-per-unit-shading.md, variation-surface-
 ```
 - The leak field runs first, on the clean mesh; any raycast or proximity field runs before modifiers that
   move the mesh (§4.6).
+- Every size is a dial: set it from the pixels it covers in the shot and judge the first render
+  (RULES MAT_03).
 - Chips are geometry; every other layer is a shading mask, multiplied in. Each layer has its own switch, an
   `amount` (0 = off) or flag, default on (RULES MAT_07); strengths are set per scene.
 

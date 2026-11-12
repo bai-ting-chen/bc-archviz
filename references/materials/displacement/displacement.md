@@ -1,10 +1,10 @@
 # Displacement
 
 ## 1. Overview
-True displacement: the mesh itself moves by a height map, so relief at geometry scale has real
-silhouette and shadow. This file is the setup only. Surface detail on faces is bump, and joint
-relief is displacement in the material that uses it: board-formed-concrete.md (joints displace, faces
-bump).
+Setting up true displacement, where the mesh itself moves by a height map. The material that needs it
+says where (e.g. joints in board-formed-concrete.md).
+
+**Use when:** relief must show in the silhouette or cast its own shadow. Finer surface detail stays bump.
 
 ## 2. Layers and node-editor diagram
 This is a single layer, not a shading stack: it sits on the mesh, not in the material. It is set up

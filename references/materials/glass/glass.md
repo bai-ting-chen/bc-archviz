@@ -1,10 +1,10 @@
 # Glass
 
 ## 1. Overview
-A flat glazed pane in two layers: the clear glass base, and the surface distortion real glazing has
-(roller waves and pillowing). Neighbours: patterned, cast or pressed relief is in
-[glass-relief.md](glass-relief.md); hollow glass block units and walls are in
-[glass-block.md](glass-block.md).
+Flat glazed panes.
+
+**Use when:** plain glazing. Patterned, cast or pressed relief: [glass-relief.md](glass-relief.md); glass
+block: [glass-block.md](glass-block.md).
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and

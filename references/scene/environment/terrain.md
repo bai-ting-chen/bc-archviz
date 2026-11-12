@@ -1,6 +1,6 @@
 # Naturally sloped terrain
 
-Use this for a building on a hill: a flat pad, an apron, a smoothstep fall with rounded crest and toe, noise-warped contours, broad roll and hummocks. It generates geometry only; shading belongs to the material setup.
+Sloped terrain around a building on a hill, as geometry; its shading is the ground material's.
 
 ## Code
 `scene.environment.terrain` exports the builders from `scripts/blender/scene/environment/terrain_graph.py` and `scripts/blender/scene/environment/terrain_objects.py`. Call them in this order in Blender; `material` is an existing material. Names below override the API defaults.

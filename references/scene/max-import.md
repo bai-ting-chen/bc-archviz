@@ -1,10 +1,9 @@
 # 3ds Max (.max) assets → Blender
 Use when: a vendor asset (vegetation, furniture, props) ships only as `.max` with vendor materials.
 
-Blender reads `.max` without 3ds Max through the **Import Autodesk MAX** extension plus the repair pass in
-`scripts/blender/scene/io/max_import.py`. Proved on four vegetation models of three genera, 25–320 MB,
-46k–971k faces. Steps in order: Install → Import → Geometry checks → Materials → Render; every check must pass
-on every new model before look-dev. A check that fails with no fix given: stop and report.
+Tools: the **Import Autodesk MAX** extension (no 3ds Max needed) and the repair pass in
+`scripts/blender/scene/io/max_import.py`. Steps in order: Install → Import → Geometry checks → Materials → Render; every check must pass on every
+new model before look-dev. A check that fails with no fix given: stop and report.
 
 ## Install
 **Step 1.** Extension `io_scene_max` (extensions.blender.org, community-maintained, GPL; verified 1.9.2).

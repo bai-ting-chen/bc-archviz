@@ -1,12 +1,9 @@
 # Tiles
 
 ## 1. Overview
-Glazed, layout-driven tile with real joints, a glaze surface, cracks and relief. Real tiles never
-match a downloaded map, so layout, joint and face are separate real-unit knobs. Stone slabs, pavers
-and large-format stone tiles are a different case (stone.md, plain-text neighbour).
+Glazed tile with a set-out layout, real joints, cracks and relief.
 
-**Use when:** glazed or layout-driven tile with real joints, cracks and relief. Stone slabs, pavers
-or large stone tiles: stone.md (plain text).
+**Use when:** glazed tile. Stone slabs, pavers or large stone tiles: stone.md (plain text).
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. This file has no generic layers of its own: the layers below
@@ -30,6 +27,8 @@ are all specific to this material.
    damage (4) ─► relief (5) ─► displacement on the damaged pieces only
 ```
 
+- **Separate real-unit knobs:** real tiles never match a downloaded map, so layout, joint and face
+  are set apart.
 - **Knobs live in group nodes.** Every surface knob sits on the `TileLayout`, `TileFinish` and
   `TileDamage` group nodes, set with `set_param` or `toggle` (§3).
 - **Which way joints run on returns and soffits** is a per-project decision (§4.1). Keep it a switch.
