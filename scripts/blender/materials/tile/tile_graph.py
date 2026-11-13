@@ -1,11 +1,11 @@
 """Tile graph; canonical implementation behind tile_nodes."""
 
 class _Graph:
-    """Small composition helpers using the shared G node builder."""
+    """Small composition helpers using the shared NodeGraph builder."""
     def __init__(self, tree):
         """Wrap the shared graph builder without clearing the tree."""
-        from materials.shared.nodes import G
-        self.g = G(tree)
+        from materials.shared.node_graph import NodeGraph
+        self.g = NodeGraph(tree)
         self.count = 0
 
     def loc(self):
@@ -15,7 +15,7 @@ class _Graph:
 
     def node(self, kind, **props):
         """Create a node using the shared public builder."""
-        return self.g.n(kind, self.loc(), **props)
+        return self.g.node_with_props(kind, self.loc(), **props)
 
     def put(self, value, socket):
         """Assign literals (RGB becomes RGBA for colour sockets) or link sockets."""
@@ -51,7 +51,7 @@ class _Graph:
 
     def noise(self, vector, scale, detail=2):
         """Create native noise with a socket-driven scale."""
-        result = self.g.noise(vector, 1., self.loc(), detail=detail)
+        result = self.g.noise_texture(vector, 1., self.loc(), detail=detail)
         self.put(scale, result.node.inputs['Scale'])
         return result
 
@@ -68,7 +68,7 @@ class _Graph:
 
     def smooth(self, value, lo, hi):
         """Clamp a smooth transition between physical bounds."""
-        return self.g.range(value, lo, hi, self.loc(), smooth=True)
+        return self.g.map_range(value, lo, hi, self.loc(), smooth=True)
 
     def mix(self, factor, a, b):
         """Interpolate two scalar values."""

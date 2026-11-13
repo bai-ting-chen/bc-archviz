@@ -70,7 +70,7 @@ Run `python scripts/workflow/helper_index.py` (MCP venv python) so [blender-pyth
 code, and give every new public helper a one-line docstring — that line is its index entry.
 Refactoring a helper: prove nothing else moved with `scripts/review/regress_helpers.py` (dump with the
 old and the new code, then compare; its docstring has the steps).
-Keep one builder per job (one dielectric, one socket helper, one node-graph builder `materials.shared.nodes.G`, one
+Keep one builder per job (one dielectric, one socket helper, one node-graph builder `materials.shared.node_graph.NodeGraph`, one
 `archviz.read_meta`, `archviz.use_gpu`); extend it rather than writing a second.
 
 ## Review

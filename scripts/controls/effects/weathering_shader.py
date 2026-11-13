@@ -1,11 +1,8 @@
 """Compose the weathering fields as independent look multipliers."""
 
-import os as _os
-import sys as _sys
-_CONTROLS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'tile', 'material', 'effects', 'water', 'lighting', 'environment', 'regression')]:
-    if _d not in _sys.path:
-        _sys.path.append(_d)
+import os as _os, sys as _sys
+_sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+import controls_import_paths  # noqa: E402,F401 -- every controls topic folder on sys.path
 from weathering_nodes import operations
 from weathering_fields import runoff, zones, joint_leaks
 

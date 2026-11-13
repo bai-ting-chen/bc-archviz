@@ -12,12 +12,9 @@ Runner only: each section lives in its own module (RULES GOV_04):
     tile_damage_displacement true displacement of the damage
 """
 
-import os as _os
-import sys as _sys
-_CONTROLS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'tile', 'material', 'effects', 'water', 'lighting', 'environment', 'regression')]:
-    if _d not in _sys.path:
-        _sys.path.append(_d)
+import os as _os, sys as _sys
+_sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+import controls_import_paths  # noqa: E402,F401 -- every controls topic folder on sys.path
 import argparse
 import json
 import sys

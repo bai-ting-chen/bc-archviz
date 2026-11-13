@@ -71,10 +71,10 @@ def hybrid_field(g, kind, layer, vector, extent, frame=None, amount=None):
     threshold, width = REGION_EDGES[kind]
     threshold = threshold if settings.region_threshold is None else settings.region_threshold
     width = width if settings.edge_width is None else settings.edge_width
-    region = g.range(driver, threshold-width/2, threshold+width/2,
+    region = g.map_range(driver, threshold-width/2, threshold+width/2,
                      (-1100, -26000), frame=frame, smooth=True)
     scan = stochastic_mask(g, masks, vector, settings, frame)
-    interior = g.range(scan, settings.interior_black, settings.interior_white,
+    interior = g.map_range(scan, settings.interior_black, settings.interior_white,
                        (-1400, -26800), frame=frame)
     interior = g.math('POWER', interior, settings.interior_gamma, (-1100, -26800), frame)
     interior = g.math('MULTIPLY', interior, settings.interior_gain, (-800, -26800), frame)

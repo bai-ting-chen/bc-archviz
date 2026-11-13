@@ -5,7 +5,7 @@ import bpy
 
 def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=None):
     """GN group: Scatter on Surface on a terrain object, masked by species patch noise, shared bare-soil noise, pad clearance and the camera frustum. Reused if it exists (layers point at it)."""
-    from materials.shared.nodes import G
+    from materials.shared.node_graph import NodeGraph
     from scene.environment.terrain import BARE_W
     ng = bpy.data.node_groups.get(name)
     if ng:
@@ -30,57 +30,57 @@ def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=None):
         s_ = it.new_socket(nm, in_out="INPUT", socket_type=typ)
         if dv is not None:
             s_.default_value = dv
-    g = G(ng, clear=True)
-    gi = g.n("NodeGroupInput", (-1600, 0))
-    go = g.n("NodeGroupOutput", (1600, 0))
+    g = NodeGraph(ng, clear=True)
+    gi = g.node_with_props("NodeGroupInput", (-1600, 0))
+    go = g.node_with_props("NodeGroupOutput", (1600, 0))
     I = gi.outputs
-    oi = g.n("GeometryNodeObjectInfo", (-1300, 300), transform_space="RELATIVE")
+    oi = g.node_with_props("GeometryNodeObjectInfo", (-1300, 300), transform_space="RELATIVE")
     g.link(I["Terrain"], oi.inputs["Object"])
-    pos = g.n("GeometryNodeInputPosition", (-1300, -100)).outputs[0]
+    pos = g.node_with_props("GeometryNodeInputPosition", (-1300, -100)).outputs[0]
     # species patches: noise low..high -> 0..1 (Patch Low < 0 = everywhere)
-    pn = g.n("ShaderNodeTexNoise", (-1100, -100), noise_dimensions="4D")
+    pn = g.node_with_props("ShaderNodeTexNoise", (-1100, -100), noise_dimensions="4D")
     pn.inputs["Detail"].default_value = 3.0
     g.link(pos, pn.inputs["Vector"]); g.link(I["Patch Scale"], pn.inputs["Scale"])
     g.link(g.math("MULTIPLY", I["Seed"], 1.618, (-1300, -250)), pn.inputs["W"])
-    pm = g.n("ShaderNodeMapRange", (-900, -100), interpolation_type="SMOOTHSTEP")
+    pm = g.node_with_props("ShaderNodeMapRange", (-900, -100), interpolation_type="SMOOTHSTEP")
     g.link(pn.outputs[0], pm.inputs["Value"]); g.link(I["Patch Low"], pm.inputs["From Min"])
     g.link(I["Patch High"], pm.inputs["From Max"])
     # bare soil: shared noise (materials.ground.ground.ground_material uses the same) thins the sward to nothing
-    bn = g.n("ShaderNodeTexNoise", (-1100, -400), noise_dimensions="4D")
+    bn = g.node_with_props("ShaderNodeTexNoise", (-1100, -400), noise_dimensions="4D")
     bn.inputs["Detail"].default_value = 4.0
     bn.inputs["W"].default_value = BARE_W
     g.link(pos, bn.inputs["Vector"]); g.link(I["Bare Scale"], bn.inputs["Scale"])
-    bm = g.n("ShaderNodeMapRange", (-900, -400), interpolation_type="SMOOTHSTEP")
+    bm = g.node_with_props("ShaderNodeMapRange", (-900, -400), interpolation_type="SMOOTHSTEP")
     bm.inputs["To Min"].default_value, bm.inputs["To Max"].default_value = 1.0, 0.0
     g.link(bn.outputs[0], bm.inputs["Value"]); g.link(I["Bare Low"], bm.inputs["From Min"])
     g.link(I["Bare High"], bm.inputs["From Max"])
-    bsw = g.n("GeometryNodeSwitch", (-700, -400), input_type="FLOAT")
+    bsw = g.node_with_props("GeometryNodeSwitch", (-700, -400), input_type="FLOAT")
     bsw.inputs["False"].default_value = 1.0
     g.link(I["Use Bare"], bsw.inputs["Switch"]); g.link(bm.outputs["Result"], bsw.inputs["True"])
     # pad clearance
-    pad = g.named("pad_d", "FLOAT", (-1100, -700))
-    pc = g.n("ShaderNodeMapRange", (-900, -700))
+    pad = g.named_attribute("pad_d", "FLOAT", (-1100, -700))
+    pc = g.node_with_props("ShaderNodeMapRange", (-900, -700))
     g.link(pad, pc.inputs["Value"]); g.link(I["Pad Clear"], pc.inputs["From Min"])
     g.link(g.math("ADD", I["Pad Clear"], 0.3, (-1100, -850)), pc.inputs["From Max"])
     # camera frustum + distance: only what the camera can see is scattered
-    ci = g.n("GeometryNodeObjectInfo", (-1300, -1000), transform_space="ORIGINAL")
+    ci = g.node_with_props("GeometryNodeObjectInfo", (-1300, -1000), transform_space="ORIGINAL")
     g.link(I["Camera"], ci.inputs["Object"])
-    inv = g.n("FunctionNodeInvertMatrix", (-1100, -1000)); g.link(ci.outputs["Transform"], inv.inputs[0])
-    tp = g.n("FunctionNodeTransformPoint", (-900, -1000))
+    inv = g.node_with_props("FunctionNodeInvertMatrix", (-1100, -1000)); g.link(ci.outputs["Transform"], inv.inputs[0])
+    tp = g.node_with_props("FunctionNodeTransformPoint", (-900, -1000))
     g.link(pos, tp.inputs["Vector"]); g.link(inv.outputs[0], tp.inputs["Transform"])
-    cs = g.n("ShaderNodeSeparateXYZ", (-700, -1000)); g.link(tp.outputs[0], cs.inputs[0])
+    cs = g.node_with_props("ShaderNodeSeparateXYZ", (-700, -1000)); g.link(tp.outputs[0], cs.inputs[0])
     depth = g.math("MAXIMUM", g.math("MULTIPLY", cs.outputs["Z"], -1.0, (-550, -1100)), 0.001, (-400, -1100))
     inx = g.math("LESS_THAN", g.math("ABSOLUTE", g.math("DIVIDE", cs.outputs["X"], depth, (-250, -950)), 0.0, (-100, -950)),
                  I["Tan X"], (50, -950))
     iny = g.math("LESS_THAN", g.math("ABSOLUTE", g.math("DIVIDE", cs.outputs["Y"], depth, (-250, -1050)), 0.0, (-100, -1050)),
                  I["Tan Y"], (50, -1050))
-    ln = g.n("ShaderNodeVectorMath", (-550, -1250), operation="LENGTH"); g.link(tp.outputs[0], ln.inputs[0])
+    ln = g.node_with_props("ShaderNodeVectorMath", (-550, -1250), operation="LENGTH"); g.link(tp.outputs[0], ln.inputs[0])
     near = g.math("LESS_THAN", ln.outputs["Value"], I["Max Distance"], (-400, -1250))
     front = g.math("GREATER_THAN", g.math("MULTIPLY", cs.outputs["Z"], -1.0, (-400, -1350)), 0.0, (-250, -1350))
     fr = g.math("MULTIPLY", g.math("MULTIPLY", inx, iny, (200, -1000)), g.math("MULTIPLY", near, front, (200, -1300)), (350, -1150))
     mask = g.math("MULTIPLY", g.math("MULTIPLY", pm.outputs["Result"], bsw.outputs[0], (400, -300)),
                   g.math("MULTIPLY", pc.outputs["Result"], fr, (400, -800)), (550, -500))
-    sc = g.n("GeometryNodeGroup", (800, 0))
+    sc = g.node_with_props("GeometryNodeGroup", (800, 0))
     sc.node_tree = scatter_ng
     S = sc.inputs
     g.link(oi.outputs["Geometry"], S["Mesh"]); g.link(I["Density"], S["Density"]); g.link(mask, S["Distribution Mask"])
@@ -92,7 +92,7 @@ def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=None):
     S["Pick Instance"].default_value = True
     g.link(g.math("MULTIPLY", I["Sink"], -1.0, (600, -200)), S["Surface Offset"])
     S["Align Rotation"].default_value = False            # grass grows up, not along the slope normal
-    sv = g.n("ShaderNodeCombineXYZ", (600, -350))
+    sv = g.node_with_props("ShaderNodeCombineXYZ", (600, -350))
     for k in "XYZ":
         g.link(I["Scale"], sv.inputs[k])
     g.link(sv.outputs[0], S["Scale"])

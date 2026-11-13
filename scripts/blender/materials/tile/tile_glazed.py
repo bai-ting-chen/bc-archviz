@@ -6,7 +6,7 @@ Separate from the layered tile_material builder: this one is a single flat mater
 """
 import bpy
 
-from materials.shared.nodes import G
+from materials.shared.node_graph import NodeGraph
 
 
 def glazed_tiles(name="POOL_TILES", tile=0.10, grout=0.003, glaze=(0.60, 0.79, 0.83),
@@ -15,11 +15,11 @@ def glazed_tiles(name="POOL_TILES", tile=0.10, grout=0.003, glaze=(0.60, 0.79, 0
     offset = square grid at real size (UVs in metres), per-tile colour variation, glossy glaze,
     rough grout, rounded tile edges as bump from the mortar mask."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    g = G(mat)
+    g = NodeGraph(mat)
     g.frame("Tile grid (Brick Texture, offset 0)", (0.20, 0.24, 0.30))
     g.frame("Glaze / grout", (0.22, 0.28, 0.22))
     F_GRID, F_BRDF = list(g.frames)
-    coords = g.uv(uv, (-1200, 0), F_GRID)
+    coords = g.uv_map(uv, (-1200, 0), F_GRID)
     br = g.node("ShaderNodeTexBrick", (-950, 0), F_GRID, label="tiles %d mm, grout %d mm" % (tile * 1000, grout * 1000),
                 Scale=1.0)
     br.offset, br.squash = 0.0, 1.0

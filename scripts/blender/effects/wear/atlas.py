@@ -3,6 +3,8 @@ from dataclasses import dataclass
 import math
 from pathlib import Path
 
+from materials.shared.map_measure import srgb_to_linear
+
 
 @dataclass
 class StampAtlas:
@@ -60,7 +62,7 @@ def _deposit_tile(tile,soft_opacity,size_m,scatter,cutout):
         for dx in (-radius_x,0,radius_x):
             eroded=np.minimum(eroded,padded[radius_y+dy:radius_y+dy+tile_px,radius_x+dx:radius_x+dx+tile_px])
     rgb=tile[...,:3]
-    linear=np.where(rgb<=.04045,rgb/12.92,((rgb+.055)/1.055)**2.4)
+    linear=srgb_to_linear(rgb)
     tile[...,0]=linear @ np.array((.2126,.7152,.0722))
     tile[...,1]=np.clip((support-eroded)*2.5,0,1)
     tile[...,2]=0

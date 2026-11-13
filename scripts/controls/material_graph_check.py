@@ -1,7 +1,8 @@
-"""Shared deterministic fixtures for the material-family refactor controls.
+"""Deterministic node-graph baseline of one material topic, built from tiny generated maps.
 
-Tiny generated maps keep controls independent of study assets. No study files are edited.
-Each topic wrapper accepts one output JSON path after Blender's -- separator.
+blender -b --factory-startup --python-exit-code 1 --python material_graph_check.py -- <topic> <out.json>
+Topics: the keys of TOPIC_MODULES plus wood_wear. Compare two outputs to prove a refactor.
+No study files are edited.
 """
 import importlib
 import ast
@@ -15,6 +16,7 @@ import bpy
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "blender"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # graph_dump
 from graph_dump import dump_material, dump_tree, value, write
 
 # topic -> the facade module whose builders the topic's cases call (wood_wear imports its own)
@@ -101,9 +103,9 @@ def import_smoke(topic):
     print("IMPORT_SMOKE", topic, callers)
 
 
-def run(topic):
-    """Build every path relevant to one material facade and write its baseline."""
-    out = Path(sys.argv[sys.argv.index("--") + 1])
+def run(topic, out):
+    """Build every path relevant to one material facade and write its baseline to out."""
+    out = Path(out)
     with tempfile.TemporaryDirectory(prefix="material-control-") as directory:
         folder = Path(directory)
         image = bpy.data.images.new("fixture", 4, 4)
@@ -184,8 +186,8 @@ def run(topic):
                     importlib.import_module("materials.shared.pbr").albedo_material("fixture", "boards", (.4, .4, .4)), cylinder=cylinder))
         elif topic == "wood_wear":
             from effects.wear.wear_locations import round_geometry
-            from materials.wood.wood_damage import wood_wear_group
-            from materials.wood.wood_shading import weathered_wood
+            from effects.wear.chipping import edge_wear_group
+            from materials.wood.wood import WOOD_CHIPS, weathered_wood
 
             fresh()
             obj = cube()
@@ -195,7 +197,7 @@ def run(topic):
             round_geometry(obj)
             archviz.directional_uv(obj, 1.0)
             result["geometry"] = mesh_state(obj)
-            result["wear_group"] = group_state(wood_wear_group(level=1))
+            result["wear_group"] = group_state(edge_wear_group(**WOOD_CHIPS, level=1))
             material("shader", weathered_wood)
         elif topic == "pbr":
             from materials.glass.clear_glass import clear_glass
@@ -336,3 +338,6 @@ def run(topic):
         write(out, result)
         print("MATERIAL_GRAPH_CHECK", topic, "cases", len(result))
 
+
+if __name__ == "__main__":
+    run(*sys.argv[sys.argv.index("--") + 1:][:2])

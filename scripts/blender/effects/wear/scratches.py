@@ -22,10 +22,10 @@ def scratches_field(g, vector, length_m, width_m, frame):
         stretch.operation = 'MULTIPLY'
         g.link(offset.outputs[0], stretch.inputs[0])
         stretch.inputs[1].default_value = (1 / (length_m * length_ratio), 1 / width_m, 1)
-        lines = g.noise(stretch.outputs[0], 1, (-2200, y), frame, detail=2)
-        lines = g.range(lines, .65, .72, (-1900, y), frame=frame)
-        extent = g.noise(offset.outputs[0], 1 / length_m, (-2200, y - 700), frame, detail=2)
-        extent = g.range(extent, .48, .6, (-1900, y - 700), frame=frame)
+        lines = g.noise_texture(stretch.outputs[0], 1, (-2200, y), frame, detail=2)
+        lines = g.map_range(lines, .65, .72, (-1900, y), frame=frame)
+        extent = g.noise_texture(offset.outputs[0], 1 / length_m, (-2200, y - 700), frame, detail=2)
+        extent = g.map_range(extent, .48, .6, (-1900, y - 700), frame=frame)
         fields.append(g.math('MULTIPLY', lines, extent, (-1600, y), frame))
     result = fields[0]
     for i, value in enumerate(fields[1:]):

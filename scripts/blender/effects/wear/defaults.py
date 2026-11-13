@@ -2,7 +2,7 @@
 from effects.wear.layers import canonical_layer
 from effects.wear.masks import asset_mask, mask_field
 from effects.wear.patterns import procedural_field
-from materials.shared.nodes import sock
+from materials.shared.node_graph import active_socket
 
 DEFAULT_SOURCES = {'grunge': 'hybrid', 'dried-marks': 'hybrid',
                    'chipping': 'hybrid', 'scratches': 'hybrid'}
@@ -43,11 +43,11 @@ def default_field(g, kind, settings, vector, frame):
     geometry = g.node('ShaderNodeNewGeometry', (-1000, -7000), frame)
     normal = g.node('ShaderNodeSeparateXYZ', (-800, -7000), frame)
     g.link(geometry.outputs['Normal'], normal.inputs[0])
-    zone = g.range(normal.outputs['Z'], .25, .75, (-600, -7000), frame=frame,
+    zone = g.map_range(normal.outputs['Z'], .25, .75, (-600, -7000), frame=frame,
                    smooth=True, label='dried marks up-facing zone')
     mix = g.node('ShaderNodeMix', (-300, -7000), frame)
     mix.data_type = 'FLOAT'
     g.link(zone, mix.inputs[0])
-    g.link(vertical, sock(mix.inputs, 'A'))
-    g.link(up, sock(mix.inputs, 'B'))
-    return sock(mix.outputs, 'Result')
+    g.link(vertical, active_socket(mix.inputs, 'A'))
+    g.link(up, active_socket(mix.inputs, 'B'))
+    return active_socket(mix.outputs, 'Result')

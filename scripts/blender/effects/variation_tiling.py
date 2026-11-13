@@ -1,7 +1,7 @@
 """Shared offset lookups for image maps, with world-space blending."""
 import random
 import math
-from materials.shared.nodes import layer_frame, layer_switch, sock
+from materials.shared.node_graph import layer_frame, layer_switch
 
 MASK_MEAN = 0.5  # measured Noise Texture centre
 MASK_HALF_RANGE = 0.12  # approximately two measured SDs; avoid a constant blend
@@ -49,15 +49,6 @@ def _shift(g, vector, offset, frame, row):
     return shifted.outputs[0]
 
 
-def _mix(g, a, b, weight, frame, column, row):
-    mix = g.node('ShaderNodeMix', (-900+300*column, -700*row), frame)
-    mix.data_type = 'RGBA'
-    g.link(weight, mix.inputs[0])
-    g.link(a, sock(mix.inputs, 'A'))
-    g.link(b, sock(mix.inputs, 'B'))
-    return sock(mix.outputs, 'Result')
-
-
 def _relink(g, tex, copies, masks, switch, frame, row):
     consumers = [(link.from_socket.name, link.to_socket) for socket in tex.outputs
                  for link in list(socket.links)]
@@ -65,8 +56,8 @@ def _relink(g, tex, copies, masks, switch, frame, row):
     for output_index, output in enumerate(tex.outputs):
         blended = output
         for column, (copy, mask) in enumerate(zip(copies, masks)):
-            blended = _mix(g, blended, copy.outputs[output.name], mask, frame, column, row+output_index)
-        results[output.name] = _mix(g, output, blended, switch, frame, len(copies), row+output_index)
+            blended = g.mix(blended, copy.outputs[output.name], mask, (-900+300*column, -700*(row+output_index)), frame)
+        results[output.name] = g.mix(output, blended, switch, (-900+300*len(copies), -700*(row+output_index)), frame)
     for name, consumer in consumers:
         g.link(results[name], consumer)
     return results
@@ -74,10 +65,10 @@ def _relink(g, tex, copies, masks, switch, frame, row):
 
 def _blend_masks(g, lookups, scale_m, amount, frame):
     world = g.node('ShaderNodeNewGeometry', (-1800, 0), frame).outputs['Position']
-    field = g.noise(world, 1/scale_m, (-1500, 0), frame)
-    field = g.range(field, MASK_MEAN-MASK_HALF_RANGE, MASK_MEAN+MASK_HALF_RANGE,
+    field = g.noise_texture(world, 1/scale_m, (-1500, 0), frame)
+    field = g.map_range(field, MASK_MEAN-MASK_HALF_RANGE, MASK_MEAN+MASK_HALF_RANGE,
                     (-1200, 0), frame=frame)
-    masks = [g.range(field, i/lookups, (i+1)/lookups, (-900, -700*(i+1)),
+    masks = [g.map_range(field, i/lookups, (i+1)/lookups, (-900, -700*(i+1)),
                      frame=frame, smooth=True) for i in range(lookups-1)]
     control = g.node('ShaderNodeValue', (-1800, 600), frame, label='anti_tile amount').outputs[0]
     control.default_value = amount

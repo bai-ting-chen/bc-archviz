@@ -1,7 +1,7 @@
 """Caustic graph; implementation for gn_caustics."""
 import bpy
 from effects.wear.chipping import input_socket as _input
-from materials.shared.nodes import G, sock
+from materials.shared.node_graph import NodeGraph, active_socket
 
 
 def caustic_sheet_group(name="Wavefront Caustics"):
@@ -21,130 +21,130 @@ def caustic_sheet_group(name="Wavefront Caustics"):
     _input(ng, "Lift", "NodeSocketFloat", 0.001, "DISTANCE")  # m above the receiver, against z-fighting
     _input(ng, "Sun Blur Iterations", "NodeSocketInt", 2)
     ng.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
-    b = G(ng, clear=False)
-    L = b.L
-    gi = b.n("NodeGroupInput", (-1800, 0))
-    go = b.n("NodeGroupOutput", (2600, 0))
+    b = NodeGraph(ng, clear=False)
+    L = b.link
+    gi = b.node_with_props("NodeGroupInput", (-1800, 0))
+    go = b.node_with_props("NodeGroupOutput", (2600, 0))
 
-    oi = b.n("GeometryNodeObjectInfo", (-1600, 200), transform_space="RELATIVE")
+    oi = b.node_with_props("GeometryNodeObjectInfo", (-1600, 200), transform_space="RELATIVE")
     L(gi.outputs["Caster"], oi.inputs["Object"])
-    rcv = b.n("GeometryNodeCollectionInfo", (-1600, -300), transform_space="RELATIVE")
+    rcv = b.node_with_props("GeometryNodeCollectionInfo", (-1600, -300), transform_space="RELATIVE")
     L(gi.outputs["Receivers"], rcv.inputs["Collection"])
-    rcv_r = b.n("GeometryNodeRealizeInstances", (-1400, -300))
+    rcv_r = b.node_with_props("GeometryNodeRealizeInstances", (-1400, -300))
     L(rcv.outputs[0], rcv_r.inputs[0])
-    occ = b.n("GeometryNodeCollectionInfo", (-1600, -550), transform_space="RELATIVE")
+    occ = b.node_with_props("GeometryNodeCollectionInfo", (-1600, -550), transform_space="RELATIVE")
     L(gi.outputs["Occluders"], occ.inputs["Collection"])
-    occ_r = b.n("GeometryNodeRealizeInstances", (-1400, -550))
+    occ_r = b.node_with_props("GeometryNodeRealizeInstances", (-1400, -550))
     L(occ.outputs[0], occ_r.inputs[0])
 
-    S = b.n("ShaderNodeVectorMath", (-1400, -800), operation="NORMALIZE")
+    S = b.node_with_props("ShaderNodeVectorMath", (-1400, -800), operation="NORMALIZE")
     L(gi.outputs["Sun Direction"], S.inputs[0])
     S = S.outputs["Vector"]
-    inc = b.n("ShaderNodeVectorMath", (-1200, -800), operation="SCALE")
+    inc = b.node_with_props("ShaderNodeVectorMath", (-1200, -800), operation="SCALE")
     L(S, inc.inputs[0])
     inc.inputs["Scale"].default_value = -1.0
-    nrm = b.n("GeometryNodeInputNormal", (-1200, -950))
-    rf = b.n("ShaderNodeVectorMath", (-1000, -850), operation="REFRACT")
+    nrm = b.node_with_props("GeometryNodeInputNormal", (-1200, -950))
+    rf = b.node_with_props("ShaderNodeVectorMath", (-1000, -850), operation="REFRACT")
     L(inc.outputs["Vector"], rf.inputs[0])
     L(nrm.outputs["Normal"], rf.inputs[1])
     L(gi.outputs["IOR Ratio"], rf.inputs["Scale"])
-    R = b.n("ShaderNodeVectorMath", (-850, -850), operation="NORMALIZE")
+    R = b.node_with_props("ShaderNodeVectorMath", (-850, -850), operation="NORMALIZE")
     L(rf.outputs["Vector"], R.inputs[0])
     R = R.outputs["Vector"]
-    pos = b.n("GeometryNodeInputPosition", (-1000, -1100))
-    eps = b.n("ShaderNodeVectorMath", (-850, -1050), operation="MULTIPLY_ADD")
+    pos = b.node_with_props("GeometryNodeInputPosition", (-1000, -1100))
+    eps = b.node_with_props("ShaderNodeVectorMath", (-850, -1050), operation="MULTIPLY_ADD")
     L(R, eps.inputs[0])
     eps.inputs[1].default_value = (1e-4, 1e-4, 1e-4)   # m: start the ray off the water surface
     L(pos.outputs["Position"], eps.inputs[2])
 
     # 1. per face: the sun power that crosses it (before moving anything)
-    fa0 = b.n("GeometryNodeInputMeshFaceArea", (-1000, 450))
-    fn = b.n("GeometryNodeInputNormal", (-1000, 300))
-    dot = b.n("ShaderNodeVectorMath", (-850, 350), operation="DOT_PRODUCT")
+    fa0 = b.node_with_props("GeometryNodeInputMeshFaceArea", (-1000, 450))
+    fn = b.node_with_props("GeometryNodeInputNormal", (-1000, 300))
+    dot = b.node_with_props("ShaderNodeVectorMath", (-850, 350), operation="DOT_PRODUCT")
     L(fn.outputs["Normal"], dot.inputs[0])
     L(S, dot.inputs[1])
     adot = b.math("ABSOLUTE", dot.outputs["Value"], 0.0, (-700, 350))
     aperp = b.math("MULTIPLY", fa0.outputs["Area"], adot, (-550, 400))
-    cap = b.n("GeometryNodeCaptureAttribute", (-350, 200), domain="FACE")
+    cap = b.node_with_props("GeometryNodeCaptureAttribute", (-350, 200), domain="FACE")
     cap.capture_items.new("FLOAT", "A_perp")
     L(oi.outputs["Geometry"], cap.inputs["Geometry"])
     L(aperp, cap.inputs["A_perp"])   # by name: index 1 is the Selection socket
 
     # 2. where each wavefront vertex lands, and whether the sun reaches it at all
-    rc = b.n("GeometryNodeRaycast", (-600, -500))
+    rc = b.node_with_props("GeometryNodeRaycast", (-600, -500))
     L(rcv_r.outputs[0], rc.inputs["Target Geometry"])
     L(eps.outputs["Vector"], rc.inputs["Source Position"])
     L(R, rc.inputs["Ray Direction"])
     rc.inputs["Ray Length"].default_value = 10.0         # m: deeper than any pool
-    sh_src = b.n("ShaderNodeVectorMath", (-850, -1250), operation="MULTIPLY_ADD")
+    sh_src = b.node_with_props("ShaderNodeVectorMath", (-850, -1250), operation="MULTIPLY_ADD")
     L(S, sh_src.inputs[0])
     sh_src.inputs[1].default_value = (1e-3, 1e-3, 1e-3)  # m: start the shadow ray off the surface
     L(pos.outputs["Position"], sh_src.inputs[2])
-    sh = b.n("GeometryNodeRaycast", (-600, -1100))
+    sh = b.node_with_props("GeometryNodeRaycast", (-600, -1100))
     L(occ_r.outputs[0], sh.inputs["Target Geometry"])
     L(sh_src.outputs["Vector"], sh.inputs["Source Position"])
     L(S, sh.inputs["Ray Direction"])
     sh.inputs["Ray Length"].default_value = 50.0         # m: reach of occluders toward the sun
-    lit = b.n("FunctionNodeBooleanMath", (-400, -1000), operation="NIMPLY")   # hit AND NOT shadowed
+    lit = b.node_with_props("FunctionNodeBooleanMath", (-400, -1000), operation="NIMPLY")   # hit AND NOT shadowed
     L(rc.outputs["Is Hit"], lit.inputs[0])
     L(sh.outputs["Is Hit"], lit.inputs[1])
-    hn = b.n("ShaderNodeSeparateXYZ", (-400, -700))
+    hn = b.node_with_props("ShaderNodeSeparateXYZ", (-400, -700))
     L(rc.outputs["Hit Normal"], hn.inputs[0])
-    onfl = b.n("FunctionNodeCompare", (-250, -700), data_type="FLOAT", operation="GREATER_THAN")
-    L(hn.outputs["Z"], sock(onfl.inputs, "A"))
-    sock(onfl.inputs, "B").default_value = 0.5            # hit normal z: floor above, wall below
-    g = b.store(cap.outputs["Geometry"], "lit", "FLOAT", lit.outputs[0], (-100, 200))
-    g = b.store(g, "onfloor", "FLOAT", onfl.outputs[0], (100, 200))
-    land = b.n("ShaderNodeVectorMath", (-250, -450), operation="MULTIPLY_ADD")
+    onfl = b.node_with_props("FunctionNodeCompare", (-250, -700), data_type="FLOAT", operation="GREATER_THAN")
+    L(hn.outputs["Z"], active_socket(onfl.inputs, "A"))
+    active_socket(onfl.inputs, "B").default_value = 0.5            # hit normal z: floor above, wall below
+    g = b.store_attribute(cap.outputs["Geometry"], "lit", "FLOAT", lit.outputs[0], (-100, 200))
+    g = b.store_attribute(g, "onfloor", "FLOAT", onfl.outputs[0], (100, 200))
+    land = b.node_with_props("ShaderNodeVectorMath", (-250, -450), operation="MULTIPLY_ADD")
     L(rc.outputs["Hit Normal"], land.inputs[0])
     L(gi.outputs["Lift"], land.inputs[1])
     L(rc.outputs["Hit Position"], land.inputs[2])
-    setp = b.n("GeometryNodeSetPosition", (300, 200))
+    setp = b.node_with_props("GeometryNodeSetPosition", (300, 200))
     L(g, setp.inputs["Geometry"])
     L(land.outputs["Vector"], setp.inputs["Position"])
 
     # 3. irradiance per landed face; drop faces that straddle floor/wall or left the pool
-    fa1 = b.n("GeometryNodeInputMeshFaceArea", (300, -200))
+    fa1 = b.node_with_props("GeometryNodeInputMeshFaceArea", (300, -200))
     adst = b.math("MAXIMUM", fa1.outputs["Area"], 1e-10, (450, -200))   # m2: no divide by a collapsed face
     pw = b.math("MULTIPLY", b.math("MULTIPLY", cap.outputs["A_perp"], gi.outputs["Sun Irradiance"], (450, -50)),
                 gi.outputs["Transmission"], (600, -50))
     E = b.math("DIVIDE", pw, adst, (750, -100))
-    litf = b.named("lit", "FLOAT", (600, -350))
+    litf = b.named_attribute("lit", "FLOAT", (600, -350))
     E = b.math("MULTIPLY", E, litf, (900, -150))
     # cap at 400x the sun: a face folded to near zero area would otherwise flash
     E = b.math("MINIMUM", E, b.math("MULTIPLY", gi.outputs["Sun Irradiance"], 400.0, (900, -300)), (1050, -150))
     # sun-disc softening: a 0.53 deg sun blurs the caustic by ~depth * 0.0093 (~1.2 cm at 1.3 m);
     # Blur Attribute over the sheet's ~1 cm vertex spacing approximates that kernel
-    blur = b.n("GeometryNodeBlurAttribute", (1100, -350), data_type="FLOAT")
+    blur = b.node_with_props("GeometryNodeBlurAttribute", (1100, -350), data_type="FLOAT")
     blur.label = "sun disc blur"
     L(E, blur.inputs["Value"])
     L(gi.outputs["Sun Blur Iterations"], blur.inputs["Iterations"])
     E = blur.outputs["Value"]
     # stored per POINT: face values average onto vertices, so brightness is smooth across the
     # sheet instead of stepping triangle to triangle (the "fingerprint" lines of per-face E)
-    g = b.store(setp.outputs["Geometry"], "E", "FLOAT", E, (1250, 200))
-    fl = b.named("onfloor", "FLOAT", (1250, -300))
-    straddle = b.n("FunctionNodeCompare", (1450, -300), data_type="FLOAT", operation="NOT_EQUAL")
-    L(fl, sock(straddle.inputs, "A"))
-    sock(straddle.inputs, "B").default_value = 0.0
+    g = b.store_attribute(setp.outputs["Geometry"], "E", "FLOAT", E, (1250, 200))
+    fl = b.named_attribute("onfloor", "FLOAT", (1250, -300))
+    straddle = b.node_with_props("FunctionNodeCompare", (1450, -300), data_type="FLOAT", operation="NOT_EQUAL")
+    L(fl, active_socket(straddle.inputs, "A"))
+    active_socket(straddle.inputs, "B").default_value = 0.0
     straddle.inputs["Epsilon"].default_value = 0.0
-    edge = b.n("FunctionNodeBooleanMath", (1600, -350), operation="AND")
-    hi = b.n("FunctionNodeCompare", (1450, -450), data_type="FLOAT", operation="LESS_THAN")
-    L(fl, sock(hi.inputs, "A"))
-    sock(hi.inputs, "B").default_value = 0.999            # onfloor strictly between 0 and 1: straddles
+    edge = b.node_with_props("FunctionNodeBooleanMath", (1600, -350), operation="AND")
+    hi = b.node_with_props("FunctionNodeCompare", (1450, -450), data_type="FLOAT", operation="LESS_THAN")
+    L(fl, active_socket(hi.inputs, "A"))
+    active_socket(hi.inputs, "B").default_value = 0.999            # onfloor strictly between 0 and 1: straddles
     L(straddle.outputs[0], edge.inputs[0])
     L(hi.outputs[0], edge.inputs[1])
-    lt = b.n("FunctionNodeCompare", (1450, -600), data_type="FLOAT", operation="LESS_THAN")
-    L(b.named("lit", "FLOAT", (1250, -600)), sock(lt.inputs, "A"))
-    sock(lt.inputs, "B").default_value = 0.001            # a face with no lit corner drops
-    drop = b.n("FunctionNodeBooleanMath", (1750, -450), operation="OR")
+    lt = b.node_with_props("FunctionNodeCompare", (1450, -600), data_type="FLOAT", operation="LESS_THAN")
+    L(b.named_attribute("lit", "FLOAT", (1250, -600)), active_socket(lt.inputs, "A"))
+    active_socket(lt.inputs, "B").default_value = 0.001            # a face with no lit corner drops
+    drop = b.node_with_props("FunctionNodeBooleanMath", (1750, -450), operation="OR")
     L(edge.outputs[0], drop.inputs[0])
     L(lt.outputs[0], drop.inputs[1])
-    dele = b.n("GeometryNodeDeleteGeometry", (1950, 200), domain="FACE")
+    dele = b.node_with_props("GeometryNodeDeleteGeometry", (1950, 200), domain="FACE")
     L(g, dele.inputs["Geometry"])
     L(drop.outputs[0], dele.inputs["Selection"])
     # Object Info geometry keeps the CASTER's material (the water glass!) -- override it
-    setm = b.n("GeometryNodeSetMaterial", (2150, 200))
+    setm = b.node_with_props("GeometryNodeSetMaterial", (2150, 200))
     setm.label = "caustic sheet material"
     L(dele.outputs["Geometry"], setm.inputs["Geometry"])
     L(setm.outputs["Geometry"], go.inputs["Geometry"])

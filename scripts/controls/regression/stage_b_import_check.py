@@ -1,11 +1,8 @@
 """Smoke-test the import statements used by callers of Stage B compatibility facades."""
 
-import os as _os
-import sys as _sys
-_CONTROLS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'tile', 'material', 'effects', 'water', 'lighting', 'environment', 'regression')]:
-    if _d not in _sys.path:
-        _sys.path.append(_d)
+import os as _os, sys as _sys
+_sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+import controls_import_paths  # noqa: E402,F401 -- every controls topic folder on sys.path
 import ast
 import importlib
 from pathlib import Path

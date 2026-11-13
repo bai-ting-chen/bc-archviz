@@ -6,7 +6,7 @@
   (empty `.name`; resolve via `node_group.interface.items_tree`) → `effects.wear.set_input`. Group defaults
   are copied only at modifier creation. New code re-hits this with `mod[ident] = v`.
 - Edge Angle (signed): convex arrises read **positive** on outward-normal Rhino meshes.
-- ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `materials.shared.nodes.sock`.
+- ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `materials.shared.node_graph.active_socket`.
 - Noise Texture output: "Factor" in GN; index 0 is safest.
 - Capture Attribute: socket index 1 is Selection — link by name.
 - Object/Collection Info geometry keeps source materials → Set Material.
@@ -81,7 +81,8 @@
 - `Image.save()` on float images applies view transform + exposure → for data EXRs use
   `img.save_render(path)` with OPEN_EXR 32-bit.
 - Pixel analysis: `img.pixels.foreach_get(np_array)` is linear for **float** images only; 8-bit
-  sRGB textures come back sRGB-encoded — decode (`((v+0.055)/1.055)**2.4`) before measuring an
+  sRGB textures come back sRGB-encoded — read with `map_measure.image_rgb` and decode with
+  `map_measure.srgb_to_linear` (`materials.shared.map_measure`) before measuring an
   albedo (encoded means read about twice the linear value on mid-grey maps).
 - Compositor in 5.x is a node group: `bpy.data.node_groups.new(name, "CompositorNodeTree")`,
   an output socket via `tree.interface.new_socket("Image", in_out="OUTPUT",

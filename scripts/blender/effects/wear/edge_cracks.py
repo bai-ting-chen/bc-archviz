@@ -3,11 +3,11 @@ import bmesh
 import math
 import random
 import bpy
-from materials.shared.nodes import G
+from materials.shared.node_graph import NodeGraph
 from mathutils import Vector
 from effects.wear.cracks import CRACK, apply_crack_masks
 from effects.wear.crack_ribbon import crooked_ribbon_masks
-from effects.wear.nodes import frame_for
+from materials.shared.node_graph import frame_for
 
 
 EDGE_CRACK = dict(CRACK, core=0.0016, halo=0.006, depth=0.0008)  # m, core/halo widths and groove depth
@@ -49,7 +49,7 @@ def _ribbon_group(seed, length):
         socket.default_value = default
     for key in ('Core', 'Halo'):
         ng.interface.new_socket(name=key, in_out='OUTPUT', socket_type='NodeSocketFloat')
-    g = G(ng)
+    g = NodeGraph(ng)
     F = 'Edge crack ribbon'
     g.frame(F)
     inputs = g.node('NodeGroupInput', (-3000, 0))
@@ -71,12 +71,12 @@ def _ribbon_group(seed, length):
     perp = dot('Tangent', (-2400, -150))
     plane = dot('Plane', (-2400, -300))
     plane = g.math('ABSOLUTE', plane, 0, (-2200, -300), F)
-    on = g.range(plane, 0.004, 0.001, (-2000, -300), frame=F)
-    phase = g.noise(pos, 180, (-2400, -500), F, detail=3)
+    on = g.map_range(plane, 0.004, 0.001, (-2000, -300), frame=F)
+    phase = g.noise_texture(pos, 180, (-2400, -500), F, detail=3)
     wob = g.math('MULTIPLY', g.math('SUBTRACT', phase, 0.5, (-2200, -500), F),
                  0.009, (-2050, -500), F)
     # Pin the ribbon to its actual edge, then wobble and drift into the face.
-    wob = g.math('MULTIPLY', wob, g.range(along, 0, 0.025, (-2200, -650), frame=F),
+    wob = g.math('MULTIPLY', wob, g.map_range(along, 0, 0.025, (-2200, -650), frame=F),
                  (-1900, -500), F)
     wob = g.math('ADD', wob, g.math('MULTIPLY', along, inputs.outputs['Skew'], (-2050, -700), F),
                  (-1750, -650), F)

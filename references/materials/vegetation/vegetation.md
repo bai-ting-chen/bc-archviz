@@ -36,7 +36,7 @@ used here with vegetation settings.
   (`load_scatter_on_surface`), `meadow_graph.py` (`meadow_layer_group`) and `meadow_objects.py`
   (`meadow_layer`, `frustum_tangents`).
 - Per-instance tone: `scripts/blender/effects/variation_per_unit_shading.py` (`random_tone_material`).
-- Control: `scripts/controls/material/vegetation_graph_check.py` (deterministic graph and geometry
+- Control: `scripts/controls/material_graph_check.py` topic `vegetation` (deterministic graph and geometry
   baseline).
 
 ## 4. Instructions and parameters, per layer

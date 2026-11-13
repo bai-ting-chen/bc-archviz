@@ -2,7 +2,7 @@
 
 import bpy
 
-from materials.shared.nodes import G, sock
+from materials.shared.node_graph import NodeGraph, active_socket
 
 def pool_water(name="POOL_WATER", tint=(0.45, 0.85, 0.72), density=1.0, ripple_scale=2.0,
                ripple_m=0.0015, ior=1.333):
@@ -10,7 +10,7 @@ def pool_water(name="POOL_WATER", tint=(0.45, 0.85, 0.72), density=1.0, ripple_s
     grows with path length (shallow steps stay clear, depth turns green). Absorption coefficient
     = density * (1 - tint) per metre. Gentle ripples as bump on the surface only."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    g = G(mat)
+    g = NodeGraph(mat)
     g.frame("Surface", (0.20, 0.24, 0.30))
     g.frame("Body", (0.18, 0.28, 0.26))
     F_S, F_B = list(g.frames)

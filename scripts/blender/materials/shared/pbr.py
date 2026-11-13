@@ -1,7 +1,7 @@
 """Compatibility facade for pbr; each job has one owner."""
 import os
 import bpy
-from materials.shared.nodes import G, sock
+from materials.shared.node_graph import NodeGraph, active_socket
 from materials.shared.pbr_config import BUMP_DISTANCE
 from materials.shared.pbr_maps import _img, _ph_maps
 from materials.shared.pbr_build import pbr_material

@@ -1,11 +1,10 @@
 """Dust build-up and bordered grunge patterns."""
 from types import SimpleNamespace
-from materials.shared.nodes import G, sock, layer_switch
-from effects.wear.nodes import math_, noise, range_
+from materials.shared.node_graph import NodeGraph, layer_switch
 from effects.wear.edge_profile import (LINE_WIDTH, DUST_WIDTH, LINE_AMOUNT, DUST_AMOUNT,
     GRIME_TINT, LINE_GAIN, DUST_SATURATION, LINE_ROUGHNESS, DUST_GAIN, CORNER_MASK_CAP,
     AO_REACH, EDGE_KINDS)
-from effects.wear.edge_profile import _noise_context, _extent, _falloff, _finish_mask, _vector
+from effects.wear.edge_profile import _noise_context, _extent, _falloff, _finish_mask
 from effects.wear.edge_line import _line_mask
 
 RGB_LUMINANCE = (0.2126, 0.7152, 0.0722)  # scene-linear luminance
@@ -14,13 +13,13 @@ def _dust_mask(g, context, fields, width, amount):
     frame, (x, y) = context.frame, context.loc
     extent = _extent(g, context, fields.width_noise, width, (0.65, 1.6), 'dust')
     band, lip = _falloff(g, context, extent, 0.0, 0.002, 'dust')
-    profile = math_(g, 'MULTIPLY', band, lip, (x + 1000, y), frame)
+    profile = g.math('MULTIPLY', band, lip, (x + 1000, y), frame)
     patch = fields.presence
     if context.recipe['dust_floor'] is not None:
-        patch = math_(g, 'ADD', context.recipe['dust_floor'], math_(g, 'MULTIPLY', fields.presence, context.recipe['dust_gain'],
+        patch = g.math('ADD', context.recipe['dust_floor'], g.math('MULTIPLY', fields.presence, context.recipe['dust_gain'],
                       (x + 1000, y - 1900), frame), (x + 1200, y - 1900), frame)
-    broken = math_(g, 'MULTIPLY', profile, patch, (x + 1400, y), frame)
-    broken = math_(g, 'MULTIPLY', broken, context.dust_orientation, (x + 1600, y), frame)
+    broken = g.math('MULTIPLY', profile, patch, (x + 1400, y), frame)
+    broken = g.math('MULTIPLY', broken, context.dust_orientation, (x + 1600, y), frame)
     return _finish_mask(g, context, broken, amount, 'dust')
 
 
@@ -50,32 +49,23 @@ def corner_dirt_masks(g, line_width=LINE_WIDTH, dust_width=DUST_WIDTH,
     ao.only_local = False
     ao.samples = 32  # cross-object occlusion rays
     # A perpendicular contact covers half the AO hemisphere.
-    unit_dist = range_(g, ao.outputs['AO'], 0.5, 1.0, (x - 400, y), frame,
+    unit_dist = g.map_range(ao.outputs['AO'], 0.5, 1.0, (x - 400, y), frame=frame,
                        label='corner distance-like 0..1')
-    dist = math_(g, 'MULTIPLY', unit_dist, AO_REACH, (x - 200, y), frame)
+    dist = g.math('MULTIPLY', unit_dist, AO_REACH, (x - 200, y), frame)
     return edge_dirt_masks(g, dist, line_width, dust_width, line_amount=line_amount,
                            dust_amount=dust_amount, frame=frame, loc=loc, mask_cap=corner_cap, kind='corner')[:2]
-
-
-def _mix_color(g, a, b, factor, frame, loc, label, blend='MIX', data_type='RGBA'):
-    node = g.node('ShaderNodeMix', loc, frame, label=label)
-    node.data_type, node.blend_type = data_type, blend
-    g._in(node.inputs['Factor'], factor)
-    g._in(sock(node.inputs, 'A'), a)
-    g._in(sock(node.inputs, 'B'), b)
-    return sock(node.outputs, 'Result')
 
 
 def _relative_dust_color(g, color, dust, frame, loc):
     """Desaturate and gently darken albedo through the independent dust term."""
     x, y = loc
-    luma = _vector(g, 'DOT_PRODUCT', color, None, (x - 220, y - 140), frame, label='Dust source luminance')
-    luma.inputs[1].default_value = RGB_LUMINANCE
-    desat = _mix_color(g, color, luma.outputs['Value'], 1.0 - DUST_SATURATION,
-                       frame, (x, y), 'Dust relative desaturation')
-    gain = _mix_color(g, desat, (*DUST_GAIN, 1), 1.0, frame, (x + 220, y),
-                      'Dust relative darkening', blend='MULTIPLY')
-    return _mix_color(g, color, gain, dust, frame, (x + 440, y), 'Dust relative albedo')
+    luma = g.vector_math('DOT_PRODUCT', color, RGB_LUMINANCE, (x - 220, y - 140), frame,
+                   label='Dust source luminance')
+    desat = g.mix(color, luma, 1.0 - DUST_SATURATION, (x, y), frame,
+                  label='Dust relative desaturation')
+    gain = g.mix(desat, (*DUST_GAIN, 1), 1.0, (x + 220, y), frame, blend='MULTIPLY',
+                 label='Dust relative darkening')
+    return g.mix(color, gain, dust, (x + 440, y), frame, label='Dust relative albedo')
 
 
 def dust_surface(g, surface, dust, frame=None, loc=(0, 0), line=None):
@@ -102,16 +92,16 @@ def dust_surface(g, surface, dust, frame=None, loc=(0, 0), line=None):
             color = value.outputs[0]
         adjusted = _relative_dust_color(g, color, dust, frame, (loc[0], loc[1] - i * 250))
         if line is not None:
-            gain = _mix_color(g, color, (LINE_GAIN, LINE_GAIN, LINE_GAIN, 1), 1.0, frame,
-                              (loc[0] + 660, loc[1] - i * 250), 'Line relative darkening', blend='MULTIPLY')
-            adjusted = _mix_color(g, adjusted, gain, line, frame,
-                                  (loc[0] + 880, loc[1] - i * 250), 'Line relative albedo')
+            gain = g.mix(color, (LINE_GAIN, LINE_GAIN, LINE_GAIN, 1), 1.0,
+                         (loc[0] + 660, loc[1] - i * 250), frame, blend='MULTIPLY',
+                         label='Line relative darkening')
+            adjusted = g.mix(adjusted, gain, line, (loc[0] + 880, loc[1] - i * 250), frame,
+                             label='Line relative albedo')
             roughness = target.node.inputs.get('Roughness')
             if roughness is not None:
                 original = roughness.links[0].from_socket if roughness.is_linked else roughness.default_value
-                rough = _mix_color(g, original, LINE_ROUGHNESS, line, frame,
-                                   (loc[0] + 660, loc[1] - i * 250 - 140),
-                                   'Line roughness (unchanged target)', data_type='FLOAT')
+                rough = g.mix(original, LINE_ROUGHNESS, line, (loc[0] + 660, loc[1] - i * 250 - 140),
+                              frame, data_type='FLOAT', label='Line roughness (unchanged target)')
                 g.link(rough, roughness)
         g.link(adjusted, target)
     return surface
@@ -120,8 +110,8 @@ def dust_surface(g, surface, dust, frame=None, loc=(0, 0), line=None):
 def add_corner_dirt(mat, line_width=LINE_WIDTH, dust_width=DUST_WIDTH,
                     line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, corner_cap=CORNER_MASK_CAP):
     """Add independently switchable shared line/dust layers to a Cycles surface material."""
-    g = G(mat.node_tree)
-    existing = {role: next((n.outputs[0] for n in g.nt.nodes
+    g = NodeGraph(mat.node_tree)
+    existing = {role: next((n.outputs[0] for n in g.tree.nodes
                            if n.label == 'Edge ' + role + ' strength'), None)
                 for role in ('line', 'dust')}
     frame = 'Corner edge line and dust'
@@ -138,7 +128,7 @@ def add_corner_dirt(mat, line_width=LINE_WIDTH, dust_width=DUST_WIDTH,
             for target in consumers:
                 g.link(union, target)
         return mat
-    out = next(n for n in g.nt.nodes if n.type == 'OUTPUT_MATERIAL' and n.is_active_output)
+    out = next(n for n in g.tree.nodes if n.type == 'OUTPUT_MATERIAL' and n.is_active_output)
     surface = out.inputs['Surface'].links[0].from_socket
     result = dust_surface(g, surface, dust, frame, (1400, 0), line=line)
     g.link(result, out.inputs['Surface'])
@@ -159,8 +149,8 @@ def grunge(g, scale_m=0.5, target_sd=0.05, detail=6.0, rough=0.6, amount=1.0):
 
 def grunge_field(g, vector, scale_m, frame=None):
     """Return the unchanged fine grunge times zero-reaching slow patch pattern."""
-    noise = g.noise(vector, 1 / scale_m, (-1800, 0), frame, detail=3)
-    fine = g.range(noise, .35, .65, (-1500, 0), frame=frame)
-    extent = g.noise(vector, 1 / (scale_m * 4), (-1800, -400), frame)
-    extent = g.range(extent, .43, .57, (-1500, -400), frame=frame)
+    noise = g.noise_texture(vector, 1 / scale_m, (-1800, 0), frame, detail=3)
+    fine = g.map_range(noise, .35, .65, (-1500, 0), frame=frame)
+    extent = g.noise_texture(vector, 1 / (scale_m * 4), (-1800, -400), frame)
+    extent = g.map_range(extent, .43, .57, (-1500, -400), frame=frame)
     return g.math('MULTIPLY', fine, extent, (-1200, 0), frame)

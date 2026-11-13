@@ -15,7 +15,7 @@ if '--analyze' not in sys.argv:
     import bpy
     import numpy as np
     from effects.wear.wear import LAYERS, MaskSource, WearLayer, WearExtent, apply_surface_wear, image_mask, wear_factor
-    from materials.shared.nodes import G
+    from materials.shared.node_graph import NodeGraph
     from variation_lab import render, emission, plane
     from _scene import black_scene, ortho_camera
     import core.archviz as archviz
@@ -38,7 +38,7 @@ def _bake(out, kind):
     resolution_px = 1024  # round-A placeholder, not production mask quality
     black_scene(samples=1, res=resolution_px)
     mat = bpy.data.materials.new('placeholder-' + kind)
-    g = G(mat)
+    g = NodeGraph(mat)
     factor, _ = wear_factor(g, kind, replace(_settings(kind), extent=WearExtent(enabled=False)))
     emission(g, factor)
     ob = plane(mat, TILE_M)
@@ -65,12 +65,12 @@ def _mask_controls(out):
     writer.close()
     black_scene(samples=1, res=32)
     mat = bpy.data.materials.new('mask-controls')
-    g = G(mat)
+    g = NodeGraph(mat)
     identity = image_mask(g, MaskSource(str(path)))
     remapped = image_mask(g, MaskSource(str(path), black=.2, white=.8, gamma=2, invert=True))
     disabled_mask, _ = wear_factor(g, 'grunge', WearLayer(enabled=False, source='mask', mask=MaskSource(str(path))))
     wear_factor(g, 'scratches', WearLayer(enabled=False))
-    emission(g, g.combine(identity, remapped, disabled_mask, (4000, 0)))
+    emission(g, g.combine_xyz(identity, remapped, disabled_mask, (4000, 0)))
     plane(mat)
     ortho_camera(5, 2)
     passes = render(out, 'mask-controls')
@@ -90,7 +90,7 @@ def _surface_vector(g, centre_x):
     local.inputs[1].default_value = (centre_x - 1, -.1, -1)
     axes = g.node('ShaderNodeSeparateXYZ', (-4400, 0))
     g.link(local.outputs[0], axes.inputs[0])
-    return g.combine(axes.outputs['X'], axes.outputs['Z'], 0, (-4100, 0))
+    return g.combine_xyz(axes.outputs['X'], axes.outputs['Z'], 0, (-4100, 0))
 
 
 def _base_shader(g, kind):
@@ -129,8 +129,6 @@ def _fixture(project, samples, kind, settings):
     ob.rotation_euler.x = 1.57079632679
     materials = []
     regions = {}
-    from bpy_extras.object_utils import world_to_camera_view
-    from mathutils import Vector
     for i, name in enumerate(SURFACES):
         x = (i - 1) * 1.9
         slab = box(name, (x, 0, 0), (1.65, .2, 1.65))
@@ -143,7 +141,7 @@ def _fixture(project, samples, kind, settings):
             loop.uv.x += (1 - x) / TILE_M
             loop.uv.y += 1 / TILE_M
         mat = bpy.data.materials.new(name)
-        g = G(mat)
+        g = NodeGraph(mat)
         vector = _surface_vector(g, x)
         shader, under = _base_shader(g, name)
         layer_settings = settings[name] if isinstance(settings, dict) else settings
@@ -153,12 +151,19 @@ def _fixture(project, samples, kind, settings):
         slab.data.materials.append(mat)
         materials.append(mat)
         bpy.context.view_layer.update()
-        points = [world_to_camera_view(sc, cam, Vector((x + dx, -.1, dz)))
-                  for dx, dz in ((-.72, -.72), (.72, .72))]
-        xs = [round(p.x * FRAME_PIXELS[0]) for p in points]
-        ys = [round((1 - p.y) * FRAME_PIXELS[1]) for p in points]
-        regions[name] = [min(xs), min(ys), max(xs), max(ys)]
+        regions[name] = surface_region(sc, cam, x)
     return sc, materials, regions
+
+
+def surface_region(sc, cam, x):
+    """Pixel box [x0, y0, x1, y1] of the 1.44 m sample face centred at world x."""
+    from bpy_extras.object_utils import world_to_camera_view
+    from mathutils import Vector
+    points = [world_to_camera_view(sc, cam, Vector((x + dx, -.1, dz)))
+              for dx, dz in ((-.72, -.72), (.72, .72))]
+    xs = [round(p.x * FRAME_PIXELS[0]) for p in points]
+    ys = [round((1 - p.y) * FRAME_PIXELS[1]) for p in points]
+    return [min(xs), min(ys), max(xs), max(ys)]
 
 
 def _amount(materials, kind, amount):
@@ -171,7 +176,7 @@ def _stack_control(out, project, samples, masks):
     """Render all four layers together, mixing source choices on the same materials."""
     _, materials, _ = _fixture(project, samples, 'grunge', _settings('grunge'))
     for i, mat in enumerate(materials):
-        g = G(mat.node_tree)
+        g = NodeGraph(mat.node_tree)
         shaders = [n for n in mat.node_tree.nodes if n.type == 'BSDF_PRINCIPLED']
         layers = {}
         for kind in LAYERS[1:]:

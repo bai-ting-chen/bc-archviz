@@ -4,12 +4,9 @@ The camera views the floor obliquely (no specular image of the lamp in frame); a
 the expected irradiance. Control result: box 0, one flat quad 0, diced 40x40 plane lit.
 Rerun after a Blender upgrade: blender -b --factory-startup --python scripts/controls/water/mnee_water.py
 """
-import os as _os
-import sys as _sys
-_CONTROLS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'tile', 'material', 'effects', 'water', 'lighting', 'environment', 'regression')]:
-    if _d not in _sys.path:
-        _sys.path.append(_d)
+import os as _os, sys as _sys
+_sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+import controls_import_paths  # noqa: E402,F401 -- every controls topic folder on sys.path
 import math
 import os
 import sys

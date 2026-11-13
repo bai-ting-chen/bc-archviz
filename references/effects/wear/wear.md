@@ -46,7 +46,7 @@ Keep geometry switches and shading amounts independent (RULES MAT_07).
 
 ## 3. Code
 - `scripts/blender/effects/wear/wear.py`: `WearLayer`, `wear_factor`, `apply_surface_wear`.
-  Pass `materials.shared.nodes.G`, a Principled shader and layer/settings mapping; chipping needs
+  Pass `materials.shared.node_graph.NodeGraph`, a Principled shader and layer/settings mapping; chipping needs
   `under_shader`. `effects.wear` also exports the geometry and shading assembly helpers.
 - `source=None` uses the table; explicit sources: `procedural`, raw `mask`, `hybrid`, or `stamps`
   (non-default deposits/chipping). `enabled=False` needs no assets; `amount=0` disables the effect.

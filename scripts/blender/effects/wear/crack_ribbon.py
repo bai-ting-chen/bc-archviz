@@ -112,7 +112,7 @@ def crooked_ribbon_masks(g, F, along, perp, wob, on, C, L, y, seed=3, physical_l
         return g.math(op, a, b, (0, y), F)
     xx = m('DIVIDE', along, L)
     # Pin distortion at the source so opening corners and edges remain attached exactly.
-    pin = g.range(xx, 0, .04, (0, y), frame=F)
+    pin = g.map_range(xx, 0, .04, (0, y), frame=F)
     yy = m('DIVIDE', m('ADD', perp, m('MULTIPLY', wob, pin)), L)
     vector = g.node('ShaderNodeCombineXYZ', (200, y), F)
     g.link(m('DIVIDE', m('SUBTRACT', xx, low_x), high_x - low_x), vector.inputs['X'])

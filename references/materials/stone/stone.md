@@ -16,7 +16,7 @@ layer in its own reference (§4.6), so there is no single diagram.
   Entry points: `long_pavers` (`pavers.py`), `polished_granite` (`granite.py`), `stone_tiles`
   (`stone_tiles.py`).
 - Slab floors (§4.4) have no code of their own: each slab or band is an object.
-- Control: `scripts/controls/material/stone_graph_check.py` (deterministic graph and geometry
+- Control: `scripts/controls/material_graph_check.py` topic `stone` (deterministic graph and geometry
   baseline).
 
 ## 4. Instructions and parameters, per layer

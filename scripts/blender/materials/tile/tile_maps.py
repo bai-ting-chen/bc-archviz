@@ -8,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 from core.archviz import read_meta
+from materials.shared.map_measure import image_rgb, srgb_to_linear
 
 
 def find_maps(folder):
@@ -30,13 +31,11 @@ def image_stats(image, color=False):
     if image.get(key + '_signature') == signature and key in image:
         values = tuple(image[key])
         return values[:3], values[3:]
-    pixels = np.empty(len(image.pixels), dtype=np.float32)
-    image.pixels.foreach_get(pixels)
-    rgb = pixels.reshape(-1, image.channels)[:, :3].astype(np.float64)
+    rgb = image_rgb(image)
     if rgb.shape[1] < 3:
         rgb = np.repeat(rgb[:, :1], 3, axis=1)
     if color and not image.is_float and image.colorspace_settings.name == 'sRGB':
-        rgb = np.where(rgb <= .04045, rgb / 12.92, ((rgb + .055) / 1.055) ** 2.4)
+        rgb = srgb_to_linear(rgb)
     mean = tuple(float(max(x, 1e-8)) for x in rgb.mean(axis=0))
     maximum = tuple(float(x) for x in rgb.max(axis=0))
     image[key], image[key + '_signature'] = (*mean, *maximum), signature

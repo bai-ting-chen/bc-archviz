@@ -1,13 +1,12 @@
 """Volumes material helpers; canonical implementations."""
 import bpy
-from materials.shared.nodes import G
-from materials.stone.stone import _ramp
+from materials.shared.node_graph import NodeGraph
 
 
 def steam(name="STEAM", density=0.6, z0=0.4, height=0.9, scale=3.0):
     """Wisps over a hot tub: Principled Volume, density = noise ramp x fade with height above z0."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    g = G(mat)
+    g = NodeGraph(mat)
     geo = g.node("ShaderNodeNewGeometry", (-1100, 0))
     stretch = g.node("ShaderNodeVectorMath", (-900, 0))
     stretch.operation = "MULTIPLY"
@@ -15,7 +14,7 @@ def steam(name="STEAM", density=0.6, z0=0.4, height=0.9, scale=3.0):
     g.link(geo.outputs["Position"], stretch.inputs[0])
     nz = g.node("ShaderNodeTexNoise", (-700, 0), label="wisps", Scale=scale, Detail=6.0, Roughness=0.6)
     g.link(stretch.outputs["Vector"], nz.inputs["Vector"])
-    cr = _ramp(g, (-500, 0), None, [(0.52, (0, 0, 0)), (0.72, (1, 1, 1))], "wisp threshold")
+    cr = g.color_ramp((-500, 0), None, [(0.52, (0, 0, 0)), (0.72, (1, 1, 1))], "wisp threshold")
     g.link(nz.outputs["Fac"], cr.inputs["Fac"])
     sep = g.node("ShaderNodeSeparateXYZ", (-700, -300))
     g.link(geo.outputs["Position"], sep.inputs["Vector"])

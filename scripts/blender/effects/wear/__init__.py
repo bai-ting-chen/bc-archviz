@@ -1,6 +1,6 @@
 """Wear family assembly API; mechanism implementations live in the named modules."""
 from effects.wear.cracks import CRACK, add_cracks  # noqa: F401
-from effects.wear.chipping import add_edge_wear, dice, edge_wear_group, set_input  # noqa: F401
+from effects.wear.chipping import GrainBreaks, add_edge_wear, dice, edge_wear_group, set_input  # noqa: F401
 from effects.wear.mask_views import mask_material  # noqa: F401
 from effects.wear.concrete_shading import weathered_concrete  # noqa: F401
 from effects.wear.dirt import add_corner_dirt, edge_dirt_masks  # noqa: F401

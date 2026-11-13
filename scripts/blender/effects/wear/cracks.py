@@ -4,7 +4,7 @@ rest, a dark core, a grime halo and a shallow groove. Works on a weathered_concr
 import math
 import random
 
-from effects.wear.nodes import frame_for
+from materials.shared.node_graph import frame_for
 from effects.wear.crack_ribbon import crooked_ribbon_masks
 
 CRACK = dict(core=0.005, halo=0.02, wobble=0.03, jag=0.006, len=(0.4, 1.0), jitter=14.0, seed=3,
@@ -17,9 +17,9 @@ def crack_masks(g, F, openings, C):
     geo = g.node("ShaderNodeNewGeometry", (-2600, -6200), F)
     pos = geo.outputs["Position"]
     sp = g.node("ShaderNodeSeparateXYZ", (-2400, -6200), F); g.link(pos, sp.inputs[0])
-    wob = g.math("MULTIPLY", g.math("SUBTRACT", g.noise(pos, 26.0, (-2400, -6450), F, detail=4, rough=0.6), 0.5, (-2250, -6450), F),
+    wob = g.math("MULTIPLY", g.math("SUBTRACT", g.noise_texture(pos, 26.0, (-2400, -6450), F, detail=4, rough=0.6), 0.5, (-2250, -6450), F),
                  C["wobble"] * 2, (-2100, -6450), F)
-    jag = g.math("MULTIPLY", g.math("SUBTRACT", g.noise(pos, 180.0, (-2400, -6650), F, detail=2, rough=0.5), 0.5, (-2250, -6650), F),
+    jag = g.math("MULTIPLY", g.math("SUBTRACT", g.noise_texture(pos, 180.0, (-2400, -6650), F, detail=2, rough=0.5), 0.5, (-2250, -6650), F),
                  C["jag"] * 2, (-2100, -6650), F)
     wob = g.math("ADD", wob, jag, (-1950, -6550), F)
     core = halo = None
@@ -29,7 +29,7 @@ def crack_masks(g, F, openings, C):
         axis, plane, u0, u1, v0, v1, top_only = op[:7]
         keep = op[7] if len(op) > 7 else None
         dist = g.math("ABSOLUTE", g.math("SUBTRACT", sp.outputs["X" if axis == "x" else "Y"], plane, (-2200, y), F), 0.0, (-2050, y), F)
-        on = g.range(dist, 0.03, 0.01, (-1900, y), frame=F)
+        on = g.map_range(dist, 0.03, 0.01, (-1900, y), frame=F)
         uu = sp.outputs["Y" if axis == "x" else "X"]
         corners = [(u0, v1, 135), (u1, v1, 45)] + ([] if top_only else [(u0, v0, 225), (u1, v0, 315)])
         for cu, cv, ang in corners:
@@ -50,11 +50,11 @@ def crack_masks(g, F, openings, C):
             halo = h if halo is None else g.math("MAXIMUM", halo, h, (-250, y - 600), F)
             y -= 800
     dis = g.node("ShaderNodeTexNoise", (-2400, y), F, Scale=2.0, Detail=3.0); g.link(pos, dis.inputs["Vector"])
-    off = g.n("ShaderNodeVectorMath", (-2250, y), operation="MULTIPLY_ADD")
+    off = g.node_with_props("ShaderNodeVectorMath", (-2250, y), operation="MULTIPLY_ADD")
     g.link(dis.outputs["Color"], off.inputs[0]); off.inputs[1].default_value = (C["net_dist"],) * 3; g.link(pos, off.inputs[2])
     fine = g.node('ShaderNodeTexNoise', (-2250, y - 650), F, Scale=18.0, Detail=3.0)
     g.link(pos, fine.inputs['Vector'])
-    bent = g.n('ShaderNodeVectorMath', (-2100, y - 650), operation='MULTIPLY_ADD')
+    bent = g.node_with_props('ShaderNodeVectorMath', (-2100, y - 650), operation='MULTIPLY_ADD')
     g.link(fine.outputs['Color'], bent.inputs[0])
     bent.inputs[1].default_value = (C['net_dist'] * 0.16,) * 3
     g.link(off.outputs[0], bent.inputs[2])
@@ -63,7 +63,7 @@ def crack_masks(g, F, openings, C):
     vc = g.node("ShaderNodeTexVoronoi", (-2100, y - 250), F, Scale=C["net_scale"]); g.link(bent.outputs[0], vc.inputs["Vector"])
     vcs = g.node("ShaderNodeSeparateColor", (-1950, y - 250), F); g.link(vc.outputs["Color"], vcs.inputs[0])
     keep_e = g.math("GREATER_THAN", vcs.outputs["Red"], C["net_keep"], (-1800, y - 250), F)
-    patch = g.range(g.noise(pos, 0.45, (-1950, y - 450), F, detail=3), *C["net_patch"], (-1800, y - 450), frame=F)
+    patch = g.map_range(g.noise_texture(pos, 0.45, (-1950, y - 450), F, detail=3), *C["net_patch"], (-1800, y - 450), frame=F)
     pres = g.math("MULTIPLY", keep_e, patch, (-1650, y - 350), F)
     nc = g.math("MULTIPLY", g.math("SUBTRACT", 1.0, g.math("DIVIDE", ve.outputs["Distance"], C["core"] * 0.8, (-1800, y), F), (-1650, y), F, clamp=True), pres, (-1500, y), F)
     nh = g.math("MULTIPLY", g.math("SUBTRACT", 1.0, g.math("DIVIDE", ve.outputs["Distance"], C["halo"] * 0.7, (-1800, y - 100), F), (-1650, y - 100), F, clamp=True), pres, (-1500, y - 100), F)

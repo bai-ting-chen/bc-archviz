@@ -2,7 +2,7 @@
 import math
 import bpy
 from core.archviz import LM_PER_W
-from materials.shared.nodes import G
+from materials.shared.node_graph import NodeGraph
 
 
 def lens_luminance(lumens, area_m2):
@@ -23,7 +23,7 @@ def emitter(name, luminance_cd, kelvin=3000, color=None):
     """Visible light source surface (LED lens, lit panel) with a luminance in cd/m2.
     Cycles emission strength S is radiance in W/m2/sr, so S = L / 683."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    g = G(mat)
+    g = NodeGraph(mat)
     em = g.node("ShaderNodeEmission", (-200, 0), label="%d cd/m2" % luminance_cd,
                 Strength=luminance_cd / LM_PER_W)
     if color:
@@ -40,7 +40,7 @@ def emitter_dots(name, luminance_cd, n=4, radius=0.22, kelvin=3000, housing=(0.0
     """Multi-head downlight face: n round LED lenses along the object's long (generated X) axis,
     black housing around them. Generated coords span 0..1 over the box."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    g = G(mat)
+    g = NodeGraph(mat)
     tc = g.node("ShaderNodeTexCoord", (-1100, 0))
     sep = g.node("ShaderNodeSeparateXYZ", (-900, 0))
     g.link(tc.outputs["Generated"], sep.inputs["Vector"])

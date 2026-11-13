@@ -12,7 +12,7 @@ def _interface_signature(group):
 def layout_group(name="TileLayout"):
     """Create the metre-based shader layout group or reuse its matching version."""
     import bpy
-    from materials.shared.nodes import G
+    from materials.shared.node_graph import NodeGraph
 
     old = bpy.data.node_groups.get(name)
     if old is not None:
@@ -68,7 +68,7 @@ def layout_group(name="TileLayout"):
                 if hasattr(item, "soft_min") and hasattr(item, "soft_max"):
                     item.soft_min, item.soft_max = 0, 1
 
-    g = G(ng)
+    g = NodeGraph(ng)
     ins = g.node("NodeGroupInput", (-1600, 300)).outputs
     out = g.node("NodeGroupOutput", (1800, 300))
     out.is_active_output = True
@@ -112,16 +112,16 @@ def layout_group(name="TileLayout"):
     cell = combine(col, row, (1050, -500))
 
     def random_signed(seed_offset, slot):
-        seed_node = g.n("ShaderNodeVectorMath", (900, -1100 - slot * 220), operation="ADD")
+        seed_node = g.node_with_props("ShaderNodeVectorMath", (900, -1100 - slot * 220), operation="ADD")
         g.link(cell, seed_node.inputs[0])
         seed_node.inputs[1].default_value = seed_offset
-        noise_node = g.n("ShaderNodeTexWhiteNoise", (1100, -1100 - slot * 220), noise_dimensions="3D")
+        noise_node = g.node_with_props("ShaderNodeTexWhiteNoise", (1100, -1100 - slot * 220), noise_dimensions="3D")
         g.link(seed_node.outputs["Vector"], noise_node.inputs["Vector"])
         return math("MULTIPLY", math("SUBTRACT", noise_node.outputs["Value"], 0.5), 2)
 
     rx, ry, ra = [random_signed(seed, slot) for slot, seed in enumerate(_JITTER_SEEDS)]
     diag_vector = combine(hx, hy, (900, -1850))
-    diagonal = g.n("ShaderNodeVectorMath", (1100, -1850), operation="LENGTH")
+    diagonal = g.node_with_props("ShaderNodeVectorMath", (1100, -1850), operation="LENGTH")
     g.link(diag_vector, diagonal.inputs[0])
     diagonal_half = diagonal.outputs["Value"]
     clearance = math("MAXIMUM", math("SUBTRACT", half_joint, 1e-5), 0)
@@ -141,7 +141,7 @@ def layout_group(name="TileLayout"):
     dx = math("SUBTRACT", math("ABSOLUTE", math("SUBTRACT", tx, hx)), math("SUBTRACT", hx, rc))
     dy = math("SUBTRACT", math("ABSOLUTE", math("SUBTRACT", ty, hy)), math("SUBTRACT", hy, rc))
     positive = combine(math("MAXIMUM", dx, 0), math("MAXIMUM", dy, 0), (900, -800))
-    length = g.n("ShaderNodeVectorMath", (1100, -800), operation="LENGTH")
+    length = g.node_with_props("ShaderNodeVectorMath", (1100, -800), operation="LENGTH")
     g.link(positive, length.inputs[0])
     inside = math("MINIMUM", math("MAXIMUM", dx, dy), 0)
     edge = math("SUBTRACT", rc, math("ADD", length.outputs["Value"], inside))
@@ -149,10 +149,10 @@ def layout_group(name="TileLayout"):
     uv = combine(math("DIVIDE", tx, ins["Tile W"], clamp=True),
                  math("DIVIDE", ty, ins["Tile H"], clamp=True), (1400, 500))
     tile_size = combine(ins["Tile W"], ins["Tile H"], (1400, 800))
-    seed = g.n("ShaderNodeVectorMath", (1250, -500), operation="ADD")
+    seed = g.node_with_props("ShaderNodeVectorMath", (1250, -500), operation="ADD")
     g.link(cell, seed.inputs[0])
     seed.inputs[1].default_value = (0.5, 0.5, 0.5)
-    noise = g.n("ShaderNodeTexWhiteNoise", (1450, -500), noise_dimensions="3D")
+    noise = g.node_with_props("ShaderNodeTexWhiteNoise", (1450, -500), noise_dimensions="3D")
     g.link(seed.outputs["Vector"], noise.inputs["Vector"])
     for label, value in (("Tile ID", noise.outputs["Value"]), ("Tile UV", uv),
                          ("Edge", edge), ("Joint", joint), ("Cell", cell),

@@ -9,7 +9,7 @@ sys.path.insert(0,str(ROOT/'scripts/controls/regression'))
 import bpy
 from regress_graph import graph
 from core.assets import set_project
-from materials.shared.nodes import G
+from materials.shared.node_graph import NodeGraph
 from effects.wear.wear import WearLayer, apply_surface_wear, LAYERS
 from effects.wear.masks import asset_mask
 from effects.wear.atlas import StampAtlas
@@ -34,21 +34,21 @@ for kind in LAYERS:
                                extent=WearExtent(drip_top_m=2.4))
             name=f'{kind}:{source}:{amount}:{enabled}'
             material=bpy.data.materials.new(name)
-            g=G(material)
+            g=NodeGraph(material)
             shader=g.node('ShaderNodeBsdfPrincipled',(5000,0))
             under=g.node('ShaderNodeBsdfPrincipled',(5000,-600),Roughness=.8)
             surface=apply_surface_wear(g,shader,{kind:settings},under_shader=under.outputs[0])
             output=g.node('ShaderNodeOutputMaterial',(6000,0))
             g.link(surface,output.inputs['Surface'])
-            result[name]=graph(g.nt)
+            result[name]=graph(g.tree)
 # Whole stack catches composition and ordering changes as well as individual sources.
 for source in ('procedural','mask','hybrid'):
     material=bpy.data.materials.new('stack-'+source)
-    g=G(material)
+    g=NodeGraph(material)
     shader=g.node('ShaderNodeBsdfPrincipled',(5000,0))
     under=g.node('ShaderNodeBsdfPrincipled',(5000,-600))
     apply_surface_wear(g,shader,{k:WearLayer(source=source) for k in LAYERS},under_shader=under.outputs[0])
-    result['stack:'+source]=graph(g.nt)
+    result['stack:'+source]=graph(g.tree)
 out.write_text(json.dumps(result,sort_keys=True))
 print('SURFACE_GRAPH_CASES',len(result),flush=True)
 

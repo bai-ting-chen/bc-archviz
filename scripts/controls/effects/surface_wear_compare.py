@@ -64,10 +64,10 @@ def _set_levels(material, kind, parameters):
 
 def _calibration_fields(material, kind):
     """Export the scan before location weighting and the fixed extent used by the actual graph."""
-    from materials.shared.nodes import G, sock
-    graph = G(material.node_tree)
-    switch = next(n for n in graph.nt.nodes if n.label == 'surface-' + kind)
-    source = sock(switch.inputs, 'B').links[0].from_socket
+    from materials.shared.node_graph import NodeGraph, active_socket
+    graph = NodeGraph(material.node_tree)
+    switch = next(n for n in graph.tree.nodes if n.label == 'surface-' + kind)
+    source = active_socket(switch.inputs, 'B').links[0].from_socket
     if kind == 'run-off':
         scan, extent = source, 1.
     else:
@@ -78,7 +78,7 @@ def _calibration_fields(material, kind):
     for name, value in (('scan', scan), ('extent', extent)):
         aov = graph.node('ShaderNodeOutputAOV', (900, -29000))
         aov.aov_name = 'var_surface-' + kind + '-calibration-' + name
-        graph._in(aov.inputs['Value'], value)
+        graph.link_or_set(aov.inputs['Value'], value)
 
 
 def _candidate(out, args, kind, candidate, targets, regions):

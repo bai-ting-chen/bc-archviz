@@ -15,7 +15,7 @@ import surface_wear_compare as compare
 from surface_wear_match import remap,fit_levels,statistics,prefilter_mask
 from effects.wear.wear import WearLayer,MaskSource,apply_surface_wear
 from effects.wear.masks import MASK_LEVELS_LABEL,MASK_GAMMA_LABEL
-from materials.shared.nodes import G,sock
+from materials.shared.node_graph import NodeGraph,active_socket
 from core import assets
 
 
@@ -46,7 +46,7 @@ def check_bake(out):
         material=bpy.data.materials['placeholder-chipping']
         aov=next(n for n in material.node_tree.nodes if n.type=='OUTPUT_AOV' and n.aov_name=='var_surface-chipping')
         switch=aov.inputs['Value'].links[0].from_node
-        product=sock(switch.inputs,'B').links[0].from_node
+        product=active_socket(switch.inputs,'B').links[0].from_node
         assert product.operation=='MULTIPLY'
         assert not product.inputs[1].is_linked and product.inputs[1].default_value==1
         assert product.inputs[0].is_linked
@@ -73,7 +73,7 @@ def check_calibration(path):
     """Exercise every raw-mask graph and preserve all location/socket defaults during fitting."""
     for kind in lab.LAYERS:
         material=bpy.data.materials.new('calibration-'+kind)
-        graph=G(material)
+        graph=NodeGraph(material)
         coat=graph.node('ShaderNodeBsdfPrincipled',(5000,0))
         under=graph.node('ShaderNodeBsdfPrincipled',(5000,-1000))
         apply_surface_wear(graph,coat,{kind:WearLayer(source='mask',mask=MaskSource(str(path)))},under.outputs[0])
@@ -81,12 +81,12 @@ def check_calibration(path):
         before=defaults(material)
         compare._set_levels(material,kind,dict(black=.1,white=.8,gamma=1.4,amount=.6))
         assert defaults(material)==before,kind
-        assert any(n.type=='MAP_RANGE' and n.label!=MASK_LEVELS_LABEL for n in graph.nt.nodes)
-        assert all(abs(n.inputs['From Min'].default_value-.1)<1e-6 for n in graph.nt.nodes if n.label==MASK_LEVELS_LABEL)
-        switch=next(n for n in graph.nt.nodes if n.label=='surface-'+kind)
-        product=sock(switch.inputs,'B').links[0].from_node
+        assert any(n.type=='MAP_RANGE' and n.label!=MASK_LEVELS_LABEL for n in graph.tree.nodes)
+        assert all(abs(n.inputs['From Min'].default_value-.1)<1e-6 for n in graph.tree.nodes if n.label==MASK_LEVELS_LABEL)
+        switch=next(n for n in graph.tree.nodes if n.label=='surface-'+kind)
+        product=active_socket(switch.inputs,'B').links[0].from_node
         for name,index in (('scan',0),('extent',1)):
-            aov=next(n for n in graph.nt.nodes if n.type=='OUTPUT_AOV' and n.aov_name.endswith('-calibration-'+name))
+            aov=next(n for n in graph.tree.nodes if n.type=='OUTPUT_AOV' and n.aov_name.endswith('-calibration-'+name))
             assert aov.inputs['Value'].links[0].from_socket==product.inputs[index].links[0].from_socket
     rng=np.random.default_rng(81)
     scan=np.clip(rng.uniform(0,1,(800,1))+rng.normal(0,.08,(800,16)),0,1)

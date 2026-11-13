@@ -1,6 +1,6 @@
 """Concrete boards; canonical implementation behind concrete."""
 
-from materials.shared.nodes import G, sock
+from materials.shared.node_graph import NodeGraph, active_socket
 
 from materials.shared.pbr_maps import _ph_maps
 from materials.shared.principled import _principled
@@ -59,9 +59,9 @@ def vertical_boards(mat, cylinder=None, strip_m=0.9, strip_tone=(0.90, 1.08), ma
         diff = next(n for n in N if n.type == "TEX_IMAGE" and n.image.colorspace_settings.name == "sRGB")
         flat = N.new("ShaderNodeMix"); flat.data_type = "RGBA"; flat.label = "flatten stains"
         flat.inputs["Factor"].default_value = flatten
-        L.new(diff.outputs["Color"], sock(flat.inputs, "A"))
-        sock(flat.inputs, "B").default_value = (*mat["map_mean"], 1)
-        L.new(sock(flat.outputs, "Result"), gain.inputs[0])
+        L.new(diff.outputs["Color"], active_socket(flat.inputs, "A"))
+        active_socket(flat.inputs, "B").default_value = (*mat["map_mean"], 1)
+        L.new(active_socket(flat.outputs, "Result"), gain.inputs[0])
     src = bsdf.inputs["Base Color"].links[0].from_socket
     tone = N.new("ShaderNodeVectorMath"); tone.operation = "SCALE"; tone.label = "strip x macro"
     L.new(src, tone.inputs[0]); L.new(mul.outputs[0], tone.inputs["Scale"])

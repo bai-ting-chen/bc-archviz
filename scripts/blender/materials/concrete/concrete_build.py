@@ -3,9 +3,9 @@
 import bpy
 from effects.wear.wear_locations import round_shader
 
-from materials.shared.nodes import G, sock
+from materials.shared.node_graph import NodeGraph
 
-from materials.shared.pbr_maps import _ph_maps
+from materials.shared.pbr_maps import _ph_maps, box_maps
 from materials.shared.principled import _principled
 from materials.shared.map_measure import map_mean
 
@@ -20,35 +20,22 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
     combined with the normal map, and chipped-edge wear driving a worn BRDF."""
     maps, meta = _ph_maps(tex_id)
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
-    g = G(mat)
+    g = NodeGraph(mat)
     g.frame("Maps (BoxUV, real-world size)", (0.20, 0.24, 0.30))
     g.frame("Surface relief: normal + height bump + round edges", (0.25, 0.22, 0.30))
     g.frame("Wear mask: chips x noise, edge line", (0.30, 0.22, 0.20))
     g.frame("BRDFs", (0.20, 0.28, 0.22))
     F_MAP, F_REL, F_WEAR, F_BRDF = list(g.frames)
 
-    uv = g.uv("BoxUV", (-1700, 200), F_MAP)
-    diff = g.img(maps["diff"], "sRGB", (-1450, 450), F_MAP, uv, "diffuse")
-    arm = g.img(maps["arm"], "Non-Color", (-1450, 150), F_MAP, uv, "arm (AO/rough/metal)")
-    nor = g.img(maps["nor_gl"], "Non-Color", (-1450, -150), F_MAP, uv, "normal (GL)")
-    hgt = g.img(maps["disp"], "Non-Color", (-1450, -450), F_MAP, uv, "height")
+    m = box_maps(g, maps, F_MAP, (-1700, 200), arm_label="arm (AO/rough/metal)", normal_frame=F_REL,
+                 normal_strength=normal_strength, height_frame=F_MAP)
+    diff, hgt, sep, nmap = m["diff"], m["hgt"], m["sep"], m["nmap"]
 
-    tone = g.node("ShaderNodeMix", (-1100, 450), F_MAP, label="color_mult (tone match)")
-    tone.data_type, tone.blend_type = "RGBA", "MULTIPLY"
-    tone.inputs["Factor"].default_value = 1.0
-    sock(tone.inputs, "B").default_value = (*color_mult, 1.0)
-    g.link(diff.outputs["Color"], sock(tone.inputs, "A"))
-    sep = g.node("ShaderNodeSeparateColor", (-1100, 150), F_MAP)
-    g.link(arm.outputs["Color"], sep.inputs["Color"])
-    rough = g.node("ShaderNodeMix", (-900, 150), F_MAP, label="rough: map 0.45 over 0.72")
-    rough.data_type = "FLOAT"
-    rough.inputs["Factor"].default_value = 0.45
-    sock(rough.inputs, "A").default_value = 0.72
-    g.link(sep.outputs["Green"], sock(rough.inputs, "B"))
+    tone = g.mix(diff.outputs["Color"], (*color_mult, 1.0), 1.0, (-1100, 450), F_MAP, blend="MULTIPLY",
+                 label="color_mult (tone match)")
+    rough = g.mix(0.72, sep.outputs["Green"], 0.45, (-900, 150), F_MAP, data_type="FLOAT",
+                  label="rough: map 0.45 over 0.72")
 
-    nmap = g.node("ShaderNodeNormalMap", (-1050, -150), F_REL, Strength=normal_strength)
-    nmap.uv_map = "BoxUV"
-    g.link(nor.outputs["Color"], nmap.inputs["Color"])
     bump = g.node("ShaderNodeBump", (-850, -250), F_REL, label="height as bump",
                   Distance=bump_distance)
     g.link(hgt.outputs["Color"], bump.inputs["Height"])
@@ -81,8 +68,8 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
     clean = g.node("ShaderNodeBsdfPrincipled", (-250, 350), F_BRDF, label="Concrete",
                    IOR=1.5)
     clean.inputs["Coat Weight"].default_value = 0.03
-    g.link(sock(tone.outputs, "Result"), clean.inputs["Base Color"])
-    g.link(sock(rough.outputs, "Result"), clean.inputs["Roughness"])
+    g.link(tone, clean.inputs["Base Color"])
+    g.link(rough, clean.inputs["Roughness"])
     g.link(relief, clean.inputs["Normal"])
     worn = g.node("ShaderNodeBsdfPrincipled", (-250, -50), F_BRDF, label="Worn BRDF",
                   Roughness=0.93)

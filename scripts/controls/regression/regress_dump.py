@@ -1,11 +1,8 @@
 """Run Blender helper cases and write their graph and geometry baseline."""
 
-import os as _os
-import sys as _sys
-_CONTROLS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'tile', 'material', 'effects', 'water', 'lighting', 'environment', 'regression')]:
-    if _d not in _sys.path:
-        _sys.path.append(_d)
+import os as _os, sys as _sys
+_sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+import controls_import_paths  # noqa: E402,F401 -- every controls topic folder on sys.path
 import json
 import sys
 import traceback
@@ -33,7 +30,7 @@ def dump(SRC, HERE, OUT):
         except Exception:
             res[k] = {"ERROR": traceback.format_exc().splitlines()[-1]}
     for k, fn in (("eval edge_wear", lambda m: eval_positions(m['effects.wear'].edge_wear_group(), m['effects.wear'].add_edge_wear)),
-                  ("eval wood_wear", lambda m: eval_positions(m['materials.wood.wood_damage'].wood_wear_group(), m['effects.wear'].add_edge_wear))):
+                  ("eval wood_wear", lambda m: eval_positions(m['effects.wear'].edge_wear_group(**m['materials.wood.wood'].WOOD_CHIPS), m['effects.wear'].add_edge_wear))):
         bpy.ops.wm.read_homefile(use_empty=True)
         try:
             res[k] = B(lambda: fn(mods()))()

@@ -52,8 +52,8 @@ Use when: choosing a texture source or method for a surface, then scaling it and
    direction runs up the image. Shader Image Texture › Box only where UVs cannot be written: it has no
    tangents (height through Bump), Blend 0.1–0.2, Object coordinates (api-traps).
 6. **Variation:** Object Info Random, Geometry › Random per Island (per plank/tile in one mesh).
-7. **Node trees** in labelled frames (`materials.shared.nodes.G`). Mix nodes keep hidden
-   same-named sockets → `materials.shared.nodes.sock()`.
+7. **Node trees** in labelled frames (`materials.shared.node_graph.NodeGraph`). Mix nodes keep hidden
+   same-named sockets → `materials.shared.node_graph.active_socket()`.
 8. **Prove the texture survives:** high-pass sigma (`imgstats`) of a native render crop against
    the reference crop at a matching screen scale.
 

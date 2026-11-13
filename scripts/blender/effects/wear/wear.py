@@ -1,6 +1,6 @@
 """Independent wear layers sharing procedural and grayscale-image factor inputs."""
 from dataclasses import dataclass, field
-from materials.shared.nodes import layer_frame, layer_switch
+from materials.shared.node_graph import layer_frame, layer_switch
 from effects.wear.patterns import procedural_field
 from effects.wear.masks import MaskSource, image_mask, mask_field, surface_coordinates
 from effects.wear.defaults import default_field, DEFAULT_SOURCES
@@ -58,7 +58,7 @@ def wear_factor(g, kind, settings, vector=None, components=None):
                 continue
             aov = g.node('ShaderNodeOutputAOV', (400, -27000), frame)
             aov.aov_name = 'var_surface-' + kind + '-' + name
-            g._in(aov.inputs['Value'], parts[name])
+            g.link_or_set(aov.inputs['Value'], parts[name])
         extent = 1  # already included before the procedural region threshold
     elif source == 'hybrid':
         raw = scratch_hybrid(g, settings, vector, frame)
@@ -149,7 +149,7 @@ def _multiply_input(g, socket, factor, gain, frame, y):
         node = g.node('ShaderNodeMixRGB', (3000, y), frame)
         node.blend_type = 'MULTIPLY'
         node.inputs[0].default_value = 1
-        g._in(node.inputs[1], original)
+        g.link_or_set(node.inputs[1], original)
         g.link(multiplier, node.inputs[2])
         result = node.outputs[0]
     else:

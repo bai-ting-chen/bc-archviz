@@ -22,7 +22,7 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 |---|---|
 | [Physical Ranges](physical-ranges.md) | `materials.shared.pbr` |
 | [Texture Selection](texture-selection.md) | `materials.shared.pbr` |
-| [Scale](scale.md) | `materials.shared.nodes` |
+| [Scale](scale.md) | `materials.shared.node_graph` |
 | [Displacement](displacement/displacement.md) | `materials.displacement.displacement` |
 
 | Materials | Canonical helper |
@@ -64,7 +64,7 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 | [Wet Surfaces](../effects/wet-surfaces.md) | `materials.vegetation.vegetation.WET`, `materials.ground.ground.ground_material`, `materials.water.wet` |
 | [Caustics](../effects/caustics.md) | `gn_caustics`; LuxCore `renderer.luxcore` |
 
-Shared graph/socket helpers: `materials.shared.nodes.G` / `sock`; asset lookup and project state: `archviz`. Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.
+Shared graph/socket helpers: `materials.shared.node_graph.NodeGraph` / `active_socket`; asset lookup and project state: `archviz`. Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.
 [LuxCore materials](../renderer/luxcore.md): `renderer.luxcore.luxcore`; [all helper signatures](../scene/blender-python-helpers.md).
 
 ## Water: which method, which file

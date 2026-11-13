@@ -29,7 +29,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 - Wet extent behind falling water: `scripts/blender/materials/water/wet.py` (`materials.water.wet`),
   `proxy(lip, pool_z, WetParams)`; `build.falling_film(wet_proxy=...)` replaces the proxy mesh in place.
 - No builder for a wet band along a standing water edge: it is node graph only (§4.2).
-- Controls: `scripts/controls/material/vegetation_graph_check.py` and `ground_graph_check.py` (wet cases),
+- Controls: `scripts/controls/material_graph_check.py` topics `vegetation` and `ground` (wet cases),
   `scripts/controls/water/water_numeric_check.py` (the proxy).
 
 ## 4. Instructions and parameters, per layer

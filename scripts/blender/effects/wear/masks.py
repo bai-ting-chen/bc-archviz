@@ -38,7 +38,7 @@ def image_mask(g, mask, vector=None, frame=None, row=0, mapped_vector=None):
         uv = mapped_vector  # already in tile units; stochastic UV lookups share the same loader
     elif mask.mapping == 'uv':
         # Author with box_uv/directional_uv(size=mask.size_m); do not scale UVs twice.
-        uv = g.uv(mask.uv_map, (-2800, y), frame)
+        uv = g.uv_map(mask.uv_map, (-2800, y), frame)
     elif mask.mapping == 'world':
         if vector is None:
             vector = surface_coordinates(g, frame)
@@ -63,9 +63,9 @@ def image_mask(g, mask, vector=None, frame=None, row=0, mapped_vector=None):
         g.link(rotation.outputs[0], offset.inputs[0])
         offset.inputs[1].default_value = (*mask.offset_uv, 0)
         uv = offset.outputs[0]
-    tex = g.img(str(mask.path), 'Non-Color', (-2500, y), frame, uv, 'surface-wear mask')
+    tex = g.image_texture(str(mask.path), 'Non-Color', (-2500, y), frame, uv, 'surface-wear mask')
     tex.interpolation = 'Linear'
-    value = g.range(tex.outputs['Color'], mask.black, mask.white, (-2200, y), frame=frame,
+    value = g.map_range(tex.outputs['Color'], mask.black, mask.white, (-2200, y), frame=frame,
                     label=MASK_LEVELS_LABEL)
     value = g.math('POWER', value, mask.gamma, (-1900, y), frame)
     value.node.label = MASK_GAMMA_LABEL
@@ -122,7 +122,6 @@ def scan_size_m(metadata):
 
 def surface_coordinates(g, frame=None):
     """Project world metres onto the dominant face plane for walls, tops and soffits."""
-    from materials.shared.nodes import sock
     geometry = g.node('ShaderNodeNewGeometry', (-5200, -300), frame)
     position = g.node('ShaderNodeSeparateXYZ', (-5000, -300), frame)
     normal = g.node('ShaderNodeSeparateXYZ', (-5000, -800), frame)
@@ -133,14 +132,7 @@ def surface_coordinates(g, frame=None):
     x_face = g.math('GREATER_THAN', normals[0], normals[1], (-4400, -800), frame)
     xy_max = g.math('MAXIMUM', normals[0], normals[1], (-4400, -1100), frame)
     z_face = g.math('GREATER_THAN', normals[2], xy_max, (-4100, -1100), frame)
-    vectors = [g.combine(position.outputs[a], position.outputs[b], 0, (-4400, i * 250), frame)
+    vectors = [g.combine_xyz(position.outputs[a], position.outputs[b], 0, (-4400, i * 250), frame)
                for i, (a, b) in enumerate((('X', 'Z'), ('Y', 'Z'), ('X', 'Y')))]
-    def mix(a, b, factor, location):
-        node = g.node('ShaderNodeMix', location, frame)
-        node.data_type = 'VECTOR'
-        g.link(factor, node.inputs[0])
-        g.link(a, sock(node.inputs, 'A'))
-        g.link(b, sock(node.inputs, 'B'))
-        return sock(node.outputs, 'Result')
-    wall = mix(vectors[0], vectors[1], x_face, (-4000, -300))
-    return mix(wall, vectors[2], z_face, (-3600, -300))
+    wall = g.mix(vectors[0], vectors[1], x_face, (-4000, -300), frame, data_type='VECTOR')
+    return g.mix(wall, vectors[2], z_face, (-3600, -300), frame, data_type='VECTOR')

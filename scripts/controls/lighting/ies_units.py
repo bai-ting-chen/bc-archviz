@@ -1,10 +1,7 @@
 
-import os as _os
-import sys as _sys
-_CONTROLS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'tile', 'material', 'effects', 'water', 'lighting', 'environment', 'regression')]:
-    if _d not in _sys.path:
-        _sys.path.append(_d)
+import os as _os, sys as _sys
+_sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+import controls_import_paths  # noqa: E402,F401 -- every controls topic folder on sys.path
 # Rerun after a Blender upgrade: blender -b --factory-startup --python scripts/controls/lighting/ies_units.py
 # Control: how Cycles scales an IES Texture on a light, and which way the profile points.
 # Synthetic LM-63 files with a known candela value; illuminance on a white Lambert plane read

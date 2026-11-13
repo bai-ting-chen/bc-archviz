@@ -1,6 +1,6 @@
 """Pavers; canonical implementation behind stone."""
 
-from materials.shared.nodes import G, sock
+from materials.shared.node_graph import NodeGraph, active_socket
 
 from materials.shared.principled import _principled
 from materials.shared.albedo import albedo_material
@@ -31,8 +31,8 @@ def long_pavers(tex_id, name, target, row=0.18, length=0.75, mortar=0.008, long_
     src = bsdf.inputs["Base Color"].links[0].from_socket
     mul = N.new("ShaderNodeMix"); mul.data_type = "RGBA"; mul.blend_type = "MULTIPLY"
     mul.inputs["Factor"].default_value = 1.0
-    L.new(src, sock(mul.inputs, "A")); L.new(br.outputs["Color"], sock(mul.inputs, "B"))
-    L.new(sock(mul.outputs, "Result"), bsdf.inputs["Base Color"])
+    L.new(src, active_socket(mul.inputs, "A")); L.new(br.outputs["Color"], active_socket(mul.inputs, "B"))
+    L.new(active_socket(mul.outputs, "Result"), bsdf.inputs["Base Color"])
     bump = N.new("ShaderNodeBump"); bump.inputs["Distance"].default_value = 0.004; bump.invert = True
     L.new(br.outputs["Fac"], bump.inputs["Height"])
     if bsdf.inputs["Normal"].links:

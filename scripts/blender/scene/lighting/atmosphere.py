@@ -15,7 +15,7 @@ is also a noise source).
 import bmesh
 import bpy
 
-from materials.shared.nodes import G
+from materials.shared.node_graph import NodeGraph
 
 
 def sigma_from_visibility(visibility_m):
@@ -35,17 +35,17 @@ def fog_volume(centre=(0.0, 0.0), visibility_m=150.0, diameter_um=15.0, box=(500
     ob.scale = (sx, sy, z1 - z0)
     (collection or bpy.context.scene.collection).objects.link(ob)
     mat = bpy.data.materials.new(name + "_MIE")
-    g = G(mat)
-    out = g.n("ShaderNodeOutputMaterial", (1500, 0))
-    vs = g.n("ShaderNodeVolumeScatter", (1250, 0), phase="MIE")
+    g = NodeGraph(mat)
+    out = g.node_with_props("ShaderNodeOutputMaterial", (1500, 0))
+    vs = g.node_with_props("ShaderNodeVolumeScatter", (1250, 0), phase="MIE")
     vs.inputs["Diameter"].default_value = diameter_um
     vs.inputs["Color"].default_value = (1, 1, 1, 1)
     g.link(vs.outputs[0], out.inputs["Volume"])
-    geo = g.n("ShaderNodeNewGeometry", (-900, 0))
-    sep = g.n("ShaderNodeSeparateXYZ", (-700, 0)); g.link(geo.outputs["Position"], sep.inputs[0])
-    height = g.range(sep.outputs["Z"], top[0], top[1], (-500, 100), 1.0, 0.0, smooth=True, label="fog top")
-    hollow = g.range(sep.outputs["Z"], valley[0], valley[1], (-500, -100), 1.0, 1.0 + valley[2], smooth=True, label="hollows")
-    nz = g.noise(geo.outputs["Position"], patch[0], (-500, -300), detail=3.0, rough=0.5)
+    geo = g.node_with_props("ShaderNodeNewGeometry", (-900, 0))
+    sep = g.node_with_props("ShaderNodeSeparateXYZ", (-700, 0)); g.link(geo.outputs["Position"], sep.inputs[0])
+    height = g.map_range(sep.outputs["Z"], top[0], top[1], (-500, 100), 1.0, 0.0, smooth=True, label="fog top")
+    hollow = g.map_range(sep.outputs["Z"], valley[0], valley[1], (-500, -100), 1.0, 1.0 + valley[2], smooth=True, label="hollows")
+    nz = g.noise_texture(geo.outputs["Position"], patch[0], (-500, -300), detail=3.0, rough=0.5)
     pt = g.math("ADD", g.math("MULTIPLY", g.math("SUBTRACT", nz, 0.5, (-300, -300)), 2 * patch[1], (-150, -300)), 1.0, (0, -300))
     dens = g.math("MULTIPLY", g.math("MULTIPLY", height, hollow, (-150, 0)), g.math("MAXIMUM", pt, 0.2, (150, -300)), (300, 0))
     dens = g.math("MULTIPLY", dens, sigma_from_visibility(visibility_m), (450, 0))

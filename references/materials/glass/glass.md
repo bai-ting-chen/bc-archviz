@@ -36,7 +36,7 @@ used here with glass settings.
     with the dome centred on `obj`.
   - `glass_shell(objs, thickness)`: turns solid lamp globes into thin shells; its use is in
     `references/scene/lighting-camera.md`.
-- Controls: `scripts/controls/material/glass_graph_check.py` (node-graph baseline of the base, the
+- Controls: `scripts/controls/material_graph_check.py` topic `glass` (node-graph baseline of the base, the
   shell and the distortion); `scripts/controls/environment/outdoor_smoke.py` renders a distorted pane.
 
 ## 4. Instructions and parameters, per layer

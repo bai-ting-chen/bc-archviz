@@ -10,7 +10,7 @@ import numpy as np
 SCRIPTS=Path(__file__).resolve().parents[2]
 sys.path[:0]=[str(SCRIPTS/'blender'),str(SCRIPTS/'controls'),str(Path(__file__).parent)]
 from core.assets import set_project
-from materials.shared.nodes import G
+from materials.shared.node_graph import NodeGraph
 from effects.wear.wear import WearLayer,WearExtent,HybridSource,MaskSource,wear_factor
 from effects.wear.masks import asset_mask
 from variation_lab import black_scene,ortho_camera,plane,emission,render,channel
@@ -19,7 +19,7 @@ from variation_lab import black_scene,ortho_camera,plane,emission,render,channel
 def _fixture(settings,down=False):
     black_scene(samples=128,res=700 if not down else 64)
     material=bpy.data.materials.new('hybrid-source-check')
-    g=G(material)
+    g=NodeGraph(material)
     factor,_=wear_factor(g,'dried-marks' if down else 'grunge',settings)
     emission(g,factor)
     if down:

@@ -12,7 +12,7 @@ SCRIPTS = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(SCRIPTS / 'blender'), str(SCRIPTS / 'controls'),
                 str(SCRIPTS / 'controls/regression')]
 from _scene import black_scene, ortho_camera
-from materials.shared.nodes import G, sock
+from materials.shared.node_graph import NodeGraph, active_socket
 from effects.variation_tiling import anti_tile
 from effects.variation_per_unit_shading import unit_key, unit_values, set_unit_keys, random_tone_material
 from effects.variation_macro_tone import macro_tone, _field, _moments
@@ -21,7 +21,7 @@ from regress_graph import graph
 
 def material(name):
     mat = bpy.data.materials.new(name)
-    return mat, G(mat)
+    return mat, NodeGraph(mat)
 
 
 def emission(g, value):
@@ -109,7 +109,7 @@ def tiling(out):
     off_passes = render(out, 'tiling-off')
     off = channel(off_passes, 'Combined')
     assert np.max(np.abs(channel(off_passes, 'var_anti_tile'))) == 0
-    node = next(n for n in g.nt.nodes if n.label == 'anti_tile amount')
+    node = next(n for n in g.tree.nodes if n.label == 'anti_tile amount')
     node.outputs[0].default_value = 1
     on = channel(render(out, 'tiling-on'), 'Combined')
     error = float(np.max(np.abs(baseline-off)))
@@ -125,7 +125,7 @@ def tiling(out):
                    on_mae=change, plain_row_period_mae=plain_phase, row_period_mae=phase)
     (out/'tiling-metrics.json').write_text(json.dumps(metrics, indent=2))
     assert metrics['off_png_identical'] and change > .001 and phase > 1.1*plain_phase, metrics
-    copies = [n for n in g.nt.nodes if n.type == 'TEX_IMAGE']
+    copies = [n for n in g.tree.nodes if n.type == 'TEX_IMAGE']
     for tex in texs:
         assert sum(n.image == tex.image for n in copies) == 3
         assert all(n.projection == tex.projection and n.projection_blend == tex.projection_blend
@@ -148,7 +148,7 @@ def coordinates(out):
         texs.append(node)
     generated = g.node('ShaderNodeTexCoord', (-1000, 0)).outputs['Generated']
     g.link(generated, texs[2].inputs['Vector'])
-    emission(g, g.combine(*(node.outputs['Color'] for node in texs), (800, 0)))
+    emission(g, g.combine_xyz(*(node.outputs['Color'] for node in texs), (800, 0)))
     anti_tile(g, [texs[1]], amount=0)
     ob = plane(mat, 4)
     for uv in ob.data.uv_layers.active.data:
@@ -171,11 +171,11 @@ def _marks_fixture():
     raw_aov = g.node('ShaderNodeOutputAOV', (900, 600))
     raw_aov.aov_name = raw_aov.name = 'noise_calibration'
     g.link(noise, raw_aov.inputs['Value'])
-    tone_preview = g.range(tone, .925, 1.075, (600, 200))
-    roughness_preview = g.range(roughness, -.05, .05, (600, 400))
-    emission(g, g.combine(tone_preview, roughness_preview, noise, (800, 0)))
+    tone_preview = g.map_range(tone, .925, 1.075, (600, 200))
+    roughness_preview = g.map_range(roughness, -.05, .05, (600, 400))
+    emission(g, g.combine_xyz(tone_preview, roughness_preview, noise, (800, 0)))
     macro_tone(g, amount=0)
-    for node in g.nt.nodes:
+    for node in g.tree.nodes:
         if node.type == 'OUTPUT_AOV':
             node.aov_name = node.name.replace('.001', '_off')
     plane(mat)
@@ -185,12 +185,12 @@ def _marks_fixture():
 
 def _check_macro_graph(g):
     """Check macro-only AOVs, neutral inputs and both amount controls without rendering."""
-    probes={n.aov_name:n for n in g.nt.nodes if n.type=='OUTPUT_AOV' and n.aov_name.startswith('var_')}
+    probes={n.aov_name:n for n in g.tree.nodes if n.type=='OUTPUT_AOV' and n.aov_name.startswith('var_')}
     assert set(probes)=={'var_macro_tone','var_macro_roughness','var_macro_tone_off','var_macro_roughness_off'}
     for name,node in probes.items():
         switch=node.inputs['Value'].links[0].from_node
         assert switch.inputs[0].links[0].from_socket.default_value==(0 if name.endswith('_off') else 1)
-        assert sock(switch.inputs,'A').default_value==(1 if 'tone' in name else 0)
+        assert active_socket(switch.inputs,'A').default_value==(1 if 'tone' in name else 0)
     return dict(macro_only=True,amount_controls=True,neutral_inputs=True,renders=0)
 
 

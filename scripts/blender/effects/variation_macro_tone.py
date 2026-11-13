@@ -1,6 +1,6 @@
 """World-space macro tone with independently switched albedo and roughness outputs."""
 import math
-from materials.shared.nodes import layer_frame, layer_switch
+from materials.shared.node_graph import layer_frame, layer_switch
 
 # One octave measured on variation_lab's 64 m XY plane at 512 x 512 pixels.
 SD1 = 0.1174030453
@@ -19,7 +19,7 @@ def _moments(detail, rough):
 def _field(g, layer, scale_m, detail=6.0, rough=0.6):
     frame = layer_frame(g, 'VARIATION: ' + layer.upper().replace('_', ' '))
     world = g.node('ShaderNodeNewGeometry', (-1800, 0), frame).outputs['Position']
-    return g.noise(world, 1/scale_m, (-1500, 0), frame, detail=detail, rough=rough), frame
+    return g.noise_texture(world, 1/scale_m, (-1500, 0), frame, detail=detail, rough=rough), frame
 
 
 def macro_tone(g, scale_m=4.0, albedo=0.075, roughness=0.05, amount=1.0):
@@ -28,6 +28,6 @@ def macro_tone(g, scale_m=4.0, albedo=0.075, roughness=0.05, amount=1.0):
     mean, sd = _moments(6.0, 0.6)
     values = []
     for row, (name, span, neutral) in enumerate((('macro_tone', albedo, 1), ('macro_roughness', roughness, 0))):
-        raw = g.range(noise, mean-2*sd, mean+2*sd, (-1200, -700*row), tmin=neutral-span, tmax=neutral+span, frame=frame)
+        raw = g.map_range(noise, mean-2*sd, mean+2*sd, (-1200, -700*row), tmin=neutral-span, tmax=neutral+span, frame=frame)
         values.append(layer_switch(g, name, raw, amount, neutral, frame))
     return tuple(values)

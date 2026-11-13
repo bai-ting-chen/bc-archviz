@@ -11,7 +11,7 @@ import bpy
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'blender'))
 from core.assets import set_project
-from materials.shared.nodes import G, sock
+from materials.shared.node_graph import NodeGraph, active_socket
 from effects.wear.wear import WearLayer, wear_factor, apply_surface_wear
 from effects.wear.defaults import DEFAULT_SOURCES
 from effects.wear import defaults as surface_wear_defaults, hybrid as surface_wear_hybrid
@@ -21,7 +21,7 @@ from effects.wear.masks import asset_mask, scan_size_m
 
 def _graph(kind, settings=None):
     mat = bpy.data.materials.new('check-' + kind)
-    g = G(mat)
+    g = NodeGraph(mat)
     factor, _ = wear_factor(g, kind, settings or WearLayer())
     return g, factor
 
@@ -57,7 +57,7 @@ def main():
     for source in (None, 'procedural', 'mask', 'hybrid'):
         alias_graph, factor = _graph('worn-through', WearLayer(source=source))
         assert any(node.type == 'FRAME' and node.label == 'surface-wear: chipping'
-                   for node in alias_graph.nt.nodes)
+                   for node in alias_graph.tree.nodes)
 
     for text, expected in (('70 x 70 cm',(.7,.7)),('700 x 1000 mm',(.7,1.)),
                            ('2 x 3 m',(2.,3.)),('70 cm x 1 m',(.7,1.)),('0.7 m',(.7,.7))):
@@ -67,8 +67,8 @@ def main():
     with patch.object(wear_scratches,'asset_mask',return_value=None), contextlib.redirect_stdout(missing_scratch):
         for _ in range(2):
             g,_=_graph('scratches')
-            assert not any(n.type=='TEX_IMAGE' for n in g.nt.nodes)
-            assert sum(n.bl_idname=='ShaderNodeVectorRotate' for n in g.nt.nodes)==4
+            assert not any(n.type=='TEX_IMAGE' for n in g.tree.nodes)
+            assert sum(n.bl_idname=='ShaderNodeVectorRotate' for n in g.tree.nodes)==4
     scratch_log=missing_scratch.getvalue().splitlines()
     assert len(scratch_log)==1 and 'vdekdjrc' in scratch_log[0] and 'Fab search:' in scratch_log[0]
     with patch.object(wear_scratches,'asset_mask',side_effect=AssertionError('Disabled asset lookup')), \
@@ -79,13 +79,13 @@ def main():
         for kind in DEFAULT_SOURCES:
             for source in (None,'procedural','mask','hybrid','stamps'):
                 g,factor=_graph(kind,WearLayer(enabled=False,source=source))
-                assert not any(n.type=='TEX_IMAGE' for n in g.nt.nodes)
+                assert not any(n.type=='TEX_IMAGE' for n in g.tree.nodes)
                 assert factor.node.inputs[0].links[0].from_socket.default_value==0
     for kind, ids in (('grunge', {'uh4tfagc','uh4uabdc'}),
                       ('dried-marks', {'uh4tdhic','tjwtbgvc'}),
                       ('chipping', {'ub1meemn','tmulfghdy'})):
         mat = bpy.data.materials.new('hybrid-parts-' + kind)
-        graph = G(mat)
+        graph = NodeGraph(mat)
         parts = {}
         wear_factor(graph, kind, WearLayer(source='hybrid'), components=parts)
         assert not _image_ids(parts['region']), kind
@@ -94,14 +94,14 @@ def main():
         assert product.operation == 'MULTIPLY'
         assert product.inputs[0].links[0].from_socket == parts['region']
         assert product.inputs[1].links[0].from_socket == parts['interior']
-        assert not any(n.type == 'GROUP' for n in graph.nt.nodes), kind
+        assert not any(n.type == 'GROUP' for n in graph.tree.nodes), kind
         if kind == 'chipping':
             assert parts['region'].node.operation == 'GREATER_THAN'
             assert parts['interior'].node.operation == 'GREATER_THAN'
-            controls=[n for n in graph.nt.nodes if n.label=='surface-chipping amount']
+            controls=[n for n in graph.tree.nodes if n.label=='surface-chipping amount']
             assert len(controls)==1 and controls[0].outputs[0].default_value==1.
     material = bpy.data.materials.new('binary-coat-selection')
-    graph = G(material)
+    graph = NodeGraph(material)
     coat = graph.node('ShaderNodeBsdfPrincipled', (6000,0))
     under = graph.node('ShaderNodeBsdfPrincipled', (6000,-1000))
     surface = apply_surface_wear(graph, coat, {'chipping':WearLayer(source='hybrid',amount=.5)},
@@ -109,21 +109,21 @@ def main():
     assert surface.node.type=='MIX_SHADER'
     assert surface.node.inputs[1].links[0].from_socket==coat.outputs[0]
     assert surface.node.inputs[2].links[0].from_socket==under.outputs[0]
-    assert sum(n.type=='BSDF_PRINCIPLED' for n in graph.nt.nodes)==2
+    assert sum(n.type=='BSDF_PRINCIPLED' for n in graph.tree.nodes)==2
     g, _ = _graph('grunge')
-    assert [Path(n.image.filepath).parent.name for n in g.nt.nodes if n.type == 'TEX_IMAGE'] == ['uh4tfagc','uh4uabdc','uh4tfagc']
+    assert [Path(n.image.filepath).parent.name for n in g.tree.nodes if n.type == 'TEX_IMAGE'] == ['uh4tfagc','uh4uabdc','uh4tfagc']
     g, _ = _graph('dried-marks', WearLayer(source='mask'))
-    assert {Path(n.image.filepath).parent.name for n in g.nt.nodes if n.type == 'TEX_IMAGE'} == {'tjwtbgvc', 'uh4tdhic'}
-    zone = next(n for n in g.nt.nodes if n.label == 'dried marks up-facing zone')
+    assert {Path(n.image.filepath).parent.name for n in g.tree.nodes if n.type == 'TEX_IMAGE'} == {'tjwtbgvc', 'uh4tdhic'}
+    zone = next(n for n in g.tree.nodes if n.label == 'dried marks up-facing zone')
     assert zone.inputs['From Min'].default_value == .25 and zone.inputs['From Max'].default_value == .75
-    mix = next(n for n in g.nt.nodes if n.type == 'MIX' and n.inputs[0].is_linked and n.inputs[0].links[0].from_node == zone)
-    assert _image_ids(sock(mix.inputs, 'A')) == {'tjwtbgvc'}
-    assert _image_ids(sock(mix.inputs, 'B')) == {'uh4tdhic'}
+    mix = next(n for n in g.tree.nodes if n.type == 'MIX' and n.inputs[0].is_linked and n.inputs[0].links[0].from_node == zone)
+    assert _image_ids(active_socket(mix.inputs, 'A')) == {'tjwtbgvc'}
+    assert _image_ids(active_socket(mix.inputs, 'B')) == {'uh4tdhic'}
     for kind in ('grunge', 'dried-marks', 'chipping'):
         g, _ = _graph(kind, WearLayer(source='procedural'))
-        assert not any(n.type == 'TEX_IMAGE' for n in g.nt.nodes)
+        assert not any(n.type == 'TEX_IMAGE' for n in g.tree.nodes)
     g, _ = _graph('chipping')
-    assert {Path(n.image.filepath).parent.name for n in g.nt.nodes if n.type=='TEX_IMAGE'}=={'ub1meemn','tmulfghdy'}
+    assert {Path(n.image.filepath).parent.name for n in g.tree.nodes if n.type=='TEX_IMAGE'}=={'ub1meemn','tmulfghdy'}
     from effects.wear.hybrid import _interior_masks, HybridSource
     from effects.wear.chipping import flaked_paint_masks
     assert all((m.black,m.white,m.gamma,m.invert)==(0.,1.,1.,False)
@@ -134,16 +134,16 @@ def main():
     with patch('effects.wear.chipping.asset_mask',return_value=None), contextlib.redirect_stdout(io.StringIO()):
         parts={}
         mat=bpy.data.materials.new('missing-chip-fallback')
-        g=G(mat)
+        g=NodeGraph(mat)
         factor,_=wear_factor(g,'chipping',WearLayer(amount=.5),components=parts)
-        assert parts=={} and not any(n.type=='TEX_IMAGE' for n in g.nt.nodes)
+        assert parts=={} and not any(n.type=='TEX_IMAGE' for n in g.tree.nodes)
         assert factor.node.inputs[0].links[0].from_socket.default_value==.5
     g, _ = _graph('scratches', WearLayer(source='procedural'))
-    assert sum(n.bl_idname == 'ShaderNodeVectorRotate' for n in g.nt.nodes) == 4
+    assert sum(n.bl_idname == 'ShaderNodeVectorRotate' for n in g.tree.nodes) == 4
     g, _ = _graph('scratches', WearLayer(source='mask'))
-    textures = [n for n in g.nt.nodes if n.type == 'TEX_IMAGE']
+    textures = [n for n in g.tree.nodes if n.type == 'TEX_IMAGE']
     assert len(textures) == 2 and textures[0].image == textures[1].image
-    assert sum(n.bl_idname == 'ShaderNodeVectorRotate' for n in g.nt.nodes) == 1
+    assert sum(n.bl_idname == 'ShaderNodeVectorRotate' for n in g.tree.nodes) == 1
     g, factor = _graph('grunge', WearLayer(enabled=False))
     assert factor.node.inputs[0].links[0].from_socket.default_value == 0
     assert asset_mask('missing-surface-wear', project=args.project) is None
@@ -154,8 +154,8 @@ def main():
         for _ in range(2):
             for kind in ('grunge', 'dried-marks'):
                 g, _ = _graph(kind)
-                assert not any(n.type == 'TEX_IMAGE' for n in g.nt.nodes)
-                assert any(n.type == 'TEX_NOISE' for n in g.nt.nodes)
+                assert not any(n.type == 'TEX_IMAGE' for n in g.tree.nodes)
+                assert any(n.type == 'TEX_NOISE' for n in g.tree.nodes)
     lines = output.getvalue().splitlines()
     assert len(lines) == 4 and all('Fab search:' in line for line in lines), lines
     assert all(sum(asset_id in line for line in lines) == 1 for asset_id in ('uh4tfagc','uh4uabdc','tjwtbgvc','uh4tdhic'))
@@ -163,8 +163,8 @@ def main():
         return None if asset_id == 'tjwtbgvc' else asset_mask(asset_id, map_name)
     with patch.object(surface_wear_defaults, 'asset_mask', side_effect=missing_vertical):
         g, _ = _graph('dried-marks', WearLayer(source='mask'))
-        assert {Path(n.image.filepath).parent.name for n in g.nt.nodes if n.type == 'TEX_IMAGE'} == {'uh4tdhic'}
-        assert any(n.type == 'TEX_NOISE' for n in g.nt.nodes)
+        assert {Path(n.image.filepath).parent.name for n in g.tree.nodes if n.type == 'TEX_IMAGE'} == {'uh4tdhic'}
+        assert any(n.type == 'TEX_NOISE' for n in g.tree.nodes)
     g, _ = _graph('scratches', WearLayer(source='procedural'))
     shader = g.node('ShaderNodeBsdfPrincipled', (6000, 0))
     apply_surface_wear(g, shader, {'scratches': WearLayer(source='procedural')})

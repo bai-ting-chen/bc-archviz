@@ -11,7 +11,7 @@ Shared source composition, scan mapping and stack order live in `references/effe
 A fresh break uses the clean underlying material, before accumulated dirt.
 
 ## 3. Code
-- `scripts/blender/effects/wear/chipping.py`: `dice`, `edge_wear_group`, `add_edge_wear`, `set_input`,
+- `scripts/blender/effects/wear/chipping.py`: `dice`, `edge_wear_group` (optional `GrainBreaks`), `add_edge_wear`, `set_input`,
   `chipping_field`, `flaked_paint_masks`. `concrete_shading.py`: `weathered_concrete`, fresh-break shader.
 - Coating loss: `WearLayer` key `chipping`, `wear_factor`, `apply_surface_wear` in `wear.py`;
   supply the actual `under_shader`. Deprecated `worn-through` remains an accepted alias.
@@ -25,8 +25,8 @@ edges; leave floors/slabs coarse. At room scale try half the close-up size and a
 share. Seed repeated objects individually. An already dense mesh can use the same chip field
 as material displacement on rest position; adaptive displacement can exhaust small-GPU VRAM.
 Fresh break: sample clean base before grime, lighten/roughen it and add a fine fracture bump;
-sampling finished weathered colour makes a dark spot. Wood uses real bevels and grain-wise breaks
-in its material-specific group (`references/materials/wood/wood.md`).
+sampling finished weathered colour makes a dark spot. Wood uses the same group with real bevels and
+grain-wise breaks (`GrainBreaks`, preset `WOOD_CHIPS` in `references/materials/wood/wood.md`).
 
 | Parameter | Existing starting point (RULES MAT_03) |
 |---|---|

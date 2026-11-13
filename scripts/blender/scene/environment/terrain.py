@@ -20,7 +20,7 @@ import math
 
 import bpy
 
-from materials.shared.nodes import G
-from materials.shared.nodes import sock
+from materials.shared.node_graph import NodeGraph
+from materials.shared.node_graph import active_socket
 
 

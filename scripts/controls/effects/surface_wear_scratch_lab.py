@@ -7,7 +7,6 @@ def scratch_fixture(project, samples, kind, settings):
     from dataclasses import replace
     import surface_wear_lab as lab
     from mathutils import Vector
-    from bpy_extras.object_utils import world_to_camera_view
     settings = replace(settings, scratch_width_m=2 * 3.9 / lab.FRAME_PIXELS[0])
     sc, materials, _ = lab._fixture(project, samples, kind, settings)
     bpy.data.objects['concrete-wall'].hide_render = True
@@ -29,11 +28,7 @@ def scratch_fixture(project, samples, kind, settings):
     regions = {}
     for i, name in enumerate(lab.SURFACES[:2]):
         x = (i - 1) * 1.9
-        points = [world_to_camera_view(sc, sc.camera, Vector((x + dx, -.1, dz)))
-                  for dx, dz in ((-.72, -.72), (.72, .72))]
-        xs = [round(p.x * lab.FRAME_PIXELS[0]) for p in points]
-        ys = [round((1 - p.y) * lab.FRAME_PIXELS[1]) for p in points]
-        regions[name] = [min(xs), min(ys), max(xs), max(ys)]
+        regions[name] = lab.surface_region(sc, sc.camera, x)
     return sc, materials[:2], regions
 
 

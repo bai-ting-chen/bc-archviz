@@ -11,7 +11,7 @@ a wrong leak_d spreads over a whole coarse triangle (light triangles under an ar
 """
 import bpy
 
-from materials.shared.nodes import G
+from materials.shared.node_graph import NodeGraph
 
 
 def leak_field_group(name="LEAK FIELD", inset=0.02, reach=6.0):
@@ -25,50 +25,50 @@ def leak_field_group(name="LEAK FIELD", inset=0.02, reach=6.0):
     fallback = ng.interface.new_socket("Top Fallback", in_out="INPUT", socket_type="NodeSocketBool")
     fallback.default_value = True  # a miss (no thickness) measures leak_d from the object's top
     ng.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
-    b = G(ng, clear=True)
-    gi = b.n("NodeGroupInput", (-1000, 0)); go = b.n("NodeGroupOutput", (1100, 0))
-    pos = b.n("GeometryNodeInputPosition", (-1000, -300)).outputs[0]
-    nrm = b.n("GeometryNodeInputNormal", (-1000, -450)).outputs[0]
+    b = NodeGraph(ng, clear=True)
+    gi = b.node_with_props("NodeGroupInput", (-1000, 0)); go = b.node_with_props("NodeGroupOutput", (1100, 0))
+    pos = b.node_with_props("GeometryNodeInputPosition", (-1000, -300)).outputs[0]
+    nrm = b.node_with_props("GeometryNodeInputNormal", (-1000, -450)).outputs[0]
     # gravity is world -Z: the object's world matrix and its inverse (an unapplied rotation stays correct)
-    me = b.n("GeometryNodeSelfObject", (-1000, -800))
-    info = b.n("GeometryNodeObjectInfo", (-800, -800), transform_space="ORIGINAL")
-    b.L(me.outputs[0], info.inputs["Object"])
+    me = b.node_with_props("GeometryNodeSelfObject", (-1000, -800))
+    info = b.node_with_props("GeometryNodeObjectInfo", (-800, -800), transform_space="ORIGINAL")
+    b.link(me.outputs[0], info.inputs["Object"])
     to_world = info.outputs["Transform"]
-    inv = b.n("FunctionNodeInvertMatrix", (-600, -800)); b.L(to_world, inv.inputs[0])
-    up = b.n("FunctionNodeTransformDirection", (-450, -700)); b.L(inv.outputs[0], up.inputs[1])
+    inv = b.node_with_props("FunctionNodeInvertMatrix", (-600, -800)); b.link(to_world, inv.inputs[0])
+    up = b.node_with_props("FunctionNodeTransformDirection", (-450, -700)); b.link(inv.outputs[0], up.inputs[1])
     up.inputs[0].default_value = (0, 0, 1)
-    up_n = b.n("ShaderNodeVectorMath", (-300, -700), operation="NORMALIZE"); b.L(up.outputs[0], up_n.inputs[0])
+    up_n = b.node_with_props("ShaderNodeVectorMath", (-300, -700), operation="NORMALIZE"); b.link(up.outputs[0], up_n.inputs[0])
     # object units per world metre: inset and reach are given in metres
-    per_m = b.n("ShaderNodeVectorMath", (-300, -900), operation="LENGTH"); b.L(up.outputs[0], per_m.inputs[0])
-    ins = b.n("ShaderNodeVectorMath", (-800, -400), operation="SCALE")
-    b.L(nrm, ins.inputs[0]); b.L(b.math("MULTIPLY", per_m.outputs["Value"], -inset, (-950, -550)), ins.inputs["Scale"])
-    src = b.n("ShaderNodeVectorMath", (-650, -350), operation="ADD")
-    b.L(pos, src.inputs[0]); b.L(ins.outputs[0], src.inputs[1])
-    ray = b.n("GeometryNodeRaycast", (-250, -250), data_type="FLOAT")
-    b.L(gi.outputs[0], ray.inputs["Target Geometry"]); b.L(src.outputs[0], ray.inputs["Source Position"])
-    b.L(up_n.outputs[0], ray.inputs["Ray Direction"])
-    b.L(b.math("MULTIPLY", per_m.outputs["Value"], reach, (-450, -950)), ray.inputs["Ray Length"])
+    per_m = b.node_with_props("ShaderNodeVectorMath", (-300, -900), operation="LENGTH"); b.link(up.outputs[0], per_m.inputs[0])
+    ins = b.node_with_props("ShaderNodeVectorMath", (-800, -400), operation="SCALE")
+    b.link(nrm, ins.inputs[0]); b.link(b.math("MULTIPLY", per_m.outputs["Value"], -inset, (-950, -550)), ins.inputs["Scale"])
+    src = b.node_with_props("ShaderNodeVectorMath", (-650, -350), operation="ADD")
+    b.link(pos, src.inputs[0]); b.link(ins.outputs[0], src.inputs[1])
+    ray = b.node_with_props("GeometryNodeRaycast", (-250, -250), data_type="FLOAT")
+    b.link(gi.outputs[0], ray.inputs["Target Geometry"]); b.link(src.outputs[0], ray.inputs["Source Position"])
+    b.link(up_n.outputs[0], ray.inputs["Ray Direction"])
+    b.link(b.math("MULTIPLY", per_m.outputs["Value"], reach, (-450, -950)), ray.inputs["Ray Length"])
 
     def world_z(vec, loc):
         """World Z (m) of an object-space point."""
-        wp = b.n("FunctionNodeTransformPoint", loc); b.L(vec, wp.inputs[0]); b.L(to_world, wp.inputs[1])
-        sz = b.n("ShaderNodeSeparateXYZ", (loc[0] + 150, loc[1])); b.L(wp.outputs[0], sz.inputs[0])
+        wp = b.node_with_props("FunctionNodeTransformPoint", loc); b.link(vec, wp.inputs[0]); b.link(to_world, wp.inputs[1])
+        sz = b.node_with_props("ShaderNodeSeparateXYZ", (loc[0] + 150, loc[1])); b.link(wp.outputs[0], sz.inputs[0])
         return sz.outputs["Z"]
 
     hit_z = world_z(ray.outputs["Hit Position"], (-50, -300))
     point_z = world_z(pos, (-50, -450))
     # a miss: the object's highest point (world Z) stands in for the drip edge
-    top = b.n("GeometryNodeAttributeStatistic", (150, -650), data_type="FLOAT", domain="POINT")
-    b.L(gi.outputs[0], top.inputs["Geometry"]); b.L(point_z, top.inputs["Attribute"])
-    edge_z = b.n("GeometryNodeSwitch", (350, -300), input_type="FLOAT")
-    b.L(ray.outputs["Is Hit"], edge_z.inputs["Switch"])
-    b.L(top.outputs["Max"], edge_z.inputs["False"]); b.L(hit_z, edge_z.inputs["True"])
+    top = b.node_with_props("GeometryNodeAttributeStatistic", (150, -650), data_type="FLOAT", domain="POINT")
+    b.link(gi.outputs[0], top.inputs["Geometry"]); b.link(point_z, top.inputs["Attribute"])
+    edge_z = b.node_with_props("GeometryNodeSwitch", (350, -300), input_type="FLOAT")
+    b.link(ray.outputs["Is Hit"], edge_z.inputs["Switch"])
+    b.link(top.outputs["Max"], edge_z.inputs["False"]); b.link(hit_z, edge_z.inputs["True"])
     d = b.math("SUBTRACT", edge_z.outputs[0], point_z, (550, -350))
-    ok = b.n("FunctionNodeBooleanMath", (550, -550), operation="OR")
-    b.L(ray.outputs["Is Hit"], ok.inputs[0]); b.L(gi.outputs["Top Fallback"], ok.inputs[1])
-    geo = b.store(gi.outputs[0], "leak_d", "FLOAT", d, (750, 0))
-    geo = b.store(geo, "leak_ok", "FLOAT", ok.outputs[0], (950, 0))
-    b.L(geo, go.inputs[0])
+    ok = b.node_with_props("FunctionNodeBooleanMath", (550, -550), operation="OR")
+    b.link(ray.outputs["Is Hit"], ok.inputs[0]); b.link(gi.outputs["Top Fallback"], ok.inputs[1])
+    geo = b.store_attribute(gi.outputs[0], "leak_d", "FLOAT", d, (750, 0))
+    geo = b.store_attribute(geo, "leak_ok", "FLOAT", ok.outputs[0], (950, 0))
+    b.link(geo, go.inputs[0])
     return ng
 
 

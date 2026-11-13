@@ -1,11 +1,8 @@
 """Material and geometry helper-regression case catalogue."""
 
-import os as _os
-import sys as _sys
-_CONTROLS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'tile', 'material', 'effects', 'water', 'lighting', 'environment', 'regression')]:
-    if _d not in _sys.path:
-        _sys.path.append(_d)
+import os as _os, sys as _sys
+_sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+import controls_import_paths  # noqa: E402,F401 -- every controls topic folder on sys.path
 
 
 CASES = {
@@ -40,15 +37,15 @@ CASES = {
     "weathered_concrete": lambda m: m['effects.wear'].weathered_concrete(),
     "mask_edge_dist": lambda m: m['effects.wear'].mask_material("MK", "edge_dist"),
     "mask_damage": lambda m: m['effects.wear'].mask_material("MK2", "damage"),
-    "wood_wear_group": lambda m: m['materials.wood.wood_damage'].wood_wear_group(),
-    "weathered_wood": lambda m: m['materials.wood.wood_shading'].weathered_wood(),
+    "wood_chips_group": lambda m: m['effects.wear'].edge_wear_group(**m['materials.wood.wood'].WOOD_CHIPS),
+    "weathered_wood": lambda m: m['materials.wood.wood'].weathered_wood(),
 }
 
 
 def _variation_case(modules, module, function, **kwargs):
     import bpy
-    from materials.shared.nodes import G
-    g = G(bpy.data.materials.new(function))
+    from materials.shared.node_graph import NodeGraph
+    g = NodeGraph(bpy.data.materials.new(function))
     if function == 'anti_tile':
         kwargs['texs'] = [g.node('ShaderNodeTexImage', (0, 0))]
     if function == 'unit_values':
@@ -60,6 +57,6 @@ for _module, _functions in (
         ('variation_tiling', ('anti_tile',)),
         ('variation_per_unit_shading', ('unit_key', 'unit_values')),
         ('variation_macro_tone', ('macro_tone',)),
-        ('surface_wear', ('grunge',))):
+        ('wear.dirt', ('grunge',))):
     for _function in _functions:
         CASES[_function] = lambda m, mod=_module, fn=_function: _variation_case(m, 'effects.' + mod, fn)

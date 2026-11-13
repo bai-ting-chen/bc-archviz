@@ -1,8 +1,8 @@
 """Caustic shading; implementation for gn_caustics."""
 import math
 import bpy
-from materials.shared.nodes import G
-from materials.shared.nodes import sock
+from materials.shared.node_graph import NodeGraph
+from materials.shared.node_graph import active_socket
 
 
 def caustic_sheet_material(name="CAUSTIC_SHEET", floor_tex=None, floor_tile_m=2.0,
@@ -14,7 +14,7 @@ def caustic_sheet_material(name="CAUSTIC_SHEET", floor_tex=None, floor_tile_m=2.
     mat.use_nodes = True
     nt = mat.node_tree
     nt.nodes.clear()
-    N = G(nt, clear=False).n
+    N = NodeGraph(nt, clear=False).node_with_props
     at = N("ShaderNodeAttribute", (-900, 200))
     at.attribute_name = "E"
     fl = N("ShaderNodeAttribute", (-900, -100))
@@ -25,9 +25,9 @@ def caustic_sheet_material(name="CAUSTIC_SHEET", floor_tex=None, floor_tile_m=2.
     nt.links.new(at.outputs["Fac"], pi.inputs[0])
     albedo = N("ShaderNodeMix", (-450, -50))
     albedo.data_type = "RGBA"
-    sock(albedo.inputs, "A").default_value = (*wall_albedo, 1)
+    active_socket(albedo.inputs, "A").default_value = (*wall_albedo, 1)
     nt.links.new(fl.outputs["Fac"], albedo.inputs["Factor"])
-    sock(albedo.inputs, "B").default_value = (*floor_albedo, 1)
+    active_socket(albedo.inputs, "B").default_value = (*floor_albedo, 1)
     if floor_tex:
         geo = N("ShaderNodeNewGeometry", (-1100, -300))
         mp = N("ShaderNodeMapping", (-900, -300))
@@ -37,9 +37,9 @@ def caustic_sheet_material(name="CAUSTIC_SHEET", floor_tex=None, floor_tile_m=2.
         tx.image = bpy.data.images.load(floor_tex, check_existing=True)
         tx.projection, tx.projection_blend = "BOX", 0.2
         nt.links.new(mp.outputs["Vector"], tx.inputs["Vector"])
-        nt.links.new(tx.outputs["Color"], sock(albedo.inputs, "B"))
+        nt.links.new(tx.outputs["Color"], active_socket(albedo.inputs, "B"))
     em = N("ShaderNodeEmission", (-200, 0))
-    nt.links.new(sock(albedo.outputs, "Result"), em.inputs["Color"])
+    nt.links.new(active_socket(albedo.outputs, "Result"), em.inputs["Color"])
     nt.links.new(pi.outputs[0], em.inputs["Strength"])
     tr = N("ShaderNodeBsdfTransparent", (-200, 200))
     add = N("ShaderNodeAddShader", (0, 100))

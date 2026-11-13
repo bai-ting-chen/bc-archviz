@@ -315,4 +315,89 @@ Old modules are thin re-exports marked for removal; update imports in other clon
 - Snapshot source graphs with `--python scripts/controls/effects/wear_graph_check.py -- --project <project> --out <json>`;
   add `--baseline <old-json>` to compare every source/switch path. Only the declared layer-label rename is normalised.
 
+# MIGRATE: wood wear merged into the shared chip group
+From: LAPTOP-25
+
+## What changed
+- Deleted `materials.wood.wood_damage` and `materials.wood.wood_shading`. Everything wood is in `materials.wood.wood`.
+- `wood_wear_group(...)` -> `effects.wear.edge_wear_group(**WOOD_CHIPS)`; grain breaks are `GrainBreaks(share, depth_m,
+  grain_stretch)` (was `break_share`, `break_depth`, `grain_stretch`). The group socket `Subdivisions` is now `Band Subdivisions`.
+- `weathered_wood(inner_tint=, inner_mix=, inner_gain=)` -> `weathered_wood(tint=, mix=, gain=)`; the raw-wood under-layer
+  is its own builder, `raw_wood_under(g, color, normal)`.
+
+## Steps
+- Update external imports and calls to the names above; no shim. Delete stale `__pycache__` in `scripts/blender/materials/wood/`.
+
+## Check after pull
+- `rg "wood_damage|wood_shading|wood_wear_group" scripts references` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
+# MIGRATE: deprecated wear re-exports removed; one graph-check runner; shared controls path
+From: LAPTOP-25
+
+## What changed
+- Removal announced and done: the 23 `effects.*` wear re-export modules (`effects.edge_wear`, `effects.surface_wear*`,
+  `effects.edge_*`, `effects.runoff`, `effects.round_edges`, `effects.cracks`, `effects.crack_ribbon`, `effects.leak_field`,
+  `effects.wear_nodes`) and `effects.variation_surface_marks`. Import from the `effects.wear.*` owners and
+  `effects.variation_macro_tone` (tables in the wear section above); `grunge` is `effects.wear.dirt.grunge`.
+- `effects.wear.nodes` is deleted: use the `G` methods `g.attr`, `g.noise`, `g.math`, `g.range` (its `frame` is a keyword,
+  after `tmin`/`tmax`); `frame_for` moved to `materials.shared.nodes`.
+- The 13 one-line `*_graph_check.py` wrappers in `scripts/controls/material/`, `tile/` and `water/` are deleted, and
+  `controls/material_graph_cases.py` is now `controls/material_graph_check.py`:
+  `--python scripts/controls/material_graph_check.py -- <topic> <out.json>`.
+- Controls put their topic folders on `sys.path` through `scripts/controls/_paths.py`.
+
+## Steps
+- Update external imports and command lines to the names above; no shims. Delete stale `__pycache__` under
+  `scripts/blender/effects/` and `scripts/controls/`, and the empty `scripts/controls/material/` folder.
+
+## Check after pull
+- `rg "effects\.(edge_wear|surface_wear|runoff|round_edges|wear_nodes|variation_surface_marks)|effects\.wear\.nodes|material_graph_cases" scripts references` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
+# MIGRATE: shared map, pixel and node helpers
+From: LAPTOP-25
+
+## What changed
+- `materials.stone.stone_ramp` is deleted, and `materials.stone.stone` no longer re-exports `_ramp`: use `G.ramp(loc, frame,
+  stops, label, interp)`. `G` also gained `mix(...)` and `vmath(...)`; the private `_mix_color`, `_vector` and `_mix`
+  helpers in the wear and variation modules are gone.
+- New shared helpers: `materials.shared.pbr_maps.box_maps` (BoxUV map block), `materials.shared.map_measure.image_rgb`
+  and `srgb_to_linear`, and `surface_wear_lab.surface_region` for the labs.
+
+## Steps
+- Update external imports of `_ramp` and the deleted helpers; no shims. Delete stale `__pycache__` in
+  `scripts/blender/materials/stone/`.
+
+## Check after pull
+- `rg "stone_ramp|_mix_color|import _ramp" scripts references` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
+# MIGRATE: node builder renamed NodeGraph; descriptive method names
+From: LAPTOP-25
+
+## What changed
+Supersedes the builder names in the sections above. `materials.shared.nodes` is now `materials.shared.node_graph`.
+
+| Old | New |
+|---|---|
+| `G` | `NodeGraph` |
+| `sock` | `active_socket` |
+| `.nt` | `.tree` |
+| `.L(a, b)` | `.link(a, b)` (now returns the link) |
+| `.n(kind, loc, **props)` | `.node_with_props(...)` |
+| `._in(socket, value)` | `.link_or_set(socket, value)` |
+| `.img`, `.uv` | `.image_texture`, `.uv_map` |
+| `.range`, `.noise`, `.vmath`, `.ramp`, `.combine` | `.map_range`, `.noise_texture`, `.vector_math`, `.color_ramp`, `.combine_xyz` |
+| `.attr`, `.store`, `.named` | `.attribute`, `.store_attribute`, `.named_attribute` |
+
+`scripts/controls/_paths.py` is now `scripts/controls/controls_import_paths.py`. Node graphs are unchanged.
+
+## Steps
+- Update external imports and calls with the table; no shim. Delete stale `__pycache__` in `scripts/blender/materials/shared/`.
+
+## Check after pull
+- `rg "materials\.shared\.nodes|import _paths" scripts references` finds nothing.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
 Remove each section after applying it; delete this file when none is left.

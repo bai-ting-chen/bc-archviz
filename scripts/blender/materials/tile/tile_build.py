@@ -21,7 +21,7 @@ from materials.tile import tile_mapping
 from materials.tile import tile_maps
 from materials.tile import tile_relief
 from materials.tile import tile_specks
-from materials.shared.nodes import G
+from materials.shared.node_graph import NodeGraph
 from materials.tile.tile_nodes import _Graph
 
 
@@ -72,7 +72,7 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
         old_group = mat.node_tree.nodes['TileFinish'].node_tree
     owner = mat.get('tile_surface_id') or uuid.uuid4().hex
     mat['tile_surface_id'] = owner
-    G(mat)
+    NodeGraph(mat)
     if old_group and old_group.get('tile_surface_owner') == owner and old_group.users == 0:
         bpy.data.node_groups.remove(old_group)
     mat['tile_surface_settings'] = json.dumps(settings)

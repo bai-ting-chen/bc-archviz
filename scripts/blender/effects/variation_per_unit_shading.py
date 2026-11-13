@@ -3,7 +3,7 @@ from collections import namedtuple
 import hashlib
 import math
 import bpy
-from materials.shared.nodes import layer_frame, layer_switch
+from materials.shared.node_graph import layer_frame, layer_switch
 
 MESH_HASH_SALT = 17  # independent namespace for combining a per-mesh key with the object key
 TILT_AXIS_Z = 0.5  # keep the reference axis non-horizontal before its tangent-plane projection
@@ -14,14 +14,14 @@ UnitValues = namedtuple('UnitValues', 'tint roughness bump offset normal')
 
 def _hash(g, key, salt, frame, row):
     y = -700 * row
-    vector = g.combine(key, salt, salt * HASH_AXIS_RATIO, (-2100, y), frame)
+    vector = g.combine_xyz(key, salt, salt * HASH_AXIS_RATIO, (-2100, y), frame)
     node = g.node('ShaderNodeTexWhiteNoise', (-1800, y), frame)
     g.link(vector, node.inputs['Vector'])
     return node.outputs['Value']
 
 
 def _instancer_key(g, attribute, frame):
-    key = g.attr(attribute, (-2100, 0), frame)
+    key = g.attribute(attribute, (-2100, 0), frame)
     key.node.attribute_type = 'INSTANCER'
     return key
 
@@ -59,7 +59,7 @@ def unit_key(g, source='object', attribute='unit_key', vector=None, size=1.0):
         'object': lambda: g.node('ShaderNodeObjectInfo', (-2100, 0), frame).outputs['Random'],
         'instancer': lambda: _instancer_key(g, attribute, frame),
         'island': lambda: _island_key(g, frame),
-        'geometry': lambda: _with_object(g, g.attr(attribute, (-2700, -700), frame), frame),
+        'geometry': lambda: _with_object(g, g.attribute(attribute, (-2700, -700), frame), frame),
         'cell': lambda: _cell_key(g, vector, size, frame),
     }
     key = builders[source]()
@@ -83,23 +83,23 @@ def unit_values(g, key, tint=0.035, roughness=0.05, bump=0.3, offset=1.0,
     values = []
     for salt, (name, span, neutral) in enumerate((('tint', tint, 1),
             ('roughness', roughness, 0), ('bump', bump, 1)), 1):
-        raw = g.range(_hash(g, key, salt, frame, salt-1), 0, 1, (-1500, -700*(salt-1)),
+        raw = g.map_range(_hash(g, key, salt, frame, salt-1), 0, 1, (-1500, -700*(salt-1)),
                       tmin=neutral-span, tmax=neutral+span, frame=frame)
         values.append(layer_switch(g, 'unit_' + name, raw, amount, neutral, frame))
-    xyz = [g.range(_hash(g, key, salt, frame, salt-1), 0, 1, (-1500, -700*(salt-1)),
+    xyz = [g.map_range(_hash(g, key, salt, frame, salt-1), 0, 1, (-1500, -700*(salt-1)),
                    tmin=-offset, tmax=offset, frame=frame) for salt in (4, 5, 6)]
-    offset_value = layer_switch(g, 'unit_offset', g.combine(*xyz, (-1200, -3500), frame),
+    offset_value = layer_switch(g, 'unit_offset', g.combine_xyz(*xyz, (-1200, -3500), frame),
                      amount, (0, 0, 0), frame)
     normal = _tilt(g, key, tilt_deg, amount, frame) if tilt_deg else None
     return UnitValues(*values, offset_value, normal)
 
 
 def _tilt(g, key, tilt_deg, amount, frame):
-    angle = g.range(_hash(g, key, 7, frame, 6), 0, 1, (-1500, -4200),
+    angle = g.map_range(_hash(g, key, 7, frame, 6), 0, 1, (-1500, -4200),
                     tmin=-math.radians(tilt_deg), tmax=math.radians(tilt_deg), frame=frame)
     angle = layer_switch(g, 'unit_tilt', angle, amount, 0, frame)
     azimuth = g.math('MULTIPLY', _hash(g, key, 8, frame, 7), math.tau, (-1500, -4900), frame)
-    axis = g.combine(g.math('COSINE', azimuth, 0, (-1200, -4900), frame),
+    axis = g.combine_xyz(g.math('COSINE', azimuth, 0, (-1200, -4900), frame),
                      g.math('SINE', azimuth, 0, (-1200, -5600), frame),
                      TILT_AXIS_Z, (-900, -4900), frame)
     normal = g.node('ShaderNodeNewGeometry', (-900, -6300), frame).outputs['Normal']

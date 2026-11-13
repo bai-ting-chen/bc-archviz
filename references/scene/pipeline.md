@@ -74,8 +74,8 @@ Read-only documentation work needs no Blender or Rhino connection.
 2. Feature tests headless (`render_variant.py`, *Look-dev headless*) or MCP renders into the
    study's `_wip/`; measure with `imgstats`; prove each feature with a control (RULES VAL_02).
 3. Reuse the helpers ([blender-python-helpers.md](blender-python-helpers.md) lists them all:
-   `effects.wear.set_input`, `materials.shared.nodes.sock`, `materials.shared.pbr.pbr_material`,
-   `materials.shared.nodes.G`, `materials.shared.pbr`, `scatter`) instead of re-deriving node
+   `effects.wear.set_input`, `materials.shared.node_graph.active_socket`, `materials.shared.pbr.pbr_material`,
+   `materials.shared.node_graph.NodeGraph`, `materials.shared.pbr`, `scatter`) instead of re-deriving node
    plumbing: the traps they wrap get hit again otherwise.
 4. **Hands over:** the look the user approved at the end of the rounds.
 

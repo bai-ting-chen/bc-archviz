@@ -71,7 +71,8 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `input_socket(ng, name, kind, default, subtype=None)` — Add a group input with a default (and an optional unit subtype).
 - `chip_field(b, gi, rp, dd, seg_scale, bite_scale, soft, prof_end)` — Chips along the arris: segments of the edge chipped (share -> threshold; Noise clusters near 0.5, sd ~0.1), bite noise varies the reach. Returns (chip 0..1, depth profile).
 - `rejoin(b, moved, sep, go, x0, weld_dist)` — Rejoin the displaced band with the untouched interior and weld the seam.
-- `edge_wear_group(name='Edge Wear + Chips', band=0.08, level=3, chip_reach=0.045, chip_depth=0.018, chipped_share=0.55, sharp_deg=30.0, chips=True, bite_scale=22.0, segment_scale=2.2, seed=(0.0, 0.0, 0.0))` — Geometry Nodes modifier: edge field for every point, real chips in the arris band. Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern.
+- `GrainBreaks` — Torn coat on up-facing faces, its outline stretched along the grain (wood). grain_stretch: noise scale per world axis; the small value is the grain axis.
+- `edge_wear_group(name='Edge Wear + Chips', band=0.08, level=3, chip_reach=0.045, chip_depth=0.018, chipped_share=0.55, sharp_deg=30.0, chips=True, bite_scale=22.0, segment_scale=2.2, seed=(0.0, 0.0, 0.0), chip_soft=0.002, profile_end=0.35, fracture=0.4, breaks=None)` — Geometry Nodes modifier: edge field for every point, real chips in the arris band, and optional grain breaks (GrainBreaks) on up-facing faces. fracture: chip-depth variation 0–1. Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern.
 - `set_input(mod, name, value)` — A Geometry Nodes modifier's own input values live at mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the identifier through the group interface. Group defaults are only copied in at creation.
 - `add_edge_wear(obj, group, **inputs)` — Add the modifier; per-object overrides by input name, e.g. add_edge_wear(o, g, Band=0.1).
 - `flaked_paint_masks(asset_ids=tuple(WORN_SCAN_LEVELS), project=None)` — Resolve per-scan Roughness polarity: white is exposed substrate, black is intact paint.
@@ -143,14 +144,6 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `asset_maps(asset_id, map_names, project=None)` — Resolve named local 4K maps and their metadata once; return None for a missing map.
 - `scan_size_m(metadata)` — Read square or rectangular scan dimensions, converting m/cm/mm metadata to metres.
 - `surface_coordinates(g, frame=None)` — Project world metres onto the dominant face plane for walls, tops and soffits.
-
-## `effects.wear.nodes` — Thin shorthands for the wear shaders and Geometry Nodes: a frame for one wear layer, and the attribute, noise, map range and math nodes with the argument order the wear builders use.
-
-- `frame_for(mat, label)` — The material's node builder with one labelled frame for a wear layer; returns (builder, label).
-- `attr(g, name, loc, frame, out='Fac')` — Named attribute (edge_dist, chip, rest_pos, leak_d ...) at a location in a frame.
-- `noise(g, vec, scale, loc, frame, detail=6.0, rough=0.6, label=None)` — Noise texture on a vector, at a location in a frame.
-- `range_(g, val, fmin, fmax, loc, frame, tmin=0.0, tmax=1.0, label=None, smooth=False)` — Map Range from [fmin, fmax] to [tmin, tmax], at a location in a frame.
-- `math_(g, op, a, b, loc, frame, clamp=False)` — Math node (op on a and b), at a location in a frame.
 
 ## `effects.wear.patterns` — Dispatch procedural patterns to their mechanism owners.
 
@@ -265,6 +258,8 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.shared.map_measure` — Map measure; canonical implementation behind pbr.
 
+- `image_rgb(img)` — The image's first three channels as a float64 (pixels, 3) array, as Blender stores them.
+- `srgb_to_linear(rgb)` — Decode sRGB-encoded 0–1 values to linear (byte images come back encoded: api-traps).
 - `solve_levels(path, target_rgb, gamma=0.5)` — 'Measured levels': per-channel gain that lands the map's mean linear colour, after a shared gamma, on a target albedo. Returns the gain.
 - `map_mean(tex_id)` — Linear mean RGB of a Poly Haven diff map; measured once, then cached in meta.json.
 
@@ -272,16 +267,21 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `material_from_spec(spec)` — spec: "ph:<tex_id>" | "glass" | {"type": "ph"|"glass"|"simple", ...kwargs}.
 
-## `materials.shared.nodes` — Nodes material helpers; canonical implementations.
+## `materials.shared.node_graph` — NodeGraph: the builder for shader and Geometry Nodes trees, and the wear-layer frame and switch.
 
-- `sock(sockets, name)` — Active socket by name (Mix nodes keep hidden same-named sockets per data type).
-- `G` — The node-graph builder for shader and Geometry Nodes trees: frames, nodes (inputs by keyword, or properties with n()), images on a named UV map, links, and the math / map range / noise / named-attribute shorthands. G(material) starts the material's tree empty; G(node_tree) adds to an existing tree (a GN group). effects.wear.nodes supplies the shader shorthands with the argument order used by wear builders.
+- `active_socket(sockets, name)` — Active socket by name (Mix nodes keep hidden same-named sockets per data type).
+- `NodeGraph` — Builds a shader or Geometry Nodes tree: frames, nodes (inputs by keyword, or properties with node_with_props), image textures on a named UV map, links, and shorthands for math, map range, mix, vector math, colour ramp, noise and named attributes. NodeGraph(material) starts the material's tree empty; NodeGraph(node_tree) adds to an existing tree (a GN group).
+- `frame_for(mat, label)` — The material's node builder with one labelled frame for a wear layer; returns (builder, label).
 - `layer_frame(g, label)` — Create a stacked layer frame and return its label for the graph builder.
 - `layer_switch(g, layer, value, amount, neutral=1.0, frame=None)` — Switch a scalar or vector layer and export its AOV.
 
 ## `materials.shared.pbr_build` — Pbr build; canonical implementation behind pbr.
 
 - `pbr_material(tex_id, name=None, scale=1.0, tint=None)` — Material from a Poly Haven texture folder, box-mapped in world space at real-world size.
+
+## `materials.shared.pbr_maps` — Pbr maps; canonical implementation behind pbr.
+
+- `box_maps(g, maps, frame, origin, arm_label='arm', normal_frame=None, normal_strength=1.0, height_frame=None)` — BoxUV, the Poly Haven diffuse / arm / normal images (and height when height_frame is given), Separate Color on arm and a Normal Map on BoxUV. Returns the nodes by key: uv (socket), diff, arm, nor, hgt, sep, nmap.
 
 ## `materials.shared.simple` — Simple; canonical implementation behind pbr.
 
@@ -555,17 +555,11 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `wet_mask(lip, pool_z, p, s, z)` — True on the wall where it is wet: behind the curtain (ragged ends, runoff fingers) and a splash band.
 - `proxy(lip, pool_z, p)` — Vertices (world space) and quads of the wet proxy sheet lying on the wall face.
 
-## `materials.wood.wood` — Wood material helpers; canonical implementations.
+## `materials.wood.wood` — Wood: base and coat (coated_wood), raw-wood under-layer, chip preset and weathered assembly.
 
 - `coated_wood(name='COATED_PINE', tex_id='coated_pine', coat=0.2, coat_rough=0.04, rough_toward_matte=0.35, albedo_rgb=(0.52, 0.33, 0.17), levels_gamma=0.5, rounded_edges=True, normal_strength=1.0)` — Coated pine: every map wired; levels solved to a natural pine albedo; satin varnish = LOW coat amount with TIGHT gloss (the coat trap); base roughness spread toward matte instead of cheating Fresnel; round edges combined with the normal map.
-
-## `materials.wood.wood_damage` — Geometry Nodes dents and grain-aligned breaks in wood.
-
-- `wood_wear_group(name='Wood Wear + Breaks', band=0.02, level=3, chip_reach=0.006, chip_depth=0.0025, chipped_share=0.3, break_share=0.5, break_depth=0.0015, grain_stretch=(35.0, 5.0, 35.0), seed=(0.0, 0.0, 0.0), sharp_deg=30.0)` — grain_stretch: noise scale per world axis for break outlines; the small value is the grain axis (the board's long axis), so breaks run long along the grain.
-
-## `materials.wood.wood_shading` — Worn varnish, edge grime and exposed inner-wood shading.
-
-- `weathered_wood(name='PINE_WEATHERED', wear_band=0.012, wear_amount=0.9, inner_tint=(0.8, 0.6, 0.36), inner_mix=0.3, inner_gain=1.7)` — coated_wood base (levels, satin coat trap) + worn varnish/grime at arrises + inner wood.
+- `raw_wood_under(g, color, normal, frame=None, loc=(-1050, -1500), tint=(0.8, 0.6, 0.36), mix=0.3, gain=1.7)` — Under-layer for solid wood: the base grain lighter and toward a raw tint, rough, with torn fibres along the grain (UV U). Returns the BSDF output socket.
+- `weathered_wood(name='PINE_WEATHERED', wear_band=0.012, wear_amount=0.9, **under)` — coated_wood + worn varnish and grime along the arrises + raw_wood_under where the edge_wear_group(**WOOD_CHIPS) chips and breaks cut the skin. under: raw_wood_under settings.
 
 ## `renderer.finals.final_images` — Final images; implementation for finals.
 

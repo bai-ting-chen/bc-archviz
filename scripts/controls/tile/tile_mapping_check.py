@@ -1,12 +1,9 @@
 """Control: TileUV distances = true surface distances (planar wall, rotated wall, floor,
 cylinder crossing the ±pi cut). Run: blender -b --factory-startup --python <this>"""
 
-import os as _os
-import sys as _sys
-_CONTROLS = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
-for _d in [_CONTROLS] + [_os.path.join(_CONTROLS, _t) for _t in ('archviz', 'tile', 'material', 'effects', 'water', 'lighting', 'environment', 'regression')]:
-    if _d not in _sys.path:
-        _sys.path.append(_d)
+import os as _os, sys as _sys
+_sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+import controls_import_paths  # noqa: E402,F401 -- every controls topic folder on sys.path
 import os, sys, math
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "blender"))
 import bpy, bmesh, numpy as np

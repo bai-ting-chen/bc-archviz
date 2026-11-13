@@ -9,10 +9,10 @@ def runoff_fixture(project, samples, kind, settings):
     from effects.wear.water_marks import add_runoff
     from effects.wear.leak_field import add_leak_field
     from effects.wear.dirt import GRIME_TINT
-    from materials.shared.nodes import G, layer_frame, layer_switch
+    from materials.shared.node_graph import NodeGraph, layer_frame, layer_switch
     sc, materials, regions = lab._fixture(project, samples, 'grunge', WearLayer(enabled=False))
     material = materials[-1]
-    g = G(material.node_tree)
+    g = NodeGraph(material.node_tree)
     shaders = [n for n in material.node_tree.nodes if n.type == 'BSDF_PRINCIPLED']
     shaders[1].inputs['Base Color'].default_value = (*GRIME_TINT, 1)
     shaders[1].inputs['Roughness'].default_value = .93

@@ -1,14 +1,12 @@
 """Pbr build; canonical implementation behind pbr."""
 
-import os
-
 import bpy
 
-from materials.shared.nodes import G, sock
+from materials.shared.node_graph import NodeGraph, active_socket
 
 from materials.shared.pbr_config import BUMP_DISTANCE
 
-from materials.shared.pbr_maps import _img
+from materials.shared.pbr_maps import _img, _ph_maps
 
 def pbr_material(tex_id, name=None, scale=1.0, tint=None):
     """Material from a Poly Haven texture folder, box-mapped in world space at real-world size.
@@ -16,11 +14,7 @@ def pbr_material(tex_id, name=None, scale=1.0, tint=None):
     scale: multiplies the texture's real-world size (2.0 = twice as large).
     tint: optional (r, g, b) multiplied into the base color.
     """
-    import core.archviz as archviz
-    from core.archviz import library, read_meta
-    folder = library("polyhaven", "textures", tex_id)
-    meta = read_meta(folder)
-    maps = {k: os.path.join(folder, v) for k, v in meta["maps"].items()}
+    maps, meta = _ph_maps(tex_id)
     w_mm, h_mm = meta.get("dimensions_mm", [1000, 1000])
 
     mat = bpy.data.materials.get(name or tex_id) or bpy.data.materials.new(name or tex_id)
@@ -42,10 +36,10 @@ def pbr_material(tex_id, name=None, scale=1.0, tint=None):
     if tint:
         mix = N.new("ShaderNodeMix"); mix.data_type = "RGBA"; mix.blend_type = "MULTIPLY"
         mix.inputs["Factor"].default_value = 1.0
-        sock(mix.inputs, "B").default_value = (*tint, 1.0)
+        active_socket(mix.inputs, "B").default_value = (*tint, 1.0)
         mix.location = (100, 300)
-        L.new(diff.outputs["Color"], sock(mix.inputs, "A"))
-        L.new(sock(mix.outputs, "Result"), bsdf.inputs["Base Color"])
+        L.new(diff.outputs["Color"], active_socket(mix.inputs, "A"))
+        L.new(active_socket(mix.outputs, "Result"), bsdf.inputs["Base Color"])
     else:
         L.new(diff.outputs["Color"], bsdf.inputs["Base Color"])
 
