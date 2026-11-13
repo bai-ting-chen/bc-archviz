@@ -59,6 +59,7 @@ def _variation_case(modules, module, function, **kwargs):
 for _module, _functions in (
         ('variation_tiling', ('anti_tile',)),
         ('variation_per_unit_shading', ('unit_key', 'unit_values')),
-        ('variation_surface_marks', ('macro_tone', 'grunge', 'patchy_extent'))):
+        ('variation_macro_tone', ('macro_tone',)),
+        ('surface_wear', ('grunge',))):
     for _function in _functions:
         CASES[_function] = lambda m, mod=_module, fn=_function: _variation_case(m, 'effects.' + mod, fn)

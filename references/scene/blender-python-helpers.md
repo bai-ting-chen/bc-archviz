@@ -168,17 +168,16 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `stochastic_mask(g, masks, vector, settings, frame=None)` — Blend three rotated, offset, scale-jittered lookups with independent slow world noise.
 
+## `effects.variation_macro_tone` — World-space macro tone with independently switched albedo and roughness outputs.
+
+- `macro_tone(g, scale_m=4.0, albedo=0.075, roughness=0.05, amount=1.0)` — Return world-space albedo multiplier and roughness addition with independent amount controls.
+
 ## `effects.variation_per_unit_shading` — Unit keys and independently hashed material variations.
 
 - `unit_key(g, source='object', attribute='unit_key', vector=None, size=1.0)` — Read a unit key from its source. instancer needs set_unit_keys on the parents; geometry reads a face attribute stored by the build; cell hashes floor(vector / size), size per axis or one number.
 - `set_unit_keys(objects, attribute='unit_key', seed=0)` — Store deterministic keys on the supplied objects or collection instancers.
 - `unit_values(g, key, tint=0.035, roughness=0.05, bump=0.3, offset=1.0, tilt_deg=0.0, amount=1.0)` — Independently hash tint, roughness, bump, lookup-coordinate offsets and optional normal tilt.
 - `random_tone_material(name, c0, c1, roughness=0.6, translucent=0.0)` — Base colour between c0 and c1 per instance (Object Info > Random); optional translucency for leaves.
-
-## `effects.variation_surface_marks` — World-space macro tone and patchy mark extents; grunge remains import-compatible.
-
-- `macro_tone(g, scale_m=4.0, albedo=0.075, roughness=0.05, amount=1.0)` — Return world-space albedo multiplier and roughness addition with one switch.
-- `patchy_extent(g, coverage=0.5, scale_m=3.0, softness=0.1, amount=1.0)` — Return a soft mark mask with a calibrated zero-area fraction of one minus coverage.
 
 ## `effects.variation_tiling` — Shared offset lookups for image maps, with world-space blending.
 

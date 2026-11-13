@@ -12,10 +12,10 @@ SCRIPTS = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(SCRIPTS / 'blender'), str(SCRIPTS / 'controls'),
                 str(SCRIPTS / 'controls/regression')]
 from _scene import black_scene, ortho_camera
-from materials.shared.nodes import G
+from materials.shared.nodes import G, sock
 from effects.variation_tiling import anti_tile
 from effects.variation_per_unit_shading import unit_key, unit_values, set_unit_keys, random_tone_material
-from effects.variation_surface_marks import macro_tone, grunge, patchy_extent, _field, _moments
+from effects.variation_macro_tone import macro_tone, _field, _moments
 from regress_graph import graph
 
 
@@ -165,59 +165,55 @@ def coordinates(out):
 
 def _marks_fixture():
     black_scene(samples=4, res=512)
-    mat, g = material('marks')
-    tone, _ = macro_tone(g)
-    dirt = grunge(g)
-    patch = patchy_extent(g)
+    mat, g = material('macro-tone')
+    tone, roughness = macro_tone(g)
     noise, _ = _field(g, 'calibration', .5)
     raw_aov = g.node('ShaderNodeOutputAOV', (900, 600))
     raw_aov.aov_name = raw_aov.name = 'noise_calibration'
     g.link(noise, raw_aov.inputs['Value'])
-    # Pack the three appearance probes into RGB; exact values also travel through AOVs.
-    dirt_preview = g.range(dirt, .8, 1.2, (600, 200))
-    tone_preview = g.range(tone, .97, 1.03, (600, 400))
-    emission(g, g.combine(dirt_preview, tone_preview, patch, (800, 0)))
+    tone_preview = g.range(tone, .925, 1.075, (600, 200))
+    roughness_preview = g.range(roughness, -.05, .05, (600, 400))
+    emission(g, g.combine(tone_preview, roughness_preview, noise, (800, 0)))
     macro_tone(g, amount=0)
-    grunge(g, amount=0)
-    patchy_extent(g, amount=0)
-    unit_values(g, unit_key(g), tilt_deg=2, amount=0)
     for node in g.nt.nodes:
         if node.type == 'OUTPUT_AOV':
             node.aov_name = node.name.replace('.001', '_off')
-    patchy_extent(g, coverage=.2)
-    patchy_extent(g, coverage=.8)
-    for node in g.nt.nodes:
-        if node.type == 'OUTPUT_AOV' and node.name.endswith(('.002', '.003')):
-            node.aov_name = node.name.replace('.002', '_20').replace('.003', '_80')
     plane(mat)
     ortho_camera(80, 64)
     return g
 
 
-def marks(out):
+def _check_macro_graph(g):
+    """Check macro-only AOVs, neutral inputs and both amount controls without rendering."""
+    probes={n.aov_name:n for n in g.nt.nodes if n.type=='OUTPUT_AOV' and n.aov_name.startswith('var_')}
+    assert set(probes)=={'var_macro_tone','var_macro_roughness','var_macro_tone_off','var_macro_roughness_off'}
+    for name,node in probes.items():
+        switch=node.inputs['Value'].links[0].from_node
+        assert switch.inputs[0].links[0].from_socket.default_value==(0 if name.endswith('_off') else 1)
+        assert sock(switch.inputs,'A').default_value==(1 if 'tone' in name else 0)
+    return dict(macro_only=True,amount_controls=True,neutral_inputs=True,renders=0)
+
+
+def marks(out, check_only=False):
     g = _marks_fixture()
     _layout_evidence(out, 'marks')
+    checked=_check_macro_graph(g)
+    if check_only:
+        return checked
     passes = render(out, 'marks-packed')
-    sd = float(channel(passes, 'var_grunge').std())
+    tone = channel(passes, 'var_macro_tone')
+    roughness = channel(passes, 'var_macro_roughness')
     raw = channel(passes, 'noise_calibration')
-    off_errors = {}
-    for node in g.nt.nodes:
-        if node.type != 'OUTPUT_AOV' or node.name == 'noise_calibration':
-            continue
-        off = node.aov_name.endswith('_off') or (node.name.startswith('var_unit_') and node.name != 'var_unit_key')
-        if off:
-            neutral = 1 if any(word in node.name for word in ('tone', 'grunge', 'tint', 'bump')) else 0
-            # Blender AOV names can themselves contain dots.
-            data = next(v for k, v in passes.items() if k.endswith('.' + node.aov_name))
-            off_errors[node.name] = float(np.max(np.abs(data[4:-4, 4:-4, :3] - neutral)))
-    assert .04 <= sd <= .06, sd
-    coverages = {str(c): float(np.mean(channel(passes, name) > 1e-6))
-                 for c, name in ((.2, 'var_patchy_extent_20'), (.5, 'var_patchy_extent'),
-                                 (.8, 'var_patchy_extent_80'))}
-    assert all(abs(float(c)-v) <= .1 for c, v in coverages.items()), coverages
-    assert off_errors and max(off_errors.values()) == 0, off_errors
-    return dict(grunge_sd=sd, coverage=coverages, raw_mean=float(raw.mean()),
-                raw_sd=float(raw.std()), off_errors=off_errors)
+    off_errors={}
+    for name,neutral in (('var_macro_tone_off',1),('var_macro_roughness_off',0)):
+        off_errors[name]=float(np.max(abs(channel(passes,name)-neutral)))
+    assert max(off_errors.values())==0,off_errors
+    assert abs(float(tone.mean())-1)<.02 and .005<float(tone.std())<=.075
+    assert .003<float(roughness.std())<=.05
+    return dict(macro_tone_mean=float(tone.mean()),macro_tone_sd=float(tone.std()),
+                macro_roughness_sd=float(roughness.std()),raw_mean=float(raw.mean()),
+                raw_sd=float(raw.std()),off_errors=off_errors)
+
 
 
 def _formula_comparison(out):
@@ -332,7 +328,7 @@ def graphs(out):
         (out/(name+'.json')).write_text(json.dumps(value, sort_keys=True, indent=2))
     assert before == after
     baselines = {}
-    for name in ('anti_tile', 'unit_key', 'unit_values', 'macro_tone', 'grunge', 'patchy_extent'):
+    for name in ('anti_tile', 'unit_key', 'unit_values', 'macro_tone'):
         bpy.ops.wm.read_homefile(use_empty=True)
         CASES[name](mods())
         _layout_evidence(out, name)
@@ -345,14 +341,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--only', choices=('tiling', 'marks', 'units', 'graphs', 'coordinates'))
+    parser.add_argument('--check-only', action='store_true', help='Check the macro-tone graph without rendering')
     args = parser.parse_args(sys.argv[sys.argv.index('--')+1:])
+    if args.check_only and args.only!='marks':
+        parser.error('--check-only requires --only marks')
     args.out.mkdir(parents=True, exist_ok=True)
     results = {}
     for name, run in (('graphs', graphs), ('tiling', tiling), ('marks', marks), ('units', units), ('coordinates', coordinates)):
         if args.only and args.only != name:
             continue
         try:
-            results[name] = run(args.out)
+            results[name] = marks(args.out, check_only=True) if args.check_only else run(args.out)
         except Exception:
             import traceback
             results[name] = {'ERROR': traceback.format_exc()}

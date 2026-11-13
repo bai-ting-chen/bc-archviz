@@ -50,7 +50,7 @@ Hiding the repeat of an image map on a continuous surface.
 ### Generic layers
 | Layer | Reference | Note for this material |
 |---|---|---|
-| Macro tone | variation-surface-marks.md | leftover stains |
+| Macro tone | variation-macro-tone.md | broad tone drift |
 | Per-unit offset | variation-per-unit-shading.md | jointed scans, units |
 
 ## 5. Troubleshooting

@@ -102,7 +102,7 @@ Read: [scale.md](references/materials/scale.md)
 
 **MAT_05 — Authoring Natural Surface Marks**  
 Rule: Make marks patchy, able to disappear, with physically shaped extents.  
-Read: [variation-surface-marks.md](references/effects/variation-surface-marks.md)
+Read: [surface-wear.md](references/effects/surface-wear.md)
 
 **MAT_06 — Using Repeated Units Or Tiled Maps**  
 Rule: Add per-unit variation, hide repeats and fade concave-joint dust outward from corners in the first pass; ask the user before adding stochastic tiling to a material.  

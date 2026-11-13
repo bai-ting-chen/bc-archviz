@@ -30,7 +30,7 @@ follows the same product. Scratches keep their legacy hybrid (scan modulation of
  | §4.2 Scratches    -> roughness x, slight groove normal; held             |
  | §4.3 Dried marks  -> colour x, roughness x; darker drying edge            |
  | §4.4 Worn-through -> under-material mix; hard region edge                 |
- | GENERIC: macro tone; extent/strength -> variation-surface-marks.md       |
+ | GENERIC: macro tone -> variation-macro-tone.md                       |
  +------------------------------------------------------------------------+
  location extent × procedural field -> threshold/feather -> region ----+
  scans -> 3 rotated/offset/scale-jittered lookups -> interior ------------×
@@ -78,7 +78,7 @@ follows the same product. Scratches keep their legacy hybrid (scan modulation of
   with its Fab search. Acquire it through pipeline.md Assets; the effect does not download.
 - `scripts/blender/effects/surface_wear_fields.py` owns procedural shapes;
   `surface_wear_deposits.py` owns irregular bodies/rims. Legacy `grunge` remains importable
-  through `effects.surface_wear` and `effects.variation_surface_marks` with its original behaviour.
+  through `effects.surface_wear` with its original behaviour.
 - `scripts/blender/effects/surface_wear_extent.py`: `WearExtent`, `location_extent`.
   Supply floor datum, foot fade, slow patch settings and the clean-mesh `edge_distance` socket.
   Without that socket no soffit-edge contribution is created. Disabled extent still excludes
@@ -217,6 +217,7 @@ it is never selected by a hybrid builder or a default.
 - `WearExtent` starts at floor datum 0 m, fades feet over 0.02–0.7 m, and uses a 2.3 m patch
   field remapped over 0.46–0.66. For dense low scuffs, try full strength below 0.3 m and a higher
   fade limit. Optional `drip_top_m`/`drip_length_m` describe actual vertical deposit origins.
+  Check that some areas carry no marks, without a constant-width band or contour ring.
 - `HybridSource` uses 3 lookups, seed 17, blend scale 1.7 m and scale jitter 0.88–1.12.
   These and the amounts are shot-dependent starting points, not rules.
 - Keep assets under the project library/local directory. `asset_mask` reads scan size from
@@ -225,11 +226,13 @@ it is never selected by a hybrid builder or a default.
 - Project world metres onto the dominant face plane. For `mapping='uv'`, author the named UVs
   with `box_uv` or `directional_uv` at the scan size; do not scale twice.
 - Keep one amount per layer across comparisons; report the final AOV mean/SD and coverage.
+  Measure interior pixels of dry surfaces and the beauty; never choose strength from the shader
+  parameter alone. Choose previews composited from one render (validation.md).
   Fit the hybrid interior against the procedural control at that amount. Compare the same native
   pixels using the beauty PNG change/off-off-noise metric; aim within 15%, and retain interior
   variation in the flat masks. Factor AOVs report coverage separately from that image metric.
-  Use variation-surface-marks.md §4.3 for extent/strength calibration. Inspect beauty PNGs beside
-  unlit component masks and native crops, with repeated-render noise (RULES VAL_02).
+  Inspect beauty PNGs beside unlit component masks and native crops, with repeated-render noise
+  (RULES VAL_02).
 - Check polarity against registered albedo where present and the raw-mask control otherwise.
   Show unmodified source scans and a same-crop pre-remap scan/interior board. Keep interior mean
   and strong-mark area below one half; filtered nonzero pixels are not a coverage measure because
@@ -238,7 +241,7 @@ it is never selected by a hybrid builder or a default.
 ### Generic layers
 | Layer | Reference | Note for this effect |
 |---|---|---|
-| Macro tone; extent and strength | variation-surface-marks.md §4.3 | measure after masking |
+| Macro tone | variation-macro-tone.md | slow base-colour drift; mark extent and strength are owned here |
 | Edge-shaped wear and run-off | edge-wear.md | run-off stays procedural; the 0.25 m leakage mask tiled visibly |
 | Wet film | wet-surfaces.md | active water, distinct from dried deposits |
 
@@ -251,6 +254,8 @@ it is never selected by a hybrid builder or a default.
 | Dried region/rim has broad gradient bands | profiled body plateau was thresholded against a height fade | build its region from continuous blob distance before profiling (§4.3) |
 | Raw mask tiles visibly | listed scan too small for the area | retain physical scan size and compare stochastic hybrid (§4 shared settings) |
 | Wear resembles camouflage | coverage/amount too high | reduce location extent and amount from the final view (§4 shared settings) |
+| Strength differs from the shader value | strength chosen from a parameter instead of the image | measure the layer AOV and beauty on dry interior pixels (§4 shared settings) |
+| Constant-width band or contour ring | fixed mark extent | use a slow field with real zero regions (§4 shared settings) |
 | Dried marks appear on soffits | orientation gate bypassed | retain the common underside exclusion (§4.3) |
 | Dried deposit is unreadable | weak body/edge contrast or sparse/rejected stamp placement | inspect region and interior separately; stamps use explicit occupancy and top anchoring (§4.3) |
 | Stamps clip or make squares | neighbour support insufficient, or full-tile opacity used as a decal | satisfy support bound and extract continuous-texture cutouts (§4.3) |

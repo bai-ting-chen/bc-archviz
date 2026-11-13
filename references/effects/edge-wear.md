@@ -119,7 +119,8 @@ surface-wear.md.
 ### Generic layers
 | Layer | Reference | Note |
 |---|---|---|
-| Per-unit variation, grunge | variation-per-unit-shading.md, variation-surface-marks.md | weathering here is gravity-shaped |
+| Per-unit variation, macro tone | variation-per-unit-shading.md, variation-macro-tone.md | vary the base before wear |
+| Surface wear | surface-wear.md | weathering here is gravity-shaped |
 | Faint edge on huge meshes | `references/materials/concrete/concrete.md` | Bevel-normal mask instead of dicing |
 | Worn wood edges | `references/materials/wood/wood.md` | real bevel and grain-wise breaks |
 | Cracks in glazed tiles | [tiles.md](../materials/tile/tiles.md) | per-tile Voronoi network |

@@ -238,4 +238,26 @@ From: LAPTOP-25
 - `rg "glass_material" scripts references` finds nothing.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
+# MIGRATE: macro tone reference and helper renamed
+From: LAPTOP-25
+
+## What changed
+- `references/effects/variation-surface-marks.md` -> `references/effects/variation-macro-tone.md`.
+- `scripts/blender/effects/variation_surface_marks.py` -> `scripts/blender/effects/variation_macro_tone.py`.
+- Mark extent/strength instructions now belong to `references/effects/surface-wear.md`.
+- `patchy_extent` is removed; `surface_wear_extent.patch_extent` owns slow zero-reaching wear patches.
+- The old Python module is a thin `macro_tone` / `grunge` re-export marked for removal after callers migrate.
+
+## Steps
+- Update external links to the new reference. Import `macro_tone` from `effects.variation_macro_tone`
+  and `grunge` from `effects.surface_wear`; stop using the deprecated module.
+- Replace external `patchy_extent` calls with `surface_wear_extent.patch_extent` and tune its
+  black/white thresholds in the shot; its signature is different and has no coverage parameter.
+- Delete stale `__pycache__` under `scripts/blender/effects/` after pulling.
+
+## Check after pull
+- Old path/name searches hit only the deprecated re-export and this migration note.
+- `variation_lab.py --only marks --check-only` and `surface_wear_graph_check.py` pass headless.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
 Remove each section after applying it; delete this file when none is left.

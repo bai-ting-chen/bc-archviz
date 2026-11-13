@@ -10,7 +10,7 @@ Recipes describe node structure and mechanisms; tune scene values in study notes
 - **Height:** geometry-scale relief goes to the Displacement output ([displacement.md](displacement/displacement.md)),
    surface texture to a Bump node on the Normal input.
 - **Switching off (MAT_07):** a Value node per layer that scales its deviation from 1 does it; an
-   AOV of the layer's multiplier lets you measure what reaches the image ([variation-surface-marks.md](../effects/variation-surface-marks.md)).
+   AOV of the layer's multiplier lets you measure what reaches the image ([surface-wear.md](../effects/surface-wear.md)).
 - **Geometry fields** measured in Geometry Nodes run before modifiers that move the mesh (RULES MAT_08).
 
 ## Which file
@@ -54,7 +54,7 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 | [Variation: Tiling](../effects/variation-tiling.md) | `effects.variation_tiling` |
 | [Variation: Per Unit, Shading](../effects/variation-per-unit-shading.md) | `effects.variation_per_unit_shading` |
 | [Variation: Per Unit, Geometry](../effects/variation-per-unit-geometry.md) | no builder yet |
-| [Variation: Surface Marks](../effects/variation-surface-marks.md) | `effects.variation_surface_marks` |
+| [Variation: Macro Tone](../effects/variation-macro-tone.md) | `effects.variation_macro_tone` |
 | [Wet Surfaces](../effects/wet-surfaces.md) | `materials.vegetation.vegetation.WET`, `materials.ground.ground.ground_material`, `materials.water.wet` |
 | [Caustics](../effects/caustics.md) | `gn_caustics`; LuxCore `renderer.luxcore` |
 

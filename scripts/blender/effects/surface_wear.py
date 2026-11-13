@@ -155,7 +155,7 @@ def _multiply_input(g, socket, factor, gain, frame, y):
 
 def grunge(g, scale_m=0.5, target_sd=0.05, detail=6.0, rough=0.6, amount=1.0):
     """Return the legacy calibrated grunge multiplier, preserving existing callers exactly."""
-    from effects.variation_surface_marks import _moments, _field
+    from effects.variation_macro_tone import _moments, _field
     mean, sd = _moments(detail, rough)
     noise, frame = _field(g, 'grunge', scale_m, detail, rough)
     signed = g.math('SUBTRACT', noise, mean, (-1200, 0), frame)

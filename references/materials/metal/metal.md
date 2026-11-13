@@ -12,7 +12,7 @@ Metal, polished or brushed. Both are one material; only roughness and anisotropy
  | GENERIC                                                                |
  | edge-wear.md               → rounded normal/geometry, edge line, dust  |
  | surface-wear.md            → grunge, scratches, marks: colour, roughness |
- | variation-surface-marks.md → macro tone: colour                         |
+ | variation-macro-tone.md → macro tone: colour                         |
  +------------------------------------------------------------------------+
 ```
 Clean mesh → edge fields → rounding geometry/normal → BSDF Normal.
@@ -55,7 +55,7 @@ Directional UV and streak noise (§4.2) → BSDF Tangent / Anisotropy / Roughnes
 |---|---|---|
 | Surface wear | [surface-wear.md](../../effects/surface-wear.md) | grunge, scratches, dried marks and worn-through coatings |
 | Rounded edge/bevel, edge line, dust in joints | [edge-wear.md](../../effects/edge-wear.md) | keep the clean metal base beneath the wear |
-| Macro tone | [variation-surface-marks.md](../../effects/variation-surface-marks.md) | vary base colour and roughness |
+| Macro tone | [variation-macro-tone.md](../../effects/variation-macro-tone.md) | vary base colour and roughness |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

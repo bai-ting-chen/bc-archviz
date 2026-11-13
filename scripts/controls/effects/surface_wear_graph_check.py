@@ -12,11 +12,10 @@ import bpy
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'blender'))
 from core.assets import set_project
 from materials.shared.nodes import G, sock
-from effects.surface_wear import WearLayer, wear_factor, apply_surface_wear, grunge
+from effects.surface_wear import WearLayer, wear_factor, apply_surface_wear
 from effects.surface_wear_defaults import DEFAULT_SOURCES
 from effects import surface_wear_defaults,surface_wear_hybrid
 from effects.surface_wear_masks import asset_mask, scan_size_m
-from effects.variation_surface_marks import grunge as compatible_grunge
 
 
 def _graph(kind, settings=None):
@@ -49,7 +48,6 @@ def main():
     args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:])
     set_project(args.project)
     assert DEFAULT_SOURCES == dict.fromkeys(('grunge', 'dried-marks', 'worn-through', 'scratches'), 'hybrid')
-    assert grunge is compatible_grunge
     from effects.surface_wear_tiling import stochastic_mask
     assert surface_wear_hybrid.stochastic_mask is stochastic_mask
     assert 'stamps' not in DEFAULT_SOURCES.values()
@@ -164,7 +162,7 @@ def main():
     assert shader.inputs['Normal'].is_linked and shader.inputs['Roughness'].is_linked
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / 'defaults-check.json').write_text(json.dumps(dict(defaults=DEFAULT_SOURCES,
-        fallback_log=lines, partial_zone_fallback=True, orientation_gate=[.25, .75], legacy_import_identical=True,
+        fallback_log=lines, partial_zone_fallback=True, orientation_gate=[.25, .75], 
         procedural_directions=4, mask_rotations=2, hybrid_region_bitmap_product=True,
         hybrid_uses_stamp_atlases=False, binary_chip_shader=True, scratch_fallback_log=scratch_log,
         disabled_layers_asset_free=True, scan_units_metres=True), indent=2))
