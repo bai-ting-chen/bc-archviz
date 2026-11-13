@@ -1,4 +1,4 @@
-"""Film swell; implementation for water.film."""
+"""Film swell; implementation for water.falling_film."""
 import numpy as np
 
 

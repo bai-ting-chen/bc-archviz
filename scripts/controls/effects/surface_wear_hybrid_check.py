@@ -12,7 +12,7 @@ sys.path[:0]=[str(SCRIPTS/'blender'),str(SCRIPTS/'controls'),str(Path(__file__).
 from core.assets import set_project
 from materials.shared.node_graph import NodeGraph
 from effects.wear.wear import WearLayer,WearExtent,HybridSource,MaskSource,wear_factor
-from effects.wear.masks import asset_mask
+from effects.wear.image_masks import asset_mask
 from variation_lab import black_scene,ortho_camera,plane,emission,render,channel
 
 

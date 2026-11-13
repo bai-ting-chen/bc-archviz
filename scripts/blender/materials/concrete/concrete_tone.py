@@ -4,14 +4,14 @@ from materials.shared.node_graph import NodeGraph, active_socket
 
 from materials.shared.pbr_maps import _ph_maps
 from materials.shared.principled import _principled
-from materials.shared.map_measure import map_mean
+from materials.shared.map_measurements import map_mean_linear_rgb
 
 def retone(mat, target_rgb, tex_id, saturation=0.25):
     """Desaturate a concrete_study map toward its luminance, then scale its measured linear mean to `target_rgb` (a dark brown scan -> light grey concrete keeps its pits and pores)."""
     nt = mat.node_tree
     diff = next(n for n in nt.nodes if n.label == "diffuse")
     tone = next(n for n in nt.nodes if n.label == "color_mult (tone match)")
-    mean = map_mean(tex_id)
+    mean = map_mean_linear_rgb(tex_id)
     # a luminance mix (RGB to BW, Mix at `saturation`) - exactly what the gain below assumes
     # (Hue/Saturation scales HSV saturation and pulls channels toward the max: ~25 % too bright)
     lum = 0.2126 * mean[0] + 0.7152 * mean[1] + 0.0722 * mean[2]

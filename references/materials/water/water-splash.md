@@ -36,10 +36,10 @@ Flow:
 
 ## 3. Code
 `scripts/blender/materials/water/`:
-- `foot_impacts.py`: `impacts(lip, land_mid, land_keep, land_thick, drops, pool_z, p)` (§4.1).
-- `foot_crowns.py`: `crowns(pts, strength, p)` (§4.2).
-- `foot_splash.py`: `splash(lip, pts, strength, pool_z, p)` (§4.3).
-- Parameters: `FootParams` in `foot_config.py`. The falling film calls these from `build.py`
+- `impact_locations.py`: `impacts(lip, land_mid, land_keep, land_thick, drops, pool_z, p)` (§4.1).
+- `impact_crowns.py`: `crowns(pts, strength, p)` (§4.2).
+- `impact_splash.py`: `splash(lip, pts, strength, pool_z, p)` (§4.3).
+- Parameters: `ImpactParams` in `impact_config.py`. The falling film calls these from `falling_film_assembly.py`
   (`falling_film()`).
 
 No script is named in this file for the simulated plunge zone (§4.4); the simulator it names is the

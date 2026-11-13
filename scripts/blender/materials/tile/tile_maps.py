@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 from core.archviz import read_meta
-from materials.shared.map_measure import image_rgb, srgb_to_linear
+from materials.shared.map_measurements import image_rgb, srgb_to_linear
 
 
 def find_maps(folder):

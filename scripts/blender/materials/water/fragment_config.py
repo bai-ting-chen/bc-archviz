@@ -1,4 +1,4 @@
-"""Fragment config; implementation for water.fragments."""
+"""Fragment config; implementation for water.film_fragments."""
 from dataclasses import dataclass
 
 

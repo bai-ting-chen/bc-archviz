@@ -52,12 +52,12 @@ Keep geometry switches and shading amounts independent (RULES MAT_07).
   (non-default deposits/chipping). `enabled=False` needs no assets; `amount=0` disables the effect.
   Continuous sources scale strength; binary hybrid chipping uses amount for coverage, not opacity.
   `worn-through` remains an accepted layer alias; new code and AOVs use `chipping`.
-- `hybrid.py`: `HybridSource`, `hybrid_field`; shared composer for active hybrids. `tiling.py`:
-  `stochastic_mask`, reusing `effects.variation_tiling.randomized_vectors`. `masks.py` owns
+- `hybrid_sources.py`: `HybridSource`, `hybrid_field`; shared composer for active hybrids. `scan_sampling.py`:
+  `stochastic_mask`, reusing `effects.variation_tiling.randomized_vectors`. `image_masks.py` owns
   `MaskSource`, `asset_mask`, `asset_maps`, `scan_size_m`, `image_mask`, `mask_field`.
-- `defaults.py`: defaults and one missing-id/Fab-search line per process; a missing default scan
+- `default_sources.py`: defaults and one missing-id/Fab-search line per process; a missing default scan
   falls back to procedural. Acquire via pipeline.md Assets; builders never download.
-- `stamps.py` / `atlas.py`: explicit neighbour-aware scatter and atlas preparation, separate from hybrid.
+- `decal_stamps.py` / `decal_atlas.py`: explicit neighbour-aware scatter and atlas preparation, separate from hybrid.
 - Controls in `scripts/controls/effects/`: `edge_wear_graph_check.py`, `surface_wear_graph_check.py`,
   `surface_wear_lab.py`, `surface_wear_hybrid_check.py`; reuse the shared rigs and AOV reader.
   `wear_graph_check.py` snapshots every field/shader source and switch for graph equivalence.

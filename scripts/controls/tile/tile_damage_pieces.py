@@ -6,7 +6,7 @@ import controls_import_paths  # noqa: E402,F401 -- every controls topic folder o
 import numpy as np
 
 import materials.tile.tile_damage as tile_damage
-from tile_damage_rig import PX, tile_rig, probe_rgb, tiles
+from tile_damage_rig import METRES_PER_PIXEL, tile_rig, probe_rgb, tiles
 
 
 def check_pieces(folder):
@@ -14,7 +14,7 @@ def check_pieces(folder):
     sc,ob,mat=tile_rig(force_kind=1,chip_share=0,spall_density=0)
     data=probe_rgb(mat,folder,'piece_planes',('Piece Height','Piece','Crack Distance'),(.002,1,.05))
     ph=data[...,0]; ids=np.rint(data[...,1]*tile_damage.PIECE_BINS).astype(int)
-    valid=data[...,2]>3*PX
+    valid=data[...,2]>3*METRES_PER_PIXEL
     moved=0.; fitted=0; residual=0.
     for index,face,x0,X,Y in tiles(ph.shape):
         for value in np.unique(ids[face&valid]):

@@ -1,4 +1,4 @@
-"""Caustic shading; implementation for gn_caustics."""
+"""Caustic shading; implementation for geometry_node_caustics."""
 import math
 import bpy
 from materials.shared.node_graph import NodeGraph

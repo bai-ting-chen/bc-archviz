@@ -6,14 +6,14 @@ uses, so light power and exposure stay consistent. Measured in Cycles (scripts/c
   * point / spot: power is for the FULL sphere; the spot cone only masks it
     -> a fixture putting F lm into a cone of full angle a needs P = F/683 * 4pi / (2pi(1 - cos a/2)).
   * area: Lambert emitter, P = total emitted flux (E on axis = P / (pi d^2)); `spread` focuses it.
-  * IES: Cycles uses 177.83 lm/W internally -> point light power 177.83/683 (ies_light, IES_POWER).
+  * IES: Cycles uses 177.83 lm/W internally -> point light power 177.83/683 (ies_light, IES_REFERENCE_POWER_W).
 """
 
 # Compatibility imports; each implementation has one owner (GOV_04).
 from scene.lighting.light_objects import _light_obj, _warm  # noqa: F401
 from scene.lighting.light_fixtures import downlight, led_strip, panel_light  # noqa: F401
 from scene.lighting.ies_profile import ies_read  # noqa: F401
-from scene.lighting.ies_fixture import IES_POWER, ies_light  # noqa: F401
+from scene.lighting.ies_fixture import IES_REFERENCE_POWER_W, ies_light  # noqa: F401
 from scene.lighting.emitter_shading import lens_luminance, lit_once, emitter, emitter_dots  # noqa: F401
 import math
 import os

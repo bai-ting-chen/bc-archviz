@@ -1,4 +1,4 @@
-"""Fragment gaps; implementation for water.fragments."""
+"""Fragment gaps; implementation for water.film_fragments."""
 import numpy as np
 from materials.water.fragment_cells import _mid_surface, _torn_cells
 

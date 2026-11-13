@@ -1,4 +1,4 @@
-"""Caustic graph; implementation for gn_caustics."""
+"""Caustic graph; implementation for geometry_node_caustics."""
 import bpy
 from effects.wear.chipping import input_socket as _input
 from materials.shared.node_graph import NodeGraph, active_socket

@@ -4,7 +4,7 @@ from materials.shared.node_graph import NodeGraph, active_socket
 
 from materials.shared.pbr_maps import _ph_maps
 from materials.shared.principled import _principled
-from materials.shared.map_measure import map_mean
+from materials.shared.map_measurements import map_mean_linear_rgb
 
 def vertical_boards(mat, cylinder=None, strip_m=0.9, strip_tone=(0.90, 1.08), macro=(0.85, 1.10),
                     flatten=0.4):

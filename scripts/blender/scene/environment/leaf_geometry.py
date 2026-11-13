@@ -2,7 +2,7 @@
 import bpy
 
 
-def leaf_proto(name, length, width, curl, material):
+def leaf_prototype(name, length, width, curl, material):
     """A small curled elliptical leaf (10-gon) in a hidden PROTOS collection; reused if present."""
     ob = bpy.data.objects.get(name)
     if ob:

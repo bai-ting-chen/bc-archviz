@@ -40,11 +40,11 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 | Ground shader | `materials.ground.ground` |
 | [Vegetation](vegetation/vegetation.md) | `materials.vegetation.vegetation` |
 | Water: [Surface](water/water-surface.md) | `materials.water.water` |
-| Water: [Free-Falling Film](water/water-free-falling-film.md) | `materials.water.build.falling_film` (`materials.water.curtain`, `materials.water.film`, `materials.water.fragments`) |
+| Water: [Free-Falling Film](water/water-free-falling-film.md) | `materials.water.falling_film_assembly.falling_film` (`materials.water.ballistic_sheet`, `materials.water.falling_film`, `materials.water.film_fragments`) |
 | Water: [Attached Film](water/water-attached-film.md) | none yet (raycast height field) |
-| Water: [Ripple](water/water-ripple.md) | `materials.water.ripple`, `materials.water.shading` |
-| Water: [Foam](water/water-foam.md) | `materials.water.foot` (foam, bubbles) |
-| Water: [Splash](water/water-splash.md) | `materials.water.foot` (impacts, crowns, splash) |
+| Water: [Ripple](water/water-ripple.md) | `materials.water.pool_ripples`, `materials.water.surface_shading` |
+| Water: [Foam](water/water-foam.md) | `materials.water.pool_impacts` (foam, bubbles) |
+| Water: [Splash](water/water-splash.md) | `materials.water.pool_impacts` (impacts, crowns, splash) |
 
 | Effects (shared) | Canonical helper |
 |---|---|
@@ -61,8 +61,8 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 | [Variation: Per Unit, Shading](../effects/variation-per-unit-shading.md) | `effects.variation_per_unit_shading` |
 | [Variation: Per Unit, Geometry](../effects/variation-per-unit-geometry.md) | no builder yet |
 | [Variation: Macro Tone](../effects/variation-macro-tone.md) | `effects.variation_macro_tone` |
-| [Wet Surfaces](../effects/wet-surfaces.md) | `materials.vegetation.vegetation.WET`, `materials.ground.ground.ground_material`, `materials.water.wet` |
-| [Caustics](../effects/caustics.md) | `gn_caustics`; LuxCore `renderer.luxcore` |
+| [Wet Surfaces](../effects/wet-surfaces.md) | `materials.vegetation.vegetation.WET_BLADE_DEFAULTS`, `materials.ground.ground.ground_material`, `materials.water.wet_wall_proxy` |
+| [Caustics](../effects/caustics.md) | `geometry_node_caustics`; LuxCore `renderer.luxcore` |
 
 Shared graph/socket helpers: `materials.shared.node_graph.NodeGraph` / `active_socket`; asset lookup and project state: `archviz`. Lighting stays in `interior`; geometry stays in `terrain` and `scatter`.
 [LuxCore materials](../renderer/luxcore.md): `renderer.luxcore.luxcore`; [all helper signatures](../scene/blender-python-helpers.md).

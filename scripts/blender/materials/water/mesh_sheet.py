@@ -1,4 +1,4 @@
-"""Mesh sheet; implementation for water.mesh."""
+"""Mesh sheet; implementation for water.mesh_builders."""
 import bpy
 import numpy as np
 from materials.water.mesh_objects import _finish, _link
@@ -20,7 +20,7 @@ def _border_loop(n_rows, n_cols):
 def film_sheet(name, front, back, keep, material=None, collection=None):
     """Closed water body from front/back grids (nd, ns, 3); quads whose four corners are all torn are removed.
 
-    Vertex order = front grid then back grid (row-major), which water.motion.film_velocity relies on.
+    Vertex order = front grid then back grid (row-major), which water.motion_blur.film_velocity relies on.
     Faces are wound outward for either lip handedness (front faces point from the back skin to the front skin).
     """
     n_rows, n_cols = keep.shape

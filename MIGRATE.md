@@ -400,4 +400,257 @@ Supersedes the builder names in the sections above. `materials.shared.nodes` is 
 - `rg "materials\.shared\.nodes|import _paths" scripts references` finds nothing.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
+# MIGRATE: descriptive file and API names, round A
+From: LAPTOP-25
+
+## What changed
+Public imports, helper names, constants and CLI spellings now use descriptive names. No compatibility shims remain.
+Graph construction, numeric results, parameter names and settings fields are unchanged. The video reference remains
+`references/research/learning-from-video.md`, paired with `scripts/research/learning_from_video.py`.
+
+Paths in the table are relative to the skill root. Symbol and flag rows identify their original owner;
+apply the file row first to locate its new owner. Re-exported symbols use the same new spelling.
+
+| Kind / original owner | Old | New |
+|---|---|---|
+| File | `scripts/research/imgstats.py` | `scripts/research/image_statistics.py` |
+| File | `scripts/research/refsolve.py` | `scripts/research/reference_camera.py` |
+| File | `scripts/research/refmatch.py` | `scripts/research/reference_match.py` |
+| File | `scripts/research/refmatch_grid.py` | `scripts/research/reference_grid.py` |
+| File | `scripts/research/refmatch_image.py` | `scripts/research/reference_image.py` |
+| File | `scripts/research/refmatch_pair.py` | `scripts/research/reference_pair.py` |
+| File | `scripts/research/refmatch_patches.py` | `scripts/research/reference_patches.py` |
+| File | `scripts/research/yt_learn.py` | `scripts/research/learning_from_video.py` |
+| File | `scripts/blender/core/projectpath.py` | `scripts/blender/core/project_paths.py` |
+| File | `scripts/blender/scene/io/blend_refs.py` | `scripts/blender/scene/io/blend_references.py` |
+| File | `scripts/scene/lighting/ldt2ies.py` | `scripts/scene/lighting/ldt_to_ies.py` |
+| File | `scripts/scene/assets/polyhaven_meta.py` | `scripts/scene/assets/polyhaven_metadata.py` |
+| File | `scripts/review/regress_helpers.py` | `scripts/review/helper_regression.py` |
+| File | `scripts/review/regress_compare.py` | `scripts/review/regression_compare.py` |
+| File | `scripts/controls/regression/regress_cases.py` | `scripts/controls/regression/regression_cases.py` |
+| File | `scripts/controls/regression/regress_dump.py` | `scripts/controls/regression/regression_dump.py` |
+| File | `scripts/controls/regression/regress_graph.py` | `scripts/controls/regression/regression_graph.py` |
+| File | `scripts/controls/regression/regress_rig.py` | `scripts/controls/regression/regression_rig.py` |
+| File | `scripts/controls/regression/stage_b_files_check.py` | `scripts/controls/regression/render_reference_files_check.py` |
+| File | `scripts/controls/regression/stage_b_graph_check.py` | `scripts/controls/regression/scene_renderer_graph_check.py` |
+| File | `scripts/controls/regression/stage_b_import_check.py` | `scripts/controls/regression/scene_renderer_import_check.py` |
+| File | `scripts/controls/_scene.py` | `scripts/controls/photometric_scene.py` |
+| File | `scripts/blender/renderer/render.py` | `scripts/blender/renderer/cycles_render.py` |
+| File | `scripts/blender/renderer/luxcore/engine.py` | `scripts/blender/renderer/luxcore/engine_settings.py` |
+| File | `scripts/blender/renderer/luxcore/lux_textured.py` | `scripts/blender/renderer/luxcore/textured_material.py` |
+| File | `scripts/blender/materials/shared/simple.py` | `scripts/blender/materials/shared/flat_color_materials.py` |
+| File | `scripts/blender/materials/shared/map_measure.py` | `scripts/blender/materials/shared/map_measurements.py` |
+| File | `scripts/blender/materials/shared/material_spec.py` | `scripts/blender/materials/shared/material_specification.py` |
+| File | `scripts/blender/materials/water/build.py` | `scripts/blender/materials/water/falling_film_assembly.py` |
+| File | `scripts/blender/materials/water/curtain.py` | `scripts/blender/materials/water/ballistic_sheet.py` |
+| File | `scripts/blender/materials/water/film.py` | `scripts/blender/materials/water/falling_film.py` |
+| File | `scripts/blender/materials/water/film_build.py` | `scripts/blender/materials/water/film_surfaces.py` |
+| File | `scripts/blender/materials/water/foot.py` | `scripts/blender/materials/water/pool_impacts.py` |
+| File | `scripts/blender/materials/water/foot_config.py` | `scripts/blender/materials/water/impact_config.py` |
+| File | `scripts/blender/materials/water/foot_impacts.py` | `scripts/blender/materials/water/impact_locations.py` |
+| File | `scripts/blender/materials/water/foot_crowns.py` | `scripts/blender/materials/water/impact_crowns.py` |
+| File | `scripts/blender/materials/water/foot_foam.py` | `scripts/blender/materials/water/impact_foam.py` |
+| File | `scripts/blender/materials/water/foot_bubbles.py` | `scripts/blender/materials/water/impact_bubbles.py` |
+| File | `scripts/blender/materials/water/foot_splash.py` | `scripts/blender/materials/water/impact_splash.py` |
+| File | `scripts/blender/materials/water/foot_drift.py` | `scripts/blender/materials/water/impact_drift.py` |
+| File | `scripts/blender/materials/water/mesh.py` | `scripts/blender/materials/water/mesh_builders.py` |
+| File | `scripts/blender/materials/water/noise.py` | `scripts/blender/materials/water/seeded_noise.py` |
+| File | `scripts/blender/materials/water/shading.py` | `scripts/blender/materials/water/surface_shading.py` |
+| File | `scripts/blender/materials/water/motion.py` | `scripts/blender/materials/water/motion_blur.py` |
+| File | `scripts/blender/materials/water/wet.py` | `scripts/blender/materials/water/wet_wall_proxy.py` |
+| File | `scripts/blender/materials/water/fragments.py` | `scripts/blender/materials/water/film_fragments.py` |
+| File | `scripts/blender/materials/water/thin_wall.py` | `scripts/blender/materials/water/thin_wall_material.py` |
+| File | `scripts/blender/materials/water/height_image.py` | `scripts/blender/materials/water/ripple_height_image.py` |
+| File | `scripts/blender/materials/tile/tile_bsdf.py` | `scripts/blender/materials/tile/tile_shading.py` |
+| File | `scripts/blender/effects/caustics/gn_caustics.py` | `scripts/blender/effects/caustics/geometry_node_caustics.py` |
+| File | `scripts/blender/scene/environment/scatter_asset.py` | `scripts/blender/scene/environment/scatter_node_asset.py` |
+| File | `scripts/blender/effects/wear/atlas.py` | `scripts/blender/effects/wear/decal_atlas.py` |
+| File | `scripts/blender/effects/wear/defaults.py` | `scripts/blender/effects/wear/default_sources.py` |
+| File | `scripts/blender/effects/wear/hybrid.py` | `scripts/blender/effects/wear/hybrid_sources.py` |
+| File | `scripts/blender/effects/wear/masks.py` | `scripts/blender/effects/wear/image_masks.py` |
+| File | `scripts/blender/effects/wear/patterns.py` | `scripts/blender/effects/wear/procedural_patterns.py` |
+| File | `scripts/blender/effects/wear/stamps.py` | `scripts/blender/effects/wear/decal_stamps.py` |
+| File | `scripts/blender/effects/wear/tiling.py` | `scripts/blender/effects/wear/scan_sampling.py` |
+| File | `scripts/blender/effects/wear/layers.py` | `scripts/blender/effects/wear/layer_names.py` |
+| File | `scripts/blender/materials/water/ripple.py` | `scripts/blender/materials/water/pool_ripples.py` |
+| Class: `scripts/blender/materials/water/build.py` | `Setup` | `FallingFilmSetup` |
+| Class: `scripts/blender/materials/water/curtain.py` | `Lip` | `LaunchLip` |
+| Class: `scripts/blender/materials/water/curtain.py` | `Flow` | `SheetFlow` |
+| Class: `scripts/blender/materials/water/foot_config.py` | `FootParams` | `ImpactParams` |
+| Class: `scripts/research/refsolve.py` | `Solve` | `ReferenceCameraSolve` |
+| Class: `scripts/controls/regression/regress_rig.py` | `Modules` | `LazyModules` |
+| Class: `scripts/blender/materials/tile/tile_graph.py` | `_Graph` | `_TileGraph` |
+| Public function/method: `scripts/blender/materials/tile/tile_graph.py` | `_Graph.m` | `math` |
+| Public function/method: `scripts/blender/materials/tile/damage_graph.py` | `_DamageGraph.m` | `math` |
+| Public function/method: `scripts/blender/materials/tile/tile_graph.py` | `_Graph.v` | `vector_math` |
+| Public function/method: `scripts/blender/materials/tile/damage_graph.py` | `_DamageGraph.v` | `vector_math` |
+| Public function/method: `scripts/blender/materials/tile/tile_graph.py` | `_Graph.xyz` | `combine_xyz` |
+| Public function/method: `scripts/blender/materials/tile/damage_graph.py` | `_DamageGraph.xyz` | `combine_xyz` |
+| Public function/method: `scripts/blender/materials/tile/tile_graph.py` | `_Graph.rand` | `hash_noise` |
+| Public function/method: `scripts/blender/materials/tile/tile_graph.py` | `_Graph.put` | `link_or_set` |
+| Public function/method: `scripts/blender/materials/tile/tile_graph.py` | `_Graph.split` | `separate_xyz` |
+| Public function/method: `scripts/blender/materials/tile/tile_graph.py` | `_Graph.loc` | `next_location` |
+| Public function/method: `scripts/blender/materials/tile/tile_graph.py` | `_Graph.noise` | `noise_texture` |
+| Public function/method: `scripts/blender/materials/tile/damage_graph.py` | `_DamageGraph.mad` | `multiply_add` |
+| Public function/method: `scripts/blender/materials/tile/damage_graph.py` | `_DamageGraph.knot` | `knot_noise` |
+| Public function/method: `scripts/blender/materials/tile/damage_graph.py` | `_DamageGraph.interval` | `interpolate_interval` |
+| Public function/method: `scripts/research/refsolve.py` | `Solve.to_f` | `camera_to_facade` |
+| Public function/method: `scripts/research/refsolve.py` | `Solve.floor_pt` | `pixel_to_floor` |
+| Public function/method: `scripts/research/refsolve.py` | `Solve.pt_at_z` | `pixel_to_height` |
+| Public function/method: `scripts/research/refsolve.py` | `Solve.plane_pt` | `pixel_to_facade_plane` |
+| Public function/method: `scripts/research/refsolve.py` | `Solve.blender` | `blender_camera_settings` |
+| Public function/method: `scripts/research/yt_learn.py` | `learn` | `extract_tutorial` |
+| Public function/method: `scripts/research/yt_learn.py` | `clean_vtt` | `clean_caption_cues` |
+| Public function/method: `scripts/scene/assets/asset_sheet.py` | `fetch_thumb` | `fetch_thumbnail` |
+| Public function/method: `scripts/scene/assets/polyhaven_texture.py` | `fetch_tex` | `fetch_texture` |
+| Public function/method: `scripts/controls/regression/regress_graph.py` | `val` | `stable_value` |
+| Public function/method: `scripts/controls/regression/regress_graph.py` | `sig` | `node_signature` |
+| Public function/method: `scripts/controls/regression/regress_rig.py` | `mods` | `lazy_modules` |
+| Public function/method: `scripts/controls/regression/regress_rig.py` | `eval_positions` | `evaluated_positions` |
+| Public function/method: `scripts/workflow/helper_index.py` | `sig` | `function_signature` |
+| Public function/method: `scripts/blender/scene/environment/leaf_geometry.py` | `leaf_proto` | `leaf_prototype` |
+| Public function/method: `scripts/blender/materials/water/noise.py` | `smooth` | `smoothstep` |
+| Public function/method: `scripts/blender/materials/water/noise.py` | `clustered` | `clustered_noise` |
+| Public function/method: `scripts/blender/materials/water/noise.py` | `unit` | `unit_noise` |
+| Public function/method: `scripts/blender/materials/water/motion.py` | `enable` | `enable_motion_blur` |
+| Public function/method: `scripts/blender/materials/water/wet.py` | `proxy` | `build_proxy` |
+| Public function/method: `scripts/blender/materials/water/height_image.py` | `readback_mm` | `height_range_mm` |
+| Public function/method: `scripts/blender/materials/water/curtain.py` | `mean_launch` | `mean_launch_speed_m_s` |
+| Public function/method: `scripts/blender/materials/water/curtain.py` | `flux` | `flow_per_width_m2_s` |
+| Public function/method: `scripts/blender/materials/water/curtain.py` | `launch` | `launch_speed_m_s` |
+| Public function/method: `scripts/blender/materials/water/curtain.py` | `speed` | `fall_speed_m_s` |
+| Public function/method: `scripts/blender/materials/water/curtain.py` | `thickness` | `sheet_thickness_m` |
+| Public function/method: `scripts/blender/materials/tile/tile_bsdf.py` | `bsdfs` | `surface_shader` |
+| Public function/method: `scripts/blender/materials/tile/damage_shading.py` | `damage_bsdfs` | `damage_shaders` |
+| Public function/method: `scripts/blender/materials/shared/simple.py` | `simple_material` | `flat_color_material` |
+| Public function/method: `scripts/blender/materials/shared/map_measure.py` | `map_mean` | `map_mean_linear_rgb` |
+| Public function/method: `scripts/blender/renderer/luxcore/lux_textured.py` | `lux_textured` | `textured_material` |
+| Module constant: `scripts/blender/materials/water/curtain.py` | `G` | `GRAVITY_M_S2` |
+| Module constant: `scripts/blender/materials/water/motion.py` | `G` | `GRAVITY_M_S2` |
+| Module constant: `scripts/blender/effects/variation_macro_tone.py` | `SD1` | `SINGLE_OCTAVE_NOISE_SD` |
+| Module constant: `scripts/blender/effects/wear/wear_locations.py` | `ROUND_RADIUS` | `ROUND_RADIUS_M` |
+| Module constant: `scripts/blender/materials/shared/pbr_config.py` | `BUMP_DISTANCE` | `BUMP_DISTANCE_M` |
+| Module constant: `scripts/research/refmatch_image.py` | `W` | `COMPARISON_WIDTH_PX` |
+| Module constant: `scripts/rhino/project_edges.py` | `CREASE` | `CREASE_ANGLE_RAD` |
+| Module constant: `scripts/scene/assets/asset_sheet.py` | `TILE_W` | `TILE_WIDTH_PX` |
+| Module constant: `scripts/scene/assets/asset_sheet.py` | `TILE_H` | `TILE_HEIGHT_PX` |
+| Module constant: `scripts/scene/assets/asset_sheet.py` | `LABEL_H` | `LABEL_HEIGHT_PX` |
+| Module constant: `scripts/scene/assets/asset_sheet.py` | `UA` | `REQUEST_HEADERS` |
+| Module constant: `scripts/scene/assets/maxtree_search.py` | `UA` | `REQUEST_HEADERS` |
+| Module constant: `scripts/scene/assets/polyhaven_config.py` | `UA` | `REQUEST_HEADERS` |
+| Module constant: `scripts/scene/assets/maxtree_search.py` | `API` | `CATALOG_API_URL` |
+| Module constant: `scripts/scene/assets/polyhaven_config.py` | `API` | `API_BASE_URL` |
+| Module constant: `scripts/scene/assets/maxtree_search.py` | `PAGE` | `PAGE_SIZE` |
+| Module constant: `scripts/scene/assets/maxtree_search.py` | `SCHEMA` | `CATALOG_SCHEMA_VERSION` |
+| Module constant: `scripts/scene/assets/maxtree_search.py` | `VARIANT` | `VARIANT_PATTERN` |
+| Module constant: `scripts/scene/assets/maxtree_search.py` | `COMMON` | `COMMON_NAME_PATTERN` |
+| Module constant: `scripts/scene/assets/maxtree_search.py` | `SPECIES` | `SPECIES_PATTERN` |
+| Module constant: `scripts/scene/assets/maxtree_search.py` | `VOLUME` | `VOLUME_PATTERN` |
+| Module constant: `scripts/scene/assets/polyhaven_config.py` | `LIB` | `LIBRARY_DIR` |
+| Module constant: `scripts/scene/assets/polyhaven_config.py` | `PROJECT` | `PROJECT_ROOT` |
+| Module constant: `scripts/scene/assets/polyhaven_config.py` | `TEX_MAPS` | `TEXTURE_MAP_FORMATS` |
+| Module constant: `scripts/scene/assets/fab_fetch.py` | `LOCAL` | `LOCAL_LIBRARY_DIR` |
+| Module constant: `scripts/research/yt_learn.py` | `LINKS` | `WINGET_LINKS_DIR` |
+| Module constant: `scripts/research/yt_learn.py` | `YTDLP` | `YT_DLP_EXE` |
+| Module constant: `scripts/research/yt_learn.py` | `FFMPEG` | `FFMPEG_EXE` |
+| Module constant: `scripts/workflow/structure_check.py` | `BS` | `BACKSLASH` |
+| Module constant: `scripts/workflow/structure_check.py` | `SKILL` | `SKILL_ROOT` |
+| Module constant: `scripts/workflow/helper_index.py` | `HERE` | `WORKFLOW_DIR` |
+| Module constant: `scripts/workflow/helper_index.py` | `SRC` | `BLENDER_SCRIPTS_DIR` |
+| Module constant: `scripts/workflow/helper_index.py` | `OUT` | `HELPER_REFERENCE_PATH` |
+| Module constant: `scripts/controls/lighting/ies_units.py` | `D` | `LIGHT_HEIGHT_M` |
+| Module constant: `scripts/controls/lighting/ies_units.py` | `I0` | `TEST_INTENSITY_CD` |
+| Module constant: `scripts/controls/lighting/ies_units.py` | `V` | `VERTICAL_ANGLES_DEG` |
+| Module constant: `scripts/controls/lighting/ies_units.py` | `H` | `HORIZONTAL_ANGLES_DEG` |
+| Module constant: `scripts/controls/lighting/ies_units.py` | `ISO` | `ISOTROPIC_PROFILE_PATH` |
+| Module constant: `scripts/controls/lighting/ies_units.py` | `DOWN` | `DOWNWARD_PROFILE_PATH` |
+| Module constant: `scripts/controls/lighting/ies_units.py` | `C0` | `C0_PROFILE_PATH` |
+| Module constant: `scripts/controls/lighting/ies_units.py` | `C90` | `C90_PROFILE_PATH` |
+| Module constant: `scripts/controls/lighting/ies_units.py` | `TMP` | `TEMP_DIR` |
+| Module constant: `scripts/controls/lighting/light_units.py` | `D` | `LIGHT_HEIGHT_M` |
+| Module constant: `scripts/controls/lighting/light_units.py` | `P` | `LIGHT_POWER_W` |
+| Module constant: `scripts/blender/scene/environment/terrain_graph.py` | `BARE_W` | `BARE_SOIL_NOISE_W` |
+| Module constant: `scripts/blender/scene/environment/terrain_graph.py` | `BARE` | `BARE_SOIL_NOISE_SETTINGS` |
+| Module constant: `scripts/blender/scene/lighting/ies_fixture.py` | `IES_POWER` | `IES_REFERENCE_POWER_W` |
+| Module constant: `scripts/blender/renderer/luxcore/engine.py` | `ADDON` | `ADDON_MODULE` |
+| Module constant: `scripts/blender/renderer/luxcore/engine.py` | `DEPTH_TOTAL` | `MAX_PATH_BOUNCES` |
+| Module constant: `scripts/blender/renderer/luxcore/engine.py` | `DEPTH_DIFFUSE` | `MAX_DIFFUSE_BOUNCES` |
+| Module constant: `scripts/blender/renderer/luxcore/engine.py` | `DEPTH_GLOSSY` | `MAX_GLOSSY_BOUNCES` |
+| Module constant: `scripts/blender/renderer/luxcore/engine.py` | `DEPTH_SPECULAR` | `MAX_SPECULAR_BOUNCES` |
+| Module constant: `scripts/blender/renderer/luxcore/engine.py` | `CLAMP` | `CAMERA_RADIANCE_CLAMP` |
+| Module constant: `scripts/blender/scene/io/max_import.py` | `MOD` | `IMPORTER_MODULE` |
+| Module constant: `scripts/controls/tile/tile_layout_rig.py` | `OUTS` | `OUTPUT_SOCKET_NAMES` |
+| Module constant: `scripts/controls/regression/regress_graph.py` | `SKIP` | `IGNORED_NODE_PROPERTIES` |
+| Module constant: `scripts/blender/effects/wear/cracks.py` | `CRACK` | `CRACK_DEFAULTS` |
+| Module constant: `scripts/blender/effects/wear/edge_cracks.py` | `EDGE_CRACK` | `EDGE_CRACK_DEFAULTS` |
+| Module constant: `scripts/blender/effects/wear/water_marks.py` | `LEAK` | `RUNOFF_DEFAULTS` |
+| Module constant: `scripts/blender/materials/vegetation/blade_config.py` | `BLADE` | `BLADE_DEFAULTS` |
+| Module constant: `scripts/blender/materials/vegetation/blade_config.py` | `WET` | `WET_BLADE_DEFAULTS` |
+| Module constant: `scripts/blender/materials/tile/damage_contract.py` | `PARAMS` | `DAMAGE_INPUT_SOCKETS` |
+| Module constant: `scripts/blender/materials/tile/damage_contract.py` | `DEFAULTS` | `DAMAGE_DEFAULT_VALUES` |
+| Module constant: `scripts/blender/renderer/render_variant.py` | `KNOWN` | `SUPPORTED_OVERRIDES` |
+| Module constant: `scripts/blender/effects/wear/edge_profile.py` | `LINE_WIDTH` | `LINE_WIDTH_M` |
+| Module constant: `scripts/blender/effects/wear/edge_profile.py` | `DUST_WIDTH` | `DUST_WIDTH_M` |
+| Module constant: `scripts/blender/effects/wear/edge_profile.py` | `AO_REACH` | `AO_REACH_M` |
+| Module constant: `scripts/blender/materials/glass/glass_assembly.py` | `N_GLASS` | `GLASS_IOR` |
+| Module constant: `scripts/blender/materials/glass/glass_assembly.py` | `N_WATER` | `WATER_IOR` |
+| Module constant: `scripts/blender/materials/water/noise.py` | `_X0` | `_DOMAIN_MIN_M` |
+| Module constant: `scripts/blender/materials/water/noise.py` | `_X1` | `_DOMAIN_MAX_M` |
+| Module constant: `scripts/controls/environment/outdoor_smoke.py` | `C` | `PAD_CENTER_M` |
+| Module constant: `scripts/controls/environment/outdoor_smoke.py` | `HALF` | `PAD_HALF_SIZE_M` |
+| Module constant: `scripts/controls/lighting/fog_koschmieder.py` | `V` | `VISIBILITY_M` |
+| Module constant: `scripts/controls/lighting/fog_koschmieder.py` | `D` | `EMITTER_DISTANCE_M` |
+| Module constant: `scripts/controls/tile/tile_damage_rig.py` | `W` | `TILE_WIDTH_M` |
+| Module constant: `scripts/controls/tile/tile_damage_rig.py` | `H` | `TILE_HEIGHT_M` |
+| Module constant: `scripts/controls/tile/tile_damage_rig.py` | `J` | `JOINT_WIDTH_M` |
+| Module constant: `scripts/controls/tile/tile_damage_rig.py` | `PX` | `METRES_PER_PIXEL` |
+| Module constant: `scripts/controls/tile/tile_damage_rig.py` | `NT` | `TILE_COUNT` |
+| Module constant: `scripts/controls/tile/tile_damage_rig.py` | `GLAZE` | `GLAZE_THICKNESS_M` |
+| Module constant: `scripts/controls/tile/tile_damage_rig.py` | `ENGOBE` | `ENGOBE_THICKNESS_M` |
+| Module constant: `scripts/controls/tile/tile_layout_rig.py` | `RES` | `RESOLUTION_PX` |
+| Module constant: `scripts/controls/tile/tile_layout_rig.py` | `SIZE` | `FRAME_SIZE_M` |
+| Module constant: `scripts/scene/assets/fab-search.js` | `FAB_PAGE` | `FAB_PAGE_SIZE` |
+| Cli flag: `scripts/workflow/study_run.py` | `--pct` | `--resolution-percent` |
+| Cli flag: `scripts/workflow/study_run.py` | `--spp` | `--samples` |
+| Cli flag: `scripts/workflow/study_run.py` | `--ref` | `--reference` |
+| Cli flag: `scripts/research/edge_overlay.py` | `--w` | `--width-px` |
+| Cli flag: `scripts/scene/assets/asset_sheet.py` | `--cols` | `--columns` |
+| Cli flag: `scripts/scene/assets/polyhaven_fetch.py` | `--res` | `--resolution` |
+| Cli flag: `scripts/research/yt_learn.py` | `--n` | `--max-results` |
+| Cli flag: `scripts/research/yt_learn.py` | `--scene` | `--scene-change-threshold` |
+| Cli flag: `scripts/research/yt_learn.py` | `--every` | `--frame-interval-s` |
+| Cli flag: `scripts/research/yt_learn.py` | `--max-height` | `--max-height-px` |
+| Cli flag: `scripts/scene/assets/maxtree_search.py` | `--min-height` | `--min-height-cm` |
+| Cli flag: `scripts/scene/assets/maxtree_search.py` | `--max-height` | `--max-height-cm` |
+| Cli flag: `scripts/blender/renderer/render_variant.py` | `res=` | `resolution=` |
+| Cli flag: `scripts/blender/renderer/render_variant.py` | `disp=` | `displacement=` |
+| Cli flag: `scripts/blender/renderer/render_variant.py` | `coll=` | `collection=` |
+| Cli flag: `scripts/blender/renderer/render_variant.py` | `woodwear=` | `wood_wear=` |
+| Override: `scripts/blender/materials/tile/damage_graph.py` | `_DamageGraph.split` | `_DamageGraph.separate_xyz` |
+
+The vector-separation override follows its renamed base method so its expression cache remains active.
+Gravity has one authority: `materials.water.ballistic_sheet.GRAVITY_M_S2`; `motion_blur` imports it.
+Short argparse destinations remain internal until the parameter/field round; callers use the new flags above.
+
+## Steps
+1. Update external imports, attribute accesses, file paths and command invocations using the table. Do not retain old shims.
+2. Clear stale `__pycache__` directories under `scripts/`, especially the renamed module families.
+3. Regenerate the helper reference with `python scripts/workflow/helper_index.py`.
+
+## Check after pull
+- `python scripts/workflow/structure_check.py` reports 0 problems; `python -m compileall -q scripts` passes.
+- In factory-startup headless Blender, run `scripts/controls/material_graph_check.py -- <topic> <output.json>`
+  for concrete, glass, ground, luxcore, pbr, stone, vegetation, wood_wear, tile_damage, tile_layout, tile_mapping, tile_nodes and water.
+- Run `scripts/controls/effects/edge_wear_graph_check.py -- <output.json>` with `ARCHVIZ_PROJECT=<project>`.
+- Run `scripts/controls/effects/surface_wear_graph_check.py` and `wear_graph_check.py` with `-- --project <project> --out <output>`;
+  the first output is a directory, the second a JSON file. Run `variation_lab.py -- --only marks --check-only --out <directory>`.
+- Dump helpers with `scripts/review/helper_regression.py -- dump <skill>/scripts/blender <project> <output.json>` in Blender;
+  compare saved baselines using `python scripts/review/helper_regression.py compare <before.json> <after.json>`.
+- Import `scripts/controls/water/water_numeric_check.py` in Blender with `scripts/blender` on `sys.path`,
+  then compare the JSON result of `check(Path(<output-directory>))` with the saved numeric baseline.
+- Compare graph and numeric outputs exactly. Missing source assets must produce the same errors as the saved baseline.
+- Import library and host modules in their Blender/MCP Python environments. Load command/control declarations without running renders.
+- Search for the old paths and qualified APIs outside this migration history; no obsolete import or invocation should remain.
+  Common words, unrelated local bindings, unchanged fields and third-party interfaces retain their established spellings.
+
 Remove each section after applying it; delete this file when none is left.

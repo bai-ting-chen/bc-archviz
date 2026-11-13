@@ -4,7 +4,7 @@ from materials.glass.tumbler_profiles import tumbler_profiles
 from materials.glass.lathe_geometry import lathe
 
 
-N_GLASS, N_WATER = 1.52, 1.333
+GLASS_IOR, WATER_IOR = 1.52, 1.333
 
 
 def glass_of_water(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256, lift=0.0001):
@@ -26,9 +26,9 @@ def glass_of_water(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256, lift
     # interface front = water side, i.e. pointing into the cavity (toward the axis / upward)
     inter = lathe("GLASS_WATER_INTERFACE", iface, centre, segments, normal_hint=lambda p: -radial(p))
     water = lathe("WATER_SURFACE", top, centre, segments, normal_hint=lambda p: Vector((0, 0, 1)))
-    glass.data.materials.append(dielectric("GLASS_SODA_LIME", N_GLASS, (0.985, 1.0, 0.99)))
-    inter.data.materials.append(dielectric("GLASS_TO_WATER", N_GLASS / N_WATER))
-    water.data.materials.append(dielectric("WATER", N_WATER))
+    glass.data.materials.append(dielectric("GLASS_SODA_LIME", GLASS_IOR, (0.985, 1.0, 0.99)))
+    inter.data.materials.append(dielectric("GLASS_TO_WATER", GLASS_IOR / WATER_IOR))
+    water.data.materials.append(dielectric("WATER", WATER_IOR))
     for ob in (glass, inter, water):
         ob.cycles.is_caustics_caster = True
     return {"glass": glass, "interface": inter, "water": water, **info}
@@ -75,9 +75,9 @@ def glass_of_water_mnee(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256,
         return Vector((p.x - c.x, p.y - c.y, 0)).normalized() * (1 if r > mid else -1)
     s = lathe("GLASS_SHELL", shell, centre, segments, normal_hint=ring_hint)
     b = lathe("GLASS_BASE", base, centre, segments, normal_hint=out_from((zb + zi) / 2))
-    w.data.materials.append(dielectric("WATER", N_WATER))
+    w.data.materials.append(dielectric("WATER", WATER_IOR))
     for ob in (s, b):
-        ob.data.materials.append(dielectric("GLASS_SODA_LIME", N_GLASS, (0.985, 1.0, 0.99)))
+        ob.data.materials.append(dielectric("GLASS_SODA_LIME", GLASS_IOR, (0.985, 1.0, 0.99)))
     for ob in (w, s, b):
         ob.cycles.is_caustics_caster = True
     return {"water": w, "shell": s, "base": b, **info}

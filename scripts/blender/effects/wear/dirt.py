@@ -1,9 +1,9 @@
 """Dust build-up and bordered grunge patterns."""
 from types import SimpleNamespace
 from materials.shared.node_graph import NodeGraph, layer_switch
-from effects.wear.edge_profile import (LINE_WIDTH, DUST_WIDTH, LINE_AMOUNT, DUST_AMOUNT,
+from effects.wear.edge_profile import (LINE_WIDTH_M, DUST_WIDTH_M, LINE_AMOUNT, DUST_AMOUNT,
     GRIME_TINT, LINE_GAIN, DUST_SATURATION, LINE_ROUGHNESS, DUST_GAIN, CORNER_MASK_CAP,
-    AO_REACH, EDGE_KINDS)
+    AO_REACH_M, EDGE_KINDS)
 from effects.wear.edge_profile import _noise_context, _extent, _falloff, _finish_mask
 from effects.wear.edge_line import _line_mask
 
@@ -23,7 +23,7 @@ def _dust_mask(g, context, fields, width, amount):
     return _finish_mask(g, context, broken, amount, 'dust')
 
 
-def edge_dirt_masks(g, dist, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, noise_vec=None,
+def edge_dirt_masks(g, dist, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M, noise_vec=None,
                     line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT,
                     noise_scale=9.0, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside'):
     """Return line, dust and the reusable outside-vertex join (None for AO corners)."""
@@ -38,20 +38,20 @@ def edge_dirt_masks(g, dist, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, noise
     return line, dust, context.join
 
 
-def corner_dirt_masks(g, line_width=LINE_WIDTH, dust_width=DUST_WIDTH,
+def corner_dirt_masks(g, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M,
                       line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT,
                       frame=None, loc=(0, 0), corner_cap=CORNER_MASK_CAP):
     """Return shared masks using cross-object AO remapped to a distance-like metre field."""
     x, y = loc
     ao = g.node('ShaderNodeAmbientOcclusion', (x - 600, y), frame,
-                label='Corner AO (cross-object)', Distance=AO_REACH)
+                label='Corner AO (cross-object)', Distance=AO_REACH_M)
     ao.inside = False
     ao.only_local = False
     ao.samples = 32  # cross-object occlusion rays
     # A perpendicular contact covers half the AO hemisphere.
     unit_dist = g.map_range(ao.outputs['AO'], 0.5, 1.0, (x - 400, y), frame=frame,
                        label='corner distance-like 0..1')
-    dist = g.math('MULTIPLY', unit_dist, AO_REACH, (x - 200, y), frame)
+    dist = g.math('MULTIPLY', unit_dist, AO_REACH_M, (x - 200, y), frame)
     return edge_dirt_masks(g, dist, line_width, dust_width, line_amount=line_amount,
                            dust_amount=dust_amount, frame=frame, loc=loc, mask_cap=corner_cap, kind='corner')[:2]
 
@@ -107,7 +107,7 @@ def dust_surface(g, surface, dust, frame=None, loc=(0, 0), line=None):
     return surface
 
 
-def add_corner_dirt(mat, line_width=LINE_WIDTH, dust_width=DUST_WIDTH,
+def add_corner_dirt(mat, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M,
                     line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, corner_cap=CORNER_MASK_CAP):
     """Add independently switchable shared line/dust layers to a Cycles surface material."""
     g = NodeGraph(mat.node_tree)

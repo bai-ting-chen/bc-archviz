@@ -3,10 +3,10 @@ import bpy
 from materials.shared.node_graph import NodeGraph
 
 
-BARE_W = 11.0                   # 4D-noise W shared by the meadow's bare-soil mask and the ground shader
+BARE_SOIL_NOISE_W = 11.0                   # 4D-noise W shared by the meadow's bare-soil mask and the ground shader
 
 
-BARE = (0.35, 0.62, 0.69)       # that noise: scale (1/m), full sward below, bare soil above
+BARE_SOIL_NOISE_SETTINGS = (0.35, 0.62, 0.69)       # that noise: scale (1/m), full sward below, bare soil above
 
 
 def _sock(ng, name, typ, io="INPUT", default=None):

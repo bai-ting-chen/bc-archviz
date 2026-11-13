@@ -9,7 +9,7 @@ import numpy as np
 
 import materials.tile.tile_surface as tile_surface
 from tile_damage_geometry import components, dilate, local_directions
-from tile_damage_rig import PX, H, grid_faces, grid_rig, probe_rgb
+from tile_damage_rig import METRES_PER_PIXEL, TILE_HEIGHT_M, grid_faces, grid_rig, probe_rgb
 
 
 def check_crack(folder):
@@ -24,7 +24,7 @@ def check_crack(folder):
         if mask.sum()<3: continue
         present+=1
         yy,xx=np.nonzero(mask)
-        heights.extend((yy+.5)*PX/H)
+        heights.extend((yy+.5)*METRES_PER_PIXEL/TILE_HEIGHT_M)
         directions.extend(local_directions(mask)[mask])
         # Close subpixel raster gaps only, then count separated visible runs.
         runs=components(dilate(mask))
@@ -38,7 +38,7 @@ def check_crack(folder):
     (folder/'network_metrics.json').write_text(json.dumps(summary,indent=2),encoding='utf-8')
     print('TILE_DAMAGE_CRACK_METRICS',json.dumps(summary),flush=True)
     dirt=data[...,1]; crack=data[...,0]>.02
-    assert not ((dirt>1e-6)&(data[...,2]>.004+PX)).any(), 'Dirt beyond network distance bound'
+    assert not ((dirt>1e-6)&(data[...,2]>.004+METRES_PER_PIXEL)).any(), 'Dirt beyond network distance bound'
     assert (dirt[crack]<.1).any() and (dirt[crack]>.5).any(), 'Dirt is not patchy'
     tile_surface.set_param(mat,'crack_dirt',0)
     assert np.max(probe_rgb(mat,folder,'dirt_zero',('Dirt',None,None)))<1e-8

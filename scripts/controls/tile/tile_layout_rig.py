@@ -5,10 +5,10 @@ _sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import controls_import_paths  # noqa: E402,F401 -- every controls topic folder on sys.path
 import bpy
 import numpy as np
-import _scene
+import photometric_scene
 import materials.tile.tile_layout as tile_layout
 
-RES, SIZE = 400, 1.0                       # 400 px over 1 m: 2.5 mm per px
+RESOLUTION_PX, FRAME_SIZE_M = 400, 1.0                       # 400 px over 1 m: 2.5 mm per px
 CASES = {
     "jitter": dict(tile_w=0.0375, tile_h=0.25, joint=0.004,
                    jitter_offset=0.0004, jitter_rotation=0.0044),
@@ -17,11 +17,11 @@ CASES = {
     "running": dict(tile_w=0.10, tile_h=0.05, joint=0.01, row_offset=0.5),
     "rotated": dict(tile_w=0.145, tile_h=0.045, joint=0.008, rotation=0.5236, origin=(0.013, -0.02)),
 }
-OUTS = ("Edge", "Joint", "Tile UV", "Tile ID")
+OUTPUT_SOCKET_NAMES = ("Edge", "Joint", "Tile UV", "Tile ID")
 
-def plane_with(output, params, RES=RES, SIZE=SIZE):
+def plane_with(output, params, RES=RESOLUTION_PX, SIZE=FRAME_SIZE_M):
     """Render one layout output on the requested metre-sized plane."""
-    sc = _scene.black_scene(samples=1, res=RES)
+    sc = photometric_scene.black_scene(samples=1, res=RES)
     sc.cycles.filter_width = 0.01
     bpy.ops.mesh.primitive_plane_add(size=SIZE)
     ob = bpy.context.object
@@ -37,10 +37,10 @@ def plane_with(output, params, RES=RES, SIZE=SIZE):
         nt.links.new(src, mul.inputs[0]); src = mul.outputs[0]
     nt.links.new(src, em.inputs["Color"]); nt.links.new(em.outputs[0], out.inputs["Surface"])
     ob.data.materials.append(m)
-    _scene.ortho_camera(1.0, SIZE)
-    return _scene.render_linear()
+    photometric_scene.ortho_camera(1.0, SIZE)
+    return photometric_scene.render_linear()
 
-def pixel_coords(RES=RES, SIZE=SIZE):
+def pixel_coords(RES=RESOLUTION_PX, SIZE=FRAME_SIZE_M):
     """Return pixel-centre metre coordinates in the emission probe plane."""
     c = (np.arange(RES) + 0.5) / RES * SIZE - SIZE / 2
     return np.meshgrid(c, c)

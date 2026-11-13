@@ -3,10 +3,10 @@ import hashlib
 import json
 import os
 import urllib.request
-from polyhaven_config import UA
+from polyhaven_config import REQUEST_HEADERS
 
 def _get(url):
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA)) as r:
+    with urllib.request.urlopen(urllib.request.Request(url, headers=REQUEST_HEADERS)) as r:
         return json.load(r)
 
 def _md5(path):
@@ -19,7 +19,7 @@ def _download(url, dst, md5=None):
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     tmp = dst + ".part"
     try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers=UA)) as r, open(tmp, "wb") as f:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=REQUEST_HEADERS)) as r, open(tmp, "wb") as f:
             while chunk := r.read(1 << 20):
                 f.write(chunk)
     except BaseException:

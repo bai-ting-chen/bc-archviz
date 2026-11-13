@@ -24,13 +24,13 @@ import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
-MOD = "bl_ext.user_default.io_scene_max"
+IMPORTER_MODULE = "bl_ext.user_default.io_scene_max"
 
 
 def load(path, **kw):
     """Import a .max through io_scene_max and repair faces, material IDs and UVs; returns (objects, reports)."""
-    addon_utils.enable(MOD, default_set=False)      # --factory-startup leaves extensions off
-    im = importlib.import_module(MOD + ".import_max")
+    addon_utils.enable(IMPORTER_MODULE, default_set=False)      # --factory-startup leaves extensions off
+    im = importlib.import_module(IMPORTER_MODULE + ".import_max")
     captured = []
     orig, orig_adj = im.create_shape, im.adjust_material
     # Multi/Sub: the importer appends slots sub by sub, and a 2-sided sub adds two (front, back),

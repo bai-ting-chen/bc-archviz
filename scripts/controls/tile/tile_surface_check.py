@@ -9,13 +9,13 @@ import os, sys, math, shutil, tempfile, struct, zlib, json, warnings
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "blender"))
 sys.path.insert(0, os.path.dirname(__file__))
 import bpy, numpy as np
-import _scene
+import photometric_scene
 import materials.tile.tile_mapping as tile_mapping
 import materials.tile.tile_surface as tile_surface
 
 def scene(mat_kwargs):
     """Create a repeatable wall and light rig for feature comparisons."""
-    sc = _scene.black_scene(samples=64, res=256)
+    sc = photometric_scene.black_scene(samples=64, res=256)
     sc.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 1.0
     bpy.ops.mesh.primitive_plane_add(size=0.6, rotation=(math.pi/2, 0, 0))   # a wall facing -Y
     w = bpy.context.object
@@ -25,7 +25,7 @@ def scene(mat_kwargs):
     sun.data.energy, sun.data.size = 200, 0.5
     sun.location, sun.rotation_euler = (0, -0.4, 0.8), (math.radians(30), 0, 0)
     sc.collection.objects.link(sun)
-    cam = _scene.ortho_camera(0, 0.3); cam.location = (0, -2, 0); cam.rotation_euler = (math.pi/2, 0, 0)
+    cam = photometric_scene.ortho_camera(0, 0.3); cam.location = (0, -2, 0); cam.rotation_euler = (math.pi/2, 0, 0)
     sc.cycles.seed = 1
     return sc, mat
 
@@ -63,7 +63,7 @@ def emission_probe(mat, node_name, output='Vector'):
     nt.links.new(nt.nodes[node_name].outputs[output], em.inputs['Color'])
     nt.links.new(em.outputs[0], out.inputs['Surface'])
     try:
-        return _scene.render_linear()
+        return photometric_scene.render_linear()
     finally:
         nt.links.new(original, out.inputs['Surface'])
         nt.nodes.remove(em)
@@ -98,7 +98,7 @@ def check_face_maps(folder, fails):
     write_stripes(os.path.join(folder, 'stripe_diff.png'))
     with open(os.path.join(folder, 'meta.json'), 'w', encoding='utf-8') as file:
         json.dump({'dimensions_mm': [2000, 1000]}, file)
-    sc = _scene.black_scene(samples=1, res=512)
+    sc = photometric_scene.black_scene(samples=1, res=512)
     sc.cycles.filter_width = .01
     bpy.ops.mesh.primitive_plane_add(size=8)
     ob = bpy.context.object
@@ -108,7 +108,7 @@ def check_face_maps(folder, fails):
                   body_albedo=target, off=tile_surface.FEATURES)
     mat = tile_surface.tile_material('FaceProbe', **kwargs)
     ob.data.materials.append(mat)
-    _scene.ortho_camera(1., .6, xy=(.5, .5))  # Entire 0.6 m patch lies inside cell (0,0).
+    photometric_scene.ortho_camera(1., .6, xy=(.5, .5))  # Entire 0.6 m patch lies inside cell (0,0).
     face = emission_probe(mat, 'TileFaceAlbedo')
     for axis, line in (('U', face[256, :, 0]), ('V', face[:, 256, 1])):
         cycles = stripe_cycles(line)
@@ -162,8 +162,8 @@ def check_face_maps(folder, fails):
 
 fails = []
 sc, mat = scene({})
-base = _scene.render_linear()
-again = _scene.render_linear()
+base = photometric_scene.render_linear()
+again = photometric_scene.render_linear()
 floor = rel_change(again, base)                            # noise floor, same seed
 floor95, floor99 = np.percentile(floor, (95, 99))
 print(f"TILE_SURFACE_NOISE p95={floor95:.8f} p99={floor99:.8f}")
@@ -176,25 +176,25 @@ for f in (*tile_surface.FEATURES, "lippage"):
         saved_damage = {key: current[key] for key in ('damage', 'chip_share', 'crack_share')}
         for key in saved_damage:
             tile_surface.set_param(mat, key, 1.)
-        case_base = _scene.render_linear()
-        case_floor = rel_change(_scene.render_linear(), case_base)
+        case_base = photometric_scene.render_linear()
+        case_floor = rel_change(photometric_scene.render_linear(), case_base)
     if f == "specks":
         # A 1 mm dot is subpixel at 256 px over 0.3 m; use 512 px (~0.6 mm/px).
         # Re-measure baseline and same-seed noise at this resolution before toggling.
         sc.render.resolution_x = sc.render.resolution_y = 512
-        case_base = _scene.render_linear()
-        case_floor = rel_change(_scene.render_linear(), case_base)
+        case_base = photometric_scene.render_linear()
+        case_floor = rel_change(photometric_scene.render_linear(), case_base)
     case_floor95, case_floor99 = np.percentile(case_floor, (95, 99))
     if f == "lippage":
         # Isolate height offsets while retaining the existing tilt and its shared switch.
         saved_lippage = mat.node_tree.nodes['TileFinish'].inputs['Lippage'].default_value
         tile_surface.set_param(mat, 'lippage', 0.)
-        off = _scene.render_linear()
+        off = photometric_scene.render_linear()
         tile_surface.set_param(mat, 'lippage', saved_lippage)
-        back = _scene.render_linear()
+        back = photometric_scene.render_linear()
     else:
-        tile_surface.toggle(mat, f, False); off = _scene.render_linear()
-        tile_surface.toggle(mat, f, True); back = _scene.render_linear()
+        tile_surface.toggle(mat, f, False); off = photometric_scene.render_linear()
+        tile_surface.toggle(mat, f, True); back = photometric_scene.render_linear()
     changed = rel_change(off, case_base)
     d, tail = np.percentile(changed, (95, 99.9))
     fraction = float(np.mean(changed > 0.02))

@@ -21,13 +21,13 @@ Specific layers are described in §4. Generic layers are written once, in their 
   after rain) uses layer 1 with a soft patch noise as its mask.
 
 ## 3. Code
-- Wet look, grass blades: `materials.vegetation.vegetation.blade_material(wet=WET)` (gamma, water coat, soft
+- Wet look, grass blades: `materials.vegetation.vegetation.blade_material(wet=WET_BLADE_DEFAULTS)` (gamma, water coat, soft
   patch mask).
 - Wet look, soil: `materials.ground.ground.ground_material(wet_gamma=1.4)` darkens the whole ground and
   multiplies its roughness by `wet_rough` (0.6). It adds no coat and no mask: damp soil, not a water film.
 - Other materials: the Gamma node and coat values of §4.1 on their own Principled.
-- Wet extent behind falling water: `scripts/blender/materials/water/wet.py` (`materials.water.wet`),
-  `proxy(lip, pool_z, WetParams)`; `build.falling_film(wet_proxy=...)` replaces the proxy mesh in place.
+- Wet extent behind falling water: `scripts/blender/materials/water/wet_wall_proxy.py` (`materials.water.wet_wall_proxy`),
+  `build_proxy(lip, pool_z, WetParams)`; `falling_film_assembly.falling_film(wet_proxy=...)` replaces the proxy mesh in place.
 - No builder for a wet band along a standing water edge: it is node graph only (§4.2).
 - Controls: `scripts/controls/material_graph_check.py` topics `vegetation` and `ground` (wet cases),
   `scripts/controls/water/water_numeric_check.py` (the proxy).
@@ -56,7 +56,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
     distance d = R − |P.xy − C|, which needs no mesh density;
   - falling water in front of a wall: the sheet stands off the wall (tens of cm at the foot), so distance to the
     water leaves the wall behind it dry. Use a proxy mesh lying on the wall face over the whole footprint of the
-    fall (`water.wet.proxy`); behind the water everything is wet from spray, run-down and condensation.
+    fall (`materials.water.wet_wall_proxy.build_proxy`); behind the water everything is wet from spray, run-down and condensation.
 - **Ragged edge (RULES MAT_05).** A slow noise along the edge drives the wet width, down to negative (dry). Behind
   falling water the wet edge wanders past each end of the fall, with run-off fingers hanging from the top near
   the ends. A constant-width band or a straight wet/dry line is a rigid tell.

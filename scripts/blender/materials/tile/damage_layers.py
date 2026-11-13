@@ -2,14 +2,14 @@
 
 def _layers(a, i, e, depth, deep, p):
     """Apply hard coating strata and include clay relief in the physical removal field."""
-    m = a.m
+    m = a.math
     shell = m('GREATER_THAN', e, 0)
     lip = m('MULTIPLY', shell, m('LESS_THAN', e, i['Glaze Lip Width']))
     ring = m('LESS_THAN', e, m('ADD', i['Glaze Lip Width'], i['Engobe Ring']))
     layers = m('ADD', i['Glaze Thickness'], i['Engobe Thickness'])
     reaches_body = m('GREATER_THAN', depth, m('SUBTRACT', layers, 1e-8))
     body = m('MULTIPLY', m('MULTIPLY', shell, m('SUBTRACT', 1, ring)), reaches_body)
-    grain_uv = a.v('ADD', p, a.xyz(*a.hash_vector(i['Cell'])))
+    grain_uv = a.vector_math('ADD', p, a.combine_xyz(*a.hash_vector(i['Cell'])))
     relief = m('MULTIPLY', .00015, a.amplitude(grain_uv, 1/.00045))
     # Relief belongs only to exposed body. Its amplitude fades at the actual
     # depth threshold, so it cannot manufacture clay in a shallow shell.

@@ -61,8 +61,8 @@ Read-only documentation work needs no Blender or Rhino connection.
    then `archviz.physical_camera(cam, iso, f, shutter, focal)`, `straighten_verticals`, white balance
    if lights are warm. Settings → [render-settings.md](../renderer/render-settings.md); LuxCore case
    ([RULES REN_03](../renderer/renderer-choice.md)) → [LuxCore setup](../renderer/luxcore.md).
-5. **From a reference image:** `refmatch.py grid` → solve the camera (`refsolve.py` when the image has
-   a repeated element) → `archviz.framing_render(root, path)` + `refmatch.py pair --overlay`; then
+5. **From a reference image:** `reference_match.py grid` → solve the camera (`reference_camera.py` when the image has
+   a repeated element) → `archviz.framing_render(root, path)` + `reference_match.py pair --overlay`; then
    light region by region with `study_run.py` (lighting-camera.md › *Recreating a reference*).
 6. **Hands over:** a full first build rendered from the final camera.
 7. **Gate:** the material gate (RULES GAT_03) before any look round.
@@ -72,7 +72,7 @@ Read-only documentation work needs no Blender or Rhino connection.
    then the loop, then its stop rule. Each round is one edit + one run of the study runner
    (*Iteration loop* below).
 2. Feature tests headless (`render_variant.py`, *Look-dev headless*) or MCP renders into the
-   study's `_wip/`; measure with `imgstats`; prove each feature with a control (RULES VAL_02).
+   study's `_wip/`; measure with `image_statistics`; prove each feature with a control (RULES VAL_02).
 3. Reuse the helpers ([blender-python-helpers.md](blender-python-helpers.md) lists them all:
    `effects.wear.set_input`, `materials.shared.node_graph.active_socket`, `materials.shared.pbr.pbr_material`,
    `materials.shared.node_graph.NodeGraph`, `materials.shared.pbr`, `scatter`) instead of re-deriving node
@@ -179,7 +179,7 @@ Read-only documentation work needs no Blender or Rhino connection.
 
 ## Assets
 - Poly Haven (CC0; credit "Powered by Poly Haven" if the live API is used in published work):
-  `polyhaven_fetch.py search textures <cat>`, `tex <id> --res 2k`, `hdri <id> --res 4k`; maps diff,
+  `polyhaven_fetch.py search textures <cat>`, `tex <id> --resolution 2k`, `hdri <id> --resolution 4k`; maps diff,
   arm, nor_gl, disp; `meta.json` has `dimensions_mm`. `search` matches categories only. For
   names and tags, query `api.polyhaven.com/assets?t=textures|hdris` and choose from a thumbnail
   contact sheet ([index.md](../materials/index.md)). HTTP 520–525 is Cloudflare: retry the same call.
@@ -224,7 +224,7 @@ Read-only documentation work needs no Blender or Rhino connection.
 - **Maxtree (RULES AST_06).** About 2,400 plant models (single models and whole volumes), read
   over plain HTTP from the shop's public Store API. Its own search knows Latin names only, so:
   1. `python scripts/scene/assets/maxtree_search.py <study>/_wip/maxtree search <words>
-     [--category Conifers] [--min-height 300 --max-height 800] [--out <topic>.json]`. The first
+     [--category Conifers] [--min-height-cm 300 --max-height-cm 800] [--out <topic>.json]`. The first
      run fetches the whole catalog into `catalog.json` (about 2 min; refetched after 7 days).
      Words match the model name, Latin and common names and categories; heights are per variant, in cm.
   2. Each row holds the id (the model name, e.g. `V113_Olea_europaea_03`), common names, volume,
@@ -236,24 +236,24 @@ Read-only documentation work needs no Blender or Rhino connection.
      against the ids.
 - **Where:** the study's own `library/` (RULES AST_03) — `ARCHVIZ_PROJECT=<study> polyhaven_fetch.py …`,
   `archviz.set_project(<study>)` in Blender. Run from inside a study, both find it without the
-  setting (`projectpath`: the search stops at the study folder); a shared `library/` above is
+  setting (`project_paths`: the search stops at the study folder); a shared `library/` above is
   read only by studies listed in its `legacy_studies.txt`, and `polyhaven_fetch` prints a NOTE
   when it downloads anywhere but a study. Edited HDRIs, baked/generated maps and their
   generator script references go in `<study>/library/local/` with a `meta.json`. Never repoint a
   study at another study's or a shared copy. Choosing a texture: [materials/texture-selection.md](../materials/texture-selection.md)
 
 ## Look-dev headless
-`blender -b scene.blend --python scripts/blender/renderer/render_variant.py -- out.png res=800x800
-[disp=off|caustics=off|wear=off|stain=off|chips=off|dirt=off|noise_seed=7|mask_view=1|material_view=NAME|camera=NAME]`
+`blender -b scene.blend --python scripts/blender/renderer/render_variant.py -- out.png resolution=800x800
+[displacement=off|caustics=off|wear=off|stain=off|chips=off|dirt=off|noise_seed=7|mask_view=1|material_view=NAME|camera=NAME]`
 (forward-slash paths from bash; the script's docstring lists every option, and an unknown option
 stops it rather than rendering an unchanged "control"). It renders on the GPU (`archviz.use_gpu`).
 
 ## Iteration loop
-`scripts/workflow/study_run.py <study> vNN.png [--rebuild] [--pct 50 --spp 128]` does all of this for a
+`scripts/workflow/study_run.py <study> vNN.png [--rebuild] [--resolution-percent 50 --samples 128]` does all of this for a
 study holding `scene_geometry.py` + `scene_look.py` (+ `_wip/ref.jpg`, `regions.json`).
 Keep two rebuild scripts in the study (`scene_geometry.py`: import + camera; `scene_look.py`:
 materials, lights, exposure) and a small runner that rebuilds, renders `_wip/vNN.png`, prints
-`refmatch.py patches` and writes `pair-vNN.png`. Every change is then one edit + one run, and
+`reference_match.py patches` and writes `pair-vNN.png`. Every change is then one edit + one run, and
 each version's reason lives as a comment next to the value it changed. What to judge and when to
 stop: validation.md › *The look round*.
 - The runner must `ast.parse` both scripts before sending them to Blender. A scripted
@@ -324,16 +324,16 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Outdoor | `terrain`, `scatter`, `atmosphere`; `materials.ground.ground` and `materials.vegetation.vegetation` for shading. |
 | Finals (Cycles) | `scripts\blender\renderer\finals\finals.py`: untiled no-limit final in the UI, savers, OIDN from passes, graded PNG |
 | 3ds Max assets | `scripts\blender\scene\io\max_import.py`: `load` (io_scene_max extension + repairs), `tidy`, `open_loops`, `origin_to_root` — [max-import.md](max-import.md) |
-| Photometry | `scripts\scene\lighting\ldt2ies.py in.ldt out.ies` (Eulumdat → IES for Cycles, lumens checked); IES files → `interior.ies_light` |
-| Measure | `scripts\research\imgstats.py stats|patch|diff`; `scripts\research\refmatch.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
+| Photometry | `scripts\scene\lighting\ldt_to_ies.py in.ldt out.ies` (Eulumdat → IES for Cycles, lumens checked); IES files → `interior.ies_light` |
+| Measure | `scripts\research\image_statistics.py stats|patch|diff`; `scripts\research\reference_match.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\research\edge_overlay.py edges.json ref.png out.png` |
-| Reference recreation | `scripts\research\refsolve.py readings.json` (camera from a repeated element + image→plan); `scripts\workflow\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
-| Maintenance | `scripts\workflow\helper_index.py` (writes [blender-python-helpers.md](blender-python-helpers.md)), `scripts\review\regress_helpers.py` (old vs new helper output), `scripts\workflow\study_close.py` (close a study: keep the final scene and milestone images, delete the rest, write `closed.md`, RULES AST_02) |
+| Reference recreation | `scripts\research\reference_camera.py readings.json` (camera from a repeated element + image→plan); `scripts\workflow\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |
+| Maintenance | `scripts\workflow\helper_index.py` (writes [blender-python-helpers.md](blender-python-helpers.md)), `scripts\review\helper_regression.py` (old vs new helper output), `scripts\workflow\study_close.py` (close a study: keep the final scene and milestone images, delete the rest, write `closed.md`, RULES AST_02) |
 | Tiles | `scripts/blender/materials/`: `tile_mapping`, `tile_layout`, `tile_surface`, `tile_damage` — [Tiles](../materials/tile/tiles.md). |
 | Controls | `scripts\controls\lighting\light_units.py`, `ies_units.py`, `mnee_water.py` — rerun after a Blender upgrade (`blender -b --factory-startup --python …`); `tile_layout_check`, `tile_mapping_check`, `tile_surface_check`, `tile_damage_check` (`--only <section>`, `--full`); `weathering_lab.py` (flat-wall look lab, `-- <out> <tag> [key=value]`) |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)): PATH, GPU + *Use CPUs*, *Add Light Tracing* |
 | Assets | `scripts\scene\assets\polyhaven_fetch.py` → `<study>\library\polyhaven\` (env `ARCHVIZ_PROJECT=<study>`); Quixel on Fab: `scripts\scene\assets\fab-search.js`, `fab-download.js` (built-in pane), then `fab_fetch.py` → `<study>\library\local\<id>\`; Maxtree: `maxtree_search.py`; both: `asset_sheet.py` (contact sheet); others `<study>\library\local\` with a `meta.json` |
-| Video research | `scripts\research\yt_learn.py` |
+| Video research | `scripts\research\learning_from_video.py` |
 
 ## Install
 - Blender: `winget install --id BlenderFoundation.Blender --version 5.3.0 --exact` — winget
@@ -354,7 +354,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
   `%LOCALAPPDATA%\BlenderMCP\app`, `python -m venv %LOCALAPPDATA%\BlenderMCP\venv`, then
   `venv\Scripts\pip install app numpy pillow`. A venv can't be moved (absolute paths) — rebuild it.
   The MCP server needs Python ≥ 3.10 (3.14 works). `numpy pillow` in its venv serve
-  `refmatch.py` / `imgstats.py`.
+  `reference_match.py` / `image_statistics.py`.
 - Claude Code, user scope (every project): `claude mcp add-json blender
   '{"type":"stdio","command":"<LOCALAPPDATA>/BlenderMCP/venv/Scripts/blender-mcp.exe","env":{...}}'
   --scope user`; check with `claude mcp get blender`. A project `.mcp.json` named `blender`
@@ -374,7 +374,7 @@ graph controls, API probes, the photometric and MNEE controls, and BlendLuxCore 
 and a 256 px render). Verified in the open UI through MCP: a no-limit Cycles final started with
 `finals.start_in_ui`, stopped from the viewer, its passes saved, then denoised and graded from the
 passes. The helper regression dump ran with 37 of its 41 cases; the other 4 need assets that were
-not in the library (regress_helpers.py lists them). Not verified: those 4 cases, the Esc cancel
+not in the library (helper_regression.py lists them). Not verified: those 4 cases, the Esc cancel
 path, a LuxCore final in the open UI, import_3dm and the asset-dependent controls.
 
 ## PIP_01 procedure

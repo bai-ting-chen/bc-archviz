@@ -14,7 +14,7 @@ def write_ies(d, out):
     lines = ["IESNA:LM-63-2002",
              f"[TEST]{d['report']}", f"[MANUFAC]{d['company']}", f"[LUMCAT]{d['number']}",
              f"[LUMINAIRE]{d['name']}", f"[LAMP]{s0['type']} {s0['cct']}",
-             f"[ISSUEDATE]{d['date']}", f"[OTHER]converted from {d['src']} by ldt2ies.py, "
+             f"[ISSUEDATE]{d['date']}", f"[OTHER]converted from {d['src']} by ldt_to_ies.py, "
              f"LORL {d['lorl']:g} %", "TILT=NONE",
              f"1 {flux:g} {flux / 1000:g} {len(d['g'])} {len(h)} 1 2 {w:g} {ln:g} 0",
              f"1 1 {sum(s['watts'] for s in d['sets']):g}"]

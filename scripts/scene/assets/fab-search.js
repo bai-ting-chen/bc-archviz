@@ -11,7 +11,7 @@
 //   max       rows to return (Fab pages hold 24; pages are followed until max)
 //   details   true (default): fetch scan size, maps, Megascans id, download file and size_mb per row (3 requests each)
 
-const FAB_PAGE = 24;        // fixed by Fab: larger counts are ignored
+const FAB_PAGE_SIZE = 24;        // fixed by Fab: larger counts are ignored
 const FAB_PAUSE_MS = 250;   // between requests, to stay gentle on the API
 const FAB_ID_FORMATS = ["texture-set", "fbx", "image", "gltf", "usd"];  // where download names carry the id
 
@@ -62,7 +62,7 @@ async function fabDownloadFiles(uid, formats) {
 }
 
 async function fabSearch({seller = "Quixel Megascans", type, category, q, max = 24, details = true} = {}) {
-  const base = new URLSearchParams({seller, count: String(FAB_PAGE)});
+  const base = new URLSearchParams({seller, count: String(FAB_PAGE_SIZE)});
   if (type) base.set("listing_types", type);
   if (category) base.set("categories", category);
   if (q) base.set("q", q);

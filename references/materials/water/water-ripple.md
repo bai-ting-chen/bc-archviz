@@ -43,12 +43,12 @@ Flow:
 
 ## 3. Code
 `scripts/blender/materials/water/`:
-- `ripple.py`: `height_field(lip, impact_pts, strength, p)` builds the impact field (§4.1); parameters
+- `pool_ripples.py`: `height_field(lip, impact_pts, strength, p)` builds the impact field (§4.1); parameters
   in `RippleParams`.
-- `height_image.py`: `save_height_exr(H, path)` writes the float EXR (§4.2).
+- `ripple_height_image.py`: `save_height_exr(H, path)` writes the float EXR (§4.2).
 - `ripple_bump.py`: `install_bump(material, image, lip, s_range, o_range)` puts the bump on the pool
   material (§4.2).
-- `build.py`: `falling_film()` runs these for a falling film.
+- `falling_film_assembly.py`: `falling_film()` runs these for a falling film.
 
 No script is named in this file for the choppy pool (§4.3). No control scene is named either.
 

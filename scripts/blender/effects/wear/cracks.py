@@ -7,7 +7,7 @@ import random
 from materials.shared.node_graph import frame_for
 from effects.wear.crack_ribbon import crooked_ribbon_masks
 
-CRACK = dict(core=0.005, halo=0.02, wobble=0.03, jag=0.006, len=(0.4, 1.0), jitter=14.0, seed=3,
+CRACK_DEFAULTS = dict(core=0.005, halo=0.02, wobble=0.03, jag=0.006, len=(0.4, 1.0), jitter=14.0, seed=3,
              net_scale=1.6, net_dist=0.22, net_keep=0.4, net_patch=(0.52, 0.6), depth=0.003, halo_dirt=0.6)
 
 
@@ -76,7 +76,7 @@ def crack_masks(g, F, openings, C):
 
 def add_cracks(mat, openings=(), crack=None, amount=1.0):
     """On a weathered_concrete material: shrinkage cracks from opening corners + patchy map-cracking; dark core over everything, grime halo, groove. openings: (axis 'x'|'y', plane, u0, u1, v0, v1, top_only[, keep_angles])."""
-    C = dict(CRACK, **(crack or {}))
+    C = dict(CRACK_DEFAULTS, **(crack or {}))
     g, F = frame_for(mat, "Cracks")
     core, halo = crack_masks(g, F, openings, C)
     return apply_crack_masks(mat, g, F, core, halo, C, amount, 'Opening cracks')

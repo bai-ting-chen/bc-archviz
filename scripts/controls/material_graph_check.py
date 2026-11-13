@@ -206,7 +206,7 @@ def run(topic, out):
                 ("tint", lambda: m.pbr_material("fixture", tint=(.8, .9, 1))),
                 ("dielectric", lambda: m.dielectric("dielectric")),
                 ("glass", clear_glass),
-                ("simple", lambda: m.simple_material("simple", (.2, .3, .4))),
+                ("simple", lambda: m.flat_color_material("simple", (.2, .3, .4))),
                 ("spec", lambda: m.material_from_spec({"type": "simple", "name": "spec", "color": (.2, .3, .4)})),
                 ("spec_ph", lambda: m.material_from_spec("ph:fixture")),
                 ("spec_glass", lambda: m.material_from_spec("glass")),
@@ -232,8 +232,8 @@ def run(topic, out):
             assert abs(spec_bsdf.inputs["Roughness"].default_value - .2) < 1e-6
             assert all(abs(a - c) < 1e-6 for a, c in zip(spec_bsdf.inputs["Base Color"].default_value, (.9, 1, .95, 1)))
             result["levels"] = m.solve_levels(str(folder / "map.png"), (.4, .5, .6))
-            result["mean"] = m.map_mean("fixture")
-            result["cached_mean"] = m.map_mean("fixture")
+            result["mean"] = m.map_mean_linear_rgb("fixture")
+            result["cached_mean"] = m.map_mean_linear_rgb("fixture")
         elif topic == "stone":
             material("granite", m.polished_granite)
             material("tiles", m.stone_tiles)
@@ -257,7 +257,7 @@ def run(topic, out):
             (cache / (obj.name + ".png")).write_bytes(b"cached")
             result["cached_bake"] = sorted(m.bake_dust([obj], str(cache)))
             for dust in (None, str(folder / "map.png")):
-                mat = m.lux_textured("native" + str(dust is not None), str(folder), obj.data, dust_png=dust)
+                mat = m.textured_material("native" + str(dust is not None), str(folder), obj.data, dust_png=dust)
                 result["native_" + str(dust is not None)] = group_state(mat.luxcore.node_tree)
             result["glass"] = dump_material(m.glass_instance_tint())
         elif topic == "glass":
@@ -274,8 +274,8 @@ def run(topic, out):
             material("wet", lambda: m.ground_material("fixture", "fixture", wet_gamma=1.4))
         elif topic == "vegetation":
             material("dry", lambda: m.blade_material("dry"))
-            material("wet", lambda: m.blade_material("wet", wet=m.WET))
-            material("textured", lambda: m.blade_material("textured", tex=str(folder / "map.png"), wet=m.WET))
+            material("wet", lambda: m.blade_material("wet", wet=m.WET_BLADE_DEFAULTS))
+            material("textured", lambda: m.blade_material("textured", tex=str(folder / "map.png"), wet=m.WET_BLADE_DEFAULTS))
         elif topic == "water":
             material("pool", m.pool_water)
             fresh()

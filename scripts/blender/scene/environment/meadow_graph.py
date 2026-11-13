@@ -6,12 +6,12 @@ import bpy
 def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=None):
     """GN group: Scatter on Surface on a terrain object, masked by species patch noise, shared bare-soil noise, pad clearance and the camera frustum. Reused if it exists (layers point at it)."""
     from materials.shared.node_graph import NodeGraph
-    from scene.environment.terrain import BARE_W
+    from scene.environment.terrain import BARE_SOIL_NOISE_W
     ng = bpy.data.node_groups.get(name)
     if ng:
         return ng
-    from scene.environment.terrain import BARE
-    bare = bare or BARE
+    from scene.environment.terrain import BARE_SOIL_NOISE_SETTINGS
+    bare = bare or BARE_SOIL_NOISE_SETTINGS
     ng = bpy.data.node_groups.new(name, "GeometryNodeTree")
     ng.is_modifier = True
     it = ng.interface
@@ -48,7 +48,7 @@ def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=None):
     # bare soil: shared noise (materials.ground.ground.ground_material uses the same) thins the sward to nothing
     bn = g.node_with_props("ShaderNodeTexNoise", (-1100, -400), noise_dimensions="4D")
     bn.inputs["Detail"].default_value = 4.0
-    bn.inputs["W"].default_value = BARE_W
+    bn.inputs["W"].default_value = BARE_SOIL_NOISE_W
     g.link(pos, bn.inputs["Vector"]); g.link(I["Bare Scale"], bn.inputs["Scale"])
     bm = g.node_with_props("ShaderNodeMapRange", (-900, -400), interpolation_type="SMOOTHSTEP")
     bm.inputs["To Min"].default_value, bm.inputs["To Max"].default_value = 1.0, 0.0

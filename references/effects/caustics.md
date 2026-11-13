@@ -27,11 +27,11 @@ the method below (RULES REN_02, REN_03), say which and why, then build and check
 - Off switch: hide the `CAUSTIC_SHEET` object (GN wavefront); LuxCore caustics are part of the render.
 
 ## 3. Code
-- GN wavefront: `scripts/blender/effects/caustics/gn_caustics.py`:
+- GN wavefront: `scripts/blender/effects/caustics/geometry_node_caustics.py`:
   `add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=…, floor_tex=…, floor_albedo=…)`.
-- LuxCore: `renderer.luxcore.engine.engine_setup` ([luxcore.md](../renderer/luxcore.md)).
+- LuxCore: `renderer.luxcore.engine_settings.engine_setup` ([luxcore.md](../renderer/luxcore.md)).
 - Relief: no builder; modelled geometry (`references/materials/glass/glass-relief.md`).
-- Regression: `scripts/controls/regression/stage_b_graph_check.py` (sheet graph and overlay).
+- Regression: `scripts/controls/regression/scene_renderer_graph_check.py` (sheet graph and overlay).
 
 ## 4. Instructions and parameters
 ### Step 1. Choose the method

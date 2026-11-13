@@ -9,7 +9,7 @@ from study_files import checked
 def scan(scenes, study, blender):
     """Return a stable reference snapshot and used paths, rejecting every unsafe reference."""
     snapshot, used, errors = {}, set(), []
-    script = Path(__file__).resolve().parents[1] / 'blender/scene/io/blend_refs.py'
+    script = Path(__file__).resolve().parents[1] / 'blender/scene/io/blend_references.py'
     with tempfile.TemporaryDirectory(prefix='bc-close-refs-') as temp:
         for scene in scenes:
             out = Path(temp) / 'refs.json'

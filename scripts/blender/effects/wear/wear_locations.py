@@ -1,5 +1,5 @@
 """Clean edge fields, scene rounding and location extents for wear."""
-from effects.wear.layers import canonical_layer
+from effects.wear.layer_names import canonical_layer
 from dataclasses import dataclass
 import math
 import bmesh
@@ -133,9 +133,9 @@ def edge_field(b, gi, x0, vertex_junctions=False):
 
 
 
-ROUND_RADIUS = 0.0025  # m, shared scene default
+ROUND_RADIUS_M = 0.0025  # m, shared scene default
 
-def set_round_radius(radius=ROUND_RADIUS):
+def set_round_radius(radius=ROUND_RADIUS_M):
     """Set the scene's shared radius in metres before building rounded materials."""
     bpy.context.scene['round_edge_radius'] = radius
 
@@ -146,7 +146,7 @@ def round_shader(g, normal=None, rounded_edges=True, loc=(-650, -250), frame=Non
     if not rounded_edges:
         return normal
     node = g.node('ShaderNodeBevel', loc, frame, label=label,
-                  Radius=bpy.context.scene.get('round_edge_radius', ROUND_RADIUS))
+                  Radius=bpy.context.scene.get('round_edge_radius', ROUND_RADIUS_M))
     node.samples = samples
     if normal is not None:
         g.link(normal, node.inputs['Normal'])
@@ -161,7 +161,7 @@ def round_geometry(obj, rounded_edges=True, segments=2, min_angle_deg=30.0):
     bm.from_mesh(obj.data)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
     edges = [e for e in bm.edges if e.is_manifold and e.calc_face_angle(0) > math.radians(min_angle_deg)]
-    bmesh.ops.bevel(bm, geom=edges, offset=bpy.context.scene.get('round_edge_radius', ROUND_RADIUS),
+    bmesh.ops.bevel(bm, geom=edges, offset=bpy.context.scene.get('round_edge_radius', ROUND_RADIUS_M),
                     segments=segments, profile=0.5, affect="EDGES", clamp_overlap=True)
     bm.to_mesh(obj.data)
     bm.free()

@@ -32,9 +32,9 @@ Flow:
 
 ## 3. Code
 `scripts/blender/materials/water/`:
-- `foot_foam.py`: `foam(lip, pts, strength, pool_z, p)` (flecks, §4.1).
-- `foot_bubbles.py`: `bubbles(lip, pts, strength, pool_z, p)` (floating bubbles, §4.2).
-- Parameters: `FootParams` in `foot_config.py`.
+- `impact_foam.py`: `foam(lip, pts, strength, pool_z, p)` (flecks, §4.1).
+- `impact_bubbles.py`: `bubbles(lip, pts, strength, pool_z, p)` (floating bubbles, §4.2).
+- Parameters: `ImpactParams` in `impact_config.py`.
 
 No script is named in this file for whitewater (§4.3). No control scene is named.
 

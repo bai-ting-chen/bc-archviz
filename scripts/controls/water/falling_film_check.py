@@ -23,9 +23,9 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "blender"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import _scene
+import photometric_scene
 from materials.water import water as water_mat
-from materials.water import build, curtain
+from materials.water import falling_film_assembly, ballistic_sheet
 
 from falling_film_rig import scene
 from falling_film_geometry import check_geometry

@@ -4,7 +4,7 @@ import bpy
 
 from materials.shared.node_graph import NodeGraph, active_socket
 
-from materials.shared.pbr_config import BUMP_DISTANCE
+from materials.shared.pbr_config import BUMP_DISTANCE_M
 
 from materials.shared.pbr_maps import _img, _ph_maps
 
@@ -56,7 +56,7 @@ def pbr_material(tex_id, name=None, scale=1.0, tint=None):
         disp = _img(N, maps["disp"], "Non-Color", (-400, -300))
         L.new(mapping.outputs["Vector"], disp.inputs["Vector"])
         bump = N.new("ShaderNodeBump"); bump.location = (100, -300)
-        bump.inputs["Distance"].default_value = BUMP_DISTANCE * scale
+        bump.inputs["Distance"].default_value = BUMP_DISTANCE_M * scale
         L.new(disp.outputs["Color"], bump.inputs["Height"])
         L.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
 

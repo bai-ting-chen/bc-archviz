@@ -1,13 +1,13 @@
 """Concrete edge shading and fresh-break material from clean distance and chip fields."""
 from materials.concrete import concrete as _mat_concrete
 from materials.shared.node_graph import NodeGraph
-from effects.wear.dirt import (DUST_AMOUNT, DUST_WIDTH, GRIME_TINT, LINE_AMOUNT, LINE_WIDTH,
+from effects.wear.dirt import (DUST_AMOUNT, DUST_WIDTH_M, GRIME_TINT, LINE_AMOUNT, LINE_WIDTH_M,
                                dust_surface, edge_dirt_masks)
 
 
-def weathered_concrete(name="CONCRETE_WEATHERED", line_width=LINE_WIDTH, line_amount=LINE_AMOUNT,
+def weathered_concrete(name="CONCRETE_WEATHERED", line_width=LINE_WIDTH_M, line_amount=LINE_AMOUNT,
                        dirt_noise_scale=9.0, tex_id="concrete_wall_009",
-                       dust_width=DUST_WIDTH, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True):
+                       dust_width=DUST_WIDTH_M, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True):
     """Layer edge line/dust and fresh-break shading over the concrete study material."""
     mat = _mat_concrete.concrete_study(name=name, tex_id=tex_id, edge_dark=False, bevel_chips=False, rounded_edges=rounded_edges)
     g = NodeGraph(mat.node_tree)                      # add to the existing tree

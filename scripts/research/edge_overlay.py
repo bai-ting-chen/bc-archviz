@@ -1,8 +1,8 @@
 """Draw Rhino model edges (from scripts/rhino/project_edges.py) over the reference image.
 
-    python scripts/research/edge_overlay.py edges.json ref.png out.png [--w 1000]
+    python scripts/research/edge_overlay.py edges.json ref.png out.png [--width-px 1000]
 
-The reference is resized to the width the edges were projected at (--w, its own aspect kept),
+The reference is resized to the width the edges were projected at (--width-px, its own aspect kept),
 washed 35 % toward white, and each layer drawn in its own colour. Run with the MCP venv python.
 Check the geometry against this BEFORE the Rhino approval gate (RULES GAT_02)."""
 import argparse
@@ -14,7 +14,7 @@ from PIL import Image, ImageDraw
 
 ap = argparse.ArgumentParser()
 ap.add_argument("edges"); ap.add_argument("ref"); ap.add_argument("out")
-ap.add_argument("--w", type=int, default=1000)
+ap.add_argument("--width-px", type=int, default=1000, dest='w')
 a = ap.parse_args()
 ref = Image.open(a.ref).convert("RGB")
 ref = ref.resize((a.w, round(a.w * ref.height / ref.width)))

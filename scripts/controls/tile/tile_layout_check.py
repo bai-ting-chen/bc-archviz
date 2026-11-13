@@ -8,9 +8,9 @@ import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "blender"))
 sys.path.insert(0, os.path.dirname(__file__))
 import bpy, numpy as np
-import _scene
+import photometric_scene
 import materials.tile.tile_layout as tile_layout
-from tile_layout_rig import RES, SIZE, CASES, OUTS, plane_with, pixel_coords, stable
+from tile_layout_rig import RESOLUTION_PX, FRAME_SIZE_M, CASES, OUTPUT_SOCKET_NAMES, plane_with, pixel_coords, stable
 from tile_layout_reference import check_reference
 from tile_layout_jitter import check_jitter_gaps
 from tile_layout_rebuild import check_rebuild

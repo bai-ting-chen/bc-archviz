@@ -17,7 +17,7 @@ if '--analyze' not in sys.argv:
     from effects.wear.wear import LAYERS, MaskSource, WearLayer, WearExtent, apply_surface_wear, image_mask, wear_factor
     from materials.shared.node_graph import NodeGraph
     from variation_lab import render, emission, plane
-    from _scene import black_scene, ortho_camera
+    from photometric_scene import black_scene, ortho_camera
     import core.archviz as archviz
 
 SURFACES = ('brushed-metal', 'painted-metal', 'concrete-wall')

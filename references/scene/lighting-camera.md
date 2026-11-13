@@ -137,7 +137,7 @@ the manufacturer's file a render's illuminance is the fixture's, not a guess fro
   bulk zips; the DIALux online catalogue (luminaires.dialux.com) has a direct *Photometric data*
   zip on each article page, no account. Some makers expose a plain file tree (the LM-79 report
   PDF's URL with `.ies` often serves the file). European makers often ship Eulumdat `.ldt`
-  only: Cycles reads IES only, so convert with `scripts/scene/lighting/ldt2ies.py in.ldt out.ies` (MCP venv
+  only: Cycles reads IES only, so convert with `scripts/scene/lighting/ldt_to_ies.py in.ldt out.ies` (MCP venv
   python), which prints the lumens integrated from the written file against the LDT's.
 - **Record:** save the file into the study's `library/local/ies/` with a `meta.json` (maker, catalogue,
   URL, lumens) (RULES AST_03). `ies_light` embeds the file in the .blend (Internal mode).
@@ -224,7 +224,7 @@ check before anything else.
 
 ### 1. Camera
 Needs: the reference image. Gives: horizon, vanishing point, eye height, focal, shift.
-1. `refmatch.py grid ref.png out.png --step 25` -> read the horizon (where parallel horizontal
+1. `reference_match.py grid ref.png out.png --step 25` -> read the horizon (where parallel horizontal
    edges converge) and the vanishing point of the dominant direction. Crop and zoom regions
    (Pillow) to read edges; one full-frame look misreads thin members.
 2. Eye height without a known size: a vertical element standing on the floor splits at the
@@ -246,12 +246,12 @@ Needs: the reference image. Gives: horizon, vanishing point, eye height, focal, 
 6. Check the Rhino model before Blender: `scripts/rhino/project_edges.py` (in Rhino via Rook,
    with the solved camera) + `scripts/research/edge_overlay.py` draws its edges over the reference. Rook
    viewport captures ignore the requested size, so a lens-shifted named view captures wrong.
-7. Check: `archviz.framing_render()` + `refmatch.py pair --overlay`. Once the vanishing point and
+7. Check: `archviz.framing_render()` + `reference_match.py pair --overlay`. Once the vanishing point and
    one height match, the camera is fixed: move geometry, not the camera.
 
 #### Camera from a repeated element
-For a colonnade, mullions or bays. Code: `scripts/research/refsolve.py readings.json` (and
-`Solve.floor_pt / plane_pt / pt_at_z / fit_circle / blender()` from a study script). Read the base
+For a colonnade, mullions or bays. Code: `scripts/research/reference_camera.py readings.json` (and
+`ReferenceCameraSolve.pixel_to_floor / pixel_to_facade_plane / pixel_to_height / fit_circle / blender_camera_settings()` from a study script). Read the base
 and top of every repeat at full resolution (ticked 2x crops, not the downscaled frame). Then:
 - Lines through the bases and through the tops meet at the façade vanishing point; its y is the
   horizon (level camera).
@@ -287,7 +287,7 @@ Needs: the fixed camera (step 1). Gives: the model's members, openings and roofs
 
 ### 3. Light, region by region
 Needs: camera and geometry from steps 1-2.
-1. `refmatch.py patches ref.png regions.json render.png` (regions.json in the study folder:
+1. `reference_match.py patches ref.png regions.json render.png` (regions.json in the study folder:
    `{"name": [x0, y0, x1, y1], …}` in 0..1, y from top; ~10 regions: each lit surface type, the
    shadow side, floor near/far, the background). Record: keep a table of render/ref ratios per
    iteration; aim for *equal* ratios first, then exposure.

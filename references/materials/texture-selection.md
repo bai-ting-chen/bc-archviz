@@ -16,7 +16,7 @@ Use when: choosing a texture source or method for a surface, then scaling it and
 - **Which Poly Haven builder:** `materials.shared.pbr.pbr_material` — shader box projection, no UVs
   needed, bump from height (quick, any Rhino mesh); the family recipes in `materials` — real-size
   `BoxUV`/`directional_uv` UVs, so normal maps and directional grain work;
-  `renderer.luxcore.luxcore.lux_textured` — native LuxCore tree (Randomized Tiling).
+  `renderer.luxcore.luxcore.textured_material` — native LuxCore tree (Randomized Tiling).
 
 ### Scaling and UV steps
 1. **Shortlist from a contact sheet:** Poly Haven thumbnails
@@ -54,7 +54,7 @@ Use when: choosing a texture source or method for a surface, then scaling it and
 6. **Variation:** Object Info Random, Geometry › Random per Island (per plank/tile in one mesh).
 7. **Node trees** in labelled frames (`materials.shared.node_graph.NodeGraph`). Mix nodes keep hidden
    same-named sockets → `materials.shared.node_graph.active_socket()`.
-8. **Prove the texture survives:** high-pass sigma (`imgstats`) of a native render crop against
+8. **Prove the texture survives:** high-pass sigma (`image_statistics`) of a native render crop against
    the reference crop at a matching screen scale.
 
 ### Tiled maps with joints

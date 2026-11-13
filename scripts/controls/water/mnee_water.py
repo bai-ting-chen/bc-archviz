@@ -17,7 +17,7 @@ import bpy
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "blender"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import materials.water.water as _mat_water
-from _scene import black_scene, render_linear, white_lambert  # noqa: E402
+from photometric_scene import black_scene, render_linear, white_lambert  # noqa: E402
 
 
 def box(name, x0, y0, z0, x1, y1, z1, top_only=False, cuts=0):

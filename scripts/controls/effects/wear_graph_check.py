@@ -7,13 +7,13 @@ ROOT=Path(__file__).resolve().parents[3]
 sys.path.insert(0,str(ROOT/'scripts/blender'))
 sys.path.insert(0,str(ROOT/'scripts/controls/regression'))
 import bpy
-from regress_graph import graph
+from regression_graph import graph
 from core.assets import set_project
 from materials.shared.node_graph import NodeGraph
 from effects.wear.wear import WearLayer, apply_surface_wear, LAYERS
-from effects.wear.masks import asset_mask
-from effects.wear.atlas import StampAtlas
-from effects.wear.stamps import StampSource
+from effects.wear.image_masks import asset_mask
+from effects.wear.decal_atlas import StampAtlas
+from effects.wear.decal_stamps import StampSource
 from effects.wear.wear_locations import WearExtent
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--project',required=True)

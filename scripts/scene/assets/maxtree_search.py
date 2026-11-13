@@ -7,7 +7,7 @@ Latin names only, so the whole catalog (about 2,400 products, 25 requests) is fe
 Usage:
     python maxtree_search.py <study>/_wip/maxtree fetch
     python maxtree_search.py <study>/_wip/maxtree search <words> [--category Conifers]
-        [--min-height 300] [--max-height 800] [--top 24] [--out rows.json]
+        [--min-height-cm 300] [--max-height-cm 800] [--top 24] [--out rows.json]
 Words match the model name, Latin and common names, the species a volume holds, variant names
 and categories (all words must match).
 Heights are in cm, per variant; a model matches when any variant lies in the range.
@@ -20,17 +20,17 @@ import re
 import time
 import urllib.request
 
-API = "https://maxtree.org/wp-json/wc/store/v1/products"
-UA = {"User-Agent": "ArchvizBlenderPipeline/0.1"}
-PAGE = 100          # the Store API's largest page
+CATALOG_API_URL = "https://maxtree.org/wp-json/wc/store/v1/products"
+REQUEST_HEADERS = {"User-Agent": "ArchvizBlenderPipeline/0.1"}
+PAGE_SIZE = 100          # the Store API's largest page
 PAUSE_S = 0.5       # between pages, to stay gentle on the shop
 STALE_DAYS = 7      # refetch the catalog when it is older than this
-SCHEMA = 3          # bump when model_row changes, so old caches are refetched
+CATALOG_SCHEMA_VERSION = 3          # bump when model_row changes, so old caches are refetched
 
-VARIANT = re.compile(r"(MT_\w+):\s*\(\s*Polygons:\s*(\d+)\s*\),\s*\(\s*Height:\s*(\d+)\s*cm\s*\)")
-COMMON = re.compile(r"referred to as ([^.]+)\.")
-SPECIES = re.compile(r"([A-Z][a-z]+(?: [a-z×.-]+)+)\s*\[([^\]]+)\]")  # "Latin name[Common, names]"
-VOLUME = re.compile(r"FROM\s+(Plant Models Vol \d+|[A-Z][\w ]+ Vol \d+)")
+VARIANT_PATTERN = re.compile(r"(MT_\w+):\s*\(\s*Polygons:\s*(\d+)\s*\),\s*\(\s*Height:\s*(\d+)\s*cm\s*\)")
+COMMON_NAME_PATTERN = re.compile(r"referred to as ([^.]+)\.")
+SPECIES_PATTERN = re.compile(r"([A-Z][a-z]+(?: [a-z×.-]+)+)\s*\[([^\]]+)\]")  # "Latin name[Common, names]"
+VOLUME_PATTERN = re.compile(r"FROM\s+(Plant Models Vol \d+|[A-Z][\w ]+ Vol \d+)")
 
 
 def plain(text):
@@ -41,13 +41,13 @@ def plain(text):
 def model_row(p):
     """One catalog row from a Store API product."""
     short, desc = plain(p["short_description"]), plain(p["description"])
-    variants = [{"name": n, "polygons": int(poly), "height_cm": int(h)} for n, poly, h in VARIANT.findall(desc)]
+    variants = [{"name": n, "polygons": int(poly), "height_cm": int(h)} for n, poly, h in VARIANT_PATTERN.findall(desc)]
     heights = [v["height_cm"] for v in variants]
-    common = COMMON.search(short)
-    volume = VOLUME.search(short)
+    common = COMMON_NAME_PATTERN.search(short)
+    volume = VOLUME_PATTERN.search(short)
     image = p["images"][0] if p["images"] else {}
     latin = re.sub(r"^V\d+_|_\d+$", "", p["name"]).replace("_", " ")
-    species = SPECIES.findall(desc)  # every species in the model or volume
+    species = SPECIES_PATTERN.findall(desc)  # every species in the model or volume
     common = common.group(1).strip() if common else ", ".join(c for _, c in species)
     return {
         "id": p["name"],
@@ -72,8 +72,8 @@ def fetch_catalog(folder):
     """Fetch every product page into <folder>/catalog.json and return the rows."""
     rows, page = [], 1
     while True:
-        url = f"{API}?per_page={PAGE}&page={page}"
-        with urllib.request.urlopen(urllib.request.Request(url, headers=UA)) as r:
+        url = f"{CATALOG_API_URL}?per_page={PAGE_SIZE}&page={page}"
+        with urllib.request.urlopen(urllib.request.Request(url, headers=REQUEST_HEADERS)) as r:
             products = json.load(r)
         if not products:
             break
@@ -82,7 +82,7 @@ def fetch_catalog(folder):
         time.sleep(PAUSE_S)
     os.makedirs(folder, exist_ok=True)
     with open(os.path.join(folder, "catalog.json"), "w", encoding="utf-8") as f:
-        json.dump({"schema": SCHEMA, "rows": rows}, f, ensure_ascii=False)
+        json.dump({"schema": CATALOG_SCHEMA_VERSION, "rows": rows}, f, ensure_ascii=False)
     print(f"{len(rows)} products -> {folder}")
     return rows
 
@@ -93,7 +93,7 @@ def load_catalog(folder):
     if os.path.exists(path) and time.time() - os.path.getmtime(path) < STALE_DAYS * 86400:
         with open(path, encoding="utf-8") as f:
             cache = json.load(f)
-        if isinstance(cache, dict) and cache.get("schema") == SCHEMA:
+        if isinstance(cache, dict) and cache.get("schema") == CATALOG_SCHEMA_VERSION:
             return cache["rows"]
     return fetch_catalog(folder)
 
@@ -129,8 +129,8 @@ def main():
     p.add_argument("cmd", choices=["fetch", "search"])
     p.add_argument("words", nargs="*")
     p.add_argument("--category")
-    p.add_argument("--min-height", type=int, default=0)
-    p.add_argument("--max-height", type=int, default=10 ** 6)
+    p.add_argument("--min-height-cm", type=int, default=0, dest='min_height')
+    p.add_argument("--max-height-cm", type=int, default=10 ** 6, dest='max_height')
     p.add_argument("--top", type=int, default=24)
     p.add_argument("--out")
     a = p.parse_args()

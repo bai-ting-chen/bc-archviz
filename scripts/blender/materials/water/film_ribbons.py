@@ -1,6 +1,6 @@
-"""Film ribbons; implementation for water.film."""
+"""Film ribbons; implementation for water.falling_film."""
 import numpy as np
-from materials.water import curtain, noise
+from materials.water import ballistic_sheet, seeded_noise
 
 
 def _ribbon_seed(p, i):
@@ -9,7 +9,7 @@ def _ribbon_seed(p, i):
 
 def _ribbon_base(p, i):
     """Rest position of ribbon i along the lip, m: even spacing with a fixed jitter of up to 8 mm."""
-    return i * p.ribbon_spacing + .008 * noise.clustered(np.array([0.]), _ribbon_seed(p, i) + 1, .375, .625)[0]
+    return i * p.ribbon_spacing + .008 * seeded_noise.clustered_noise(np.array([0.]), _ribbon_seed(p, i) + 1, .375, .625)[0]
 
 
 def _ribbon(p, i, v_col):
@@ -17,15 +17,15 @@ def _ribbon(p, i, v_col):
     seed = _ribbon_seed(p, i)
     zero = np.array([0.])
     centre = (_ribbon_base(p, i)
-              + p.ribbon_wander * noise.clustered(v_col, seed + 2, .225, .375)
-              + .005 * noise.clustered(v_col, seed + 3, .075, .125))
-    braid = np.clip((noise.clustered(v_col, p.seed + 900 + i // 2, .27, .45) - .05) * 2.5, 0, 1)
+              + p.ribbon_wander * seeded_noise.clustered_noise(v_col, seed + 2, .225, .375)
+              + .005 * seeded_noise.clustered_noise(v_col, seed + 3, .075, .125))
+    braid = np.clip((seeded_noise.clustered_noise(v_col, p.seed + 900 + i // 2, .27, .45) - .05) * 2.5, 0, 1)
     centre = centre + (1 if i % 2 == 0 else -1) * .014 * braid          # pairs approach and split
-    width = ((.008 + .009 * noise.unit(zero, seed + 4, .375, .625)[0])
-             * (1 + p.ribbon_varicose * noise.clustered(v_col, seed + 5, .09, .15)))
-    thick = (.0007 + .0035 * noise.unit(v_col, seed + 6, .079, .131) ** 3
-             + .018 * np.maximum(0, noise.clustered(v_col, seed + 8, .052, .088) - .55) ** 2)   # sparse lens swells
-    twist = p.ribbon_twist * noise.clustered(v_col, seed + 7, .071, .119)
+    width = ((.008 + .009 * seeded_noise.unit_noise(zero, seed + 4, .375, .625)[0])
+             * (1 + p.ribbon_varicose * seeded_noise.clustered_noise(v_col, seed + 5, .09, .15)))
+    thick = (.0007 + .0035 * seeded_noise.unit_noise(v_col, seed + 6, .079, .131) ** 3
+             + .018 * np.maximum(0, seeded_noise.clustered_noise(v_col, seed + 8, .052, .088) - .55) ** 2)   # sparse lens swells
+    twist = p.ribbon_twist * seeded_noise.clustered_noise(v_col, seed + 7, .071, .119)
     return centre, width, thick, twist
 
 

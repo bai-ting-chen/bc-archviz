@@ -7,7 +7,7 @@ Use when: judging a look round against a reference, proving a feature works, or 
 ### 1. Set the criteria before rendering
 - **Where:** the regions to match and, per material or effect, the reference crop at the same
   footprint. Compute mm per pixel at the feature in the final view first (VAL_01 › Final-view pixels).
-- **Which numbers decide:** the ratios between regions from `refmatch.py patches` on the PNG (VAL_03);
+- **Which numbers decide:** the ratios between regions from `reference_match.py patches` on the PNG (VAL_03);
   exposure is set last (RULES RES_03), so match ratios, not absolute means. For a feature claim,
   *changed > 2 %* and several times the noise floor (VAL_02).
 - **Which character points:** feature size, edge sharpness, contrast, density, orientation,
@@ -67,7 +67,7 @@ and a side-by-side sheet.
 
 ## VAL_03 procedure
 
-Measure on the PNG the renderer wrote (`imgstats.py`, `refmatch.py`): AgX rolls off whites, so
+Measure on the PNG the renderer wrote (`image_statistics.py`, `reference_match.py`): AgX rolls off whites, so
 linear values mislead for look matching. Physical calibration controls may inspect linear EXR energy
 data. Processed frames go to the study's `_wip/`.
 

@@ -34,7 +34,7 @@ bpy.ops.wm.read_homefile(use_empty=True)
 archviz.set_project(os.environ["ARCHVIZ_PROJECT"])
 sc = bpy.context.scene
 archviz.render_setup(400, 500, 64, look="AgX - Base Contrast")
-C, HALF = (0.0, 0.0), (2.5, 2.0)
+PAD_CENTER_M, PAD_HALF_SIZE_M = (0.0, 0.0), (2.5, 2.0)
 
 # hut: a closed box with a recessed opening (window) in the -Y face
 bm = bmesh.new()
@@ -75,21 +75,21 @@ rot = pane.copy(); rot.data = pane.data.copy(); rot.rotation_euler.z = math.radi
 sc.collection.objects.link(rot)
 _mat_glass.glass_distortion(rot.data.materials[0], rot)
 # hill + ground
-topo = terrain.landform_group("SMOKE_LAND", centre=C, pad_half=HALF, size=120, verts=241, fall=4, run=25)
+topo = terrain.landform_group("SMOKE_LAND", centre=PAD_CENTER_M, pad_half=PAD_HALF_SIZE_M, size=120, verts=241, fall=4, run=25)
 ground = _mat_ground.ground_material("grass_ground", "forest_ground_05", "SMOKE_GROUND", wet_gamma=1.4)
 ter = terrain.add_terrain(topo, ground)
 
 # camera down the slope
 cam = bpy.data.objects.new("CAM", bpy.data.cameras.new("CAM")); sc.collection.objects.link(cam)
 a = math.radians(-120); x, y = 16 * math.cos(a), 16 * math.sin(a)
-cam.location = (x, y, terrain.height(x, y, C, HALF, fall=4, run=25) + 1.5)
+cam.location = (x, y, terrain.height(x, y, PAD_CENTER_M, PAD_HALF_SIZE_M, fall=4, run=25) + 1.5)
 cam.rotation_euler = (Vector((0, 0, 1.6)) - cam.location).to_track_quat("-Z", "Y").to_euler()
 archviz.physical_camera(cam, 100, 8.0, 8.0 ** 2 / 2 ** 11.0, 40.0, focus_distance=16)
 archviz.straighten_verticals(cam)
 
 # meadow of procedural blades: wet
 blades = bpy.data.collections.new("SMOKE_BLADES"); sc.collection.children.link(blades)
-mat = vegetation.blade_material("SMOKE_BLADE", colour=(0.10, 0.16, 0.04), wet=vegetation.WET)
+mat = vegetation.blade_material("SMOKE_BLADE", colour=(0.10, 0.16, 0.04), wet=vegetation.WET_BLADE_DEFAULTS)
 for i in range(4):
     bm = bmesh.new()
     for k in range(9):
@@ -106,7 +106,7 @@ tx, ty = scatter.frustum_tangents(cam, (400, 500))
 scatter.meadow_layer("SMOKE_GRASS", grp, ter, blades, cam, Density=400.0, Tan_X=tx, Tan_Y=ty, Max_Distance=40.0)
 
 # fog + sky
-atmosphere.fog_volume(centre=C, visibility_m=150, box=(200, 200, -20, 80), top=(20, 60),
+atmosphere.fog_volume(centre=PAD_CENTER_M, visibility_m=150, box=(200, 200, -20, 80), top=(20, 60),
                       clear_boxes=[(-2.0, 2.0, -1.6, 1.6, 2.8)])
 atmosphere.volume_render_settings()
 archviz.world_hdri_lux("kloofendal_misty_morning", 12000)

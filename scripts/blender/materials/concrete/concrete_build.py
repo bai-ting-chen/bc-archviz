@@ -7,7 +7,7 @@ from materials.shared.node_graph import NodeGraph
 
 from materials.shared.pbr_maps import _ph_maps, box_maps
 from materials.shared.principled import _principled
-from materials.shared.map_measure import map_mean
+from materials.shared.map_measurements import map_mean_linear_rgb
 
 from materials.concrete.concrete_masks import _bevel_chips, _edge_mask
 

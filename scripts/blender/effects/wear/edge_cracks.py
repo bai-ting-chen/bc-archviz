@@ -5,12 +5,12 @@ import random
 import bpy
 from materials.shared.node_graph import NodeGraph
 from mathutils import Vector
-from effects.wear.cracks import CRACK, apply_crack_masks
+from effects.wear.cracks import CRACK_DEFAULTS, apply_crack_masks
 from effects.wear.crack_ribbon import crooked_ribbon_masks
 from materials.shared.node_graph import frame_for
 
 
-EDGE_CRACK = dict(CRACK, core=0.0016, halo=0.006, depth=0.0008)  # m, core/halo widths and groove depth
+EDGE_CRACK_DEFAULTS = dict(CRACK_DEFAULTS, core=0.0016, halo=0.006, depth=0.0008)  # m, core/halo widths and groove depth
 
 
 def edge_crack_edges(obj, min_angle_deg=30.0):
@@ -80,7 +80,7 @@ def _ribbon_group(seed, length):
                  (-1900, -500), F)
     wob = g.math('ADD', wob, g.math('MULTIPLY', along, inputs.outputs['Skew'], (-2050, -700), F),
                  (-1750, -650), F)
-    core, halo = crooked_ribbon_masks(g, F, along, perp, wob, on, EDGE_CRACK,
+    core, halo = crooked_ribbon_masks(g, F, along, perp, wob, on, EDGE_CRACK_DEFAULTS,
                                       inputs.outputs['Length'], 0, seed=seed, physical_length=length)
     g.link(core, output.inputs['Core'])
     g.link(halo, output.inputs['Halo'])
@@ -119,4 +119,4 @@ def add_edge_cracks(mat, edges, amount=1.0, seed=17):
         core = halo = zero.outputs[0]
         zero.outputs[0].default_value = 0
     mat['edge_crack_count'] = count
-    return apply_crack_masks(mat, g, F, core, halo, EDGE_CRACK, amount, 'Edge cracks')
+    return apply_crack_masks(mat, g, F, core, halo, EDGE_CRACK_DEFAULTS, amount, 'Edge cracks')

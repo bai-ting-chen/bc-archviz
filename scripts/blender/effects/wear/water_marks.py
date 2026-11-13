@@ -4,13 +4,13 @@ Needs the leak field (leak_field.add_leak_field) on the object. Works on a weath
 """
 from materials.shared.node_graph import frame_for
 
-LEAK = dict(streak_w=14.0, streak_len=0.6, max_len=(0.8, 3.2), top_band=0.2, top=0.9, amount=1.0,
+RUNOFF_DEFAULTS = dict(streak_w=14.0, streak_len=0.6, max_len=(0.8, 3.2), top_band=0.2, top=0.9, amount=1.0,
             streak_band=(0.42, 0.58), presence=(0.28, 0.5), fade_pow=1.15)
 
 
 def add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0, amount=1.0):
     """On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask."""
-    L_ = dict(LEAK, **(leak or {}))
+    L_ = dict(RUNOFF_DEFAULTS, **(leak or {}))
     g, F = frame_for(mat, "Runoff streaks, grunge, splash")
     nt = mat.node_tree
     geo = g.node("ShaderNodeNewGeometry", (-2600, -3400), F)

@@ -2,7 +2,7 @@
 import os
 import bpy
 from renderer.finals.final_settings import setup_unlimited
-from renderer.luxcore.engine import set_halt
+from renderer.luxcore.engine_settings import set_halt
 
 
 _STATE = {}

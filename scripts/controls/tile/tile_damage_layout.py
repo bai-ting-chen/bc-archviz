@@ -6,19 +6,19 @@ import controls_import_paths  # noqa: E402,F401 -- every controls topic folder o
 import numpy as np
 
 import materials.tile.tile_surface as tile_surface
-from tile_damage_rig import PX, probe_rgb, setup
+from tile_damage_rig import METRES_PER_PIXEL, probe_rgb, setup
 
 
 def check_square(folder):
     """The network survives square tiles and fine chips remain inside mosaics."""
     pitch=.102
-    sc,ob,mat=setup(4*pitch,5*pitch,round(4*pitch/PX),round(5*pitch/PX),tile_w=.1,tile_h=.1,
+    sc,ob,mat=setup(4*pitch,5*pitch,round(4*pitch/METRES_PER_PIXEL),round(5*pitch/METRES_PER_PIXEL),tile_w=.1,tile_h=.1,
                     joint=.002,force_kind=1,chip_share=0,spall_density=0)
     data=probe_rgb(mat,folder,'square_20',('Crack','Piece Height',None),(1,.002,1))
     cells=0
     for row in range(5):
         for col in range(4):
-            x0,y0=round((col*pitch+.001)/PX),round((row*pitch+.001)/PX)
+            x0,y0=round((col*pitch+.001)/METRES_PER_PIXEL),round((row*pitch+.001)/METRES_PER_PIXEL)
             cells+=(data[y0:y0+400,x0:x0+400,0]>.02).any()
     assert cells>=10, f'Square crack occurrence {cells}/20'
     sc,ob,mat=setup(.033,.033,132,132,tile_w=.01,tile_h=.01,joint=.001,force_kind=2,chip_size=.008)

@@ -9,8 +9,8 @@ MATCHING_TOLERANCE = dict(mean_relative=.03, sd_relative=.03, coverage_absolute=
 
 
 def _assets(manifest, project):
-    from effects.wear.masks import asset_mask, mask_dimensions_m
-    from effects.wear.layers import canonical_layer
+    from effects.wear.image_masks import asset_mask, mask_dimensions_m
+    from effects.wear.layer_names import canonical_layer
     result = {}
     for kind, candidates in json.loads(manifest.read_text()).items():
         kind = canonical_layer(kind)
@@ -50,7 +50,7 @@ def _tolerances(target):
 
 
 def _set_levels(material, kind, parameters):
-    from effects.wear.masks import MASK_LEVELS_LABEL, MASK_GAMMA_LABEL
+    from effects.wear.image_masks import MASK_LEVELS_LABEL, MASK_GAMMA_LABEL
     frame = next(n for n in material.node_tree.nodes if n.type == 'FRAME' and n.label == 'surface-wear: ' + kind)
     nodes = [n for n in material.node_tree.nodes if n.parent == frame]
     for levels in (n for n in nodes if n.label == MASK_LEVELS_LABEL):

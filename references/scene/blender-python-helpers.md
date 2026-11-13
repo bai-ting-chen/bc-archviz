@@ -6,7 +6,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `core.assets` — The project's asset library: which folder holds library/, and the meta.json of each asset.
 
 - `set_project(path)` — Point library() at a study/project folder (else env ARCHVIZ_PROJECT, else found from the .blend / cwd).
-- `project_root()` — The folder whose library/ holds the assets (see set_project and projectpath).
+- `project_root()` — The folder whose library/ holds the assets (see set_project and project_paths).
 - `library(*parts)` — Path inside the project's library/, e.g. library("polyhaven", "hdris", hdri_id).
 - `read_meta(folder)` — An asset folder's meta.json (Poly Haven fetch or a local/ asset).
 - `write_meta(folder, meta)` — Write an asset folder's meta.json (pair of read_meta).
@@ -15,7 +15,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `apply_material_map(root, mapping)` — mapping: {collection_name: material spec}. Each mesh gets the material of the nearest collection (its layer, a parent layer, or its block definition) that has an entry.
 
-## `core.projectpath` — Which folder's library/ a script reads and writes assets in (no bpy: also used by host tools).
+## `core.project_paths` — Which folder's library/ a script reads and writes assets in (no bpy: also used by host tools).
 
 - `is_study(folder)` — A study folder: its parent folder is named 'studies'.
 - `legacy_studies(project)` — Study folder names listed in <project>/library/legacy_studies.txt (# comments allowed).
@@ -31,15 +31,15 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `anisotropy(bsdf, amount=0.0, rotation=None, tangent=None)` — Set directional roughness; rotation in turns, tangent a world vector or UV-map name; None keeps either as it is.
 
-## `effects.caustics.caustic_graph` — Caustic graph; implementation for gn_caustics.
+## `effects.caustics.caustic_graph` — Caustic graph; implementation for geometry_node_caustics.
 
 - `caustic_sheet_group(name='Wavefront Caustics')` — GN group: refract water vertices, raycast to receivers and sun, store E = E_sun T A_perp / A_landed.
 
-## `effects.caustics.caustic_objects` — Caustic objects; implementation for gn_caustics.
+## `effects.caustics.caustic_objects` — Caustic objects; implementation for geometry_node_caustics.
 
 - `add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_tex=None, floor_tile_m=2.0, name='CAUSTIC_SHEET', floor_albedo=(0.5, 0.5, 0.5))` — Create the overlay object with the GN modifier; inputs set on the modifier itself.
 
-## `effects.caustics.caustic_shading` — Caustic shading; implementation for gn_caustics.
+## `effects.caustics.caustic_shading` — Caustic shading; implementation for geometry_node_caustics.
 
 - `caustic_sheet_material(name='CAUSTIC_SHEET', floor_tex=None, floor_tile_m=2.0, wall_albedo=(0.6, 0.79, 0.83), floor_albedo=(0.5, 0.5, 0.5))` — Transparent + Emission(albedo * E / pi). Floor albedo from the same world-box-mapped texture the floor uses (or `floor_albedo` without one -- set it to the floor's real albedo); walls a constant glaze colour (`wall_albedo`, a pale cyan pool tile, linear).
 
@@ -60,11 +60,6 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `randomized_vectors(g, vector, count=3, seed=0, scale_jitter=0.12, frame=None)` — Rotate, slightly rescale and offset independent metre-space image lookups.
 - `anti_tile(g, texs, lookups=3, scale_m=1.5, seed=0, amount=1.0)` — Relink image consumers to shared XYZ-offset lookups; amount zero is the original.
 
-## `effects.wear.atlas` — Pack chosen decal colour and opacity maps without changing their physical aspect ratios.
-
-- `StampAtlas` — RGBA atlas with physical sizes, metre cell spacing and 0–1 occupied-cell probability.
-- `build_stamp_atlas(project, asset_ids, path, tile_px=768, **scatter)` — Pack 4K colour/opacity into a derived tone, deposit-data or chip-opacity atlas.
-
 ## `effects.wear.chipping` — Geometry chips, flaked coating fields and verified bare-substrate scans.
 
 - `dice(obj, size=0.05)` — Subdivide in place by repeated halving of over-long edges (grid fill keeps quads).
@@ -80,7 +75,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `effects.wear.concrete_shading` — Concrete edge shading and fresh-break material from clean distance and chip fields.
 
-- `weathered_concrete(name='CONCRETE_WEATHERED', line_width=LINE_WIDTH, line_amount=LINE_AMOUNT, dirt_noise_scale=9.0, tex_id='concrete_wall_009', dust_width=DUST_WIDTH, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True)` — Layer edge line/dust and fresh-break shading over the concrete study material.
+- `weathered_concrete(name='CONCRETE_WEATHERED', line_width=LINE_WIDTH_M, line_amount=LINE_AMOUNT, dirt_noise_scale=9.0, tex_id='concrete_wall_009', dust_width=DUST_WIDTH_M, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True)` — Layer edge line/dust and fresh-break shading over the concrete study material.
 
 ## `effects.wear.crack_ribbon` — Compact Cycles crack masks from seeded polylines; avoids expanding every segment into SVM.
 
@@ -93,17 +88,29 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `add_cracks(mat, openings=(), crack=None, amount=1.0)` — On a weathered_concrete material: shrinkage cracks from opening corners + patchy map-cracking; dark core over everything, grime halo, groove. openings: (axis 'x'|'y', plane, u0, u1, v0, v1, top_only[, keep_angles]).
 - `apply_crack_masks(mat, g, F, core, halo, C, amount, label)` — Compose crack core, halo and groove under one independent amount.
 
-## `effects.wear.defaults` — Per-layer source choices and local default assets; missing-id logs are deduplicated per process.
+## `effects.wear.decal_atlas` — Pack chosen decal colour and opacity maps without changing their physical aspect ratios.
+
+- `StampAtlas` — RGBA atlas with physical sizes, metre cell spacing and 0–1 occupied-cell probability.
+- `build_stamp_atlas(project, asset_ids, path, tile_px=768, **scatter)` — Pack 4K colour/opacity into a derived tone, deposit-data or chip-opacity atlas.
+
+## `effects.wear.decal_stamps` — Neighbour-aware, nonperiodic decal placement in metre-space surface coordinates.
+
+- `StampSource` — Non-default decal pools and chip threshold retained independently from hybrid regions.
+- `stamps_field(g, kind, layer, vector, extent, frame=None)` — Select explicit decal deposits or scan-outline chips, never called by a hybrid source.
+- `scatter_stamps(g, vector, atlas, seed=17, vertical=False, extent=None, frame=None)` — Sum 3x3 neighbour stamps with seeded choice, rotation, scale, offsets and cell density.
+- `deposit_stamps(g, vector, settings, extent, frame=None)` — Select down-aligned wall decals or freely rotated floor stains; undersides are gated later.
+
+## `effects.wear.default_sources` — Per-layer source choices and local default assets; missing-id logs are deduplicated per process.
 
 - `report_missing(asset_id, search)` — Log a named default's procedural fallback and Fab search once per missing id.
 - `default_field(g, kind, settings, vector, frame)` — Load the layer's default mask, blend dried-mark zones, or use the procedural fallback.
 
 ## `effects.wear.dirt` — Dust build-up and bordered grunge patterns.
 
-- `edge_dirt_masks(g, dist, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, noise_vec=None, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, noise_scale=9.0, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside')` — Return line, dust and the reusable outside-vertex join (None for AO corners).
-- `corner_dirt_masks(g, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, frame=None, loc=(0, 0), corner_cap=CORNER_MASK_CAP)` — Return shared masks using cross-object AO remapped to a distance-like metre field.
+- `edge_dirt_masks(g, dist, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M, noise_vec=None, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, noise_scale=9.0, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside')` — Return line, dust and the reusable outside-vertex join (None for AO corners).
+- `corner_dirt_masks(g, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, frame=None, loc=(0, 0), corner_cap=CORNER_MASK_CAP)` — Return shared masks using cross-object AO remapped to a distance-like metre field.
 - `dust_surface(g, surface, dust, frame=None, loc=(0, 0), line=None)` — Apply relative dust/line albedos with line priority, preserving source textures and normals.
-- `add_corner_dirt(mat, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, corner_cap=CORNER_MASK_CAP)` — Add independently switchable shared line/dust layers to a Cycles surface material.
+- `add_corner_dirt(mat, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, corner_cap=CORNER_MASK_CAP)` — Add independently switchable shared line/dust layers to a Cycles surface material.
 - `grunge(g, scale_m=0.5, target_sd=0.05, detail=6.0, rough=0.6, amount=1.0)` — Return the legacy calibrated grunge multiplier, preserving existing callers exactly.
 - `grunge_field(g, vector, scale_m, frame=None)` — Return the unchanged fine grunge times zero-reaching slow patch pattern.
 
@@ -114,14 +121,25 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `effects.wear.edge_profile` — Shared distance falloffs and noise context for edge line and dust.
 
-- `edge_vertex_join(g, line_width=LINE_WIDTH, frame=None, loc=(0, 0))` — Return a local outside-junction blend from clean-mesh vertex distance in metres.
+- `edge_vertex_join(g, line_width=LINE_WIDTH_M, frame=None, loc=(0, 0))` — Return a local outside-junction blend from clean-mesh vertex distance in metres.
 
-## `effects.wear.hybrid` — One hybrid definition: procedural region multiplied by a full-range stochastic scan interior.
+## `effects.wear.hybrid_sources` — One hybrid definition: procedural region multiplied by a full-range stochastic scan interior.
 
 - `HybridSource` — Stochastic interiors, contrast/mean remap, normalized region edges and binary flake cutoff.
 - `hybrid_field(g, kind, layer, vector, extent, frame=None, amount=None)` — Return region, scan interior, drying-edge rim and their exact region-times-interior product.
 
-## `effects.wear.layers` — Canonical wear layer names and their deprecated input alias.
+## `effects.wear.image_masks` — Canonical grayscale image loader for surface-wear masks.
+
+- `mask_dimensions_m(size_m)` — Return width and height in metres from a square scalar or rectangular pair.
+- `MaskSource` — Grayscale data image, levels and real-world mapping (size_m in metres per tile).
+- `image_mask(g, mask, vector=None, frame=None, row=0, mapped_vector=None)` — Load a Non-Color mask in surface metres or named real-world box/directional UVs.
+- `mask_field(g, mask, vector=None, frame=None, crossed=False, row=0)` — Return one image field, or its union with a rotated/offset copy for crossing scratches.
+- `asset_mask(asset_id, map_name='Mask', project=None)` — Resolve a local 4K scan mask at its metadata scan size; return None when its map is missing.
+- `asset_maps(asset_id, map_names, project=None)` — Resolve named local 4K maps and their metadata once; return None for a missing map.
+- `scan_size_m(metadata)` — Read square or rectangular scan dimensions, converting m/cm/mm metadata to metres.
+- `surface_coordinates(g, frame=None)` — Project world metres onto the dominant face plane for walls, tops and soffits.
+
+## `effects.wear.layer_names` — Canonical wear layer names and their deprecated input alias.
 
 - `canonical_layer(kind)` — Accept the deprecated coating-loss spelling while returning its mechanism name.
 
@@ -134,36 +152,18 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `mask_material(name, method, radius=0.035)` — Emission view of one edge-detection method, for side-by-side comparison.
 
-## `effects.wear.masks` — Canonical grayscale image loader for surface-wear masks.
-
-- `mask_dimensions_m(size_m)` — Return width and height in metres from a square scalar or rectangular pair.
-- `MaskSource` — Grayscale data image, levels and real-world mapping (size_m in metres per tile).
-- `image_mask(g, mask, vector=None, frame=None, row=0, mapped_vector=None)` — Load a Non-Color mask in surface metres or named real-world box/directional UVs.
-- `mask_field(g, mask, vector=None, frame=None, crossed=False, row=0)` — Return one image field, or its union with a rotated/offset copy for crossing scratches.
-- `asset_mask(asset_id, map_name='Mask', project=None)` — Resolve a local 4K scan mask at its metadata scan size; return None when its map is missing.
-- `asset_maps(asset_id, map_names, project=None)` — Resolve named local 4K maps and their metadata once; return None for a missing map.
-- `scan_size_m(metadata)` — Read square or rectangular scan dimensions, converting m/cm/mm metadata to metres.
-- `surface_coordinates(g, frame=None)` — Project world metres onto the dominant face plane for walls, tops and soffits.
-
-## `effects.wear.patterns` — Dispatch procedural patterns to their mechanism owners.
+## `effects.wear.procedural_patterns` — Dispatch procedural patterns to their mechanism owners.
 
 - `procedural_field(g, kind, vector, scale_m, scratch_width_m, frame, region=False)` — Return a wear profile or a continuous deposit driver for a hybrid region.
+
+## `effects.wear.scan_sampling` — Shared stochastic scan sampling through the canonical loader and offset generator.
+
+- `stochastic_mask(g, masks, vector, settings, frame=None)` — Blend three rotated, offset, scale-jittered lookups with independent slow world noise.
 
 ## `effects.wear.scratches` — Crossing procedural scratches and their held legacy scan modulation.
 
 - `scratches_field(g, vector, length_m, width_m, frame)` — Return four independently phased stroke orientations in metre coordinates.
 - `scratch_hybrid(g, layer, vector, frame=None)` — Keep the held scratch hybrid's existing 0.7–1.0 scan modulation unchanged.
-
-## `effects.wear.stamps` — Neighbour-aware, nonperiodic decal placement in metre-space surface coordinates.
-
-- `StampSource` — Non-default decal pools and chip threshold retained independently from hybrid regions.
-- `stamps_field(g, kind, layer, vector, extent, frame=None)` — Select explicit decal deposits or scan-outline chips, never called by a hybrid source.
-- `scatter_stamps(g, vector, atlas, seed=17, vertical=False, extent=None, frame=None)` — Sum 3x3 neighbour stamps with seeded choice, rotation, scale, offsets and cell density.
-- `deposit_stamps(g, vector, settings, extent, frame=None)` — Select down-aligned wall decals or freely rotated floor stains; undersides are gated later.
-
-## `effects.wear.tiling` — Shared stochastic scan sampling through the canonical loader and offset generator.
-
-- `stochastic_mask(g, masks, vector, settings, frame=None)` — Blend three rotated, offset, scale-jittered lookups with independent slow world noise.
 
 ## `effects.wear.water_marks` — Runoff: vertical streaks below drip edges, grunge patches and soil splash, all into the grime mask.
 
@@ -186,7 +186,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `patch_extent(g, vector, scale_m, frame=None, black=0.46, white=0.66)` — Return a slow patch field with real zero regions, rather than uniform modulation.
 - `location_extent(g, kind, settings, frame=None)` — Gate feet, floor patches and supplied soffit-edge distances; dried marks exclude undersides.
 - `edge_field(b, gi, x0, vertex_junctions=False)` — Distance to the nearest convex arris -> `edge_dist`, and the rest position offset by the group's Seed -> `rest_pos` (noise lookups; a per-object Seed decorrelates repeated objects). Measured on outward-normal meshes: convex arrises give a POSITIVE signed angle, inner corners a negative one.
-- `set_round_radius(radius=ROUND_RADIUS)` — Set the scene's shared radius in metres before building rounded materials.
+- `set_round_radius(radius=ROUND_RADIUS_M)` — Set the scene's shared radius in metres before building rounded materials.
 - `round_shader(g, normal=None, rounded_edges=True, loc=(-650, -250), frame=None, label='Round edges (TexEdges)', samples=8)` — Build a rounded shader normal using the shared scene radius.
 - `round_geometry(obj, rounded_edges=True, segments=2, min_angle_deg=30.0)` — Bevel a mesh's real edges using the shared scene radius.
 - `switch_rounding(mat, rounded_edges=True)` — Switch an existing material's shared rounded-normal layer on or off.
@@ -242,7 +242,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.ground.meadow_ground` — Meadow ground; canonical implementation behind ground.
 
-- `ground_material(thatch_tex, soil_tex, name='GROUND', bare=BARE, wet_gamma=None, wet_rough=0.6)` — Ground under a meadow: a dead-grass/thatch texture, soil only where the bare-soil noise (same 4D noise and W as scatter.meadow_layer_group) opens the sward. wet_gamma (e.g. 1.4): wet ground = dry^gamma (darker, more saturated) and roughness x wet_rough.
+- `ground_material(thatch_tex, soil_tex, name='GROUND', bare=BARE_SOIL_NOISE_SETTINGS, wet_gamma=None, wet_rough=0.6)` — Ground under a meadow: a dead-grass/thatch texture, soil only where the bare-soil noise (same 4D noise and W as scatter.meadow_layer_group) opens the sward. wet_gamma (e.g. 1.4): wet ground = dry^gamma (darker, more saturated) and roughness x wet_rough.
 
 ## `materials.metal.metal` — Metal material helpers; canonical implementations.
 
@@ -256,14 +256,19 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None, *, anisotropy=None, rotation=0.0, tangent=None)` — The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled, transmission 1. `tint` multiplies every crossing, so keep it within a few % of white.
 
-## `materials.shared.map_measure` — Map measure; canonical implementation behind pbr.
+## `materials.shared.flat_color_materials` — Simple; canonical implementation behind pbr.
+
+- `flat_color_material(name, color, roughness=0.5, metallic=0.0)` — Principled with a flat colour, roughness and metallic -- placeholders and controls.
+- `white_backdrop(name='WHITE_BACKDROP', albedo=0.85)` — Matte white backdrop of a measured albedo (product/studio shots).
+
+## `materials.shared.map_measurements` — Map measure; canonical implementation behind pbr.
 
 - `image_rgb(img)` — The image's first three channels as a float64 (pixels, 3) array, as Blender stores them.
 - `srgb_to_linear(rgb)` — Decode sRGB-encoded 0–1 values to linear (byte images come back encoded: api-traps).
 - `solve_levels(path, target_rgb, gamma=0.5)` — 'Measured levels': per-channel gain that lands the map's mean linear colour, after a shared gamma, on a target albedo. Returns the gain.
-- `map_mean(tex_id)` — Linear mean RGB of a Poly Haven diff map; measured once, then cached in meta.json.
+- `map_mean_linear_rgb(tex_id)` — Linear mean RGB of a Poly Haven diff map; measured once, then cached in meta.json.
 
-## `materials.shared.material_spec` — Material spec; canonical implementation behind pbr.
+## `materials.shared.material_specification` — Material spec; canonical implementation behind pbr.
 
 - `material_from_spec(spec)` — spec: "ph:<tex_id>" | "glass" | {"type": "ph"|"glass"|"simple", ...kwargs}.
 
@@ -282,11 +287,6 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `materials.shared.pbr_maps` — Pbr maps; canonical implementation behind pbr.
 
 - `box_maps(g, maps, frame, origin, arm_label='arm', normal_frame=None, normal_strength=1.0, height_frame=None)` — BoxUV, the Poly Haven diffuse / arm / normal images (and height when height_frame is given), Separate Color on arm and a Normal Map on BoxUV. Returns the nodes by key: uv (socket), diff, arm, nor, hgt, sep, nmap.
-
-## `materials.shared.simple` — Simple; canonical implementation behind pbr.
-
-- `simple_material(name, color, roughness=0.5, metallic=0.0)` — Principled with a flat colour, roughness and metallic -- placeholders and controls.
-- `white_backdrop(name='WHITE_BACKDROP', albedo=0.85)` — Matte white backdrop of a measured albedo (product/studio shots).
 
 ## `materials.shared.volumes` — Volumes material helpers; canonical implementations.
 
@@ -310,7 +310,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.tile.damage_shading` — Damage shading; canonical implementation behind tile_damage.
 
-- `damage_bsdfs(a, i, intact, color, height, d)` — Shade exposed clay, engobe and dirt independently of the coated glaze.
+- `damage_shaders(a, i, intact, color, height, d)` — Shade exposed clay, engobe and dirt independently of the coated glaze.
 
 ## `materials.tile.layout_build` — Layout build; canonical implementation behind tile_layout.
 
@@ -330,10 +330,6 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `face_tone(a, i)` — Reduce scan contrast and saturation, then normalize its adjusted linear mean.
 - `albedo(a, i, dust, pits, pinholes)` — Build normalized face and grout albedos plus signed macro variation.
 - `dust(a, i)` — Build patchy corner dust with independently varying physical width.
-
-## `materials.tile.tile_bsdf` — Tile shading: coated clay face and grout, mixed by the joint mask, with a world-metre bump field.
-
-- `bsdfs(a, i, color, grout_color, dust, macro_delta, height, joint_mix)` — Mix coated clay and grout using a world-metre bump field.
 
 ## `materials.tile.tile_build` — Build a tile material: layout, face maps, finish, colour, relief, shading and damage in one node tree.
 
@@ -377,6 +373,10 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `read_settings(mat)` — Read rebuild settings including live UI socket edits and feature switches.
 - `set_param(mat, name, value)` — Set any tile_material keyword, rebuilding structural options in the same material.
 
+## `materials.tile.tile_shading` — Tile shading: coated clay face and grout, mixed by the joint mask, with a world-metre bump field.
+
+- `surface_shader(a, i, color, grout_color, dust, macro_delta, height, joint_mix)` — Mix coated clay and grout using a world-metre bump field.
+
 ## `materials.tile.tile_specks` — Iron specks and pinholes on the glaze: clustered, irregular, varied-size dots from a warped Voronoi.
 
 - `specks(a, i)` — Build clustered, irregular, varied-size iron spots and lighter pinhole masks.
@@ -398,146 +398,146 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dry_patch=0.55)` — Thin blade: Principled + Translucent (Add); per-instance value 0.8-1.15 and a patchy straw mix; optional wet film.
 
-## `materials.water.build` — One entry point: a free-falling water film with its foot, pool ripples, wet-wall proxy and motion blur (references/materials/water/water-free-falling-film.md and the files it links).
+## `materials.water.ballistic_sheet` — Ballistic carrier of a water sheet thrown off a straight lip (references/materials/water/water-free-falling-film.md §3.1-3.3).
 
-- `Setup` — Grid, flow and every layer's parameters (all with starting-value defaults).
-- `falling_film(lip, pool_z, film_mat, foam_mat=None, pool_mat=None, exr_path=None, wet_proxy=None, setup=None, collection=None, name='Water')` — Build film, strings, drops, foot, pool bump and wet proxy for one lip; returns (objects dict, stats dict).
-
-## `materials.water.curtain` — Ballistic carrier of a water sheet thrown off a straight lip (references/materials/water/water-free-falling-film.md §3.1-3.3).
-
-- `Lip` — A straight horizontal lip: origin on the wall face, along = increasing s, out = direction the water is thrown.
-- `Flow` — Launch speed and per-stream flow (§3.1-3.2); seeds make every layer repeatable.
-- `mean_launch(flow, s)` — Launch speed before per-stream variation: v0 x (1 +- v0_var) at two smooth scales (metres and decimetres).
+- `LaunchLip` — A straight horizontal lip: origin on the wall face, along = increasing s, out = direction the water is thrown.
+- `SheetFlow` — Launch speed and per-stream flow (§3.1-3.2); seeds make every layer repeatable.
+- `mean_launch_speed_m_s(flow, s)` — Launch speed before per-stream variation: v0 x (1 +- v0_var) at two smooth scales (metres and decimetres).
 - `stream_factor(flow, s, d)` — Per-stream flow multiplier 1 + m, constant down each stream apart from a slow drift.
-- `flux(flow, s, d)` — Flow per metre width q (m^2/s) at (s, d).
-- `launch(flow, s, d)` — Local launch speed v0 = (g q)^(1/3), m/s.
-- `speed(flow, s, d)` — Sheet speed U = sqrt(v0^2 + 2 g d), m/s.
-- `thickness(flow, s, d)` — Sheet thickness h = q / U, m.
+- `flow_per_width_m2_s(flow, s, d)` — Flow per metre width q (m^2/s) at (s, d).
+- `launch_speed_m_s(flow, s, d)` — Local launch speed v0 = (g q)^(1/3), m/s.
+- `fall_speed_m_s(flow, s, d)` — Sheet speed U = sqrt(v0^2 + 2 g d), m/s.
+- `sheet_thickness_m(flow, s, d)` — Sheet thickness h = q / U, m.
 - `throw(flow, s, d)` — Outward distance of the sheet mid-surface from the wall face, m.
 - `effective_depth(flow, s, d, k=0.5, d_ref=0.15)` — Fall-time stretch coordinate v = d_ref + integral of (U(d_ref)/U)^k, unchanged above d_ref; metres.
 - `carrier_grid(lip, flow, s, d)` — Grids S, D (nd, ns), mid-surface points P and unit normals pointing away from the wall (nd, ns, 3).
 - `landing(lip, flow, s)` — Landing line on the receiving surface: world points (len(s), 3).
 
-## `materials.water.film_build` — Film build; implementation for water.film.
+## `materials.water.falling_film_assembly` — One entry point: a free-falling water film with its foot, pool ripples, wet-wall proxy and motion blur (references/materials/water/water-free-falling-film.md and the files it links).
 
-- `film_surfaces(lip, flow, p, s, d)` — Evaluate every layer on the grid s x d (metres) and return FilmFields.
+- `FallingFilmSetup` — Grid, flow and every layer's parameters (all with starting-value defaults).
+- `falling_film(lip, pool_z, film_mat, foam_mat=None, pool_mat=None, exr_path=None, wet_proxy=None, setup=None, collection=None, name='Water')` — Build film, strings, drops, foot, pool bump and wet proxy for one lip; returns (objects dict, stats dict).
 
-## `materials.water.film_config` — Film config; implementation for water.film.
+## `materials.water.film_config` — Film config; implementation for water.falling_film.
 
 - `FilmParams` — Layer strengths and scales (metres unless noted); starting values from one courtyard-scale view.
 - `FilmFields` — Result of film_surfaces: grids are (nd, ns) or (nd, ns, 3), rows = drop.
 
-## `materials.water.film_meander` — Film meander; implementation for water.film.
+## `materials.water.film_meander` — Film meander; implementation for water.falling_film.
 
 - `meander(p, s, v, d)` — Sideways meander shape (x p.meander = metres): two along-fall scales, phase changing over a few cm across.
 
-## `materials.water.film_ribbons` — Film ribbons; implementation for water.film.
+## `materials.water.film_ribbons` — Film ribbons; implementation for water.falling_film.
 
 - `ribbon_envelope(p, S, V, h)` — Front/back offsets of the union of twisted elliptical ribbons over a sheet of thickness h (front >= h/2).
 
-## `materials.water.film_swell` — Film swell; implementation for water.film.
+## `materials.water.film_surfaces` — Film build; implementation for water.falling_film.
+
+- `film_surfaces(lip, flow, p, s, d)` — Evaluate every layer on the grid s x d (metres) and return FilmFields.
+
+## `materials.water.film_swell` — Film swell; implementation for water.falling_film.
 
 - `swell_field(s, v, seed)` — Smooth broad swell in [-1, 1]: 32 noncommensurate modes, 80-200 mm across, ~60 mm half-width along v.
 
-## `materials.water.film_tears` — Film tears; implementation for water.film.
+## `materials.water.film_tears` — Film tears; implementation for water.falling_film.
 
 - `tear_value(p, s, v)` — High = torn: narrow across (slit_lo..slit_hi), long and finite along the stretched fall.
 
-## `materials.water.film_waves` — Film waves; implementation for water.film.
+## `materials.water.film_waves` — Film waves; implementation for water.falling_film.
 
 - `roll_waves(p, s, v, d)` — Roll-wave arcs across the flow, ~[0, 3]: two trains, on/off per stream, more and taller down the fall.
 
-## `materials.water.film_zones` — Film zones; implementation for water.film.
+## `materials.water.film_zones` — Film zones; implementation for water.falling_film.
 
 - `zones(p, s, v, stream)` — Calm/busy multiplier in [zone_min, 1]: clustered patches 0.3-1 m, busier on thick streams (stream in [-1, 1]).
 
-## `materials.water.foot_bubbles` — Foot bubbles; implementation for water.foot.
-
-- `bubbles(lip, pts, strength, pool_z, p)` — Floating clear domes (single or in rafts), carried far out and past the ends. (V, F); use thin-wall water.
-
-## `materials.water.foot_config` — Foot config; implementation for water.foot.
-
-- `FootParams` — Impact spacing, crowns, foam, floating bubbles and splash (starting values; size from the shot).
-
-## `materials.water.foot_crowns` — Foot crowns; implementation for water.foot.
-
-- `crowns(pts, strength, p)` — Clear crowns at the strongest impacts: tilted rings with spiky rims. (V, F); use thin-wall water.
-
-## `materials.water.foot_foam` — Foot foam; implementation for water.foot.
-
-- `foam(lip, pts, strength, pool_z, p)` — Irregular foam flecks clustered at impacts, drifting out and past the ends, stretched as they travel. (V, F).
-
-## `materials.water.foot_impacts` — Foot impacts; implementation for water.foot.
-
-- `impacts(lip, land_mid, land_keep, land_thick, drops, pool_z, p)` — Impact points (N, 3) on the pool surface and strengths (N,), from the film's bottom row and falling drops.
-
-## `materials.water.foot_splash` — Foot splash; implementation for water.foot.
-
-- `splash(lip, pts, strength, pool_z, p)` — Splash drops thrown up and out from the strongest impacts: array (N, 5) = x, y, z, diameter, stretch.
-
-## `materials.water.fragment_config` — Fragment config; implementation for water.fragments.
+## `materials.water.fragment_config` — Fragment config; implementation for water.film_fragments.
 
 - `FragmentParams` — Densities and sizes of gap strings, gap drops and edge drops (starting values; size from the shot).
 
-## `materials.water.fragment_edges` — Fragment edges; implementation for water.fragments.
+## `materials.water.fragment_edges` — Fragment edges; implementation for water.film_fragments.
 
 - `edge_drops(ff, lip, p, s, d)` — Drops and ligaments shed at torn edges, weighted toward the foot: array (N, 5).
 
-## `materials.water.fragment_gaps` — Fragment gaps; implementation for water.fragments.
+## `materials.water.fragment_gaps` — Fragment gaps; implementation for water.film_fragments.
 
 - `gap_fill(ff, lip, p, s, d)` — Strings (list of (M, 4) arrays) and drops (N, 5) inside torn cells.
 
-## `materials.water.height_image` — Height image; implementation for water.shading.
+## `materials.water.impact_bubbles` — Foot bubbles; implementation for water.pool_impacts.
 
-- `save_height_exr(H, path, name='water ripple height (mm)')` — Write H (metres, [s, o]) as a float EXR in millimetres and return the image loaded from that file.
-- `readback_mm(image)` — Min/max (mm) of a loaded height image: proof the field survived saving and loading.
+- `bubbles(lip, pts, strength, pool_z, p)` — Floating clear domes (single or in rafts), carried far out and past the ends. (V, F); use thin-wall water.
 
-## `materials.water.mesh_drops` — Mesh drops; implementation for water.mesh.
+## `materials.water.impact_config` — Foot config; implementation for water.pool_impacts.
+
+- `ImpactParams` — Impact spacing, crowns, foam, floating bubbles and splash (starting values; size from the shot).
+
+## `materials.water.impact_crowns` — Foot crowns; implementation for water.pool_impacts.
+
+- `crowns(pts, strength, p)` — Clear crowns at the strongest impacts: tilted rings with spiky rims. (V, F); use thin-wall water.
+
+## `materials.water.impact_foam` — Foot foam; implementation for water.pool_impacts.
+
+- `foam(lip, pts, strength, pool_z, p)` — Irregular foam flecks clustered at impacts, drifting out and past the ends, stretched as they travel. (V, F).
+
+## `materials.water.impact_locations` — Foot impacts; implementation for water.pool_impacts.
+
+- `impacts(lip, land_mid, land_keep, land_thick, drops, pool_z, p)` — Impact points (N, 3) on the pool surface and strengths (N,), from the film's bottom row and falling drops.
+
+## `materials.water.impact_splash` — Foot splash; implementation for water.pool_impacts.
+
+- `splash(lip, pts, strength, pool_z, p)` — Splash drops thrown up and out from the strongest impacts: array (N, 5) = x, y, z, diameter, stretch.
+
+## `materials.water.mesh_drops` — Mesh drops; implementation for water.mesh_builders.
 
 - `spheroids(name, drops, material=None, collection=None)` — Low-poly drops from an (N, 5) array x, y, z, diameter, stretch along z.
 
-## `materials.water.mesh_objects` — Mesh objects; implementation for water.mesh.
+## `materials.water.mesh_objects` — Mesh objects; implementation for water.mesh_builders.
 
 - `from_arrays(name, verts, faces, material=None, collection=None, smooth=True)` — Object from vertices (N, 3) and a face list (any polygon sizes).
 
-## `materials.water.mesh_sheet` — Mesh sheet; implementation for water.mesh.
+## `materials.water.mesh_sheet` — Mesh sheet; implementation for water.mesh_builders.
 
 - `film_sheet(name, front, back, keep, material=None, collection=None)` — Closed water body from front/back grids (nd, ns, 3); quads whose four corners are all torn are removed.
 
-## `materials.water.mesh_tubes` — Mesh tubes; implementation for water.mesh.
+## `materials.water.mesh_tubes` — Mesh tubes; implementation for water.mesh_builders.
 
 - `tubes(name, strings, material=None, collection=None, sides=6)` — Capped tubes along polylines; each string is an (M, 4) array x, y, z, radius.
 
-## `materials.water.motion` — Motion blur for still water: a per-vertex `velocity` attribute (m/s) read by Cycles deformation motion blur (references/materials/water/water-free-falling-film.md §3.9). The mesh does not move; the streak length is speed x shutter / fps (blender-api-traps › Render).
+## `materials.water.motion_blur` — Motion blur for still water: a per-vertex `velocity` attribute (m/s) read by Cycles deformation motion blur (references/materials/water/water-free-falling-film.md §3.9). The mesh does not move; the streak length is speed x shutter / fps (blender-api-traps › Render).
 
 - `fall_speed(v0, lip_z, z)` — Free-fall speed U = sqrt(v0^2 + 2 g (lip_z - z)), m/s.
 - `set_velocity(ob, velocity)` — Store a per-vertex `velocity` (m/s) and enable deformation motion blur on the object.
-- `film_velocity(front, back, lip_z, v0)` — Velocity in water.mesh.film_sheet's vertex order: fall speed along each skin's local fall direction.
+- `film_velocity(front, back, lip_z, v0)` — Velocity in water.mesh_builders.film_sheet's vertex order: fall speed along each skin's local fall direction.
 - `falling_velocity(ob, lip_z, v0)` — Straight-down velocity at the local fall speed for every vertex of an object (strings, drops).
-- `enable(scene, shutter_frames)` — Turn on scene motion blur with the shutter in frames.
-
-## `materials.water.noise` — Smooth, irregular, seeded 1-D noise: the single noise source for the water fields (metres in, [-1, 1] out).
-
-- `smooth(t)` — Quintic smoothstep of t clipped to [0, 1].
-- `clustered(x, seed, lo, hi)` — Irregular smooth noise in [-1, 1] at x metres; knot spacing uniform in [lo, hi] metres.
-- `unit(x, seed, lo, hi)` — Same noise mapped to [0, 1].
+- `enable_motion_blur(scene, shutter_frames)` — Turn on scene motion blur with the shutter in frames.
 
 ## `materials.water.pool_material` — Pool material; canonical implementation behind water.
 
 - `pool_water(name='POOL_WATER', tint=(0.45, 0.85, 0.72), density=1.0, ripple_scale=2.0, ripple_m=0.0015, ior=1.333)` — Water as a closed volume: refractive surface (IOR 1.333) + Volume Absorption, so colour grows with path length (shallow steps stay clear, depth turns green). Absorption coefficient = density * (1 - tint) per metre. Gentle ripples as bump on the surface only.
 
-## `materials.water.ripple` — Pool-surface height field around falling water: craters, crowns, rings, wall-parallel fronts, chop (references/materials/water/water-ripple.md). Pure numpy; water.shading installs it as a bump on the pool material.
+## `materials.water.pool_ripples` — Pool-surface height field around falling water: craters, crowns, rings, wall-parallel fronts, chop (references/materials/water/water-ripple.md). Pure numpy; water.surface_shading installs it as a bump on the pool material.
 
 - `RippleParams` — Grid, extent and strengths of the pool ripple field (craters, chop, ring waves, line fronts).
 - `grid(lip, p)` — Axes (s_axis, o_axis) and 2-D arrays (S, O) indexed [s, o] of the ripple field.
 - `height_field(lip, impact_pts, strength, p)` — Height (m) H[s, o] on the lip-local grid, faded to zero at its borders; returns (s_axis, o_axis, H).
 - `slope_stats(H, step)` — RMS and 99th-percentile surface slope (rad) of a height field: ripples need ~0.05-0.15 rad to read.
 
-## `materials.water.ripple_bump` — Ripple bump; implementation for water.shading.
+## `materials.water.ripple_bump` — Ripple bump; implementation for water.surface_shading.
 
 - `install_bump(material, image, lip, s_range, o_range)` — Bump the material's Principled Normal with image (mm) mapped over lip-local s_range x o_range (metres).
 
-## `materials.water.thin_wall` — Thin wall; implementation for water.shading.
+## `materials.water.ripple_height_image` — Height image; implementation for water.surface_shading.
+
+- `save_height_exr(H, path, name='water ripple height (mm)')` — Write H (metres, [s, o]) as a float EXR in millimetres and return the image loaded from that file.
+- `height_range_mm(image)` — Min/max (mm) of a loaded height image: proof the field survived saving and loading.
+
+## `materials.water.seeded_noise` — Smooth, irregular, seeded 1-D noise: the single noise source for the water fields (metres in, [-1, 1] out).
+
+- `smoothstep(t)` — Quintic smoothstep of t clipped to [0, 1].
+- `clustered_noise(x, seed, lo, hi)` — Irregular smooth noise in [-1, 1] at x metres; knot spacing uniform in [lo, hi] metres.
+- `unit_noise(x, seed, lo, hi)` — Same noise mapped to [0, 1].
+
+## `materials.water.thin_wall_material` — Thin wall; implementation for water.surface_shading.
 
 - `thin_wall_copy(material, name)` — Copy of a water material with Principled Thin Wall on (an open shell with solid water glows white).
 
@@ -549,17 +549,24 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `smooth_flat(obj, sharp_deg=30.0)` — Shade smooth but keep edges sharper than `sharp_deg` split: a box stays geometrically flat (top normals exactly vertical) while counting as 'smooth normals' -- required by MNEE casters.
 
-## `materials.water.wet` — Wet-wall proxy behind falling water (references/effects/wet-surfaces.md › Wet extent).
+## `materials.water.wet_wall_proxy` — Wet-wall proxy behind falling water (references/effects/wet-surfaces.md › Wet extent).
 
 - `WetParams` — Cell size, wall gap and splash-band shape of the wet-wall proxy.
 - `wet_mask(lip, pool_z, p, s, z)` — True on the wall where it is wet: behind the curtain (ragged ends, runoff fingers) and a splash band.
-- `proxy(lip, pool_z, p)` — Vertices (world space) and quads of the wet proxy sheet lying on the wall face.
+- `build_proxy(lip, pool_z, p)` — Vertices (world space) and quads of the wet proxy sheet lying on the wall face.
 
 ## `materials.wood.wood` — Wood: base and coat (coated_wood), raw-wood under-layer, chip preset and weathered assembly.
 
 - `coated_wood(name='COATED_PINE', tex_id='coated_pine', coat=0.2, coat_rough=0.04, rough_toward_matte=0.35, albedo_rgb=(0.52, 0.33, 0.17), levels_gamma=0.5, rounded_edges=True, normal_strength=1.0)` — Coated pine: every map wired; levels solved to a natural pine albedo; satin varnish = LOW coat amount with TIGHT gloss (the coat trap); base roughness spread toward matte instead of cheating Fresnel; round edges combined with the normal map.
 - `raw_wood_under(g, color, normal, frame=None, loc=(-1050, -1500), tint=(0.8, 0.6, 0.36), mix=0.3, gain=1.7)` — Under-layer for solid wood: the base grain lighter and toward a raw tint, rough, with torn fibres along the grain (UV U). Returns the BSDF output socket.
 - `weathered_wood(name='PINE_WEATHERED', wear_band=0.012, wear_amount=0.9, **under)` — coated_wood + worn varnish and grime along the arrises + raw_wood_under where the edge_wear_group(**WOOD_CHIPS) chips and breaks cut the skin. under: raw_wood_under settings.
+
+## `renderer.cycles_render` — Render engine, quality settings and output: the Cycles set-up every render starts from.
+
+- `use_gpu(force=False)` — Cycles on the GPU. --factory-startup leaves no compute device, so scene "GPU" would silently render on the CPU: pick OptiX then (always, with force=True).
+- `framing_render(root, path)` — Fast Workbench render, one colour per layer collection -- compare with the reference (`scripts/research/reference_match.py pair --overlay`) while solving the camera. Restores the engine after.
+- `render_setup(width=1920, height=1080, samples=256, look='AgX - Medium High Contrast', exposure=0.0)` — Cycles on the GPU, adaptive sampling, OptiX denoise, AgX look, 12 bounces (render-settings.md).
+- `render_to(path)` — Render the active camera and write a PNG to `path`.
 
 ## `renderer.finals.final_images` — Final images; implementation for finals.
 
@@ -588,25 +595,18 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `dust_uv(ob, name='DustUV')` — Non-overlapping layout for a baked map, beside the tiling UVs. Smart Project is deterministic, so a cached map still matches: always call it, even when not re-baking (a missing layer makes a LuxCore mapping uvindex -1, which crashes pyluxcore).
 
-## `renderer.luxcore.engine` — LuxCore engine settings: PATH + light tracing, GPU camera paths with CPU light paths (luxcore.md).
+## `renderer.luxcore.engine_settings` — LuxCore engine settings: PATH + light tracing, GPU camera paths with CPU light paths (luxcore.md).
 
 - `set_halt(seconds, scene=None)` — Halt after `seconds` of rendering, or never (None: a final). Halt by samples and by noise always off.
-- `engine_setup(halt_s=None, backend='CUDA', clamp=CLAMP, camera=None, scene=None)` — LuxCore PATH + light tracing on GPU camera paths and CPU light paths; halt after `halt_s` seconds or never (None).
+- `engine_setup(halt_s=None, backend='CUDA', clamp=CAMERA_RADIANCE_CLAMP, camera=None, scene=None)` — LuxCore PATH + light tracing on GPU camera paths and CPU light paths; halt after `halt_s` seconds or never (None).
 
 ## `renderer.luxcore.glass_tint` — Glass tint; canonical implementation behind luxcore.
 
 - `glass_instance_tint(name='Glass_rand', tint=(0.985, 0.996, 0.99), ior=1.52)` — Clear glass; Object Info Random mixes white -> `tint` per instance (per face crossed, so a hollow block's 4 faces give ~tint^4).
 
-## `renderer.luxcore.lux_textured` — Lux textured; canonical implementation behind luxcore.
+## `renderer.luxcore.textured_material` — Lux textured; canonical implementation behind luxcore.
 
-- `lux_textured(name, folder, me, dust_png=None, uv_tex='BoxUV', uv_dust='DustUV', randomized=True, specular=0.5)` — Native LuxCore Disney from a generated/scanned map folder; `me` = the mesh it goes on (its UV layer indices are baked into the tree, so one material per mesh layout).
-
-## `renderer.render` — Render engine, quality settings and output: the Cycles set-up every render starts from.
-
-- `use_gpu(force=False)` — Cycles on the GPU. --factory-startup leaves no compute device, so scene "GPU" would silently render on the CPU: pick OptiX then (always, with force=True).
-- `framing_render(root, path)` — Fast Workbench render, one colour per layer collection -- compare with the reference (`scripts/research/refmatch.py pair --overlay`) while solving the camera. Restores the engine after.
-- `render_setup(width=1920, height=1080, samples=256, look='AgX - Medium High Contrast', exposure=0.0)` — Cycles on the GPU, adaptive sampling, OptiX denoise, AgX look, 12 bounces (render-settings.md).
-- `render_to(path)` — Render the active camera and write a PNG to `path`.
+- `textured_material(name, folder, me, dust_png=None, uv_tex='BoxUV', uv_dust='DustUV', randomized=True, specular=0.5)` — Native LuxCore Disney from a generated/scanned map folder; `me` = the mesh it goes on (its UV layer indices are baked into the tree, so one material per mesh layout).
 
 ## `renderer.render_variant` — Headless look-dev / control render of a saved .blend, with overrides. Never saves the .blend.
 
@@ -614,7 +614,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `scene.environment.leaf_geometry` — Leaf geometry; implementation for scatter.
 
-- `leaf_proto(name, length, width, curl, material)` — A small curled elliptical leaf (10-gon) in a hidden PROTOS collection; reused if present.
+- `leaf_prototype(name, length, width, curl, material)` — A small curled elliptical leaf (10-gon) in a hidden PROTOS collection; reused if present.
 
 ## `scene.environment.meadow_graph` — Meadow graph; implementation for scatter.
 
@@ -625,13 +625,13 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `frustum_tangents(cam, res, margin=1.15)` — Half-tangents (x, y) of a camera's view incl. vertical lens shift, for the meadow frustum mask.
 - `meadow_layer(name, group, terrain, collection, camera, target_collection=None, **inputs)` — One meadow layer object (empty mesh + MEADOW_LAYER modifier); inputs by name, '_' for spaces.
 
-## `scene.environment.scatter_asset` — Scatter asset; implementation for scatter.
-
-- `load_scatter_on_surface()` — Append Blender's essentials 'Scatter on Surface' node group (native, 5.x).
-
 ## `scene.environment.scatter_graph` — Scatter graph; implementation for scatter.
 
 - `scatter_group(name='SCATTER')` — GN group: distribute points below a height and inside a noise patch, instance with random rotation/scale.
+
+## `scene.environment.scatter_node_asset` — Scatter asset; implementation for scatter.
+
+- `load_scatter_on_surface()` — Append Blender's essentials 'Scatter on Surface' node group (native, 5.x).
 
 ## `scene.environment.scatter_objects` — Scatter objects; implementation for scatter.
 
@@ -650,7 +650,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `add_terrain(group, material, name='TERRAIN', collection=None)` — An empty mesh object carrying the landform modifier (the GN group makes the geometry).
 
-## `scene.io.blend_refs` — Read scene references without saving: blender -b scene.blend --python blend_refs.py -- --out refs.json.
+## `scene.io.blend_references` — Read scene references without saving: blender -b scene.blend --python blend_references.py -- --out refs.json.
 
 - `main()` — Write sorted raw reference paths and their concrete files without changing the scene.
 
@@ -661,7 +661,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `open_loops(obj, material_index=None)` — Open-edge loops (optionally of one material): z, span, closed, which side the faces are on - holes vs tube ends.
 - `origin_to_root(obj)` — Move the mesh so its root (bbox centre in plan, lowest z) sits at the object origin - for scattering clumps on terrain.
 
-## `scene.io.reference_paths` — Reference paths; implementation for blend_refs.
+## `scene.io.reference_paths` — Reference paths; implementation for blend_references.
 
 - `files_of(d, path)` — Concrete files behind a path: UDIM tiles and all numbered image, volume or mesh-cache sequence frames.
 - `references()` — Yield (datablock, attribute, absolute path) for every external file the .blend needs.

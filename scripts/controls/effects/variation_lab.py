@@ -11,12 +11,12 @@ import numpy as np
 SCRIPTS = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(SCRIPTS / 'blender'), str(SCRIPTS / 'controls'),
                 str(SCRIPTS / 'controls/regression')]
-from _scene import black_scene, ortho_camera
+from photometric_scene import black_scene, ortho_camera
 from materials.shared.node_graph import NodeGraph, active_socket
 from effects.variation_tiling import anti_tile
 from effects.variation_per_unit_shading import unit_key, unit_values, set_unit_keys, random_tone_material
 from effects.variation_macro_tone import macro_tone, _field, _moments
-from regress_graph import graph
+from regression_graph import graph
 
 
 def material(name):
@@ -316,8 +316,8 @@ def units(out):
 
 
 def graphs(out):
-    from regress_cases import CASES
-    from regress_rig import mods
+    from regression_cases import CASES
+    from regression_rig import lazy_modules
     black_scene(samples=1, res=16)
     spec = importlib.util.spec_from_file_location('variation_before', out/'variation_before.py')
     old = importlib.util.module_from_spec(spec)
@@ -330,7 +330,7 @@ def graphs(out):
     baselines = {}
     for name in ('anti_tile', 'unit_key', 'unit_values', 'macro_tone'):
         bpy.ops.wm.read_homefile(use_empty=True)
-        CASES[name](mods())
+        CASES[name](lazy_modules())
         _layout_evidence(out, name)
         baselines[name] = {m.name: graph(m.node_tree) for m in bpy.data.materials if m.node_tree}
     (out/'variation-baseline.json').write_text(json.dumps(baselines, sort_keys=True, indent=2))

@@ -1,4 +1,4 @@
-"""Fragment cells; implementation for water.fragments."""
+"""Fragment cells; implementation for water.film_fragments."""
 import numpy as np
 
 

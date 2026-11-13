@@ -1,6 +1,6 @@
 """Build a tile material: layout, face maps, finish, colour, relief, shading and damage in one node tree.
 
-Each part is built by its own module (tile_albedo, tile_specks, tile_relief, tile_bsdf, tile_damage);
+Each part is built by its own module (tile_albedo, tile_specks, tile_relief, tile_shading, tile_damage);
 this module only wires them together and stores the settings that a later rebuild reads back.
 """
 import json
@@ -11,7 +11,7 @@ import bpy
 import numpy as np
 
 from materials.tile import tile_albedo
-from materials.tile import tile_bsdf
+from materials.tile import tile_shading
 from materials.tile import tile_config
 from materials.tile import tile_damage
 from materials.tile import tile_displacement
@@ -22,7 +22,7 @@ from materials.tile import tile_maps
 from materials.tile import tile_relief
 from materials.tile import tile_specks
 from materials.shared.node_graph import NodeGraph
-from materials.tile.tile_nodes import _Graph
+from materials.tile.tile_nodes import _TileGraph
 
 
 def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, row_offset=0.0,
@@ -61,7 +61,7 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
         raise ValueError('Tile dimensions must be positive and joint nonnegative')
     if not 0 <= face_contrast <= 1 or not 0 <= face_saturation <= 1:
         raise ValueError('face_contrast and face_saturation must lie in [0, 1]')
-    for key in tile_damage.PARAMS:
+    for key in tile_damage.DAMAGE_INPUT_SOCKETS:
         tile_config.validate_damage(key, values[key])
     maps = tile_maps.find_maps(face) if face else {}
     mat = bpy.data.materials.get(name)
@@ -77,7 +77,7 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
         bpy.data.node_groups.remove(old_group)
     mat['tile_surface_settings'] = json.dumps(settings)
 
-    a = _Graph(mat.node_tree)
+    a = _TileGraph(mat.node_tree)
     vector = tile_mapping.layout_vector(mat.node_tree, uv, (-600, 300))
     layout = tile_layout.add_layout(mat.node_tree, vector, (-350, 300),
                                     **{k: values[k] for k in tile_config.LAYOUT if k not in tile_config.OPTIONAL_LAYOUT})
@@ -90,14 +90,14 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
     finish.name = 'TileFinish'; finish.location = (350, 300)
     params = {socket.name: socket for socket in finish.outputs}
     params.update({key: layout.outputs[key] for key in ('Tile UV', 'Cell', 'Edge', 'Joint')})
-    dimensions = a.split(layout.outputs['Tile Size'])
+    dimensions = a.separate_xyz(layout.outputs['Tile Size'])
     params.update({'Tile W': dimensions[0], 'Tile H': dimensions[1],
                    'Joint Width': layout.outputs['Joint Width']})
     # Tile Size is (W,H,0); use a safe Z denominator while preserving map aspect.
-    sizes = a.split(finish.outputs['Map Size'])
-    map_scale = a.xyz(sizes[0], sizes[1], 1)
-    patch = a.v('MULTIPLY', a.rand(layout.outputs['Cell'], (41, 73, 19), True), map_scale)
-    coords = a.v('DIVIDE', a.v('ADD', a.v('MULTIPLY', layout.outputs['Tile UV'],
+    sizes = a.separate_xyz(finish.outputs['Map Size'])
+    map_scale = a.combine_xyz(sizes[0], sizes[1], 1)
+    patch = a.vector_math('MULTIPLY', a.hash_noise(layout.outputs['Cell'], (41, 73, 19), True), map_scale)
+    coords = a.vector_math('DIVIDE', a.vector_math('ADD', a.vector_math('MULTIPLY', layout.outputs['Tile UV'],
                                          layout.outputs['Tile Size']), patch), map_scale)
     coords.node.name = 'TileMapUV'
     geo = a.node('ShaderNodeNewGeometry')
@@ -114,11 +114,11 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
             elif not image.is_float:
                 image.colorspace_settings.name = 'sRGB'
             node = a.node('ShaderNodeTexImage'); node.image = image; node.extension = 'REPEAT'; node['tile_map_role'] = key
-            a.put(coords, node.inputs['Vector'])
+            a.link_or_set(coords, node.inputs['Vector'])
             if key == 'arm':
                 separate = a.node('ShaderNodeSeparateColor', mode='RGB')
                 separate.name = 'TileARMChannels'
-                a.put(node.outputs['Color'], separate.inputs['Color'])
+                a.link_or_set(node.outputs['Color'], separate.inputs['Color'])
                 params['Face Rough'] = separate.outputs['Green']
             else:
                 params[{'color': 'Face Color', 'rough': 'Face Rough', 'height': 'Face Height'}[key]] = node.outputs['Color']
@@ -138,40 +138,40 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
     damage_node = a.node('ShaderNodeGroup'); damage_node.node_tree = tile_damage.damage_group()
     damage_node.name = 'TileDamage'; damage_node.location = (0, -500)
     for label in ('Tile ID', 'Cell', 'Tile UV', 'Edge', 'Tile Size'):
-        a.put(layout.outputs[label], damage_node.inputs[label])
-    for key, label in tile_damage.PARAMS.items():
+        a.link_or_set(layout.outputs[label], damage_node.inputs[label])
+    for key, label in tile_damage.DAMAGE_INPUT_SOCKETS.items():
         damage_node.inputs[label].default_value = values[key]
-    a.put(finish.outputs['damage On'], damage_node.inputs['On'])
+    a.link_or_set(finish.outputs['damage On'], damage_node.inputs['On'])
     d = damage_node.outputs
-    piece_height = a.m('MULTIPLY', d['Piece Height'], a.m('GREATER_THAN', params['Edge'], 0))
+    piece_height = a.math('MULTIPLY', d['Piece Height'], a.math('GREATER_THAN', params['Edge'], 0))
     undamaged = height
-    height = a.m('ADD', height, piece_height)
-    face_height = a.m('ADD', face_height, piece_height)
-    missing = a.m('ADD', d['Chip Depth Out'], d['Crack Depth Out'])
-    cut = a.m('MINIMUM', height, a.m('SUBTRACT', face_height, missing))
-    cut = a.m('MAXIMUM', cut, a.m('MULTIPLY', params['Recess'], -1))
-    height = a.mix(a.m('GREATER_THAN', missing, 0), height, cut)
+    height = a.math('ADD', height, piece_height)
+    face_height = a.math('ADD', face_height, piece_height)
+    missing = a.math('ADD', d['Chip Depth Out'], d['Crack Depth Out'])
+    cut = a.math('MINIMUM', height, a.math('SUBTRACT', face_height, missing))
+    cut = a.math('MAXIMUM', cut, a.math('MULTIPLY', params['Recess'], -1))
+    height = a.mix(a.math('GREATER_THAN', missing, 0), height, cut)
     marker = a.node('ShaderNodeMath', operation='ADD'); marker.name = 'TileTotalHeight'
-    a.put(height, marker.inputs[0]); marker.inputs[1].default_value = 0
+    a.link_or_set(height, marker.inputs[0]); marker.inputs[1].default_value = 0
     height = marker.outputs[0]
     # Damage-only relief (piece steps + chip/crack cuts): what use_damage_displacement turns into geometry.
     # Bump then shades the rest (profile, joints, waviness), so the displaced part is not counted twice.
     damage_height = a.node('ShaderNodeMath', operation='SUBTRACT'); damage_height.name = 'TileDamageHeight'
-    a.put(height, damage_height.inputs[0]); a.put(undamaged, damage_height.inputs[1])
+    a.link_or_set(height, damage_height.inputs[0]); a.link_or_set(undamaged, damage_height.inputs[1])
     displaced_share = a.node('ShaderNodeValue'); displaced_share.name = 'DamageDisplacementOn'
     displaced_share.outputs[0].default_value = 0.
-    bump_height = a.m('SUBTRACT', height, a.m('MULTIPLY', damage_height.outputs[0], displaced_share.outputs[0]))
-    shader = tile_bsdf.bsdfs(a, params, color, grout_color, dust_mask, macro_delta, bump_height, joint_mix)
-    shader = tile_damage.damage_bsdfs(a, params, shader, color, bump_height, d)
+    bump_height = a.math('SUBTRACT', height, a.math('MULTIPLY', damage_height.outputs[0], displaced_share.outputs[0]))
+    shader = tile_shading.surface_shader(a, params, color, grout_color, dust_mask, macro_delta, bump_height, joint_mix)
+    shader = tile_damage.damage_shaders(a, params, shader, color, bump_height, d)
     out = a.node('ShaderNodeOutputMaterial'); out.location = (900, 300)
-    a.put(shader, out.inputs['Surface'])
+    a.link_or_set(shader, out.inputs['Surface'])
     disp = a.node('ShaderNodeDisplacement'); disp.label = 'Metres; optional displacement'; disp.space = 'WORLD'
     disp.inputs['Midlevel'].default_value = 0; disp.inputs['Scale'].default_value = 1
-    a.put(height, disp.inputs['Height'])
+    a.link_or_set(height, disp.inputs['Height'])
     disp.name = 'TileDisplacement'
     ddisp = a.node('ShaderNodeDisplacement'); ddisp.label = 'Metres; damage-only displacement'; ddisp.space = 'WORLD'
     ddisp.inputs['Midlevel'].default_value = 0; ddisp.inputs['Scale'].default_value = 1
-    a.put(damage_height.outputs[0], ddisp.inputs['Height'])
+    a.link_or_set(damage_height.outputs[0], ddisp.inputs['Height'])
     ddisp.name = 'DamageDisplacement'
     mat.displacement_method = 'BUMP'
     for feature in off:

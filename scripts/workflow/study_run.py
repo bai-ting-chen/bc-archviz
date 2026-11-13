@@ -1,14 +1,14 @@
 """Rebuild + render one look-dev frame of a study through the Blender MCP, then compare it.
 
-    python scripts/workflow/study_run.py <study_dir> v07.png [--rebuild] [--pct 50] [--spp 128]
-                              [--ref _wip/ref.jpg] [--regions regions.json]
+    python scripts/workflow/study_run.py <study_dir> v07.png [--rebuild] [--resolution-percent 50] [--samples 128]
+                              [--reference _wip/ref.jpg] [--regions regions.json]
 
 The study holds scene_geometry.py (import + camera) and scene_look.py (materials, lights,
 exposure). Both are syntax-checked first: a scripted edit that appends a "# reason" to a line
 continuing a call comments its arguments out, and finding that after a render costs a round trip.
 Writes <study>/_wip/<out>, a side-by-side _wip/pair_<out>, a stacked render-over-reference
 _wip/stack_<out> (look at it every iteration: patch numbers miss joint grids, missing lamps,
-black areas), prints refmatch patches, and saves <study>/<name>.blend. Run with the MCP venv python.
+black areas), prints reference_match patches, and saves <study>/<name>.blend. Run with the MCP venv python.
 """
 import argparse
 import ast
@@ -38,8 +38,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("study"); ap.add_argument("out")
     ap.add_argument("--rebuild", action="store_true", help="also run scene_geometry.py (re-import)")
-    ap.add_argument("--pct", type=int, default=50); ap.add_argument("--spp", type=int, default=128)
-    ap.add_argument("--ref", default="_wip/ref.jpg"); ap.add_argument("--regions", default="regions.json")
+    ap.add_argument("--resolution-percent", type=int, default=50, dest='pct'); ap.add_argument("--samples", type=int, default=128, dest='spp')
+    ap.add_argument("--reference", default="_wip/ref.jpg", dest='ref'); ap.add_argument("--regions", default="regions.json")
     a = ap.parse_args()
     study = os.path.abspath(a.study)
     scripts = (["scene_geometry.py"] if a.rebuild else []) + ["scene_look.py"]
@@ -69,7 +69,7 @@ def main():
     if not os.path.exists(ref):
         print("rendered", render); return
     from PIL import Image
-    rm = [sys.executable, os.path.join(os.path.dirname(TOOLS), "research", "refmatch.py")]
+    rm = [sys.executable, os.path.join(os.path.dirname(TOOLS), "research", "reference_match.py")]
     subprocess.run(rm + ["pair", render, ref, os.path.join(study, "_wip", "pair_" + a.out)])
     r_img = Image.open(ref).convert("RGB"); w, h = r_img.size; s = 1225 / w
     sw, sh = round(w * s), round(h * s)

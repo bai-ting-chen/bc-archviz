@@ -6,7 +6,7 @@ from materials.shared.node_graph import NodeGraph
 
 from materials.shared.node_graph import active_socket
 
-from materials.vegetation.blade_config import BLADE
+from materials.vegetation.blade_config import BLADE_DEFAULTS
 
 from materials.vegetation.blade_wet import _wet
 
@@ -40,13 +40,13 @@ def blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dry_patc
     tone.inputs["Factor"].default_value = 1.0
     g.link(active_socket(mix.outputs, "Result"), active_socket(tone.inputs, "A")); g.link(cmb.outputs[0], active_socket(tone.inputs, "B"))
     p = g.node_with_props("ShaderNodeBsdfPrincipled", (500, 250))
-    p.inputs["Roughness"].default_value = BLADE["rough"]; p.inputs["IOR"].default_value = BLADE["ior"]
+    p.inputs["Roughness"].default_value = BLADE_DEFAULTS["rough"]; p.inputs["IOR"].default_value = BLADE_DEFAULTS["ior"]
     base = active_socket(tone.outputs, "Result")
     g.link(base, p.inputs["Base Color"])
     if wet:
         base = _wet(g, p, base, oi, wet)
     tg = g.node_with_props("ShaderNodeMix", (500, -150), data_type="RGBA", blend_type="MULTIPLY")
-    tg.inputs["Factor"].default_value = 1.0; active_socket(tg.inputs, "B").default_value = (BLADE["trans_gain"],) * 3 + (1.0,)
+    tg.inputs["Factor"].default_value = 1.0; active_socket(tg.inputs, "B").default_value = (BLADE_DEFAULTS["trans_gain"],) * 3 + (1.0,)
     g.link(base, active_socket(tg.inputs, "A"))
     tl = g.node_with_props("ShaderNodeBsdfTranslucent", (750, -150)); g.link(active_socket(tg.outputs, "Result"), tl.inputs["Color"])
     add = g.node_with_props("ShaderNodeAddShader", (950, 0))

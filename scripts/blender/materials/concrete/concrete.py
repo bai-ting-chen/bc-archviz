@@ -4,7 +4,7 @@ import math
 import bpy
 from core.archviz import library
 from materials.shared.node_graph import NodeGraph, active_socket
-from materials.shared.pbr import _ph_maps, _principled, map_mean
+from materials.shared.pbr import _ph_maps, _principled, map_mean_linear_rgb
 from materials.concrete.concrete_masks import _edge_mask, _bevel_chips
 from materials.concrete.concrete_build import concrete_study
 from materials.concrete.concrete_tone import retone

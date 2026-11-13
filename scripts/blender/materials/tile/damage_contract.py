@@ -6,7 +6,7 @@ _REVISION = 1
 
 PIECE_BINS = 65536
 
-PARAMS = dict(damage='Fraction',crack_share='Crack Share',chip_share='Chip Share',
+DAMAGE_INPUT_SOCKETS = dict(damage='Fraction',crack_share='Crack Share',chip_share='Chip Share',
               step_height='Step Height',piece_tilt='Piece Tilt',crack_width='Crack Width',
               crack_depth='Crack Depth',chip_size='Chip Size',chip_depth='Chip Depth',
               spall_size='Spall Size',spall_density='Spall Density',glaze_thickness='Glaze Thickness',
@@ -15,7 +15,7 @@ PARAMS = dict(damage='Fraction',crack_share='Crack Share',chip_share='Chip Share
               dirt_width='Dirt Width',warp='Warp',warp_scale='Warp Scale',crack_cell='Crack Cell',
               crack_density='Crack Density',chip_density='Chip Density')
 
-DEFAULTS=(.05,.45,.35,.00015,.0035,.00018,.0008,.004,.0008,.001,.25,.0003,.0002,
+DAMAGE_DEFAULT_VALUES=(.05,.45,.35,.00015,.0035,.00018,.0008,.004,.0008,.001,.25,.0003,.0002,
           .0002,.0003,0,.6,.85,.004,.004,.02,.03,.35,.5)
 
 _LAYOUT_INPUTS=('Tile ID','Cell','Tile UV','Edge','Tile Size')

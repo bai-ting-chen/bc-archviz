@@ -11,8 +11,8 @@ Field capture: [wear-locations.md](wear-locations.md). Family assembly:
 `references/effects/wear/wear.md`.
 
 ## 3. Code
-- `scripts/blender/effects/wear/cracks.py`: `CRACK`, `crack_masks`, `add_cracks`, `apply_crack_masks`.
-- `edge_cracks.py`: `EDGE_CRACK`, `edge_crack_edges`, `add_edge_cracks`.
+- `scripts/blender/effects/wear/cracks.py`: `CRACK_DEFAULTS`, `crack_masks`, `add_cracks`, `apply_crack_masks`.
+- `edge_cracks.py`: `EDGE_CRACK_DEFAULTS`, `edge_crack_edges`, `add_edge_cracks`.
 - `crack_ribbon.py`: shared `crooked_ribbon_masks`; both origin builders use this one path helper.
 - `edge_crack_edges` captures clean mesh before dicing/displacement. `amount=0` disables each layer.
 - Controls: `scripts/controls/effects/edge_wear_lab.py`, `edge_wear_graph_check.py`.

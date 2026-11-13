@@ -31,7 +31,7 @@ the socket error).
 Fix: check whether Blender is still running and re-read the scene state before retrying a write.
 
 ### Host tool cannot import numpy or Pillow
-Seen as: `ModuleNotFoundError: No module named 'numpy'` (or `'PIL'`) from `refmatch.py` / `imgstats.py`
+Seen as: `ModuleNotFoundError: No module named 'numpy'` (or `'PIL'`) from `reference_match.py` / `image_statistics.py`
 Cause: the script ran on an interpreter without numpy and Pillow.
 Fix: run host tools with the MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`), or
 `pip install numpy pillow` into that venv. See [pipeline.md](../scene/pipeline.md) › Install.

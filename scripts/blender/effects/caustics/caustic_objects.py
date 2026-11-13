@@ -1,4 +1,4 @@
-"""Caustic objects; implementation for gn_caustics."""
+"""Caustic objects; implementation for geometry_node_caustics."""
 import bpy
 from mathutils import Vector
 from effects.caustics.caustic_graph import caustic_sheet_group

@@ -10,10 +10,10 @@ import os
 import sys
 import zipfile
 
-from polyhaven_config import PROJECT
+from polyhaven_config import PROJECT_ROOT
 from polyhaven_http import _download
 
-LOCAL = os.path.join(PROJECT, "library", "local")
+LOCAL_LIBRARY_DIR = os.path.join(PROJECT_ROOT, "library", "local")
 
 
 def folder_name(pick):
@@ -33,7 +33,7 @@ def unzip_inside(zip_path, dst):
 
 def fetch(pick):
     """Download one pick, check its size, unzip it and write its meta.json; return the folder."""
-    dst = os.path.join(LOCAL, folder_name(pick))
+    dst = os.path.join(LOCAL_LIBRARY_DIR, folder_name(pick))
     zip_path = os.path.join(dst, pick["file"])
     _download(pick["url"], zip_path)
     if os.path.getsize(zip_path) != pick["size"]:

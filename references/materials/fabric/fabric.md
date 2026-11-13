@@ -10,7 +10,7 @@ own. It is a Mix of Diffuse and Translucent at about 0.5, at high albedo (§4.1)
 ## 3. Code
 - `scripts/blender/materials/fabric/fabric.py`: `sheer(name, color, translucency)`, called as
   `materials.fabric.fabric.sheer()`.
-- Control: the `sheer` case in `scripts/controls/regression/regress_cases.py`.
+- Control: the `sheer` case in `scripts/controls/regression/regression_cases.py`.
 
 ## 4. Instructions and parameters, per layer
 

@@ -1,16 +1,16 @@
 """Independent wear layers sharing procedural and grayscale-image factor inputs."""
 from dataclasses import dataclass, field
 from materials.shared.node_graph import layer_frame, layer_switch
-from effects.wear.patterns import procedural_field
-from effects.wear.masks import MaskSource, image_mask, mask_field, surface_coordinates
-from effects.wear.defaults import default_field, DEFAULT_SOURCES
+from effects.wear.procedural_patterns import procedural_field
+from effects.wear.image_masks import MaskSource, image_mask, mask_field, surface_coordinates
+from effects.wear.default_sources import default_field, DEFAULT_SOURCES
 from effects.wear.wear_locations import WearExtent, location_extent
-from effects.wear.hybrid import HybridSource, hybrid_field
+from effects.wear.hybrid_sources import HybridSource, hybrid_field
 from effects.wear.scratches import scratch_hybrid
 from effects.wear.dirt import grunge
-from effects.wear.stamps import StampSource, stamps_field
+from effects.wear.decal_stamps import StampSource, stamps_field
 
-from effects.wear.layers import LAYERS, canonical_layer
+from effects.wear.layer_names import LAYERS, canonical_layer
 
 
 @dataclass

@@ -6,7 +6,7 @@ from materials.tile.tile_graph import _socket
 
 from materials.tile.group_retarget import _replace_group_users
 
-from materials.tile.damage_contract import DEFAULTS, PARAMS, _LAYOUT_INPUTS, _OUTPUTS, _REVISION, _VERSION
+from materials.tile.damage_contract import DAMAGE_DEFAULT_VALUES, DAMAGE_INPUT_SOCKETS, _LAYOUT_INPUTS, _OUTPUTS, _REVISION, _VERSION
 
 from materials.tile.damage_fields import _fine_fields, _piece_fields, _rand, _voronoi, _warp
 
@@ -19,7 +19,7 @@ def _is_current(tree):
     if tree is None or tree.get('tile_damage_version')!=_VERSION or tree.get('tile_damage_revision')!=_REVISION:
         return False
     sockets={(s.in_out,s.name) for s in tree.interface.items_tree if s.item_type=='SOCKET'}
-    return (all(('INPUT',label) in sockets for label in (*_LAYOUT_INPUTS,*PARAMS.values(),'On')) and
+    return (all(('INPUT',label) in sockets for label in (*_LAYOUT_INPUTS,*DAMAGE_INPUT_SOCKETS.values(),'On')) and
             all(('OUTPUT',label) in sockets for label in _OUTPUTS))
 
 def damage_group(name='TileDamage'):
@@ -32,7 +32,7 @@ def damage_group(name='TileDamage'):
     tree=bpy.data.node_groups.new(name,'ShaderNodeTree')
     for label in _LAYOUT_INPUTS:
         _socket(tree,label,kind='NodeSocketVector' if label in ('Cell','Tile UV','Tile Size') else 'NodeSocketFloat')
-    for (key,label),default in zip(PARAMS.items(),DEFAULTS):
+    for (key,label),default in zip(DAMAGE_INPUT_SOCKETS.items(),DAMAGE_DEFAULT_VALUES):
         socket=_socket(tree,label,default=default); socket.min_value=0
         if key in ('damage','crack_share','chip_share','spall_density','crack_dirt','crack_density','chip_density'):
             socket.max_value=1
@@ -42,7 +42,7 @@ def damage_group(name='TileDamage'):
         elif key=='piece_tilt': socket.subtype='ANGLE'
     _socket(tree,'On',default=1.)
     for label in _OUTPUTS: _socket(tree,label,'OUTPUT')
-    a=_DamageGraph(tree); m=a.m
+    a=_DamageGraph(tree); m=a.math
     i=a.node('NodeGroupInput').outputs
     out=a.node('NodeGroupOutput'); out.is_active_output=True
     damaged=m('MULTIPLY',i['On'],m('LESS_THAN',_rand(a,i['Cell'],101),i['Fraction']))
@@ -56,27 +56,27 @@ def damage_group(name='TileDamage'):
     chip_tile=m('MULTIPLY',chip_tile,m('GREATER_THAN',i['Chip Size'],0))
     flake_tile=m('MULTIPLY',inside,m('COMPARE',kind,3))
     flake_tile=m('MULTIPLY',flake_tile,m('GREATER_THAN',i['Chip Size'],0))
-    p=a.v('MULTIPLY',i['Tile UV'],i['Tile Size'])
-    w,h,_=a.split(i['Tile Size'])
+    p=a.vector_math('MULTIPLY',i['Tile UV'],i['Tile Size'])
+    w,h,_=a.separate_xyz(i['Tile Size'])
     q,phase=_warp(a,i,p)
-    crack_cell=m('MAXIMUM',m('MULTIPLY',i['Crack Cell'],a.mad(_rand(a,i['Cell'],903),1.,.6)),1e-8)
+    crack_cell=m('MAXIMUM',m('MULTIPLY',i['Crack Cell'],a.multiply_add(_rand(a,i['Cell'],903),1.,.6)),1e-8)
     # SPEC v7 calls for a per-tile network origin as well as a warp offset. Phase
     # is subtracted from Position so sites/tilt pivots remain in tile-frame metres.
     distance,colours,site=_voronoi(a,q,crack_cell,phase)
     picked=m('LESS_THAN',colours[0],i['Crack Density'])
-    patch=a.smooth(a.noise(p,m('DIVIDE',1,m('MULTIPLY',2,crack_cell)),detail=2),.35,.55)
+    patch=a.smooth(a.noise_texture(p,m('DIVIDE',1,m('MULTIPLY',2,crack_cell)),detail=2),.35,.55)
     keep=m('MULTIPLY',picked,patch)
-    width_noise=a.noise(a.v('ADD',q,a.v('MULTIPLY',phase,a.xyz(crack_cell,crack_cell,0))),
+    width_noise=a.noise_texture(a.vector_math('ADD',q,a.vector_math('MULTIPLY',phase,a.combine_xyz(crack_cell,crack_cell,0))),
                        m('DIVIDE',1,crack_cell),detail=2)
-    half=m('MULTIPLY',m('MULTIPLY',.5,i['Crack Width']),a.mad(width_noise,1.5,.5))
+    half=m('MULTIPLY',m('MULTIPLY',.5,i['Crack Width']),a.multiply_add(width_noise,1.5,.5))
     crack=m('MULTIPLY',crack_tile,m('MULTIPLY',keep,m('LESS_THAN',distance,half)))
     ph,piece=_piece_fields(a,i,p,site,colours,m('MULTIPLY',crack_tile,picked))
     # Where the patch mask fades the crack out, its piece must not step either: scale lift and tilt by the
     # mask at the cell site (one value per cell, so each piece stays a plane).
-    ph=m('MULTIPLY',ph,a.smooth(a.noise(site,m('DIVIDE',1,m('MULTIPLY',2,crack_cell)),detail=2),.35,.55))
+    ph=m('MULTIPLY',ph,a.smooth(a.noise_texture(site,m('DIVIDE',1,m('MULTIPLY',2,crack_cell)),detail=2),.35,.55))
     r=_rand(a,i['Cell'],907)
-    chip_cell=m('MAXIMUM',m('MULTIPLY',i['Chip Size'],a.mad(m('MULTIPLY',r,r),.65,.35)),1e-8)
-    fine,fine_colours,fine_site=_voronoi(a,q,chip_cell,a.v('ADD',phase,(31,47,0)))
+    chip_cell=m('MAXIMUM',m('MULTIPLY',i['Chip Size'],a.multiply_add(m('MULTIPLY',r,r),.65,.35)),1e-8)
+    fine,fine_colours,fine_site=_voronoi(a,q,chip_cell,a.vector_math('ADD',phase,(31,47,0)))
     selected,chip_depth,chip_identity,site_edge,e_shell=_fine_fields(a,i,p,fine,fine_colours,fine_site,chip_cell,w,h)
     chip=m('MULTIPLY',selected,m('MAXIMUM',chip_tile,flake_tile))
     e_chip=a.mix(chip,-1e10,e_shell)
@@ -86,7 +86,7 @@ def damage_group(name='TileDamage'):
     spall_e=m('MINIMUM',fine,m('SUBTRACT',i['Spall Size'],distance))
     e=m('MAXIMUM',e_chip,a.mix(spall,-1e10,spall_e))
     # Crack spalls flake glaze, at most into the slip; glaze+slip exactly would count as clay.
-    spall_depth=a.mad(m('MULTIPLY',.5,i['Engobe Thickness']),m('LESS_THAN',fine_colours[1],.25),i['Glaze Thickness'])
+    spall_depth=a.multiply_add(m('MULTIPLY',.5,i['Engobe Thickness']),m('LESS_THAN',fine_colours[1],.25),i['Glaze Thickness'])
     depth=m('MAXIMUM',depth,m('MULTIPLY',m('MULTIPLY',spall,m('GREATER_THAN',spall_e,0)),spall_depth))
     depth,lip,engobe,body=_layers(a,i,e,depth,chip_tile,p)
     stack=m('ADD',i['Glaze Thickness'],i['Engobe Thickness'])
@@ -96,7 +96,7 @@ def damage_group(name='TileDamage'):
     values=(depth,ph,piece,crack,crack_depth,lip,engobe,body,damaged,m('MULTIPLY',damaged,m('DIVIDE',kind,3)),dirt,
             m('MULTIPLY',chip,chip_identity),m('MULTIPLY',crack_tile,picked),m('MULTIPLY',crack_tile,distance),
             m('MULTIPLY',inside,chip_cell),m('MULTIPLY',chip,site_edge))
-    for label,value in zip(_OUTPUTS,values): a.put(value,out.inputs[label])
+    for label,value in zip(_OUTPUTS,values): a.link_or_set(value,out.inputs[label])
     live=set()
     def visit(node):
         """Prune only unreachable expressions in this newly built group."""

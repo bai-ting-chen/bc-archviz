@@ -1,4 +1,4 @@
-"""Mesh drops; implementation for water.mesh."""
+"""Mesh drops; implementation for water.mesh_builders."""
 import numpy as np
 from materials.water.mesh_objects import from_arrays
 

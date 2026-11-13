@@ -2,17 +2,17 @@
 
 Every asset folder carries a meta.json (Poly Haven fetch or a local/ asset). Paths resolve against
 the project folder chosen by set_project(), else the ARCHVIZ_PROJECT variable, else the folder found
-from the open .blend or the working directory (projectpath.find_project).
+from the open .blend or the working directory (project_paths.find_project).
 """
 import json
 import os
 
 import bpy
 
-import core.projectpath as projectpath
+import core.project_paths as project_paths
 
 # Code lives in the skill; assets live in a study's (or project's) library/ (polyhaven/, local/).
-# The folder: set_project(path), else env ARCHVIZ_PROJECT, else projectpath.find_project from
+# The folder: set_project(path), else env ARCHVIZ_PROJECT, else project_paths.find_project from
 # the open .blend, then the working directory (a study stops the search at itself, RULES AST_03).
 _PROJECT = os.environ.get("ARCHVIZ_PROJECT")
 
@@ -24,11 +24,11 @@ def set_project(path):
 
 
 def project_root():
-    """The folder whose library/ holds the assets (see set_project and projectpath)."""
+    """The folder whose library/ holds the assets (see set_project and project_paths)."""
     if _PROJECT:
         return _PROJECT
     starts = [os.path.dirname(bpy.data.filepath)] if bpy.data.filepath else []
-    found = projectpath.find_project(starts + [os.getcwd()])
+    found = project_paths.find_project(starts + [os.getcwd()])
     if found:
         return found
     raise RuntimeError("no project library/ found: call archviz.set_project(<study folder>)")

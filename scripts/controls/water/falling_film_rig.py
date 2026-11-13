@@ -6,13 +6,13 @@ import controls_import_paths  # noqa: E402,F401 -- every controls topic folder o
 import math
 import bpy
 import numpy as np
-import _scene
+import photometric_scene
 from materials.water import water as water_mat
-from materials.water import build, curtain
+from materials.water import falling_film_assembly, ballistic_sheet
 
 def scene(OUT, RES, SAMPLES):
     """Build the same film integration scene."""
-    sc = _scene.black_scene(samples=SAMPLES, res=RES)
+    sc = photometric_scene.black_scene(samples=SAMPLES, res=RES)
     sc.render.resolution_y = int(RES * .75)
     bg = sc.world.node_tree.nodes['Background']; bg.inputs['Color'].default_value = (.75, .78, .82, 1); bg.inputs['Strength'].default_value = 1.0
     sc.view_settings.view_transform = 'AgX'
@@ -21,7 +21,7 @@ def scene(OUT, RES, SAMPLES):
     L, H, Z_LIP, POOL_Z = 4.0, 2.4, 2.35, -.05
     origin = np.array([1.0, 2.0, Z_LIP])
 
-    concrete = _scene.white_lambert('wall', .45)
+    concrete = photometric_scene.white_lambert('wall', .45)
     bpy.ops.mesh.primitive_cube_add(size=1)
     wall = bpy.context.object; wall.name = 'wall'
     wall.scale = (L + 2, .3, Z_LIP + .6); wall.rotation_euler = (0, 0, ang)
@@ -36,7 +36,7 @@ def scene(OUT, RES, SAMPLES):
     film_mat = bpy.data.materials.new('control film water'); film_mat.use_nodes = True
     b = film_mat.node_tree.nodes['Principled BSDF']; b.inputs['Transmission Weight'].default_value = 1.0
     b.inputs['IOR'].default_value = 1.333; b.inputs['Roughness'].default_value = 0.0
-    foam_mat = _scene.white_lambert('foam', .7)
+    foam_mat = photometric_scene.white_lambert('foam', .7)
     proxy = bpy.data.objects.new('wet proxy', bpy.data.meshes.new('wet proxy')); sc.collection.objects.link(proxy)
     proxy.hide_render = True
     proxy.location = (.7, -.4, .3); proxy.rotation_euler = (0, 0, .5)   # transformed on purpose
@@ -48,8 +48,8 @@ def scene(OUT, RES, SAMPLES):
     cam.location = origin + along * (L * .5) + out * 5.0 + np.array([0, 0, -1.2]) - along * 1.5
     d = target - cam.location; cam.rotation_euler = (math.atan2(math.hypot(d[0], d[1]), -d[2]), 0, math.atan2(d[1], d[0]) - math.pi / 2)
 
-    lip = curtain.Lip(origin=origin, along=along, out=out, length=L, drop=H)
-    setup = build.Setup(cell=.004)
-    objs, stats = build.falling_film(lip, POOL_Z, film_mat, foam_mat, pool_mat, OUT / 'falling_film_ripple.exr', proxy, setup)
+    lip = ballistic_sheet.LaunchLip(origin=origin, along=along, out=out, length=L, drop=H)
+    setup = falling_film_assembly.FallingFilmSetup(cell=.004)
+    objs, stats = falling_film_assembly.falling_film(lip, POOL_Z, film_mat, foam_mat, pool_mat, OUT / 'falling_film_ripple.exr', proxy, setup)
 
     return sc, objs, stats, proxy, lip, setup, H

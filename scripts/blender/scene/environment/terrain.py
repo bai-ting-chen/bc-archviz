@@ -13,7 +13,7 @@ hill). The group stores `pad_d` (signed plan distance to the pad, m) for scatter
 """
 
 # Compatibility imports; each implementation has one owner (GOV_04).
-from scene.environment.terrain_graph import BARE_W, BARE, _sock, _noise4, _centred, pad_distance, landform_group  # noqa: F401
+from scene.environment.terrain_graph import BARE_SOIL_NOISE_W, BARE_SOIL_NOISE_SETTINGS, _sock, _noise4, _centred, pad_distance, landform_group  # noqa: F401
 from scene.environment.terrain_height import height  # noqa: F401
 from scene.environment.terrain_objects import add_terrain  # noqa: F401
 import math

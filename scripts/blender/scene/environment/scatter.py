@@ -1,7 +1,7 @@
 """Geometry Nodes scatter for small instances: leaf litter, climbers, shrub foliage (run in Blender).
 
     group = scatter_group()
-    leaf = leaf_proto("PROTO_DRY_LEAF", 0.07, 0.045, 0.012, material)
+    leaf = leaf_prototype("PROTO_DRY_LEAF", 0.07, 0.045, 0.012, material)
     scatter(objs, leaf, density=0.35, z_max=0.5, seed=3, patch=0.42)
 
 Points are distributed on each target's faces where Z < `z_max` AND a 0.6/m noise > `patch`
@@ -21,9 +21,9 @@ stays upright (Align Rotation off) and picks random variants of the collection.
 
 # Compatibility imports; each implementation has one owner (GOV_04).
 from scene.environment.scatter_graph import scatter_group  # noqa: F401
-from scene.environment.leaf_geometry import leaf_proto  # noqa: F401
+from scene.environment.leaf_geometry import leaf_prototype  # noqa: F401
 from scene.environment.scatter_objects import scatter  # noqa: F401
-from scene.environment.scatter_asset import load_scatter_on_surface  # noqa: F401
+from scene.environment.scatter_node_asset import load_scatter_on_surface  # noqa: F401
 from scene.environment.meadow_graph import meadow_layer_group  # noqa: F401
 from scene.environment.meadow_objects import frustum_tangents, meadow_layer  # noqa: F401
 import math

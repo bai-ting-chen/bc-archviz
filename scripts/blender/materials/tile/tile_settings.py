@@ -29,8 +29,8 @@ def read_settings(mat):
     for key in tile_config.REMOVED_DAMAGE:
         values.pop(key, None)
     values['name'] = mat.name
-    for key, label in {**tile_config.LAYOUT, **tile_config.FINISH, **tile_damage.PARAMS}.items():
-        node = mat.node_tree.nodes['TileDamage' if key in tile_damage.PARAMS else 'TileLayout' if key in tile_config.LAYOUT else 'TileFinish']
+    for key, label in {**tile_config.LAYOUT, **tile_config.FINISH, **tile_damage.DAMAGE_INPUT_SOCKETS}.items():
+        node = mat.node_tree.nodes['TileDamage' if key in tile_damage.DAMAGE_INPUT_SOCKETS else 'TileLayout' if key in tile_config.LAYOUT else 'TileFinish']
         socket = node.inputs.get(label)
         if socket is None:
             continue
@@ -59,7 +59,7 @@ def read_settings(mat):
 def set_param(mat, name, value):
     """Set any tile_material keyword, rebuilding structural options in the same material."""
     if name in tile_config.REMOVED_DAMAGE:
-        raise ValueError(f'{name} was removed; v7 parameters: {", ".join(tile_damage.PARAMS)}')
+        raise ValueError(f'{name} was removed; v7 parameters: {", ".join(tile_damage.DAMAGE_INPUT_SOCKETS)}')
     settings = read_settings(mat)
     if name not in settings:
         raise KeyError(name)
@@ -85,9 +85,9 @@ def set_param(mat, name, value):
             tile_finish.toggle(mat, feature, feature not in value)
         settings['off'] = list(value)
     else:
-        node = mat.node_tree.nodes['TileDamage' if name in tile_damage.PARAMS else 'TileLayout' if name in tile_config.LAYOUT else 'TileFinish']
-        label = ({**tile_config.LAYOUT, **tile_config.FINISH, **tile_damage.PARAMS})[name]
-        if name in tile_damage.PARAMS:
+        node = mat.node_tree.nodes['TileDamage' if name in tile_damage.DAMAGE_INPUT_SOCKETS else 'TileLayout' if name in tile_config.LAYOUT else 'TileFinish']
+        label = ({**tile_config.LAYOUT, **tile_config.FINISH, **tile_damage.DAMAGE_INPUT_SOCKETS})[name]
+        if name in tile_damage.DAMAGE_INPUT_SOCKETS:
             tile_config.validate_damage(name, value)
         settings[name] = value
         if name in ('tilt_deg', 'jitter_rotation_deg'):

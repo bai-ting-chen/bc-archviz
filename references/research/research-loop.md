@@ -12,12 +12,12 @@ GAT_01–GAT_04); a study built from a scripted test scene has no model gate.
 2. **Physics first** (RULES RES_01): mechanism and numbers from papers or measured data; write each
    number with its source into study-notes.md. Gather the sources first and stop at the research
    gate (RULES GAT_01) before analysing them. Then 2–4 workflows (manual, forums, GitHub
-   `gh search code`, video via `yt_learn.py`), pick one by 1–2 criteria, say why.
+   `gh search code`, video via `learning_from_video.py`), pick one by 1–2 criteria, say why.
 3. **Plan the proof before the build.** Which control (RULES VAL_02), which images, which number decides
    it, the run budget (lean-run habits: few short headless runs, `--only`, probes packed into one
    render). Write the plan as 5–10 lines in study-notes.md before coding.
 4. **Build** small modules in the study (RULES GOV_04). Syntax-check before every Blender run.
-5. **Prove**: control render, imgstats numbers, native-resolution crops beside the reference
+5. **Prove**: control render, image_statistics numbers, native-resolution crops beside the reference
    (RULES VAL_01). A number that matches while the image does not is a fail.
 6. **Judge as the steering model would**: does it read like the reference at the final camera?
    Name the worst defect in the crop, fix only that, rerun. Stop after 3 rounds without a clear
@@ -49,7 +49,7 @@ for the user at the top of the latest report.
 **Research before anything new — from the physics down, not from tutorials up.** Order:
    (a) the mechanism: optics/physics papers, measured data, the governing equations (why does wet
    concrete darken? Lekner–Dorf: internal reflection in the water film, non-linear in albedo);
-   (b) how others implement it: manual/API, forums, papers' renderers, YouTube (`yt_learn.py`);
+   (b) how others implement it: manual/API, forums, papers' renderers, YouTube (`learning_from_video.py`);
    (c) map the model onto native nodes and say which terms are kept and which approximated.
    Compare 2–4 workflows, choose by REN_01/REN_02, cite sources, then build and prove. Read a source's own
    pictures and video frames at full resolution, not a summary of its text: the method is often

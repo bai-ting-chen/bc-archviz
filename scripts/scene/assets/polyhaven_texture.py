@@ -1,15 +1,15 @@
 """Acquire the supported PBR maps for one texture asset."""
 import os
-from polyhaven_config import API, LIB, TEX_MAPS
+from polyhaven_config import API_BASE_URL, LIBRARY_DIR, TEXTURE_MAP_FORMATS
 from polyhaven_http import _get, _download
-from polyhaven_meta import _write_meta
+from polyhaven_metadata import _write_meta
 
-def fetch_tex(asset_id, res):
+def fetch_texture(asset_id, res):
     """Download the available PBR maps and save their real-scale metadata."""
-    files = _get(f"{API}/files/{asset_id}")
-    folder = os.path.join(LIB, "textures", asset_id)
+    files = _get(f"{API_BASE_URL}/files/{asset_id}")
+    folder = os.path.join(LIBRARY_DIR, "textures", asset_id)
     maps = {}
-    for key, (suffix, fmts) in TEX_MAPS.items():
+    for key, (suffix, fmts) in TEXTURE_MAP_FORMATS.items():
         entry = files.get(key, {}).get(res, {})
         fmt = next((f for f in fmts if f in entry), None)
         if not fmt:

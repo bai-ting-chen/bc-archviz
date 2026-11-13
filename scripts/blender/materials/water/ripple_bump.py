@@ -1,4 +1,4 @@
-"""Ripple bump; implementation for water.shading."""
+"""Ripple bump; implementation for water.surface_shading."""
 
 
 

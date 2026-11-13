@@ -1,4 +1,4 @@
-"""Reference paths; implementation for blend_refs."""
+"""Reference paths; implementation for blend_references."""
 import glob
 import os
 import re

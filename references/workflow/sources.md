@@ -24,6 +24,6 @@ Candidate lists: RULES MAT_10. "Agent" is whoever builds in the current work mod
 | GitHub | real API usage, known bugs, workarounds | `gh search code/repos/issues` | [research-loop.md](../research/research-loop.md) |
 | Papers (arXiv and others), measured data | physics, numbers, methods | web search | [research-loop.md](../research/research-loop.md) |
 | Forums | workflows, fixes | web search | [research-loop.md](../research/research-loop.md) |
-| YouTube | technique walkthroughs | `yt_learn.py` (captions first) | [learning-from-video.md](../research/learning-from-video.md) |
+| YouTube | technique walkthroughs | `learning_from_video.py` (captions first) | [learning-from-video.md](../research/learning-from-video.md) |
 
 When to stop for the user: RULES GAT_01.

@@ -1,3 +1,3 @@
 """Pbr config; canonical implementation behind pbr."""
 
-BUMP_DISTANCE = 0.004
+BUMP_DISTANCE_M = 0.004

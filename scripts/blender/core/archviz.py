@@ -22,6 +22,6 @@ from scene.lighting.camera import physical_camera, straighten_verticals, use_cam
 from scene.lighting.lighting import hdri_analyse, sun_from_direction, world_hdri, world_hdri_lux  # noqa: F401
 from core.material_map import apply_material_map  # noqa: F401
 from scene.lighting.photometry import LM_PER_W, ev100  # noqa: F401
-from renderer.render import framing_render, render_setup, render_to, use_gpu  # noqa: F401
+from renderer.cycles_render import framing_render, render_setup, render_to, use_gpu  # noqa: F401
 from scene.io.rhino_import import import_rhino  # noqa: F401
 from core.uv import box_uv, directional_uv, height_span_uv  # noqa: F401

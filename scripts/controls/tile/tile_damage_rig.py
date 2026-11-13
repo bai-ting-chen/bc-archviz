@@ -18,8 +18,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'blender'))
 import core.archviz as archviz  # noqa: E402
 import materials.tile.tile_surface as tile_surface  # noqa: E402
 
-W, H, J, PX, NT = .0375, .25, .003, .00025, 3
-GLAZE, ENGOBE = .0003, .0002
+TILE_WIDTH_M, TILE_HEIGHT_M, JOINT_WIDTH_M, METRES_PER_PIXEL, TILE_COUNT = .0375, .25, .003, .00025, 3
+GLAZE_THICKNESS_M, ENGOBE_THICKNESS_M = .0003, .0002
 SOLO = tuple(f for f in tile_surface.FEATURES if f != 'damage')
 
 
@@ -61,7 +61,7 @@ def setup(width, height, nx, ny, origin=(0., 0.), **kwargs):
     uv = mesh.uv_layers.new(name='TileUV')
     for loop in mesh.loops:
         uv.data[loop.index].uv = mesh.vertices[loop.vertex_index].co[:2]
-    base = dict(tile_w=W, tile_h=H, joint=J, corner_radius=0, jitter_offset=0,
+    base = dict(tile_w=TILE_WIDTH_M, tile_h=TILE_HEIGHT_M, joint=JOINT_WIDTH_M, corner_radius=0, jitter_offset=0,
                 jitter_rotation_deg=0, damage=1, off=SOLO)
     base.update(kwargs)
     mat = tile_surface.tile_material('DamageControl', **base); mesh.materials.append(mat)
@@ -74,7 +74,7 @@ def setup(width, height, nx, ny, origin=(0., 0.), **kwargs):
 
 def tile_rig(**kw):
     """Three complete finger tiles at 0.25 mm per pixel."""
-    return setup(NT*(W+J), H+J, round(NT*(W+J)/PX), round((H+J)/PX), **kw)
+    return setup(TILE_COUNT*(TILE_WIDTH_M+JOINT_WIDTH_M), TILE_HEIGHT_M+JOINT_WIDTH_M, round(TILE_COUNT*(TILE_WIDTH_M+JOINT_WIDTH_M)/METRES_PER_PIXEL), round((TILE_HEIGHT_M+JOINT_WIDTH_M)/METRES_PER_PIXEL), **kw)
 
 
 def probe_rgb(mat, folder, label, outputs, divisors=(1., 1., 1.)):
@@ -126,21 +126,21 @@ def probe_rgb(mat, folder, label, outputs, divisors=(1., 1., 1.)):
 
 def tiles(shape):
     """Yield face masks and metre coordinates for the three-tile topology rig."""
-    Y, X = np.meshgrid((np.arange(shape[0])+.5)*PX, (np.arange(shape[1])+.5)*PX, indexing='ij')
-    for index in range(NT):
-        x0 = index*(W+J)+J/2
-        yield index, (X>x0)&(X<x0+W)&(Y>J/2)&(Y<J/2+H), x0, X, Y
+    Y, X = np.meshgrid((np.arange(shape[0])+.5)*METRES_PER_PIXEL, (np.arange(shape[1])+.5)*METRES_PER_PIXEL, indexing='ij')
+    for index in range(TILE_COUNT):
+        x0 = index*(TILE_WIDTH_M+JOINT_WIDTH_M)+JOINT_WIDTH_M/2
+        yield index, (X>x0)&(X<x0+TILE_WIDTH_M)&(Y>JOINT_WIDTH_M/2)&(Y<JOINT_WIDTH_M/2+TILE_HEIGHT_M), x0, X, Y
 
 
 def grid_rig(count,cols,**kw):
     """Observe complete 37.5 x 250 mm cells at 0.25 mm/px."""
     rows=math.ceil(count/cols)
-    return setup(cols*(W+J),rows*(H+J),round(cols*(W+J)/PX),round(rows*(H+J)/PX),**kw)
+    return setup(cols*(TILE_WIDTH_M+JOINT_WIDTH_M),rows*(TILE_HEIGHT_M+JOINT_WIDTH_M),round(cols*(TILE_WIDTH_M+JOINT_WIDTH_M)/METRES_PER_PIXEL),round(rows*(TILE_HEIGHT_M+JOINT_WIDTH_M)/METRES_PER_PIXEL),**kw)
 
 
 def grid_faces(data,count,cols):
     """Extract aligned face arrays; joints remain outside every face slice."""
     for index in range(count):
         col,row=index%cols,index//cols
-        x0=round((col*(W+J)+J/2)/PX); y0=round((row*(H+J)+J/2)/PX)
-        yield index,data[y0:y0+round(H/PX),x0:x0+round(W/PX)],(col*(W+J)+J/2,row*(H+J)+J/2)
+        x0=round((col*(TILE_WIDTH_M+JOINT_WIDTH_M)+JOINT_WIDTH_M/2)/METRES_PER_PIXEL); y0=round((row*(TILE_HEIGHT_M+JOINT_WIDTH_M)+JOINT_WIDTH_M/2)/METRES_PER_PIXEL)
+        yield index,data[y0:y0+round(TILE_HEIGHT_M/METRES_PER_PIXEL),x0:x0+round(TILE_WIDTH_M/METRES_PER_PIXEL)],(col*(TILE_WIDTH_M+JOINT_WIDTH_M)+JOINT_WIDTH_M/2,row*(TILE_HEIGHT_M+JOINT_WIDTH_M)+JOINT_WIDTH_M/2)

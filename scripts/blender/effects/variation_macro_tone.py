@@ -3,7 +3,7 @@ import math
 from materials.shared.node_graph import layer_frame, layer_switch
 
 # One octave measured on variation_lab's 64 m XY plane at 512 x 512 pixels.
-SD1 = 0.1174030453
+SINGLE_OCTAVE_NOISE_SD = 0.1174030453
 NOISE_MEAN = 0.5
 
 
@@ -12,7 +12,7 @@ def _moments(detail, rough):
     amplitudes = [rough**i for i in range(octaves+1)]
     if detail != octaves:
         amplitudes[-1] *= detail-octaves
-    sd = SD1 * math.sqrt(sum(a*a for a in amplitudes)) / sum(amplitudes)
+    sd = SINGLE_OCTAVE_NOISE_SD * math.sqrt(sum(a*a for a in amplitudes)) / sum(amplitudes)
     return NOISE_MEAN, sd
 
 

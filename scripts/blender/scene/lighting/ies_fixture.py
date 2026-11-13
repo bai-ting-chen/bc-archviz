@@ -7,7 +7,7 @@ from scene.lighting.light_objects import _light_obj, _warm
 from scene.lighting.ies_profile import ies_read
 
 
-IES_POWER = 177.83 / LM_PER_W
+IES_REFERENCE_POWER_W = 177.83 / LM_PER_W
 
 
 def ies_light(name, path, loc, rot=(0.0, 0.0, 0.0), lumens=None, kelvin=3000, radius=0.02,
@@ -23,7 +23,7 @@ def ies_light(name, path, loc, rot=(0.0, 0.0, 0.0), lumens=None, kelvin=3000, ra
     ld.shadow_soft_size = radius
     if kind == "SPOT":
         ld.spot_size, ld.spot_blend = math.pi, 0.0        # cone off: the profile shapes the beam
-    ld.energy = IES_POWER * (lumens / info["lumens"] if lumens else 1.0)
+    ld.energy = IES_REFERENCE_POWER_W * (lumens / info["lumens"] if lumens else 1.0)
     _warm(ld, kelvin)
     ld.use_nodes = True
     nt = ld.node_tree

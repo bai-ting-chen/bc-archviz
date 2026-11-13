@@ -1,7 +1,7 @@
 """Shared distance falloffs and noise context for edge line and dust."""
 from types import SimpleNamespace
 
-LINE_WIDTH, DUST_WIDTH = 0.015, 0.150  # m, nominal line and dust widths
+LINE_WIDTH_M, DUST_WIDTH_M = 0.015, 0.150  # m, nominal line and dust widths
 LINE_AMOUNT, DUST_AMOUNT = 1.70, 0.40  # line and dust mask gains
 OUTSIDE_LINE_BOOST = 2.7  # gain balances the connected base, slow strength and fine spot contrast
 OUTSIDE_LINE_PRESENCE = (0.28, 0.34)  # only rare low troughs interrupt the long outside run
@@ -10,10 +10,10 @@ OUTSIDE_LINE_STRENGTH_FLOOR = 0.32  # carry more of the slow variation in darkne
 GRIME_TINT = (0.105, 0.098, 0.088)  # absolute stain/run-off albedo
 LINE_GAIN, DUST_SATURATION, LINE_ROUGHNESS = 0.50, 0.90, 0.93  # line albedo gain, retained dust saturation and line roughness
 DUST_GAIN = (0.825, 0.825, 0.825)  # dust is between the clean surface and line
-CORNER_MASK_CAP, AO_REACH = 0.50, 0.30  # contact mask ceiling and dust AO reach in metres
+CORNER_MASK_CAP, AO_REACH_M = 0.50, 0.30  # contact mask ceiling and dust AO reach in metres
 LINE_UP_WEIGHT, VERTEX_LINE_WEIGHT = 0.45, 0.65  # top-facing line and shared junction weights
 
-def edge_vertex_join(g, line_width=LINE_WIDTH, frame=None, loc=(0, 0)):
+def edge_vertex_join(g, line_width=LINE_WIDTH_M, frame=None, loc=(0, 0)):
     """Return a local outside-junction blend from clean-mesh vertex distance in metres."""
     x, y = loc
     distance = g.attribute('edge_vertex_dist', (x, y), frame)

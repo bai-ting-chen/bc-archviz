@@ -22,7 +22,7 @@ yaw = math.radians(c.get("yaw_deg", 0.0))           # 0 = looking along +Y
 foc = c["w_px"] * c["f_mm"] / c["sensor_mm"]
 cx, hor = c["w_px"] / 2.0, c["horizon_px"]
 k = Rhino.RhinoMath.UnitScale(sc.doc.ModelUnitSystem, Rhino.UnitSystem.Meters)
-CREASE = math.radians(30.0)
+CREASE_ANGLE_RAD = math.radians(30.0)
 
 
 def project(p):
@@ -43,7 +43,7 @@ def curves_of(geom):
             faces = te.GetConnectedFaces(i)
             if len(faces) == 1 or (len(faces) == 2 and Rhino.Geometry.Vector3d.VectorAngle(
                     Rhino.Geometry.Vector3d(m.FaceNormals[faces[0]]),
-                    Rhino.Geometry.Vector3d(m.FaceNormals[faces[1]])) > CREASE):
+                    Rhino.Geometry.Vector3d(m.FaceNormals[faces[1]])) > CREASE_ANGLE_RAD):
                 out.append(te.EdgeLine(i).ToNurbsCurve())
         return out
     if isinstance(geom, Rhino.Geometry.SubD):

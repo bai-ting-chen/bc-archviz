@@ -8,7 +8,7 @@ from materials.shared.node_graph import NodeGraph
 from materials.shared.node_graph import active_socket
 from effects.wear.wear_locations import edge_field
 from dataclasses import dataclass, replace
-from effects.wear.masks import asset_mask
+from effects.wear.image_masks import asset_mask
 
 
 def dice(obj, size=0.05):

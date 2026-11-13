@@ -17,7 +17,7 @@ When to choose LuxCore: renderer-choice.md.
 
 ## Engine settings that converge caustics
 Start every LuxCore render with `renderer.luxcore.luxcore.engine_setup()`
-(`scripts/blender/renderer/luxcore/engine.py`); do not set these by hand.
+(`scripts/blender/renderer/luxcore/engine_settings.py`); do not set these by hand.
 ```python
 luxcore.engine_setup(halt_s=600)   # tests/previews: a time budget in seconds
 luxcore.engine_setup()             # finals: no halt (finals.start_in_ui also clears it)
@@ -148,7 +148,7 @@ island). Build: `bpy.data.node_groups.new(n, "luxcore_material_nodes")`,
 `LuxCoreNodeMatOutput`, `LuxCoreNodeMatDisney`, `LuxCoreNodeTexImagemap` (`gamma` 2.2 colour /
 1.0 data, `randomized_tiling`), `LuxCoreNodeTexMapping2D` (`uvindex` = the mesh's UV layer index),
 `LuxCoreNodeTexColorMix` (`mode` "scale"/"mix"), `LuxCoreNodeTexSplitFloat3`.
-`renderer.luxcore.luxcore.lux_textured(name, folder, mesh, dust_png)` does it from a map folder.
+`renderer.luxcore.luxcore.textured_material(name, folder, mesh, dust_png)` does it from a map folder.
 - **A `uvindex` that points at a missing UV layer (-1) crashes pyluxcore** at export
   (EXCEPTION_ACCESS_VIOLATION in `pyluxcore.pyd`, no Python error). Build every UV layer the
   tree references on every run, even when the map itself is cached.

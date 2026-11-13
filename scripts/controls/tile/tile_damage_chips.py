@@ -12,7 +12,7 @@ import numpy as np
 import materials.tile.tile_damage as tile_damage
 import materials.tile.tile_surface as tile_surface
 from tile_damage_geometry import boundary, dilate
-from tile_damage_rig import ENGOBE, GLAZE, H, J, PX, W, grid_faces, grid_rig, probe_rgb, setup, tile_rig
+from tile_damage_rig import ENGOBE_THICKNESS_M, GLAZE_THICKNESS_M, TILE_HEIGHT_M, JOINT_WIDTH_M, METRES_PER_PIXEL, TILE_WIDTH_M, grid_faces, grid_rig, probe_rgb, setup, tile_rig
 
 
 def check_chip_layers(folder,origin):
@@ -26,8 +26,8 @@ def check_chip_layers(folder,origin):
         assert not (((image[:,:-1]==1)&(image[:,1:]==3))|((image[:,1:]==1)&(image[:,:-1]==3))).any(), 'Lip skips Engobe'
     yy,xx=np.nonzero(boundary(codes>0))
     gx=origin[0]+(xx+.5)*.00005; gy=origin[1]+(yy+.5)*.00005
-    lx=np.mod(gx,W+J)-J/2; ly=np.mod(gy,H+J)-J/2
-    good=(xx>3)&(xx<156)&(yy>3)&(yy<156)&(lx>.0005)&(lx<W-.0005)&(ly>.0005)&(ly<H-.0005)
+    lx=np.mod(gx,TILE_WIDTH_M+JOINT_WIDTH_M)-JOINT_WIDTH_M/2; ly=np.mod(gy,TILE_HEIGHT_M+JOINT_WIDTH_M)-JOINT_WIDTH_M/2
+    good=(xx>3)&(xx<156)&(yy>3)&(yy<156)&(lx>.0005)&(lx<TILE_WIDTH_M-.0005)&(ly>.0005)&(ly<TILE_HEIGHT_M-.0005)
     candidates=np.flatnonzero(good)
     assert len(candidates), 'No interior glaze edge in layer window'
     at=candidates[len(candidates)//2]
@@ -37,8 +37,8 @@ def check_chip_layers(folder,origin):
     widths=[]
     for line in list(depth)+list(depth.T):
         for values in (line,line[::-1]):
-            for start in np.flatnonzero((values[:-1]<.1*GLAZE)&(values[1:]>=.1*GLAZE)):
-                stops=np.flatnonzero(values[start+1:]>=.9*GLAZE)
+            for start in np.flatnonzero((values[:-1]<.1*GLAZE_THICKNESS_M)&(values[1:]>=.1*GLAZE_THICKNESS_M)):
+                stops=np.flatnonzero(values[start+1:]>=.9*GLAZE_THICKNESS_M)
                 if len(stops): widths.append((stops[0]+1)*.00001)
     assert widths and max(widths)<=.00003+1e-12, f'Glaze transition {widths}'
     return max(widths)
@@ -55,24 +55,24 @@ def check_chips(folder):
         ids=np.rint(face[...,1]*tile_damage.PIECE_BINS).astype(int)
         masks.append(face[...,0]>1e-6)
         values=np.unique(ids[ids>0]); counts.append(len(values))
-        yy,xx=np.indices(ids.shape); xx=(xx+.5)*PX; yy=(yy+.5)*PX
-        arris=np.minimum.reduce([xx,W-xx,yy,H-yy])
+        yy,xx=np.indices(ids.shape); xx=(xx+.5)*METRES_PER_PIXEL; yy=(yy+.5)*METRES_PER_PIXEL
+        arris=np.minimum.reduce([xx,TILE_WIDTH_M-xx,yy,TILE_HEIGHT_M-yy])
         for value in values:
             cell=ids==value; areas.append(int(cell.sum()))
-            corner=(xx<2*PX)&(yy<2*PX)|(xx>W-2*PX)&(yy<2*PX)|(xx<2*PX)&(yy>H-2*PX)|(xx>W-2*PX)&(yy>H-2*PX)
+            corner=(xx<2*METRES_PER_PIXEL)&(yy<2*METRES_PER_PIXEL)|(xx>TILE_WIDTH_M-2*METRES_PER_PIXEL)&(yy<2*METRES_PER_PIXEL)|(xx<2*METRES_PER_PIXEL)&(yy>TILE_HEIGHT_M-2*METRES_PER_PIXEL)|(xx>TILE_WIDTH_M-2*METRES_PER_PIXEL)&(yy>TILE_HEIGHT_M-2*METRES_PER_PIXEL)
             edge_chips+=not (cell&corner).any()
-            coating+=not (face[...,2][cell]>.5).any() and face[...,0][cell].max()<=GLAZE+1e-8
-            rim=boundary(cell)&(arris>2*PX)
+            coating+=not (face[...,2][cell]>.5).any() and face[...,0][cell].max()<=GLAZE_THICKNESS_M+1e-8
+            rim=boundary(cell)&(arris>2*METRES_PER_PIXEL)
             if rim.sum()>=3:
                 lip_cover.append(float(np.mean(dilate(strata[...,0]>.5)[rim])))
-        x0=round(origin[0]/PX); y0=round(origin[1]/PX)
+        x0=round(origin[0]/METRES_PER_PIXEL); y0=round(origin[1]/METRES_PER_PIXEL)
         outside[y0:y0+ids.shape[0],x0:x0+ids.shape[1]]=False
         if selected_origin is None:
             candidates=np.argwhere(boundary(masks[-1])&(arris>.001))
             if len(candidates):
                 y,x=candidates[len(candidates)//2]
-                cx,cy=origin[0]+(x+.5)*PX,origin[1]+(y+.5)*PX
-                selected_origin=(min(max(cx-.004,origin[0]),origin[0]+W-.008),min(max(cy-.004,origin[1]),origin[1]+H-.008))
+                cx,cy=origin[0]+(x+.5)*METRES_PER_PIXEL,origin[1]+(y+.5)*METRES_PER_PIXEL
+                selected_origin=(min(max(cx-.004,origin[0]),origin[0]+TILE_WIDTH_M-.008),min(max(cy-.004,origin[1]),origin[1]+TILE_HEIGHT_M-.008))
     assert len(set(counts))>=3, f'Chip counts {counts}'
     ratio=max(areas)/min(areas)
     assert ratio>=6, f'Chip area ratio {ratio}'
@@ -93,7 +93,7 @@ def check_chips(folder):
     assert shell.any() and np.mean(shallow[...,1][shell]>.5)<.05
     tile_surface.set_param(mat,'chip_depth',0)
     zero=probe_rgb(mat,folder,'zero_depth',('Chip Depth Out','Body',None),(.002,1,1))
-    assert np.max(zero[...,0])<=GLAZE+1e-8 and np.max(zero[...,1])<1e-8
+    assert np.max(zero[...,0])<=GLAZE_THICKNESS_M+1e-8 and np.max(zero[...,1])<1e-8
     return dict(chip_counts=counts,chip_area_ratio=ratio,chip_noncorner_cells=int(edge_chips),
                 chip_glaze_only_cells=int(coating),chip_mask_max_iou=float(max(ious)),
                 chip_lip_coverage_min=min(lip_cover),edge_transition_max_m=transition)
@@ -104,7 +104,7 @@ def check_flakes(folder):
     sc,ob,mat=tile_rig(force_kind=3)
     data=probe_rgb(mat,folder,'flakes',('Chip Depth Out','Chip Site Edge','Chip Cell'),(.002,.01,.01))
     shell=data[...,0]>1e-6
-    assert shell.any() and data[...,0][shell].max()<=GLAZE+1e-8
+    assert shell.any() and data[...,0][shell].max()<=GLAZE_THICKNESS_M+1e-8
     assert np.all(data[...,1][shell]<.6*data[...,2][shell]+1e-8)
 
 
@@ -115,6 +115,6 @@ def check_spalls(folder):
     shell=data[...,0]>1e-6
     assert shell.any()
     assert np.all(data[...,1][shell]<.001+1e-8) and np.all(data[...,2][shell]>.5)
-    assert data[...,0][shell].max()<=GLAZE+ENGOBE+1e-8
+    assert data[...,0][shell].max()<=GLAZE_THICKNESS_M+ENGOBE_THICKNESS_M+1e-8
     tile_surface.set_param(mat,'spall_density',0)
     assert np.max(probe_rgb(mat,folder,'spalls_zero',('Chip Depth Out',None,None)))<1e-8

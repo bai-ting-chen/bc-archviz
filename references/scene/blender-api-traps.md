@@ -81,8 +81,8 @@
 - `Image.save()` on float images applies view transform + exposure → for data EXRs use
   `img.save_render(path)` with OPEN_EXR 32-bit.
 - Pixel analysis: `img.pixels.foreach_get(np_array)` is linear for **float** images only; 8-bit
-  sRGB textures come back sRGB-encoded — read with `map_measure.image_rgb` and decode with
-  `map_measure.srgb_to_linear` (`materials.shared.map_measure`) before measuring an
+  sRGB textures come back sRGB-encoded — read with `map_measurements.image_rgb` and decode with
+  `map_measurements.srgb_to_linear` (`materials.shared.map_measurements`) before measuring an
   albedo (encoded means read about twice the linear value on mid-grey maps).
 - Compositor in 5.x is a node group: `bpy.data.node_groups.new(name, "CompositorNodeTree")`,
   an output socket via `tree.interface.new_socket("Image", in_out="OUTPUT",
@@ -94,7 +94,7 @@
   window: switch the largest area to `IMAGE_EDITOR` showing `Render Result` to watch it.
 - Headless runs load user prefs unless `--factory-startup` (which disables add-ons, CPU device —
   `archviz.render_setup` turns OptiX on when no compute device is set; a control that builds its
-  own scene must call `archviz.use_gpu()` (`controls/_scene.black_scene` does), or it silently
+  own scene must call `archviz.use_gpu()` (`controls/photometric_scene.black_scene` does), or it silently
   renders on the CPU at ~10x the time —
   and gives new worlds a grey 0.05 background (+π·0.05 W/m² on every surface) — set the
   Background Strength to 0 for a black test world).

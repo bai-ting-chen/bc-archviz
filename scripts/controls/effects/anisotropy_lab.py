@@ -11,7 +11,7 @@ import OpenImageIO as oiio
 
 SCRIPTS = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(SCRIPTS / 'blender'), str(SCRIPTS / 'controls')]
-from _scene import black_scene, ortho_camera
+from photometric_scene import black_scene, ortho_camera
 from core.archviz import directional_uv
 from effects.anisotropy import anisotropy
 from materials.shared.dielectric import dielectric

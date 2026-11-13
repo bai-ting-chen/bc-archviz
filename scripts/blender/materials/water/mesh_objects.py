@@ -1,4 +1,4 @@
-"""Mesh objects; implementation for water.mesh."""
+"""Mesh objects; implementation for water.mesh_builders."""
 import bpy
 import numpy as np
 

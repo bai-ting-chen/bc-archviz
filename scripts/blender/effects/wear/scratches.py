@@ -1,7 +1,7 @@
 """Crossing procedural scratches and their held legacy scan modulation."""
 import math
-from effects.wear.masks import asset_mask
-from effects.wear.tiling import stochastic_mask
+from effects.wear.image_masks import asset_mask
+from effects.wear.scan_sampling import stochastic_mask
 
 def scratches_field(g, vector, length_m, width_m, frame):
     """Return four independently phased stroke orientations in metre coordinates."""
@@ -37,7 +37,7 @@ def scratch_hybrid(g, layer, vector, frame=None):
     """Keep the held scratch hybrid's existing 0.7–1.0 scan modulation unchanged."""
     mask = layer.mask or asset_mask('vdekdjrc')
     if mask is None:
-        from effects.wear.defaults import report_missing
+        from effects.wear.default_sources import report_missing
         report_missing('vdekdjrc', 'scratched metal')
         return scratches_field(g, vector, layer.scale_m, layer.scratch_width_m, frame)
     texture = stochastic_mask(g, [mask], vector, layer.hybrid, frame)

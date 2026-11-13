@@ -32,7 +32,7 @@ used here with vegetation settings.
 - `scripts/blender/materials/vegetation/`: `vegetation.py` (entry point `blade_material`, imported
   from `blade_build.py`; config in `blade_config.py`, wet film in `blade_wet.py`).
 - `scripts/blender/scene/environment/`: `scatter.py` is the import point for leaf litter and meadow.
-  Leaf litter uses `scatter_objects.py` (`scatter`); the meadow uses `scatter_asset.py`
+  Leaf litter uses `scatter_objects.py` (`scatter`); the meadow uses `scatter_node_asset.py`
   (`load_scatter_on_surface`), `meadow_graph.py` (`meadow_layer_group`) and `meadow_objects.py`
   (`meadow_layer`, `frustum_tangents`).
 - Per-instance tone: `scripts/blender/effects/variation_per_unit_shading.py` (`random_tone_material`).
@@ -58,7 +58,7 @@ used here with vegetation settings.
 - Use `scatter.meadow_layer_group(scatter.load_scatter_on_surface())`: Blender's own *Scatter on
   Surface* (native, Poisson or random, collection + Pick Instance), wrapped with mask fields:
   - species patch noise;
-  - a **shared** bare-soil noise, the same 4D noise the ground shader uses (`terrain.BARE_W`), so
+  - a **shared** bare-soil noise, the same 4D noise the ground shader uses (`terrain.BARE_SOIL_NOISE_W`), so
     bare spots show earth;
   - clearance from the pad;
   - the **camera frustum + distance**: only what the camera can see; the crest hides the rest.

@@ -11,8 +11,8 @@ import py_compile
 import re
 import sys
 
-BS = chr(92)
-SKILL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BACKSLASH = chr(92)
+SKILL_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 ALWAYS_LOADED = {'SKILL.md', 'RULES.md'}   # links back to these close no loop: they are read first anyway
@@ -75,7 +75,7 @@ def reference_loops():
     for group in groups:
         links = [f'{a} -> {b}' for a in group for b in sorted(graph[a]) if b in group]
         problems.append(('reference loop between ' + ', '.join(group)
-                         + '\n    ' + '\n    '.join(links)).replace(BS, '/'))
+                         + '\n    ' + '\n    '.join(links)).replace(BACKSLASH, '/'))
     return problems
 
 
@@ -106,13 +106,13 @@ def broken_anchors():
         for m in re.finditer(r'\]\(([^)#\s]*)#([^)\s]+)\)', prose(md)):
             target = os.path.normpath(os.path.join(os.path.dirname(md), m.group(1))) if m.group(1) else os.path.normpath(md)
             if target in slugs and m.group(2) not in slugs[target]:
-                problems.append(f'{md}: no heading for #{m.group(2)} in {m.group(1) or md}'.replace(BS, '/'))
+                problems.append(f'{md}: no heading for #{m.group(2)} in {m.group(1) or md}'.replace(BACKSLASH, '/'))
     return problems
 
 
 def main():
     """Print each problem and return a non-zero exit code when there are any."""
-    os.chdir(SKILL)
+    os.chdir(SKILL_ROOT)
     problems = []
     text = open('SKILL.md', encoding='utf-8').read()
     # 1. folders named in the repository map exist
@@ -133,8 +133,8 @@ def main():
                 continue
             if not os.path.exists(os.path.normpath(os.path.join(base, target))):
                 problems.append(f'{md}: broken link {target}')
-        for m in re.finditer(r'`((?:scripts|references)[' + BS + '/][^`\\s]+)`', body):
-            target = m.group(1).replace(BS, '/')
+        for m in re.finditer(r'`((?:scripts|references)[' + BACKSLASH + '/][^`\\s]+)`', body):
+            target = m.group(1).replace(BACKSLASH, '/')
             if not os.path.exists(target):
                 problems.append(f'{md}: broken path {target}')
     # 3. Python compiles

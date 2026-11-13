@@ -1,6 +1,6 @@
 """Albedo; canonical implementation behind pbr."""
 
-from materials.shared.map_measure import map_mean
+from materials.shared.map_measurements import map_mean_linear_rgb
 
 from materials.shared.pbr_build import pbr_material
 
@@ -8,7 +8,7 @@ from materials.shared.principled import _principled
 
 def albedo_material(tex_id, name, target, scale=1.0):
     """pbr_material whose base colour averages `target` (linear RGB)."""
-    mean = map_mean(tex_id)
+    mean = map_mean_linear_rgb(tex_id)
     m = pbr_material(tex_id, name=name, scale=scale)
     N, L = m.node_tree.nodes, m.node_tree.links
     bsdf = _principled(m)

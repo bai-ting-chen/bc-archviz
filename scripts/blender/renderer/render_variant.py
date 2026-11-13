@@ -1,10 +1,10 @@
 """Headless look-dev / control render of a saved .blend, with overrides. Never saves the .blend.
 
 blender -b scene.blend --python render_variant.py -- out.png [key=value ...]
-  res=800x800  samples=256  disp=off  caustics=off  wear=off  stain=off  noise_seed=N
-  chips=off  breaks=off  woodwear=off  dirt=off  mnee=off  denoise=off  adaptive=T  sun_angle=DEG
+  resolution=800x800  samples=256  displacement=off  caustics=off  wear=off  stain=off  noise_seed=N
+  chips=off  breaks=off  wood_wear=off  dirt=off  mnee=off  denoise=off  adaptive=T  sun_angle=DEG
   mask_view=1|<node label>
-  camera=<object name>  material_view=<material name> [coll=<collection>]  (one material on every mesh)
+  camera=<object name>  material_view=<material name> [collection=<collection>]  (one material on every mesh)
   key_area=SIZE,DIST[,LUX] [key_target=x,y,z]   water_test=empty_glass|water_only (glassware scenes)
 """
 import os
@@ -16,28 +16,28 @@ import bpy
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import core.archviz as archviz  # noqa: E402
 
-KNOWN = {"res", "samples", "noise_seed", "camera", "disp", "caustics", "wear", "stain", "chips", "breaks",
-         "woodwear", "dirt", "mask_view", "material_view", "coll", "key_area", "key_target", "mnee",
+SUPPORTED_OVERRIDES = {"resolution", "samples", "noise_seed", "camera", "displacement", "caustics", "wear", "stain", "chips", "breaks",
+         "wood_wear", "dirt", "mask_view", "material_view", "collection", "key_area", "key_target", "mnee",
          "adaptive", "denoise", "water_test", "sun_angle"}
 def main():
     """Run the command against the supplied files; never save a scene."""
     argv = sys.argv[sys.argv.index("--") + 1:]
     out, opts = argv[0], dict(a.split("=", 1) for a in argv[1:])
-    unknown = set(opts) - KNOWN
+    unknown = set(opts) - SUPPORTED_OVERRIDES
     if unknown:   # a typo must not render an unchanged "control"
-        sys.exit("render_variant: unknown option(s) %s; known: %s" % (sorted(unknown), sorted(KNOWN)))
+        sys.exit("render_variant: unknown option(s) %s; known: %s" % (sorted(unknown), sorted(SUPPORTED_OVERRIDES)))
     sc = bpy.context.scene
     archviz.use_gpu()
 
-    if "res" in opts:
-        sc.render.resolution_x, sc.render.resolution_y = map(int, opts["res"].split("x"))
+    if "resolution" in opts:
+        sc.render.resolution_x, sc.render.resolution_y = map(int, opts["resolution"].split("x"))
     if "samples" in opts:
         sc.cycles.samples = int(opts["samples"])
     if "noise_seed" in opts:
         sc.cycles.seed = int(opts["noise_seed"])
     if "camera" in opts:
         sc.camera = bpy.data.objects[opts["camera"]]
-    if opts.get("disp") == "off":  # negative control: no geometry displacement, bump only
+    if opts.get("displacement") == "off":  # negative control: no geometry displacement, bump only
         for m in bpy.data.materials:
             if m.displacement_method in ("DISPLACEMENT", "BOTH"):
                 m.displacement_method = "BUMP"
@@ -101,7 +101,7 @@ def main():
 
     if "material_view" in opts:  # assign one material to every concrete mesh (mask comparisons)
         mv = bpy.data.materials[opts["material_view"]]
-        for ob in bpy.data.collections[opts.get("coll", "concrete")].all_objects:
+        for ob in bpy.data.collections[opts.get("collection", "concrete")].all_objects:
             if ob.type == "MESH":
                 if ob.data.materials:
                     ob.data.materials[0] = mv
@@ -126,7 +126,7 @@ def main():
         _zero_gn_input("Chip Depth")
     if opts.get("breaks") == "off":  # negative control: no torn-skin geometry on the wood top
         _zero_gn_input("Break Depth")
-    if opts.get("woodwear") == "off":  # negative control: no worn-edge shading on the wood
+    if opts.get("wood_wear") == "off":  # negative control: no worn-edge shading on the wood
         for m in bpy.data.materials:
             nt = m.node_tree
             n = nt and next((n for n in nt.nodes if n.label == "worn edges over varnish"), None)

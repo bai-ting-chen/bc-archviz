@@ -13,10 +13,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'blender'))
 from core.assets import set_project
 from materials.shared.node_graph import NodeGraph, active_socket
 from effects.wear.wear import WearLayer, wear_factor, apply_surface_wear
-from effects.wear.defaults import DEFAULT_SOURCES
-from effects.wear import defaults as surface_wear_defaults, hybrid as surface_wear_hybrid
+from effects.wear.default_sources import DEFAULT_SOURCES
+from effects.wear import default_sources as surface_wear_defaults, hybrid_sources as surface_wear_hybrid
 from effects.wear import scratches as wear_scratches
-from effects.wear.masks import asset_mask, scan_size_m
+from effects.wear.image_masks import asset_mask, scan_size_m
 
 
 def _graph(kind, settings=None):
@@ -49,7 +49,7 @@ def main():
     args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:])
     set_project(args.project)
     assert DEFAULT_SOURCES == dict.fromkeys(('grunge', 'dried-marks', 'chipping', 'scratches'), 'hybrid')
-    from effects.wear.tiling import stochastic_mask
+    from effects.wear.scan_sampling import stochastic_mask
     assert surface_wear_hybrid.stochastic_mask is stochastic_mask
     assert 'stamps' not in DEFAULT_SOURCES.values()
     from effects.wear.wear import canonical_layer
@@ -75,7 +75,7 @@ def main():
          patch.object(surface_wear_hybrid,'asset_mask',side_effect=AssertionError('Disabled asset lookup')), \
          patch.object(surface_wear_defaults,'asset_mask',side_effect=AssertionError('Disabled asset lookup')), \
          patch('effects.wear.chipping.asset_mask',side_effect=AssertionError('Disabled asset lookup')), \
-         patch('effects.wear.stamps.stamps_field',side_effect=AssertionError('Disabled stamp lookup')):
+         patch('effects.wear.decal_stamps.stamps_field',side_effect=AssertionError('Disabled stamp lookup')):
         for kind in DEFAULT_SOURCES:
             for source in (None,'procedural','mask','hybrid','stamps'):
                 g,factor=_graph(kind,WearLayer(enabled=False,source=source))
@@ -124,7 +124,7 @@ def main():
         assert not any(n.type == 'TEX_IMAGE' for n in g.tree.nodes)
     g, _ = _graph('chipping')
     assert {Path(n.image.filepath).parent.name for n in g.tree.nodes if n.type=='TEX_IMAGE'}=={'ub1meemn','tmulfghdy'}
-    from effects.wear.hybrid import _interior_masks, HybridSource
+    from effects.wear.hybrid_sources import _interior_masks, HybridSource
     from effects.wear.chipping import flaked_paint_masks
     assert all((m.black,m.white,m.gamma,m.invert)==(0.,1.,1.,False)
                for m in _interior_masks('grunge',HybridSource(),None))

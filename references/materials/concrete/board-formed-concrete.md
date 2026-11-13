@@ -41,7 +41,7 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
 - `scripts/blender/materials/concrete/concrete.py`: `vertical_boards(mat, cylinder=(cx, cy, r) | None)`,
   the printed board map for distant walls (its helper is `concrete_boards.py` in the same folder).
 - Board geometry (§4.2) has no builder yet.
-- Control for the printed map: the `vertical_boards` case in `scripts/controls/regression/regress_cases.py`
+- Control for the printed map: the `vertical_boards` case in `scripts/controls/regression/regression_cases.py`
   and the `boards_` case in `scripts/controls/material_graph_check.py`.
 
 ## 4. Instructions and parameters, per layer

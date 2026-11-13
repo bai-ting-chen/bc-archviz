@@ -11,25 +11,25 @@ import numpy as np
 import materials.tile.tile_damage as tile_damage
 import materials.tile.tile_surface as tile_surface
 from tile_damage_geometry import dilate
-from tile_damage_rig import H, PX, W, probe_rgb, setup
+from tile_damage_rig import TILE_HEIGHT_M, METRES_PER_PIXEL, TILE_WIDTH_M, probe_rgb, setup
 
 
 def displacement_case(folder,kind,whole=False):
     """Compare positions and world normals in an 8 mm, <=20 um-edge diced window."""
     kw=dict(force_kind=kind,chip_depth=.0015,chip_share=0,spall_density=0,joint=0,recess=.006)
-    sc,ob,mat=setup(3*W,H,round(3*W/PX),round(H/PX),**kw)
+    sc,ob,mat=setup(3*TILE_WIDTH_M,TILE_HEIGHT_M,round(3*TILE_WIDTH_M/METRES_PER_PIXEL),round(TILE_HEIGHT_M/METRES_PER_PIXEL),**kw)
     data=probe_rgb(mat,folder,f'locate_{kind}',('Chip Depth Out','Crack','Piece Height'),(.001,1,.002))
     if kind==2:
         yy,xx=np.unravel_index(np.argmax(data[...,0]),data[...,0].shape)
-        centre=((xx+.5)*PX,(yy+.5)*PX)
+        centre=((xx+.5)*METRES_PER_PIXEL,(yy+.5)*METRES_PER_PIXEL)
     else:
         yy,xx=np.nonzero(data[...,1]>.02)
         assert len(yy), 'no crack for window location'
         at=len(yy)//2
-        centre=((xx[at]+.5)*PX,(yy[at]+.5)*PX)
-    tile_x=math.floor(centre[0]/W)*W
-    origin=(min(max(centre[0]-.004,tile_x),tile_x+W-.008),min(max(centre[1]-.004,0),H-.008))
-    width,height=(W,H) if whole else (.008,.008)
+        centre=((xx[at]+.5)*METRES_PER_PIXEL,(yy[at]+.5)*METRES_PER_PIXEL)
+    tile_x=math.floor(centre[0]/TILE_WIDTH_M)*TILE_WIDTH_M
+    origin=(min(max(centre[0]-.004,tile_x),tile_x+TILE_WIDTH_M-.008),min(max(centre[1]-.004,0),TILE_HEIGHT_M-.008))
+    width,height=(TILE_WIDTH_M,TILE_HEIGHT_M) if whole else (.008,.008)
     origin=(0,0) if whole else origin
     nx,ny=(240,1600) if whole else (400,400)
     sc,ob,mat=setup(width,height,nx,ny,origin=origin,**kw)
@@ -97,12 +97,12 @@ def check_chip_displacement(folder,full=False):
 def check_damage_displacement(folder,full=False):
     """Damage-only displacement moves the mesh by the damage height alone, survives a rebuild, use_bump undoes it."""
     kw=dict(force_kind=1,chip_share=0,spall_density=0,joint=0,step_height=.0003)
-    sc,ob,mat=setup(3*W,H,round(3*W/PX),round(H/PX),**kw)
+    sc,ob,mat=setup(3*TILE_WIDTH_M,TILE_HEIGHT_M,round(3*TILE_WIDTH_M/METRES_PER_PIXEL),round(TILE_HEIGHT_M/METRES_PER_PIXEL),**kw)
     data=probe_rgb(mat,folder,'damage_locate',('Crack','Piece Height',None),(1,.002,1))
     yy,xx=np.nonzero(data[...,0]>.02); assert len(yy), 'no crack for window location'
-    at=len(yy)//2; centre=((xx[at]+.5)*PX,(yy[at]+.5)*PX)
-    tile_x=math.floor(centre[0]/W)*W
-    origin=(min(max(centre[0]-.004,tile_x),tile_x+W-.008),min(max(centre[1]-.004,0),H-.008))
+    at=len(yy)//2; centre=((xx[at]+.5)*METRES_PER_PIXEL,(yy[at]+.5)*METRES_PER_PIXEL)
+    tile_x=math.floor(centre[0]/TILE_WIDTH_M)*TILE_WIDTH_M
+    origin=(min(max(centre[0]-.004,tile_x),tile_x+TILE_WIDTH_M-.008),min(max(centre[1]-.004,0),TILE_HEIGHT_M-.008))
     sc,ob,mat=setup(.008,.008,400,400,origin=origin,**kw)
     before=probe_rgb(mat,folder,'damage_expected',('Damage Height','Crack',None),(.002,1,1))
     tile_surface.use_damage_displacement(mat,[ob],pixel_size=.5)

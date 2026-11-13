@@ -8,7 +8,7 @@ This module is the one import point; each job lives in its own module (RULES GOV
     tile_albedo        colour, tint, dust, macro variation
     tile_specks        iron specks and pinholes
     tile_relief        height: shoulders, tilt, wave, lippage
-    tile_bsdf          coated face and grout shading
+    tile_shading          coated face and grout shading
     tile_maps          face image maps: find, measure, physical size
     tile_config        feature names, parameter groups, validation
     tile_glazed        procedural glazed pool tiles (separate, flat material)

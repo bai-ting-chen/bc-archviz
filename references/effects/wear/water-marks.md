@@ -10,10 +10,10 @@ Shared sources and strength inspection: `references/effects/wear/wear.md`.
 Location/orientation and raycast setup: [wear-locations.md](wear-locations.md).
 
 ## 3. Code
-- `scripts/blender/effects/wear/water_marks.py`: `LEAK`, `add_runoff`, `deposit_distance`,
+- `scripts/blender/effects/wear/water_marks.py`: `RUNOFF_DEFAULTS`, `add_runoff`, `deposit_distance`,
   `deposit_profile`, `irregular_deposits`, `dried_marks_field`.
 - `leak_field.py`: `add_leak_field`; dried marks use `WearLayer` key `dried-marks` in `wear.py`.
-- `stamps.py`: non-default `deposit_stamps`; `atlas.py`: `StampAtlas`, `build_stamp_atlas`.
+- `decal_stamps.py`: non-default `deposit_stamps`; `decal_atlas.py`: `StampAtlas`, `build_stamp_atlas`.
 - Controls: `scripts/controls/effects/weathering_lab.py`, `surface_wear_lab.py`.
 
 ## 4. Instructions and parameters

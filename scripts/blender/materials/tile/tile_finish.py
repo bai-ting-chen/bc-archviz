@@ -4,7 +4,7 @@ feature switch helpers. A feature's switch removes its whole contribution when i
 import bpy
 
 from materials.tile.tile_config import FEATURES, FINISH
-from materials.tile.tile_nodes import _Graph
+from materials.tile.tile_nodes import _TileGraph
 from materials.tile.tile_nodes import _socket
 
 
@@ -27,18 +27,18 @@ def finish_group(defaults, owner):
     inputs = [item for item in tree.interface.items_tree if item.in_out == 'INPUT']
     for item in inputs:
         _socket(tree, item.name, 'OUTPUT', item.socket_type)
-    a = _Graph(tree)
+    a = _TileGraph(tree)
     source = a.node('NodeGroupInput')
     target = a.node('NodeGroupOutput')
     target.is_active_output = True
     for item in inputs:
-        a.put(source.outputs[item.name], target.inputs[item.name])
+        a.link_or_set(source.outputs[item.name], target.inputs[item.name])
     return tree
 
 
 def gate(a, i, feature, value):
     """Remove a feature's whole contribution when its switch is zero."""
-    return a.m('MULTIPLY', i[feature + ' On'], value)
+    return a.math('MULTIPLY', i[feature + ' On'], value)
 
 
 def toggle(mat, feature, on):

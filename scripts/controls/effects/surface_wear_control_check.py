@@ -14,7 +14,7 @@ import surface_wear_lab as lab
 import surface_wear_compare as compare
 from surface_wear_match import remap,fit_levels,statistics,prefilter_mask
 from effects.wear.wear import WearLayer,MaskSource,apply_surface_wear
-from effects.wear.masks import MASK_LEVELS_LABEL,MASK_GAMMA_LABEL
+from effects.wear.image_masks import MASK_LEVELS_LABEL,MASK_GAMMA_LABEL
 from materials.shared.node_graph import NodeGraph,active_socket
 from core import assets
 
@@ -107,7 +107,7 @@ def check_rectangle(out,path):
     manifest=out/'rectangular-manifest.json'
     manifest.write_text(json.dumps({'grunge':[{'id':'rectangle','map':'Mask'}],
                                     'worn-through':[{'id':'rectangle','map':'Mask'}]}))
-    with patch('effects.wear.masks.asset_mask',return_value=MaskSource(str(path),size_m=(2.,3.))):
+    with patch('effects.wear.image_masks.asset_mask',return_value=MaskSource(str(path),size_m=(2.,3.))):
         candidates=compare._assets(manifest,None)
         assert 'chipping' in candidates and 'worn-through' not in candidates
         candidate=candidates['grunge'][0]
