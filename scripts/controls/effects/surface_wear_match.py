@@ -88,7 +88,7 @@ def _simplex(function, start, steps, iterations=280):
 def prefilter_mask(out, candidate, pixels, metres_per_pixel, sigma_pixels=.5):
     """Average unresolved scan detail before nonlinear levels; retain the 4K grid and scan size."""
     import OpenImageIO as oiio
-    from effects.surface_wear_masks import mask_dimensions_m
+    from effects.wear.masks import mask_dimensions_m
     # The footprint is in final-view pixels, independent of the asset's listed size.
     sigma_m = sigma_pixels * metres_per_pixel
     width_m, height_m = mask_dimensions_m(candidate['size_m'])

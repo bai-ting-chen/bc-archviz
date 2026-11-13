@@ -3,7 +3,7 @@
 ## Nodes
 - Principled BSDF has 34 inputs; Glass BSDF has 10. Resolve sockets by name, not a saved index.
 - GN modifier inputs: `mod["Socket_N"]` fails; values live at `mod.properties.inputs.<id>.value`
-  (empty `.name`; resolve via `node_group.interface.items_tree`) → `effects.edge_wear.set_input`. Group defaults
+  (empty `.name`; resolve via `node_group.interface.items_tree`) → `effects.wear.set_input`. Group defaults
   are copied only at modifier creation. New code re-hits this with `mod[ident] = v`.
 - Edge Angle (signed): convex arrises read **positive** on outward-normal Rhino meshes.
 - ShaderNodeMix: hidden per-type sockets share names `A/B/Result` → `materials.shared.nodes.sock`.

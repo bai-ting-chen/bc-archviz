@@ -63,7 +63,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 - **Splash fades with distance.** Splash drops (Voronoi) thin out away from the water. Above a pool the splash
   band is low and fades past both ends of the fall; it never covers the whole wall.
 - **Gate by height** so canopies and far floors stay dry.
-- Dried marks and tide rings: [surface-wear.md](surface-wear.md) §4.3.
+- Dried marks and tide rings: [water-marks.md](wear/water-marks.md) §4.2.
 - Keep the proxy a plain hidden mesh referenced by the wetness GN and replace its mesh data in place. Deleting
   the object empties every reference and the noise term draws blotches.
 
@@ -89,7 +89,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 | Wall behind falling water stays dry | mask from distance to the water; the sheet stands off the wall | proxy on the wall face over the whole footprint (§4.2) |
 | Constant-width band, or a straight wet/dry line | wet width fixed | slow noise drives the width; wander and run-off fingers at the ends (§4.2) |
 | Whole wall wet | splash not limited | low splash band, fading past the ends (§4.2) |
-| Dried marks read as contour lines | marks drawn as lines | surface-wear.md §4.3 |
+| Dried marks read as contour lines | marks drawn as lines | wear/water-marks.md §4.2 |
 | Canopies or far floors wet | no height gate | gate by height (§4.2) |
 | Blotches in the wetness noise term | proxy object deleted, references emptied | replace the proxy's mesh data in place (§4.2) |
 

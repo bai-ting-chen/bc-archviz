@@ -32,8 +32,8 @@ def dump(SRC, HERE, OUT):
             res[k] = snapshot()
         except Exception:
             res[k] = {"ERROR": traceback.format_exc().splitlines()[-1]}
-    for k, fn in (("eval edge_wear", lambda m: eval_positions(m['effects.edge_wear'].edge_wear_group(), m['effects.edge_wear'].add_edge_wear)),
-                  ("eval wood_wear", lambda m: eval_positions(m['materials.wood.wood_damage'].wood_wear_group(), m['effects.edge_wear'].add_edge_wear))):
+    for k, fn in (("eval edge_wear", lambda m: eval_positions(m['effects.wear'].edge_wear_group(), m['effects.wear'].add_edge_wear)),
+                  ("eval wood_wear", lambda m: eval_positions(m['materials.wood.wood_damage'].wood_wear_group(), m['effects.wear'].add_edge_wear))):
         bpy.ops.wm.read_homefile(use_empty=True)
         try:
             res[k] = B(lambda: fn(mods()))()

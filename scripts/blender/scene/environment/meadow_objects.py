@@ -1,6 +1,6 @@
 """Meadow objects; implementation for scatter."""
 import bpy
-from effects.edge_wear import set_input
+from effects.wear import set_input
 
 
 def frustum_tangents(cam, res, margin=1.15):

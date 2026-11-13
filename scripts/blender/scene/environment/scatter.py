@@ -7,7 +7,7 @@
 Points are distributed on each target's faces where Z < `z_max` AND a 0.6/m noise > `patch`
 (0 = everywhere), then instanced with random rotation and 0.6-1.3 x `scale`. The patch threshold
 is sensitive near 0.5: on one wall 0.42 blanketed it, 0.48 gave patches, 0.53 left nothing.
-Inputs are set through effects.edge_wear.set_input (mod["id"] = v raises).
+Inputs are set through effects.wear.set_input (mod["id"] = v raises).
 
 Meadow / grass on terrain (references/materials/vegetation/vegetation.md):
     sos = load_scatter_on_surface()                   # Blender's own essentials group
@@ -31,7 +31,7 @@ import os
 
 import bpy
 
-from effects.edge_wear import set_input
+from effects.wear import set_input
 
 
 # --- meadow --------------------------------------------------------------------------------

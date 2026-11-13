@@ -3,13 +3,13 @@
 ## 1. Overview
 Broad tone variation across a surface.
 
-**Use when:** the base reads too even; localized dirt and damage belong to surface-wear.md.
+**Use when:** the base reads too even; localized dirt and damage belong to wear/wear.md.
 
 ## 2. Layers and node-editor diagram
 ```
  +-- VARIATION: MACRO TONE — LAYER DIAGRAM --------------------------+
  | §4.1 Macro tone -> Base Color x, Roughness +                     |
- | GENERIC: surface-wear.md -> localized dirt and damage            |
+ | GENERIC: wear/wear.md -> localized dirt and damage            |
  +----------------------------------------------------------------+
  world position -> slow noise -> albedo multiplier / roughness addition
                 -> independent amount switches -> AOVs -> shader inputs
@@ -38,7 +38,7 @@ Broad tone variation across a surface.
 ### Generic layers
 | Layer | Reference | Note for this effect |
 |---|---|---|
-| Localized dirt and damage | surface-wear.md | owns mark extent and image-based strength calibration |
+| Localized dirt and damage | wear/wear.md | extent: wear/wear-locations.md; image-based strength: wear/wear.md |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

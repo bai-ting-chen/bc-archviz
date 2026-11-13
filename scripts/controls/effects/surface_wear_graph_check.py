@@ -12,10 +12,11 @@ import bpy
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'blender'))
 from core.assets import set_project
 from materials.shared.nodes import G, sock
-from effects.surface_wear import WearLayer, wear_factor, apply_surface_wear
-from effects.surface_wear_defaults import DEFAULT_SOURCES
-from effects import surface_wear_defaults,surface_wear_hybrid
-from effects.surface_wear_masks import asset_mask, scan_size_m
+from effects.wear.wear import WearLayer, wear_factor, apply_surface_wear
+from effects.wear.defaults import DEFAULT_SOURCES
+from effects.wear import defaults as surface_wear_defaults, hybrid as surface_wear_hybrid
+from effects.wear import scratches as wear_scratches
+from effects.wear.masks import asset_mask, scan_size_m
 
 
 def _graph(kind, settings=None):
@@ -47,26 +48,34 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:])
     set_project(args.project)
-    assert DEFAULT_SOURCES == dict.fromkeys(('grunge', 'dried-marks', 'worn-through', 'scratches'), 'hybrid')
-    from effects.surface_wear_tiling import stochastic_mask
+    assert DEFAULT_SOURCES == dict.fromkeys(('grunge', 'dried-marks', 'chipping', 'scratches'), 'hybrid')
+    from effects.wear.tiling import stochastic_mask
     assert surface_wear_hybrid.stochastic_mask is stochastic_mask
     assert 'stamps' not in DEFAULT_SOURCES.values()
+    from effects.wear.wear import canonical_layer
+    assert canonical_layer('worn-through') == 'chipping'
+    for source in (None, 'procedural', 'mask', 'hybrid'):
+        alias_graph, factor = _graph('worn-through', WearLayer(source=source))
+        assert any(node.type == 'FRAME' and node.label == 'surface-wear: chipping'
+                   for node in alias_graph.nt.nodes)
+
     for text, expected in (('70 x 70 cm',(.7,.7)),('700 x 1000 mm',(.7,1.)),
                            ('2 x 3 m',(2.,3.)),('70 cm x 1 m',(.7,1.)),('0.7 m',(.7,.7))):
         assert all(abs(a-b)<1e-12 for a,b in zip(scan_size_m({'scan':text}),expected)),text
     surface_wear_defaults._missing_reported.clear()
     missing_scratch=io.StringIO()
-    with patch.object(surface_wear_hybrid,'asset_mask',return_value=None), contextlib.redirect_stdout(missing_scratch):
+    with patch.object(wear_scratches,'asset_mask',return_value=None), contextlib.redirect_stdout(missing_scratch):
         for _ in range(2):
             g,_=_graph('scratches')
             assert not any(n.type=='TEX_IMAGE' for n in g.nt.nodes)
             assert sum(n.bl_idname=='ShaderNodeVectorRotate' for n in g.nt.nodes)==4
     scratch_log=missing_scratch.getvalue().splitlines()
     assert len(scratch_log)==1 and 'vdekdjrc' in scratch_log[0] and 'Fab search:' in scratch_log[0]
-    with patch.object(surface_wear_hybrid,'asset_mask',side_effect=AssertionError('Disabled asset lookup')), \
+    with patch.object(wear_scratches,'asset_mask',side_effect=AssertionError('Disabled asset lookup')), \
+         patch.object(surface_wear_hybrid,'asset_mask',side_effect=AssertionError('Disabled asset lookup')), \
          patch.object(surface_wear_defaults,'asset_mask',side_effect=AssertionError('Disabled asset lookup')), \
-         patch('effects.surface_wear_chips.asset_mask',side_effect=AssertionError('Disabled asset lookup')), \
-         patch('effects.surface_wear_stamps.stamps_field',side_effect=AssertionError('Disabled stamp lookup')):
+         patch('effects.wear.chipping.asset_mask',side_effect=AssertionError('Disabled asset lookup')), \
+         patch('effects.wear.stamps.stamps_field',side_effect=AssertionError('Disabled stamp lookup')):
         for kind in DEFAULT_SOURCES:
             for source in (None,'procedural','mask','hybrid','stamps'):
                 g,factor=_graph(kind,WearLayer(enabled=False,source=source))
@@ -74,7 +83,7 @@ def main():
                 assert factor.node.inputs[0].links[0].from_socket.default_value==0
     for kind, ids in (('grunge', {'uh4tfagc','uh4uabdc'}),
                       ('dried-marks', {'uh4tdhic','tjwtbgvc'}),
-                      ('worn-through', {'ub1meemn','tmulfghdy'})):
+                      ('chipping', {'ub1meemn','tmulfghdy'})):
         mat = bpy.data.materials.new('hybrid-parts-' + kind)
         graph = G(mat)
         parts = {}
@@ -86,16 +95,16 @@ def main():
         assert product.inputs[0].links[0].from_socket == parts['region']
         assert product.inputs[1].links[0].from_socket == parts['interior']
         assert not any(n.type == 'GROUP' for n in graph.nt.nodes), kind
-        if kind == 'worn-through':
+        if kind == 'chipping':
             assert parts['region'].node.operation == 'GREATER_THAN'
             assert parts['interior'].node.operation == 'GREATER_THAN'
-            controls=[n for n in graph.nt.nodes if n.label=='surface-worn-through amount']
+            controls=[n for n in graph.nt.nodes if n.label=='surface-chipping amount']
             assert len(controls)==1 and controls[0].outputs[0].default_value==1.
     material = bpy.data.materials.new('binary-coat-selection')
     graph = G(material)
     coat = graph.node('ShaderNodeBsdfPrincipled', (6000,0))
     under = graph.node('ShaderNodeBsdfPrincipled', (6000,-1000))
-    surface = apply_surface_wear(graph, coat, {'worn-through':WearLayer(source='hybrid',amount=.5)},
+    surface = apply_surface_wear(graph, coat, {'chipping':WearLayer(source='hybrid',amount=.5)},
                                  under_shader=under.outputs[0])
     assert surface.node.type=='MIX_SHADER'
     assert surface.node.inputs[1].links[0].from_socket==coat.outputs[0]
@@ -110,23 +119,23 @@ def main():
     mix = next(n for n in g.nt.nodes if n.type == 'MIX' and n.inputs[0].is_linked and n.inputs[0].links[0].from_node == zone)
     assert _image_ids(sock(mix.inputs, 'A')) == {'tjwtbgvc'}
     assert _image_ids(sock(mix.inputs, 'B')) == {'uh4tdhic'}
-    for kind in ('grunge', 'dried-marks', 'worn-through'):
+    for kind in ('grunge', 'dried-marks', 'chipping'):
         g, _ = _graph(kind, WearLayer(source='procedural'))
         assert not any(n.type == 'TEX_IMAGE' for n in g.nt.nodes)
-    g, _ = _graph('worn-through')
+    g, _ = _graph('chipping')
     assert {Path(n.image.filepath).parent.name for n in g.nt.nodes if n.type=='TEX_IMAGE'}=={'ub1meemn','tmulfghdy'}
-    from effects.surface_wear_hybrid import _interior_masks, HybridSource
-    from effects.surface_wear_chips import flaked_paint_masks
+    from effects.wear.hybrid import _interior_masks, HybridSource
+    from effects.wear.chipping import flaked_paint_masks
     assert all((m.black,m.white,m.gamma,m.invert)==(0.,1.,1.,False)
                for m in _interior_masks('grunge',HybridSource(),None))
     chips=flaked_paint_masks()
     assert [m.invert for m in chips]==[False,True]
     assert all('Roughness' in Path(m.path).stem for m in chips)
-    with patch('effects.surface_wear_chips.asset_mask',return_value=None), contextlib.redirect_stdout(io.StringIO()):
+    with patch('effects.wear.chipping.asset_mask',return_value=None), contextlib.redirect_stdout(io.StringIO()):
         parts={}
         mat=bpy.data.materials.new('missing-chip-fallback')
         g=G(mat)
-        factor,_=wear_factor(g,'worn-through',WearLayer(amount=.5),components=parts)
+        factor,_=wear_factor(g,'chipping',WearLayer(amount=.5),components=parts)
         assert parts=={} and not any(n.type=='TEX_IMAGE' for n in g.nt.nodes)
         assert factor.node.inputs[0].links[0].from_socket.default_value==.5
     g, _ = _graph('scratches', WearLayer(source='procedural'))

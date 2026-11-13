@@ -3,7 +3,7 @@ import bpy
 from mathutils import Vector
 from effects.caustics.caustic_graph import caustic_sheet_group
 from effects.caustics.caustic_shading import caustic_sheet_material
-from effects.edge_chips import set_input
+from effects.wear.chipping import set_input
 
 
 def add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_tex=None,

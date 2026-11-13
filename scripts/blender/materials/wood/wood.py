@@ -1,6 +1,6 @@
 """Wood material helpers; canonical implementations."""
 import bpy
-from effects.round_edges import round_shader
+from effects.wear.wear_locations import round_shader
 from materials.shared.nodes import G, sock
 from materials.shared.pbr import _ph_maps, solve_levels
 

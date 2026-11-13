@@ -1,19 +1,8 @@
-"""Resolve bare-substrate signals verified against each flaked-paint scan's BaseColor."""
-from dataclasses import replace
-from effects.surface_wear_masks import asset_mask
-
-# Pale exposed substrate is rougher in the first scan; green substrate is smoother in the second.
-WORN_SCAN_LEVELS={'tmulfghdy':('Roughness',.80,.85,False),
-                  'ub1meemn':('Roughness',.65,.72,True)}
+"""Deprecated: use effects.wear.chipping; thin re-export marked for removal (see MIGRATE.md)."""
+from effects.wear.chipping import *
+from importlib import import_module as _import_module
+_owner = _import_module("effects.wear.chipping")
 
 
-def flaked_paint_masks(asset_ids=tuple(WORN_SCAN_LEVELS),project=None):
-    """Resolve per-scan Roughness polarity: white is exposed substrate, black is intact paint."""
-    result=[]
-    for asset_id in asset_ids:
-        map_name,black,white,invert=WORN_SCAN_LEVELS[asset_id]
-        mask=asset_mask(asset_id,map_name,project)
-        result.append(replace(mask,black=black,white=white,invert=invert) if mask is not None else None)
-    return result
-
-
+def __getattr__(name):
+    return getattr(_owner, name)

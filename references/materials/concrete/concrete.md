@@ -14,8 +14,8 @@ used here with concrete settings.
               CONCRETE (monolithic and burnished) — LAYER DIAGRAM
  ┌───────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                          GENERIC (own reference)            │
- │ 1  Base recipe and tone  → colour, rough   Concave corners → edge-wear.md │
- │ 2  Zone masks (Normal Z) → masks           Runoff, cracks  → edge-wear.md │
+ │ 1  Base recipe and tone  → colour, rough   Concave corners → wear/dirt.md │
+ │ 2  Zone masks (Normal Z) → masks           Runoff, cracks  → wear/wear.md │
  │ 3  Grunge patches        → colour, rough                                  │
  │ 4  Damp band at the foot → colour, rough                                  │
  │ 5  Leak stain            → see Runoff                                     │
@@ -109,11 +109,11 @@ used here with concrete settings.
 
 ### 4.5 Leak stain
 - Procedural, no bitmap: `add_leak_field` on the object, then `add_runoff` on its `weathered_concrete`
-  material. Method and parameters: [edge-wear.md](../../effects/edge-wear.md) › Run-off.
+  material. Method and parameters: [water-marks.md](../../effects/wear/water-marks.md) › Run-off.
 
 ### 4.6 Concave-corner grime
 - AO node set to **Outside**, not Inside, × fine noise, into the grunge darkening. Method and related
-  runoff: [edge-wear.md](../../effects/edge-wear.md) › Concave corners.
+  contact field: [wear-locations.md](../../effects/wear/wear-locations.md) §4.1.
 
 | Parameter | Value |
 |---|---|
@@ -189,9 +189,9 @@ used here with concrete settings.
 ### Generic layers, concrete settings
 | Layer | Reference | Note for this material |
 |---|---|---|
-| Surface wear | [surface-wear.md](../../effects/surface-wear.md) | grunge, scratches, dried marks and worn-through coatings |
-| Concave corners | [edge-wear.md](../../effects/edge-wear.md) › Concave corners | method behind §4.6 |
-| Runoff streaks, cracks | [edge-wear.md](../../effects/edge-wear.md) › §4.9–4.11 | for the weathered scanned base (§4.1) |
+| Wear family | [wear.md](../../effects/wear/wear.md) | grunge, scratches, dried marks and chipping coatings |
+| Concave corners | [dirt.md](../../effects/wear/dirt.md) › §4.1 Dust and build-up | method behind §4.6 |
+| Runoff streaks, cracks | [water-marks.md](../../effects/wear/water-marks.md), [cracks.md](../../effects/wear/cracks.md) | for the weathered scanned base (§4.1) |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |
@@ -208,8 +208,8 @@ used here with concrete settings.
 | Drum or infill does not match the walls | relit instead of given its own albedo | own albedo from the measured ratio (§4.7) |
 | Soffits look like the fascia | one material slot | assign the soffit slot (§4.12) |
 | Neutral white turns cyan | bounce colour | correct the albedo toward the reference (§4.11) |
-| No stain on the wall | no leak field on the object, or `leak_ok` 0 | view it with `mask_view=attr: leak_ok`; edge-wear.md › Run-off (§4.5) |
-| Streaks look like a regular pattern | presence and length too even | vary `presence` and `max_len` in `add_runoff(leak=…)`; edge-wear.md › Run-off (§4.5) |
+| No stain on the wall | no leak field on the object, or `leak_ok` 0 | view it with `mask_view=attr: leak_ok`; wear/water-marks.md › Run-off (§4.5) |
+| Streaks look like a regular pattern | presence and length too even | vary `presence` and `max_len` in `add_runoff(leak=…)`; wear/water-marks.md › Run-off (§4.5) |
 
 No generic problems are listed in this file. The general list is in troubleshooting.md (named here,
 not linked, so this file adds no reference loop).

@@ -48,7 +48,7 @@ Read the files for the stage you are in.
 ### 3. Camera, light and materials (→ GAT_03)
 - [Lighting and camera](references/scene/lighting-camera.md): HDRI, lumens/IES, camera, reference solve, fog
 - [Materials](references/materials/index.md): general rules, material families (water in `materials/water/`) and
-  shared effects (`references/effects/`: edge wear, variation, wet surfaces, caustics, anisotropy); the index routes all three
+  shared effects (`references/effects/`: wear, variation, wet surfaces, caustics, anisotropy); the index routes all three
 
 ### 4. Look rounds and controls (→ GAT_04)
 - [Renderer choice](references/renderer/renderer-choice.md): Cycles, or LuxCore for caustics
@@ -72,7 +72,8 @@ Reference folders and code folders use the same topic names. Each code folder's 
 | Research (reference matching, solving, video) | `references/research/` | `scripts/research/` |
 | Scene: Rhino and Max import, camera, lighting, environment | `references/scene/` | `scripts/blender/core/`, `scripts/blender/scene/`, `scripts/scene/` |
 | Materials, one folder per family | `references/materials/` | `scripts/blender/materials/` |
-| Effects: edge wear, caustics, variation, wet surfaces | `references/effects/` | `scripts/blender/effects/` |
+| Effects: caustics, variation, wet surfaces | `references/effects/` | `scripts/blender/effects/` |
+| Wear by mechanism and shared locations/patterns | `references/effects/wear/` | `scripts/blender/effects/wear/` |
 | Renderer: Cycles and LuxCore, finals | `references/renderer/` | `scripts/blender/renderer/` |
 | Review: controls, validation | `references/review/` | `scripts/controls/`, `scripts/review/` |
 | Rook geometry extraction (host) | — | `scripts/rhino/` |

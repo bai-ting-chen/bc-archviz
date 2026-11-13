@@ -10,8 +10,8 @@ Metal, polished or brushed. Both are one material; only roughness and anisotropy
  | 4.1 Base clean metal       → metallic response, colour, roughness       |
  | 4.2 Brush streaks          → anisotropy, roughness                       |
  | GENERIC                                                                |
- | edge-wear.md               → rounded normal/geometry, edge line, dust  |
- | surface-wear.md            → grunge, scratches, marks: colour, roughness |
+ | wear/wear.md               → rounded normal/geometry, edge line, dust  |
+ | wear/wear.md            → grunge, scratches, marks: colour, roughness |
  | variation-macro-tone.md → macro tone: colour                         |
  +------------------------------------------------------------------------+
 ```
@@ -53,8 +53,8 @@ Directional UV and streak noise (§4.2) → BSDF Tangent / Anisotropy / Roughnes
 ### Generic layers, metal settings
 | Layer | Reference | Note for this material |
 |---|---|---|
-| Surface wear | [surface-wear.md](../../effects/surface-wear.md) | grunge, scratches, dried marks and worn-through coatings |
-| Rounded edge/bevel, edge line, dust in joints | [edge-wear.md](../../effects/edge-wear.md) | keep the clean metal base beneath the wear |
+| Wear family | [wear.md](../../effects/wear/wear.md) | grunge, scratches, dried marks and chipping coatings |
+| Rounding, edge line, joint dust | [wear.md](../../effects/wear/wear.md) | keep the clean metal base beneath the wear |
 | Macro tone | [variation-macro-tone.md](../../effects/variation-macro-tone.md) | vary base colour and roughness |
 
 ## 5. Troubleshooting

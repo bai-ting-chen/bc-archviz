@@ -110,10 +110,10 @@ def main():
         sc.view_settings.exposure = 0
         sc.view_settings.view_transform = "Standard"
     def _zero_gn_input(input_name):
-        """Zero a Geometry Nodes modifier input on every object whose group has it (effects.edge_wear.set_input)."""
+        """Zero a Geometry Nodes modifier input on every object whose group has it (effects.wear.set_input)."""
         import os
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from effects.edge_wear import set_input
+        from effects.wear import set_input
         for ob in bpy.data.objects:
             for md in ob.modifiers:
                 if md.type == "NODES" and md.node_group and any(

@@ -9,9 +9,11 @@ MATCHING_TOLERANCE = dict(mean_relative=.03, sd_relative=.03, coverage_absolute=
 
 
 def _assets(manifest, project):
-    from effects.surface_wear_masks import asset_mask, mask_dimensions_m
+    from effects.wear.masks import asset_mask, mask_dimensions_m
+    from effects.wear.layers import canonical_layer
     result = {}
     for kind, candidates in json.loads(manifest.read_text()).items():
+        kind = canonical_layer(kind)
         result[kind] = []
         for row in candidates:
             mask = asset_mask(row['id'], row['map'], project)
@@ -48,7 +50,7 @@ def _tolerances(target):
 
 
 def _set_levels(material, kind, parameters):
-    from effects.surface_wear_masks import MASK_LEVELS_LABEL, MASK_GAMMA_LABEL
+    from effects.wear.masks import MASK_LEVELS_LABEL, MASK_GAMMA_LABEL
     frame = next(n for n in material.node_tree.nodes if n.type == 'FRAME' and n.label == 'surface-wear: ' + kind)
     nodes = [n for n in material.node_tree.nodes if n.parent == frame]
     for levels in (n for n in nodes if n.label == MASK_LEVELS_LABEL):
@@ -83,7 +85,7 @@ def _candidate(out, args, kind, candidate, targets, regions):
     import bpy
     import OpenImageIO as oiio
     import surface_wear_lab as lab
-    from effects.surface_wear import MaskSource
+    from effects.wear.wear import MaskSource
     # All downloaded maps in this control are grayscale RGB; verify that rather than infer a channel.
     image = oiio.ImageBuf(candidate['path']).get_pixels()
     assert image.shape[:2] == (4096, 4096)
@@ -98,7 +100,7 @@ def _candidate(out, args, kind, candidate, targets, regions):
     lab.render(out, candidate['id'] + '-unmodified')
     # A hard coating mask needs coherent patches before thresholding; its micrograin otherwise
     # leaves too many partially covered final pixels to match the procedural solid-patch SD.
-    sigma_pixels = 1.5 if kind == 'worn-through' else .5
+    sigma_pixels = 1.5 if kind == 'chipping' else .5
     width_m = sc.camera.data.ortho_scale
     filtered_path, filtering = _prefilter(out, candidate, image[..., 0],
                                          width_m / lab.FRAME_PIXELS[0], sigma_pixels)
@@ -128,7 +130,7 @@ def _candidate(out, args, kind, candidate, targets, regions):
     for iteration in range(5):
         parameters = {}
         for material, name in zip(materials, targets):
-            parameters[name] = fit_levels(samples[name], goals[name], hard=kind == 'worn-through',
+            parameters[name] = fit_levels(samples[name], goals[name], hard=kind == 'chipping',
                                           extent=extents[name])
             _set_levels(material, kind, parameters[name])
         passes = lab.render(out, candidate['id'] + '-fit-' + str(iteration))

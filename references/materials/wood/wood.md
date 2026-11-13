@@ -7,12 +7,12 @@ Wood: coated wood, cladding boards, battens and veneers.
 This file is a single material family, not a stack. The coat sits on the wood base in `coated_wood()`
 (§4.1), and cladding grain is set by UV (§4.2). The coat rules in §4.3 and §4.4 apply to the same
 coat, so there is no separate diagram. Worn edges (§4.5) use the edge field and chips of
-[edge-wear.md](../../effects/edge-wear.md).
+[wear.md](../../effects/wear/wear.md).
 
 ## 3. Code
 - `scripts/blender/materials/wood/wood.py`: `coated_wood()` (`materials.wood.wood`).
 - `scripts/blender/core/archviz.py`: `archviz.directional_uv`, defined in `core/uv.py`.
-- Worn edges: `round_geometry(obj)` (`effects/round_edges.py`), `wood_wear_group`
+- Worn edges: `round_geometry(obj)` (`effects/wear/wear_locations.py`), `wood_wear_group`
   (`wood_damage.py`), `weathered_wood` (`wood_shading.py`); control `scripts/controls/material/wood_wear_graph_check.py`.
 
 ## 4. Instructions and parameters, per layer
@@ -68,8 +68,8 @@ coat, so there is no separate diagram. Worn edges (§4.5) use the edge field and
 ### Generic layers, wood settings
 | Layer | Reference | Wood note |
 |---|---|---|
-| Surface wear | [surface-wear.md](../../effects/surface-wear.md) | grunge, scratches, dried marks and worn-through coatings |
-| Edge field and chips | [edge-wear.md](../../effects/edge-wear.md) | wood uses its own group (§4.5) |
+| Wear family | [wear.md](../../effects/wear/wear.md) | grunge, scratches, dried marks and chipping coatings |
+| Edge field and chips | [wear-locations.md](../../effects/wear/wear-locations.md), [chipping.md](../../effects/wear/chipping.md) | wood uses its own group (§4.5) |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

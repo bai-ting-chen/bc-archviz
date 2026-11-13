@@ -1,6 +1,6 @@
 """Caustic graph; implementation for gn_caustics."""
 import bpy
-from effects.edge_chips import input_socket as _input
+from effects.wear.chipping import input_socket as _input
 from materials.shared.nodes import G, sock
 
 

@@ -1,5 +1,5 @@
 """Scatter objects; implementation for scatter."""
-from effects.edge_wear import set_input
+from effects.wear import set_input
 from scene.environment.scatter_graph import scatter_group
 
 

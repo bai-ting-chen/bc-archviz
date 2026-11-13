@@ -13,7 +13,7 @@ def polished_granite(name="GRANITE_POLISHED", grain_m=0.006, roughness=0.04, ior
     """Procedural speckled granite in 3-D world space (a solid texture: cut faces and edges agree).
     Crystals = Voronoi cells of ~grain_m, each coloured by its random value through a constant
     ramp (black mica / brown feldspar / grey quartz / cream feldspar); a coarse noise drifts the
-    base. Polished = one smooth dielectric (no coat). For MNEE casters/receivers apply effects.round_edges.round_geometry
+    base. Polished = one smooth dielectric (no coat). For MNEE casters/receivers apply effects.wear.wear_locations.round_geometry
     on the object; the shared scene layer owns the radius."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     g = G(mat)

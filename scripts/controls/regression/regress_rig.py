@@ -12,7 +12,7 @@ def eval_positions(group, add):
     """Record evaluated positions after adding a wear group to a diced cube."""
     bpy.ops.mesh.primitive_cube_add(size=0.4)
     ob = bpy.context.object
-    import effects.edge_wear as wear
+    import effects.wear as wear
     wear.dice(ob, 0.05)
     add(ob, group)
     dg = bpy.context.evaluated_depsgraph_get()

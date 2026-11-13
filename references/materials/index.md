@@ -5,12 +5,12 @@ Recipes describe node structure and mechanisms; tune scene values in study notes
 
 ## Layer assembly (MAT_07)
 - **Colour and roughness:** each layer is a multiplier around 1 on the base, chained in sequence.
-   Older helpers that mix whole BSDFs or MAXIMUM masks (`edge_wear.weathered_concrete`,
+   Older helpers that mix whole BSDFs or MAXIMUM masks (`effects.wear.concrete_shading.weathered_concrete`,
    `add_runoff`) predate MAT_07: migrate them when they are next changed.
 - **Height:** geometry-scale relief goes to the Displacement output ([displacement.md](displacement/displacement.md)),
    surface texture to a Bump node on the Normal input.
 - **Switching off (MAT_07):** a Value node per layer that scales its deviation from 1 does it; an
-   AOV of the layer's multiplier lets you measure what reaches the image ([surface-wear.md](../effects/surface-wear.md)).
+   AOV of the layer's multiplier lets you measure what reaches the image ([wear.md](../effects/wear/wear.md)).
 - **Geometry fields** measured in Geometry Nodes run before modifiers that move the mesh (RULES MAT_08).
 
 ## Which file
@@ -49,8 +49,14 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 | Effects (shared) | Canonical helper |
 |---|---|
 | [Anisotropy](../effects/anisotropy.md) | `effects.anisotropy` |
-| [Edge Wear](../effects/edge-wear.md) | `effects.edge_wear` |
-| [Surface Wear](../effects/surface-wear.md) | `effects.surface_wear` |
+| [Wear family](../effects/wear/wear.md) | `effects.wear` |
+| [Wear locations](../effects/wear/wear-locations.md) | `effects.wear.wear_locations` |
+| [Dirt](../effects/wear/dirt.md) | `effects.wear.dirt` |
+| [Water marks](../effects/wear/water-marks.md) | `effects.wear.water_marks` |
+| [Chipping](../effects/wear/chipping.md) | `effects.wear.chipping` |
+| [Scratches](../effects/wear/scratches.md) | `effects.wear.scratches` |
+| [Cracks](../effects/wear/cracks.md) | `effects.wear.cracks` |
+| [Edge line](../effects/wear/edge-line.md) | `effects.wear.edge_line` |
 | [Variation: Tiling](../effects/variation-tiling.md) | `effects.variation_tiling` |
 | [Variation: Per Unit, Shading](../effects/variation-per-unit-shading.md) | `effects.variation_per_unit_shading` |
 | [Variation: Per Unit, Geometry](../effects/variation-per-unit-geometry.md) | no builder yet |

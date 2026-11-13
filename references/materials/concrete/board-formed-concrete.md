@@ -13,10 +13,10 @@ used here with board-form settings.
                              BOARD-FORMED CONCRETE — LAYER DIAGRAM
  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                         GENERIC (own reference)                            │
- │ 1 Base concrete      → colour, rough  Chips at joints   → edge-wear.md                   │
- │ 2 Board layout/tilt  → geometry       Dirty joints/edge → edge-wear.md                   │
- │ 3 Joint marks        → displacement   Run-off, leaks    → edge-wear.md                   │
- │ 4 Grain per board    → bump + ink     Concave dust      → edge-wear.md                   │
+ │ 1 Base concrete      → colour, rough  Chips at joints   → wear/chipping.md                   │
+ │ 2 Board layout/tilt  → geometry       Dirty joints/edge → wear/dirt.md                   │
+ │ 3 Joint marks        → displacement   Run-off, leaks    → wear/water-marks.md                   │
+ │ 4 Grain per board    → bump + ink     Concave dust      → wear/dirt.md                   │
  │ 5 Board tone         → colour         Tone key          → variation-per-unit-shading.md  │
  │                                       Tilt, step        → variation-per-unit-geometry.md │
  │                                       Wet               → wet-surfaces.md                │
@@ -75,9 +75,9 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
   cannot cancel another (a summed groove erased the fin) or exceed the cap.
 - **Clamp every distance** that drives a fin or a displacement.
 - **Chips:** mostly the thin paste fin breaking off in short ragged lengths, plus small shallow
-  losses at the arris — no deep bites. Method and fresh-break colour: [edge-wear.md](../../effects/edge-wear.md)
+  losses at the arris — no deep bites. Method and fresh-break colour: [chipping.md](../../effects/wear/chipping.md)
   (RULES MAT_02), sized from the shot (RULES MAT_03). On meshes already subdivided wall-wide, build
-  the chip field as displacement through the adaptive dicing (edge-wear.md › Chips as displacement).
+  the chip field as displacement through the adaptive dicing (wear/chipping.md › §4.1 Edge chips and fresh breaks).
 
 | Parameter | Value |
 |---|---|
@@ -146,11 +146,11 @@ final view's mm per pixel: relief finer than a pixel reads only through its tone
 ### 4.7 Generic layers, board-form settings
 | Layer | Reference | Board-form note |
 |---|---|---|
-| Chips | [edge-wear.md](../../effects/edge-wear.md) | at board arrises, as displacement (§4.3) |
-| Dirty joints / edge grime | [edge-wear.md](../../effects/edge-wear.md) | joint band rougher and darker (§4.3) |
-| Run-off streaks | [edge-wear.md](../../effects/edge-wear.md) › Runoff | from each wall's own top; vertical faces only |
-| Joint leaks | [edge-wear.md](../../effects/edge-wear.md) › Runoff | short drips under the horizontal joints, a pattern per joint, ending at the next joint |
-| Concave dust | [edge-wear.md](../../effects/edge-wear.md) › Edge dust (RULES MAT_06) | at inside corners and wall feet |
+| Chips | [chipping.md](../../effects/wear/chipping.md) | at board arrises, as displacement (§4.3) |
+| Dirty joints / edge grime | [dirt.md](../../effects/wear/dirt.md) | joint band rougher and darker (§4.3) |
+| Run-off streaks | [water-marks.md](../../effects/wear/water-marks.md) › Run-off | from each wall's own top; vertical faces only |
+| Joint leaks | [water-marks.md](../../effects/wear/water-marks.md) › Run-off | short drips under the horizontal joints, a pattern per joint, ending at the next joint |
+| Concave dust | [dirt.md](../../effects/wear/dirt.md) › §4.1 Dust and build-up (RULES MAT_06) | at inside corners and wall feet |
 | Wet | [wet-surfaces.md](../../effects/wet-surfaces.md) | darkens and smooths all layers above |
 
 ## 5. Troubleshooting

@@ -260,4 +260,59 @@ From: LAPTOP-25
 - `variation_lab.py --only marks --check-only` and `surface_wear_graph_check.py` pass headless.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
+# MIGRATE: wear family organised by mechanism
+From: LAPTOP-25
+
+## What changed
+- `references/effects/edge-wear.md` and `surface-wear.md` are deprecated pointer files.
+  Start at `references/effects/wear/wear.md`. Locations no longer separate edge from face wear.
+- Canonical layer name `worn-through` → `chipping`, including `var_surface-chipping` AOV names,
+  frame labels and control manifests. The old layer spelling remains an input alias.
+- Defaults, scalar settings, switches and graph behaviour are unchanged. Scratch hybrid remains held;
+  grunge's 0.20 edge width is unchanged pending a render test.
+
+| Old reference section | New reference under `references/effects/wear/` |
+|---|---|
+| Edge §4.1–4.2, surface location settings, leak origin | `wear-locations.md` |
+| Edge §4.3 | `edge-line.md` |
+| Edge §4.4, surface §4.1 | `dirt.md` |
+| Edge §4.6, surface §4.3 | `water-marks.md` |
+| Edge §4.5, surface §4.4 | `chipping.md` |
+| Surface §4.2 | `scratches.md` |
+| Edge §4.7 | `cracks.md` |
+| Shared assembly, source choice, tiling, loading and strength matching | `wear.md` |
+
+Canonical Python modules moved from `scripts/blender/effects/` into its `wear/` package.
+Old modules are thin re-exports marked for removal; update imports in other clones now.
+
+| Old `effects.*` module | New `effects.wear.*` owner |
+|---|---|
+| `edge_wear` | package assembly API `effects.wear` |
+| `surface_wear` | `wear` (`grunge` implementation in `dirt`) |
+| `edge_chips`, `surface_wear_chips` | `chipping` (clean `edge_field` in `wear_locations`) |
+| `edge_dirt` | `dirt`; line profile in `edge_line`, shared support in `edge_profile` |
+| `round_edges`, `surface_wear_extent` | `wear_locations` |
+| `runoff`, `surface_wear_deposits` | `water_marks` |
+| `cracks`, `edge_cracks`, `crack_ribbon` | same basename inside `wear` |
+| `leak_field` | `leak_field` |
+| `edge_masks`, `edge_shading` | `mask_views`, `concrete_shading` |
+| `wear_nodes` | `nodes` |
+| `surface_wear_fields` | `patterns` dispatcher; patterns live in mechanism modules |
+| `surface_wear_masks`, `surface_wear_defaults`, `surface_wear_hybrid` | `masks`, `defaults`, `hybrid` (held `scratch_hybrid` in `scratches`) |
+| `surface_wear_tiling`, `surface_wear_stamps`, `surface_wear_atlas` | `tiling`, `stamps`, `atlas` |
+
+## Steps
+- Change external imports/doc bookmarks to the owners above; change layer keys and requested AOVs
+  to `chipping`. Existing finished studies need no changes. Do not edit downloaded assets.
+- Delete stale skill `__pycache__` folders. Keep the compatibility re-exports until their removal is announced.
+
+## Check after pull
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+- `python scripts/workflow/helper_index.py` regenerates the helper index.
+- Headless Blender 5.3: `--python-exit-code 1 --python scripts/controls/effects/edge_wear_graph_check.py -- <out.json>`
+  with `ARCHVIZ_PROJECT` set to a library containing `concrete_wall_009`.
+- Headless Blender 5.3: `--python-exit-code 1 --python scripts/controls/effects/surface_wear_graph_check.py -- --project <project> --out <dir>`.
+- Snapshot source graphs with `--python scripts/controls/effects/wear_graph_check.py -- --project <project> --out <json>`;
+  add `--baseline <old-json>` to compare every source/switch path. Only the declared layer-label rename is normalised.
+
 Remove each section after applying it; delete this file when none is left.

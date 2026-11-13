@@ -6,13 +6,13 @@ from materials.wood import wood as _mat_wood
 
 from materials.shared.nodes import sock
 
-from effects.wear_nodes import attr as _attr
+from effects.wear.nodes import attr as _attr
 
-from effects.wear_nodes import noise as _noise
+from effects.wear.nodes import noise as _noise
 
-from effects.wear_nodes import range_ as _range
+from effects.wear.nodes import range_ as _range
 
-from effects.wear_nodes import math_ as _math
+from effects.wear.nodes import math_ as _math
 
 def weathered_wood(name="PINE_WEATHERED", wear_band=0.012, wear_amount=0.9,
                    inner_tint=(0.80, 0.60, 0.36), inner_mix=0.30, inner_gain=1.7):

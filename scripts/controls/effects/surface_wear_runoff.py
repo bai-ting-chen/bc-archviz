@@ -5,10 +5,10 @@ def runoff_fixture(project, samples, kind, settings):
     """Adapt only the lab's concrete material to the existing run-off builder contract."""
     import bpy
     import surface_wear_lab as lab
-    from effects.surface_wear import WearLayer, image_mask
-    from effects.runoff import add_runoff
-    from effects.leak_field import add_leak_field
-    from effects.edge_dirt import GRIME_TINT
+    from effects.wear.wear import WearLayer, image_mask
+    from effects.wear.water_marks import add_runoff
+    from effects.wear.leak_field import add_leak_field
+    from effects.wear.dirt import GRIME_TINT
     from materials.shared.nodes import G, layer_frame, layer_switch
     sc, materials, regions = lab._fixture(project, samples, 'grunge', WearLayer(enabled=False))
     material = materials[-1]

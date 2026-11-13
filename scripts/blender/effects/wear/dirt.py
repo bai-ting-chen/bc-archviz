@@ -1,0 +1,166 @@
+"""Dust build-up and bordered grunge patterns."""
+from types import SimpleNamespace
+from materials.shared.nodes import G, sock, layer_switch
+from effects.wear.nodes import math_, noise, range_
+from effects.wear.edge_profile import (LINE_WIDTH, DUST_WIDTH, LINE_AMOUNT, DUST_AMOUNT,
+    GRIME_TINT, LINE_GAIN, DUST_SATURATION, LINE_ROUGHNESS, DUST_GAIN, CORNER_MASK_CAP,
+    AO_REACH, EDGE_KINDS)
+from effects.wear.edge_profile import _noise_context, _extent, _falloff, _finish_mask, _vector
+from effects.wear.edge_line import _line_mask
+
+RGB_LUMINANCE = (0.2126, 0.7152, 0.0722)  # scene-linear luminance
+
+def _dust_mask(g, context, fields, width, amount):
+    frame, (x, y) = context.frame, context.loc
+    extent = _extent(g, context, fields.width_noise, width, (0.65, 1.6), 'dust')
+    band, lip = _falloff(g, context, extent, 0.0, 0.002, 'dust')
+    profile = math_(g, 'MULTIPLY', band, lip, (x + 1000, y), frame)
+    patch = fields.presence
+    if context.recipe['dust_floor'] is not None:
+        patch = math_(g, 'ADD', context.recipe['dust_floor'], math_(g, 'MULTIPLY', fields.presence, context.recipe['dust_gain'],
+                      (x + 1000, y - 1900), frame), (x + 1200, y - 1900), frame)
+    broken = math_(g, 'MULTIPLY', profile, patch, (x + 1400, y), frame)
+    broken = math_(g, 'MULTIPLY', broken, context.dust_orientation, (x + 1600, y), frame)
+    return _finish_mask(g, context, broken, amount, 'dust')
+
+
+def edge_dirt_masks(g, dist, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, noise_vec=None,
+                    line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT,
+                    noise_scale=9.0, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside'):
+    """Return line, dust and the reusable outside-vertex join (None for AO corners)."""
+    if line_width <= 0 or dust_width <= 0:
+        raise ValueError('edge dirt widths must be positive')
+    context = SimpleNamespace(dist=dist, frame=frame, loc=loc, recipe=EDGE_KINDS[kind], cap=mask_cap)
+    context.recipe['context'](g, context, line_width)
+    fields = _noise_context(g, context, context.position if noise_vec is None else noise_vec, noise_scale)
+    line = _line_mask(g, context, fields, line_width, line_amount)
+    context.loc = (loc[0], loc[1] - 300)
+    dust = _dust_mask(g, context, fields, dust_width, dust_amount)
+    return line, dust, context.join
+
+
+def corner_dirt_masks(g, line_width=LINE_WIDTH, dust_width=DUST_WIDTH,
+                      line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT,
+                      frame=None, loc=(0, 0), corner_cap=CORNER_MASK_CAP):
+    """Return shared masks using cross-object AO remapped to a distance-like metre field."""
+    x, y = loc
+    ao = g.node('ShaderNodeAmbientOcclusion', (x - 600, y), frame,
+                label='Corner AO (cross-object)', Distance=AO_REACH)
+    ao.inside = False
+    ao.only_local = False
+    ao.samples = 32  # cross-object occlusion rays
+    # A perpendicular contact covers half the AO hemisphere.
+    unit_dist = range_(g, ao.outputs['AO'], 0.5, 1.0, (x - 400, y), frame,
+                       label='corner distance-like 0..1')
+    dist = math_(g, 'MULTIPLY', unit_dist, AO_REACH, (x - 200, y), frame)
+    return edge_dirt_masks(g, dist, line_width, dust_width, line_amount=line_amount,
+                           dust_amount=dust_amount, frame=frame, loc=loc, mask_cap=corner_cap, kind='corner')[:2]
+
+
+def _mix_color(g, a, b, factor, frame, loc, label, blend='MIX', data_type='RGBA'):
+    node = g.node('ShaderNodeMix', loc, frame, label=label)
+    node.data_type, node.blend_type = data_type, blend
+    g._in(node.inputs['Factor'], factor)
+    g._in(sock(node.inputs, 'A'), a)
+    g._in(sock(node.inputs, 'B'), b)
+    return sock(node.outputs, 'Result')
+
+
+def _relative_dust_color(g, color, dust, frame, loc):
+    """Desaturate and gently darken albedo through the independent dust term."""
+    x, y = loc
+    luma = _vector(g, 'DOT_PRODUCT', color, None, (x - 220, y - 140), frame, label='Dust source luminance')
+    luma.inputs[1].default_value = RGB_LUMINANCE
+    desat = _mix_color(g, color, luma.outputs['Value'], 1.0 - DUST_SATURATION,
+                       frame, (x, y), 'Dust relative desaturation')
+    gain = _mix_color(g, desat, (*DUST_GAIN, 1), 1.0, frame, (x + 220, y),
+                      'Dust relative darkening', blend='MULTIPLY')
+    return _mix_color(g, color, gain, dust, frame, (x + 440, y), 'Dust relative albedo')
+
+
+def dust_surface(g, surface, dust, frame=None, loc=(0, 0), line=None):
+    """Apply relative dust/line albedos with line priority, preserving source textures and normals."""
+    # Follow only shader links, so colour/bump subgraphs and other output branches stay intact.
+    pending, seen, bases = [surface.node], set(), []
+    while pending:
+        node = pending.pop()
+        if node in seen:
+            continue
+        seen.add(node)
+        color = node.inputs.get('Base Color') or node.inputs.get('Color')
+        if node.type.startswith('BSDF') and color is not None:
+            bases.append(color)
+        pending.extend(link.from_node for inp in node.inputs if inp.type == 'SHADER'
+                       for link in inp.links)
+    for i, target in enumerate(bases):
+        if target.is_linked:
+            color = target.links[0].from_socket
+        else:
+            value = g.node('ShaderNodeRGB', (loc[0] - 220, loc[1] - i * 250), frame,
+                           label='Dust original albedo')
+            value.outputs[0].default_value = target.default_value
+            color = value.outputs[0]
+        adjusted = _relative_dust_color(g, color, dust, frame, (loc[0], loc[1] - i * 250))
+        if line is not None:
+            gain = _mix_color(g, color, (LINE_GAIN, LINE_GAIN, LINE_GAIN, 1), 1.0, frame,
+                              (loc[0] + 660, loc[1] - i * 250), 'Line relative darkening', blend='MULTIPLY')
+            adjusted = _mix_color(g, adjusted, gain, line, frame,
+                                  (loc[0] + 880, loc[1] - i * 250), 'Line relative albedo')
+            roughness = target.node.inputs.get('Roughness')
+            if roughness is not None:
+                original = roughness.links[0].from_socket if roughness.is_linked else roughness.default_value
+                rough = _mix_color(g, original, LINE_ROUGHNESS, line, frame,
+                                   (loc[0] + 660, loc[1] - i * 250 - 140),
+                                   'Line roughness (unchanged target)', data_type='FLOAT')
+                g.link(rough, roughness)
+        g.link(adjusted, target)
+    return surface
+
+
+def add_corner_dirt(mat, line_width=LINE_WIDTH, dust_width=DUST_WIDTH,
+                    line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, corner_cap=CORNER_MASK_CAP):
+    """Add independently switchable shared line/dust layers to a Cycles surface material."""
+    g = G(mat.node_tree)
+    existing = {role: next((n.outputs[0] for n in g.nt.nodes
+                           if n.label == 'Edge ' + role + ' strength'), None)
+                for role in ('line', 'dust')}
+    frame = 'Corner edge line and dust'
+    g.frame(frame, (0.32, 0.24, 0.16))
+    line, dust = corner_dirt_masks(g, line_width, dust_width, line_amount, dust_amount, frame,
+                                  corner_cap=corner_cap)
+    if all(existing.values()):
+        # Reuse the outside BRDFs and chip exclusions instead of exceeding Cycles' closure limit.
+        for i, (role, corner) in enumerate((('line', line), ('dust', dust))):
+            old = existing[role]
+            consumers = [link.to_socket for link in old.links]
+            union = g.math('MAXIMUM', old, corner, (900, -i * 220), frame)
+            union.node.label = 'Outside + corner ' + role
+            for target in consumers:
+                g.link(union, target)
+        return mat
+    out = next(n for n in g.nt.nodes if n.type == 'OUTPUT_MATERIAL' and n.is_active_output)
+    surface = out.inputs['Surface'].links[0].from_socket
+    result = dust_surface(g, surface, dust, frame, (1400, 0), line=line)
+    g.link(result, out.inputs['Surface'])
+    return mat
+
+
+def grunge(g, scale_m=0.5, target_sd=0.05, detail=6.0, rough=0.6, amount=1.0):
+    """Return the legacy calibrated grunge multiplier, preserving existing callers exactly."""
+    from effects.variation_macro_tone import _moments, _field
+    mean, sd = _moments(detail, rough)
+    noise, frame = _field(g, 'grunge', scale_m, detail, rough)
+    signed = g.math('SUBTRACT', noise, mean, (-1200, 0), frame)
+    gain = g.math('MULTIPLY', signed, target_sd/sd, (-900, 0), frame)
+    raw = g.math('ADD', gain, 1, (-600, 0), frame)
+    return layer_switch(g, 'grunge', raw, amount, 1, frame)
+
+
+
+def grunge_field(g, vector, scale_m, frame=None):
+    """Return the unchanged fine grunge times zero-reaching slow patch pattern."""
+    noise = g.noise(vector, 1 / scale_m, (-1800, 0), frame, detail=3)
+    fine = g.range(noise, .35, .65, (-1500, 0), frame=frame)
+    extent = g.noise(vector, 1 / (scale_m * 4), (-1800, -400), frame)
+    extent = g.range(extent, .43, .57, (-1500, -400), frame=frame)
+    return g.math('MULTIPLY', fine, extent, (-1200, 0), frame)

@@ -14,7 +14,7 @@ from edge_lab_common import scene_setup, box, board_views
 if '--analyze' not in sys.argv:
     import bpy
     import numpy as np
-    from effects.surface_wear import LAYERS, MaskSource, WearLayer, WearExtent, apply_surface_wear, image_mask, wear_factor
+    from effects.wear.wear import LAYERS, MaskSource, WearLayer, WearExtent, apply_surface_wear, image_mask, wear_factor
     from materials.shared.nodes import G
     from variation_lab import render, emission, plane
     from _scene import black_scene, ortho_camera

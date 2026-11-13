@@ -57,7 +57,7 @@ def build_and_render(out, project, samples):
     import bpy
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'blender'))
     import core.archviz as archviz
-    from effects.edge_dirt import LINE_AMOUNT, DUST_AMOUNT
+    from effects.wear.dirt import LINE_AMOUNT, DUST_AMOUNT
     sc, cam = scene_setup(archviz, project, samples, (3.3, -5.5, 3.1), (0.1, 0.35, 1.0), 3.6, track=True)
     mats = _specimens(archviz)
     _write_regions(out, samples, sc, cam)
@@ -105,7 +105,7 @@ def _material_box(archviz, name, location, dimensions, mat, field=False):
 def _specimens(archviz):
     import bpy
     from materials.concrete.concrete import concrete_study
-    from effects.edge_wear import weathered_concrete, add_corner_dirt
+    from effects.wear import weathered_concrete, add_corner_dirt
     mats = []
     column = weathered_concrete()
     add_corner_dirt(column)

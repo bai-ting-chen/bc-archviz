@@ -44,8 +44,8 @@ What the pipeline can do and which technique does it; each row was proved with a
 | Modelled grass blades | Principled + Translucent, per-instance tone + dry patches (`materials.vegetation.vegetation.blade_material`) | solid |
 | Wet lawn / wet ground | dry^gamma + water coat (`materials.vegetation.vegetation.WET`, `materials.ground.ground.ground_material(wet_gamma)`) | solid, control-proved |
 | Volumetric fog / mist | Volume Scatter Mie, sigma = 3.912/V (`atmosphere.fog_volume`) | solid, control-proved (1.000) |
-| Runoff / leak streaks below drip edges | GN raycast drip-edge field + streak shader (`effects.edge_wear.add_leak_field`, `add_runoff`) | solid, control-proved |
-| Concrete cracks | corner shrinkage cracks + patchy Voronoi map-cracking (`effects.edge_wear.add_cracks`) | solid, control-proved |
+| Runoff / leak streaks below drip edges | GN raycast drip-edge field + streak shader (`effects.wear.add_leak_field`, `add_runoff`) | solid, control-proved |
+| Concrete cracks | corner shrinkage cracks + patchy Voronoi map-cracking (`effects.wear.add_cracks`) | solid, control-proved |
 | Glazing distortion | roller wave + IGU pillowing bump (`materials.glass.glass.glass_distortion`) | solid |
 | Water film down a wall / textured glass | height field from a raycast of the surface + Nusselt film, ropes, roll waves; glass/water interface IOR 1.14 ([water-attached-film.md](../materials/water/water-attached-film.md)) | test (one study, no control yet) |
 | Overflow edge into a trench | rim strip: draw-down → roll over the crest → clinging film down the wall ([water-attached-film.md](../materials/water/water-attached-film.md)) | test |

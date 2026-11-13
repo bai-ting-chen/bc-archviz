@@ -52,7 +52,7 @@ roughness. Units that really tilt or step: variation-per-unit-geometry.md.
 ### Generic layers
 | Layer | Reference | Note for this material |
 |---|---|---|
-| Concave joint dust | [edge-wear.md](edge-wear.md) › Edge dust | darkest in the corner (RULES MAT_06) |
+| Concave joint dust | [dirt.md](wear/dirt.md) › §4.1 Dust and build-up | darkest in the corner (RULES MAT_06) |
 | Repeat inside one unit | variation-tiling.md | large units |
 
 ## 5. Troubleshooting

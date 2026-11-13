@@ -30,7 +30,7 @@ import scene.lighting.atmosphere as atmosphere  # noqa: E402
 import scene.environment.scatter as scatter  # noqa: E402
 import scene.environment.terrain as terrain  # noqa: E402
 import materials.vegetation.vegetation as vegetation  # noqa: E402
-import effects.edge_wear as wear  # noqa: E402
+import effects.wear as wear  # noqa: E402
 
 out = sys.argv[sys.argv.index("--") + 1]
 bpy.ops.wm.read_homefile(use_empty=True)

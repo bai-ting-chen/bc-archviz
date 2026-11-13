@@ -1,7 +1,7 @@
 """Concrete build; canonical implementation behind concrete."""
 
 import bpy
-from effects.round_edges import round_shader
+from effects.wear.wear_locations import round_shader
 
 from materials.shared.nodes import G, sock
 
@@ -56,7 +56,7 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
     relief = round_shader(g, bump.outputs['Normal'], rounded_edges=rounded_edges,
                          loc=(-650, -250), frame=F_REL)
 
-    # Wear mask = max( chips * noise , edge line ); leak streaks come from effects.runoff
+    # Wear mask = max( chips * noise , edge line ); leak streaks come from effects.wear.water_marks
     mask = None
     if bevel_chips:
         mask = _bevel_chips(g, chip_spread, chip_in, noise_scale, noise_band, F_WEAR)

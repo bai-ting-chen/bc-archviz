@@ -13,8 +13,8 @@ sys.path[:0]=[str(Path(__file__).resolve().parents[2]/'blender'),str(Path(__file
 import surface_wear_lab as lab
 import surface_wear_compare as compare
 from surface_wear_match import remap,fit_levels,statistics,prefilter_mask
-from effects.surface_wear import WearLayer,MaskSource,apply_surface_wear
-from effects.surface_wear_masks import MASK_LEVELS_LABEL,MASK_GAMMA_LABEL
+from effects.wear.wear import WearLayer,MaskSource,apply_surface_wear
+from effects.wear.masks import MASK_LEVELS_LABEL,MASK_GAMMA_LABEL
 from materials.shared.nodes import G,sock
 from core import assets
 
@@ -43,8 +43,8 @@ def check_startup(project,out):
 def check_bake(out):
     """Inspect the actual upward bake graph: its source product has unit extent, not a wall gate."""
     def source_graph(*args):
-        material=bpy.data.materials['placeholder-worn-through']
-        aov=next(n for n in material.node_tree.nodes if n.type=='OUTPUT_AOV' and n.aov_name=='var_surface-worn-through')
+        material=bpy.data.materials['placeholder-chipping']
+        aov=next(n for n in material.node_tree.nodes if n.type=='OUTPUT_AOV' and n.aov_name=='var_surface-chipping')
         switch=aov.inputs['Value'].links[0].from_node
         product=sock(switch.inputs,'B').links[0].from_node
         assert product.operation=='MULTIPLY'
@@ -54,7 +54,7 @@ def check_bake(out):
         raise GraphReady
     with patch.object(lab,'render',side_effect=source_graph):
         try:
-            lab._bake(out,'worn-through')
+            lab._bake(out,'chipping')
         except GraphReady:
             return
     raise AssertionError('Bake did not reach the render boundary')
@@ -105,9 +105,12 @@ def check_calibration(path):
 def check_rectangle(out,path):
     """Check scan labels and equal physical-frequency attenuation along unequal texture axes."""
     manifest=out/'rectangular-manifest.json'
-    manifest.write_text(json.dumps({'grunge':[{'id':'rectangle','map':'Mask'}]}))
-    with patch('effects.surface_wear_masks.asset_mask',return_value=MaskSource(str(path),size_m=(2.,3.))):
-        candidate=compare._assets(manifest,None)['grunge'][0]
+    manifest.write_text(json.dumps({'grunge':[{'id':'rectangle','map':'Mask'}],
+                                    'worn-through':[{'id':'rectangle','map':'Mask'}]}))
+    with patch('effects.wear.masks.asset_mask',return_value=MaskSource(str(path),size_m=(2.,3.))):
+        candidates=compare._assets(manifest,None)
+        assert 'chipping' in candidates and 'worn-through' not in candidates
+        candidate=candidates['grunge'][0]
     assert candidate['scan']=='2x3 m' and candidate['size_m']==(2.,3.)
     y,x=np.mgrid[:48,:64]
     pixels=.5+.2*np.sin(2*np.pi*4*x/64)+.2*np.sin(2*np.pi*6*y/48)

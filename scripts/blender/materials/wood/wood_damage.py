@@ -6,13 +6,13 @@ import bpy
 
 from materials.shared.nodes import G, sock
 
-from effects.edge_chips import input_socket as _input
+from effects.wear.chipping import input_socket as _input
 
-from effects.edge_chips import edge_field as _edge_field
+from effects.wear.wear_locations import edge_field as _edge_field
 
-from effects.edge_chips import chip_field as _chip_field
+from effects.wear.chipping import chip_field as _chip_field
 
-from effects.edge_chips import rejoin as _rejoin
+from effects.wear.chipping import rejoin as _rejoin
 
 def wood_wear_group(name="Wood Wear + Breaks", band=0.02, level=3,
                     chip_reach=0.006, chip_depth=0.0025, chipped_share=0.30,

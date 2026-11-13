@@ -1,6 +1,6 @@
 """Bake the shared cross-object corner masks into R=line, G=dust, B=0."""
 import bpy
-from effects.edge_dirt import corner_dirt_masks
+from effects.wear.dirt import corner_dirt_masks
 from materials.shared.nodes import G
 
 

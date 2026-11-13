@@ -183,7 +183,7 @@ def run(topic):
                 material("boards_" + str(cylinder), lambda cylinder=cylinder: m.vertical_boards(
                     importlib.import_module("materials.shared.pbr").albedo_material("fixture", "boards", (.4, .4, .4)), cylinder=cylinder))
         elif topic == "wood_wear":
-            from effects.round_edges import round_geometry
+            from effects.wear.wear_locations import round_geometry
             from materials.wood.wood_damage import wood_wear_group
             from materials.wood.wood_shading import weathered_wood
 

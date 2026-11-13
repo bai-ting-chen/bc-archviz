@@ -43,131 +43,6 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `caustic_sheet_material(name='CAUSTIC_SHEET', floor_tex=None, floor_tile_m=2.0, wall_albedo=(0.6, 0.79, 0.83), floor_albedo=(0.5, 0.5, 0.5))` — Transparent + Emission(albedo * E / pi). Floor albedo from the same world-box-mapped texture the floor uses (or `floor_albedo` without one -- set it to the floor's real albedo); walls a constant glaze colour (`wall_albedo`, a pale cyan pool tile, linear).
 
-## `effects.crack_ribbon` — Compact Cycles crack masks from seeded polylines; avoids expanding every segment into SVM.
-
-- `crack_polylines(seed)` — Return the main unit-arclength polyline and its optional narrower offshoots.
-- `crooked_ribbon_masks(g, F, along, perp, wob, on, C, L, y, seed=3, physical_length=None)` — Sample a seeded crooked polyline mask with fine shader wobble and unchanged nominal widths.
-
-## `effects.cracks` — Cracks on a concrete wall: shrinkage cracks from the corners of openings, patchy map-cracking over the rest, a dark core, a grime halo and a shallow groove. Works on a weathered_concrete material.
-
-- `crack_masks(g, F, openings, C)` — Core and halo masks for the shrinkage cracks from each opening's corners, plus map-cracking.
-- `add_cracks(mat, openings=(), crack=None, amount=1.0)` — On a weathered_concrete material: shrinkage cracks from opening corners + patchy map-cracking; dark core over everything, grime halo, groove. openings: (axis 'x'|'y', plane, u0, u1, v0, v1, top_only[, keep_angles]).
-- `apply_crack_masks(mat, g, F, core, halo, C, amount, label)` — Compose crack core, halo and groove under one independent amount.
-
-## `effects.edge_chips` — Edge chips as real geometry: dice a mesh, then a Geometry Nodes modifier that cuts chips along arrises.
-
-- `dice(obj, size=0.05)` — Subdivide in place by repeated halving of over-long edges (grid fill keeps quads).
-- `input_socket(ng, name, kind, default, subtype=None)` — Add a group input with a default (and an optional unit subtype).
-- `edge_field(b, gi, x0, vertex_junctions=False)` — Distance to the nearest convex arris -> `edge_dist`, and the rest position offset by the group's Seed -> `rest_pos` (noise lookups; a per-object Seed decorrelates repeated objects). Measured on outward-normal meshes: convex arrises give a POSITIVE signed angle, inner corners a negative one.
-- `chip_field(b, gi, rp, dd, seg_scale, bite_scale, soft, prof_end)` — Chips along the arris: segments of the edge chipped (share -> threshold; Noise clusters near 0.5, sd ~0.1), bite noise varies the reach. Returns (chip 0..1, depth profile).
-- `rejoin(b, moved, sep, go, x0, weld_dist)` — Rejoin the displaced band with the untouched interior and weld the seam.
-- `edge_wear_group(name='Edge Wear + Chips', band=0.08, level=3, chip_reach=0.045, chip_depth=0.018, chipped_share=0.55, sharp_deg=30.0, chips=True, bite_scale=22.0, segment_scale=2.2, seed=(0.0, 0.0, 0.0))` — Geometry Nodes modifier: edge field for every point, real chips in the arris band. Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern.
-- `set_input(mod, name, value)` — A Geometry Nodes modifier's own input values live at mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the identifier through the group interface. Group defaults are only copied in at creation.
-- `add_edge_wear(obj, group, **inputs)` — Add the modifier; per-object overrides by input name, e.g. add_edge_wear(o, g, Band=0.1).
-
-## `effects.edge_cracks` — Sparse short cracks running inward from clean outside edges.
-
-- `edge_crack_edges(obj, min_angle_deg=30.0)` — Collect world-space (start, end, inward) face edges before dicing or displacement.
-- `add_edge_cracks(mat, edges, amount=1.0, seed=17)` — Add sparse 5-20 cm core/halo cracks from clean (start, end, inward) outside edges.
-
-## `effects.edge_dirt` — Shared edge line and dust layers for convex distance fields and concave AO.
-
-- `edge_vertex_join(g, line_width=LINE_WIDTH, frame=None, loc=(0, 0))` — Return a local outside-junction blend from clean-mesh vertex distance in metres.
-- `edge_dirt_masks(g, dist, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, noise_vec=None, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, noise_scale=9.0, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside')` — Return line, dust and the reusable outside-vertex join (None for AO corners).
-- `corner_dirt_masks(g, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, frame=None, loc=(0, 0), corner_cap=CORNER_MASK_CAP)` — Return shared masks using cross-object AO remapped to a distance-like metre field.
-- `dust_surface(g, surface, dust, frame=None, loc=(0, 0), line=None)` — Apply relative dust/line albedos with line priority, preserving source textures and normals.
-- `add_corner_dirt(mat, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, corner_cap=CORNER_MASK_CAP)` — Add independently switchable shared line/dust layers to a Cycles surface material.
-
-## `effects.edge_masks` — Edge masks as an emission view: one edge-detection method at a time, for side-by-side comparison (pointiness, inside ambient occlusion, bevel normal, the GN edge distance, the chip mask, damage).
-
-- `mask_material(name, method, radius=0.035)` — Emission view of one edge-detection method, for side-by-side comparison.
-
-## `effects.edge_shading` — Concrete edge shading and fresh-break material from clean distance and chip fields.
-
-- `weathered_concrete(name='CONCRETE_WEATHERED', line_width=LINE_WIDTH, line_amount=LINE_AMOUNT, dirt_noise_scale=9.0, tex_id='concrete_wall_009', dust_width=DUST_WIDTH, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True)` — Layer edge line/dust and fresh-break shading over the concrete study material.
-
-## `effects.leak_field` — Leak field: per point, how far below the first surface straight above it (a raycast up from just inside the wall) -> `leak_d` and `leak_ok`. Runoff streaks read these to hang drips under drip edges.
-
-- `leak_field_group(name='LEAK FIELD', inset=0.02, reach=6.0)` — GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`; a miss falls back to the object's top (Top Fallback). Reused if it exists (other objects' modifiers point at it).
-- `add_leak_field(obj)` — Add LEAK FIELD as the FIRST modifier: run after chips, rays slip through the chip-band seam and a wrong leak_d spreads over whole coarse triangles (light triangles under an arris).
-
-## `effects.round_edges` — Shared scene-sized rounded edges: shader normals or real bevel geometry.
-
-- `set_round_radius(radius=ROUND_RADIUS)` — Set the scene's shared radius in metres before building rounded materials.
-- `round_shader(g, normal=None, rounded_edges=True, loc=(-650, -250), frame=None, label='Round edges (TexEdges)', samples=8)` — Build a rounded shader normal using the shared scene radius.
-- `round_geometry(obj, rounded_edges=True, segments=2, min_angle_deg=30.0)` — Bevel a mesh's real edges using the shared scene radius.
-- `switch_rounding(mat, rounded_edges=True)` — Switch an existing material's shared rounded-normal layer on or off.
-
-## `effects.runoff` — Runoff: vertical streaks below drip edges, grunge patches and soil splash, all into the grime mask.
-
-- `add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0, amount=1.0)` — On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask.
-
-## `effects.surface_wear` — Independent surface-wear layers sharing procedural and grayscale-image factor inputs.
-
-- `WearLayer` — One layer's switch, metre sizes and 0–1 strength; binary chips use strength for coverage.
-- `wear_factor(g, kind, settings, vector=None, components=None)` — Return a switched wear factor; binary hybrid chips vary coverage instead of transparency.
-- `apply_surface_wear(g, shader, layers, under_shader=None, vector=None)` — Compose requested layers on a Principled shader; return the resulting Surface socket.
-- `grunge(g, scale_m=0.5, target_sd=0.05, detail=6.0, rough=0.6, amount=1.0)` — Return the legacy calibrated grunge multiplier, preserving existing callers exactly.
-
-## `effects.surface_wear_atlas` — Pack chosen decal colour and opacity maps without changing their physical aspect ratios.
-
-- `StampAtlas` — RGBA atlas with physical sizes, metre cell spacing and 0–1 occupied-cell probability.
-- `build_stamp_atlas(project, asset_ids, path, tile_px=768, **scatter)` — Pack 4K colour/opacity into a derived tone, deposit-data or chip-opacity atlas.
-
-## `effects.surface_wear_chips` — Resolve bare-substrate signals verified against each flaked-paint scan's BaseColor.
-
-- `flaked_paint_masks(asset_ids=tuple(WORN_SCAN_LEVELS), project=None)` — Resolve per-scan Roughness polarity: white is exposed substrate, black is intact paint.
-
-## `effects.surface_wear_defaults` — Per-layer source choices and local default assets; missing-id logs are deduplicated per process.
-
-- `report_missing(asset_id, search)` — Log a named default's procedural fallback and Fab search once per missing id.
-- `default_field(g, kind, settings, vector, frame)` — Load the layer's default mask, blend dried-mark zones, or use the procedural fallback.
-
-## `effects.surface_wear_deposits` — Irregular deposit bodies and uneven rims without radial or circular primitives.
-
-- `deposit_profile(g, body, rim, tone, frame=None)` — Keep a faint deposit body inside a stronger dark rim, with scan/noise tone variation.
-- `deposit_distance(g, vector, scale_m, frame=None)` — Return a continuous warped blob distance and tone, before body/rim plateaus are applied.
-- `irregular_deposits(g, vector, scale_m, frame=None)` — Warp a multiscale noise domain into varied, sometimes merged blobs with broken rims.
-
-## `effects.surface_wear_extent` — Location and patch extents shared by every surface-wear source.
-
-- `WearExtent` — World-metre wear location; edge_distance is a clean-mesh distance socket when available.
-- `face_z(g, frame=None)` — Return world shading-normal Z, independent of the projected mask coordinates.
-- `patch_extent(g, vector, scale_m, frame=None, black=0.46, white=0.66)` — Return a slow patch field with real zero regions, rather than uniform modulation.
-- `location_extent(g, kind, settings, frame=None)` — Gate feet, floor patches and supplied soffit-edge distances; dried marks exclude undersides.
-
-## `effects.surface_wear_fields` — Procedural surface-wear factors in surface coordinates measured in metres.
-
-- `procedural_field(g, kind, vector, scale_m, scratch_width_m, frame, region=False)` — Return a 0–1 wear profile, or the continuous pre-profile dried-mark driver for regions.
-
-## `effects.surface_wear_hybrid` — One hybrid definition: procedural region multiplied by a full-range stochastic scan interior.
-
-- `HybridSource` — Stochastic interiors, contrast/mean remap, normalized region edges and binary flake cutoff.
-- `hybrid_field(g, kind, layer, vector, extent, frame=None, amount=None)` — Return region, scan interior, drying-edge rim and their exact region-times-interior product.
-- `scratch_hybrid(g, layer, vector, frame=None)` — Keep the held scratch hybrid's existing 0.7–1.0 scan modulation unchanged.
-
-## `effects.surface_wear_masks` — Canonical grayscale image loader for surface-wear masks.
-
-- `mask_dimensions_m(size_m)` — Return width and height in metres from a square scalar or rectangular pair.
-- `MaskSource` — Grayscale data image, levels and real-world mapping (size_m in metres per tile).
-- `image_mask(g, mask, vector=None, frame=None, row=0, mapped_vector=None)` — Load a Non-Color mask in surface metres or named real-world box/directional UVs.
-- `mask_field(g, mask, vector=None, frame=None, crossed=False, row=0)` — Return one image field, or its union with a rotated/offset copy for crossing scratches.
-- `asset_mask(asset_id, map_name='Mask', project=None)` — Resolve a local 4K scan mask at its metadata scan size; return None when its map is missing.
-- `asset_maps(asset_id, map_names, project=None)` — Resolve named local 4K maps and their metadata once; return None for a missing map.
-- `scan_size_m(metadata)` — Read square or rectangular scan dimensions, converting m/cm/mm metadata to metres.
-- `surface_coordinates(g, frame=None)` — Project world metres onto the dominant face plane for walls, tops and soffits.
-
-## `effects.surface_wear_stamps` — Neighbour-aware, nonperiodic decal placement in metre-space surface coordinates.
-
-- `StampSource` — Non-default decal pools and chip threshold retained independently from hybrid regions.
-- `stamps_field(g, kind, layer, vector, extent, frame=None)` — Select explicit decal deposits or scan-outline chips, never called by a hybrid source.
-- `scatter_stamps(g, vector, atlas, seed=17, vertical=False, extent=None, frame=None)` — Sum 3x3 neighbour stamps with seeded choice, rotation, scale, offsets and cell density.
-- `deposit_stamps(g, vector, settings, extent, frame=None)` — Select down-aligned wall decals or freely rotated floor stains; undersides are gated later.
-
-## `effects.surface_wear_tiling` — Shared stochastic scan sampling through the canonical loader and offset generator.
-
-- `stochastic_mask(g, masks, vector, settings, frame=None)` — Blend three rotated, offset, scale-jittered lookups with independent slow world noise.
-
 ## `effects.variation_macro_tone` — World-space macro tone with independently switched albedo and roughness outputs.
 
 - `macro_tone(g, scale_m=4.0, albedo=0.075, roughness=0.05, amount=1.0)` — Return world-space albedo multiplier and roughness addition with independent amount controls.
@@ -185,13 +60,143 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `randomized_vectors(g, vector, count=3, seed=0, scale_jitter=0.12, frame=None)` — Rotate, slightly rescale and offset independent metre-space image lookups.
 - `anti_tile(g, texs, lookups=3, scale_m=1.5, seed=0, amount=1.0)` — Relink image consumers to shared XYZ-offset lookups; amount zero is the original.
 
-## `effects.wear_nodes` — Thin shorthands for the wear shaders and Geometry Nodes: a frame for one wear layer, and the attribute, noise, map range and math nodes with the argument order the wear builders use.
+## `effects.wear.atlas` — Pack chosen decal colour and opacity maps without changing their physical aspect ratios.
+
+- `StampAtlas` — RGBA atlas with physical sizes, metre cell spacing and 0–1 occupied-cell probability.
+- `build_stamp_atlas(project, asset_ids, path, tile_px=768, **scatter)` — Pack 4K colour/opacity into a derived tone, deposit-data or chip-opacity atlas.
+
+## `effects.wear.chipping` — Geometry chips, flaked coating fields and verified bare-substrate scans.
+
+- `dice(obj, size=0.05)` — Subdivide in place by repeated halving of over-long edges (grid fill keeps quads).
+- `input_socket(ng, name, kind, default, subtype=None)` — Add a group input with a default (and an optional unit subtype).
+- `chip_field(b, gi, rp, dd, seg_scale, bite_scale, soft, prof_end)` — Chips along the arris: segments of the edge chipped (share -> threshold; Noise clusters near 0.5, sd ~0.1), bite noise varies the reach. Returns (chip 0..1, depth profile).
+- `rejoin(b, moved, sep, go, x0, weld_dist)` — Rejoin the displaced band with the untouched interior and weld the seam.
+- `edge_wear_group(name='Edge Wear + Chips', band=0.08, level=3, chip_reach=0.045, chip_depth=0.018, chipped_share=0.55, sharp_deg=30.0, chips=True, bite_scale=22.0, segment_scale=2.2, seed=(0.0, 0.0, 0.0))` — Geometry Nodes modifier: edge field for every point, real chips in the arris band. Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern.
+- `set_input(mod, name, value)` — A Geometry Nodes modifier's own input values live at mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the identifier through the group interface. Group defaults are only copied in at creation.
+- `add_edge_wear(obj, group, **inputs)` — Add the modifier; per-object overrides by input name, e.g. add_edge_wear(o, g, Band=0.1).
+- `flaked_paint_masks(asset_ids=tuple(WORN_SCAN_LEVELS), project=None)` — Resolve per-scan Roughness polarity: white is exposed substrate, black is intact paint.
+- `chipping_field(g, vector, scale_m, frame=None)` — Return the unchanged smooth procedural coating-loss patches.
+
+## `effects.wear.concrete_shading` — Concrete edge shading and fresh-break material from clean distance and chip fields.
+
+- `weathered_concrete(name='CONCRETE_WEATHERED', line_width=LINE_WIDTH, line_amount=LINE_AMOUNT, dirt_noise_scale=9.0, tex_id='concrete_wall_009', dust_width=DUST_WIDTH, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True)` — Layer edge line/dust and fresh-break shading over the concrete study material.
+
+## `effects.wear.crack_ribbon` — Compact Cycles crack masks from seeded polylines; avoids expanding every segment into SVM.
+
+- `crack_polylines(seed)` — Return the main unit-arclength polyline and its optional narrower offshoots.
+- `crooked_ribbon_masks(g, F, along, perp, wob, on, C, L, y, seed=3, physical_length=None)` — Sample a seeded crooked polyline mask with fine shader wobble and unchanged nominal widths.
+
+## `effects.wear.cracks` — Cracks on a concrete wall: shrinkage cracks from the corners of openings, patchy map-cracking over the rest, a dark core, a grime halo and a shallow groove. Works on a weathered_concrete material.
+
+- `crack_masks(g, F, openings, C)` — Core and halo masks for the shrinkage cracks from each opening's corners, plus map-cracking.
+- `add_cracks(mat, openings=(), crack=None, amount=1.0)` — On a weathered_concrete material: shrinkage cracks from opening corners + patchy map-cracking; dark core over everything, grime halo, groove. openings: (axis 'x'|'y', plane, u0, u1, v0, v1, top_only[, keep_angles]).
+- `apply_crack_masks(mat, g, F, core, halo, C, amount, label)` — Compose crack core, halo and groove under one independent amount.
+
+## `effects.wear.defaults` — Per-layer source choices and local default assets; missing-id logs are deduplicated per process.
+
+- `report_missing(asset_id, search)` — Log a named default's procedural fallback and Fab search once per missing id.
+- `default_field(g, kind, settings, vector, frame)` — Load the layer's default mask, blend dried-mark zones, or use the procedural fallback.
+
+## `effects.wear.dirt` — Dust build-up and bordered grunge patterns.
+
+- `edge_dirt_masks(g, dist, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, noise_vec=None, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, noise_scale=9.0, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside')` — Return line, dust and the reusable outside-vertex join (None for AO corners).
+- `corner_dirt_masks(g, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, frame=None, loc=(0, 0), corner_cap=CORNER_MASK_CAP)` — Return shared masks using cross-object AO remapped to a distance-like metre field.
+- `dust_surface(g, surface, dust, frame=None, loc=(0, 0), line=None)` — Apply relative dust/line albedos with line priority, preserving source textures and normals.
+- `add_corner_dirt(mat, line_width=LINE_WIDTH, dust_width=DUST_WIDTH, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, corner_cap=CORNER_MASK_CAP)` — Add independently switchable shared line/dust layers to a Cycles surface material.
+- `grunge(g, scale_m=0.5, target_sd=0.05, detail=6.0, rough=0.6, amount=1.0)` — Return the legacy calibrated grunge multiplier, preserving existing callers exactly.
+- `grunge_field(g, vector, scale_m, frame=None)` — Return the unchanged fine grunge times zero-reaching slow patch pattern.
+
+## `effects.wear.edge_cracks` — Sparse short cracks running inward from clean outside edges.
+
+- `edge_crack_edges(obj, min_angle_deg=30.0)` — Collect world-space (start, end, inward) face edges before dicing or displacement.
+- `add_edge_cracks(mat, edges, amount=1.0, seed=17)` — Add sparse 5-20 cm core/halo cracks from clean (start, end, inward) outside edges.
+
+## `effects.wear.edge_profile` — Shared distance falloffs and noise context for edge line and dust.
+
+- `edge_vertex_join(g, line_width=LINE_WIDTH, frame=None, loc=(0, 0))` — Return a local outside-junction blend from clean-mesh vertex distance in metres.
+
+## `effects.wear.hybrid` — One hybrid definition: procedural region multiplied by a full-range stochastic scan interior.
+
+- `HybridSource` — Stochastic interiors, contrast/mean remap, normalized region edges and binary flake cutoff.
+- `hybrid_field(g, kind, layer, vector, extent, frame=None, amount=None)` — Return region, scan interior, drying-edge rim and their exact region-times-interior product.
+
+## `effects.wear.layers` — Canonical wear layer names and their deprecated input alias.
+
+- `canonical_layer(kind)` — Accept the deprecated coating-loss spelling while returning its mechanism name.
+
+## `effects.wear.leak_field` — Leak field: per point, how far below the first surface straight above it (a raycast up from just inside the wall) -> `leak_d` and `leak_ok`. Runoff streaks read these to hang drips under drip edges.
+
+- `leak_field_group(name='LEAK FIELD', inset=0.02, reach=6.0)` — GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`; a miss falls back to the object's top (Top Fallback). Reused if it exists (other objects' modifiers point at it).
+- `add_leak_field(obj)` — Add LEAK FIELD as the FIRST modifier: run after chips, rays slip through the chip-band seam and a wrong leak_d spreads over whole coarse triangles (light triangles under an arris).
+
+## `effects.wear.mask_views` — Edge masks as an emission view: one edge-detection method at a time, for side-by-side comparison (pointiness, inside ambient occlusion, bevel normal, the GN edge distance, the chip mask, damage).
+
+- `mask_material(name, method, radius=0.035)` — Emission view of one edge-detection method, for side-by-side comparison.
+
+## `effects.wear.masks` — Canonical grayscale image loader for surface-wear masks.
+
+- `mask_dimensions_m(size_m)` — Return width and height in metres from a square scalar or rectangular pair.
+- `MaskSource` — Grayscale data image, levels and real-world mapping (size_m in metres per tile).
+- `image_mask(g, mask, vector=None, frame=None, row=0, mapped_vector=None)` — Load a Non-Color mask in surface metres or named real-world box/directional UVs.
+- `mask_field(g, mask, vector=None, frame=None, crossed=False, row=0)` — Return one image field, or its union with a rotated/offset copy for crossing scratches.
+- `asset_mask(asset_id, map_name='Mask', project=None)` — Resolve a local 4K scan mask at its metadata scan size; return None when its map is missing.
+- `asset_maps(asset_id, map_names, project=None)` — Resolve named local 4K maps and their metadata once; return None for a missing map.
+- `scan_size_m(metadata)` — Read square or rectangular scan dimensions, converting m/cm/mm metadata to metres.
+- `surface_coordinates(g, frame=None)` — Project world metres onto the dominant face plane for walls, tops and soffits.
+
+## `effects.wear.nodes` — Thin shorthands for the wear shaders and Geometry Nodes: a frame for one wear layer, and the attribute, noise, map range and math nodes with the argument order the wear builders use.
 
 - `frame_for(mat, label)` — The material's node builder with one labelled frame for a wear layer; returns (builder, label).
 - `attr(g, name, loc, frame, out='Fac')` — Named attribute (edge_dist, chip, rest_pos, leak_d ...) at a location in a frame.
 - `noise(g, vec, scale, loc, frame, detail=6.0, rough=0.6, label=None)` — Noise texture on a vector, at a location in a frame.
 - `range_(g, val, fmin, fmax, loc, frame, tmin=0.0, tmax=1.0, label=None, smooth=False)` — Map Range from [fmin, fmax] to [tmin, tmax], at a location in a frame.
 - `math_(g, op, a, b, loc, frame, clamp=False)` — Math node (op on a and b), at a location in a frame.
+
+## `effects.wear.patterns` — Dispatch procedural patterns to their mechanism owners.
+
+- `procedural_field(g, kind, vector, scale_m, scratch_width_m, frame, region=False)` — Return a wear profile or a continuous deposit driver for a hybrid region.
+
+## `effects.wear.scratches` — Crossing procedural scratches and their held legacy scan modulation.
+
+- `scratches_field(g, vector, length_m, width_m, frame)` — Return four independently phased stroke orientations in metre coordinates.
+- `scratch_hybrid(g, layer, vector, frame=None)` — Keep the held scratch hybrid's existing 0.7–1.0 scan modulation unchanged.
+
+## `effects.wear.stamps` — Neighbour-aware, nonperiodic decal placement in metre-space surface coordinates.
+
+- `StampSource` — Non-default decal pools and chip threshold retained independently from hybrid regions.
+- `stamps_field(g, kind, layer, vector, extent, frame=None)` — Select explicit decal deposits or scan-outline chips, never called by a hybrid source.
+- `scatter_stamps(g, vector, atlas, seed=17, vertical=False, extent=None, frame=None)` — Sum 3x3 neighbour stamps with seeded choice, rotation, scale, offsets and cell density.
+- `deposit_stamps(g, vector, settings, extent, frame=None)` — Select down-aligned wall decals or freely rotated floor stains; undersides are gated later.
+
+## `effects.wear.tiling` — Shared stochastic scan sampling through the canonical loader and offset generator.
+
+- `stochastic_mask(g, masks, vector, settings, frame=None)` — Blend three rotated, offset, scale-jittered lookups with independent slow world noise.
+
+## `effects.wear.water_marks` — Runoff: vertical streaks below drip edges, grunge patches and soil splash, all into the grime mask.
+
+- `add_runoff(mat, leak=None, grunge=(0.6, 9.0, 0.56, 0.62, 0.45), splash=(0.08, 0.35, 0.7), ground_z=0.0, amount=1.0)` — On a weathered_concrete material: vertical runoff streaks below drip edges (needs add_leak_field), grunge patches, soil splash above ground_z (the wall foot); all into its grime mask.
+- `deposit_profile(g, body, rim, tone, frame=None)` — Keep a faint deposit body inside a stronger dark rim, with scan/noise tone variation.
+- `deposit_distance(g, vector, scale_m, frame=None)` — Return a continuous warped blob distance and tone, before body/rim plateaus are applied.
+- `irregular_deposits(g, vector, scale_m, frame=None)` — Warp a multiscale noise domain into varied, sometimes merged blobs with broken rims.
+- `dried_marks_field(g, vector, scale_m, frame=None, region=False)` — Return the continuous blob driver for regions or its dry body/rim profile.
+
+## `effects.wear.wear` — Independent wear layers sharing procedural and grayscale-image factor inputs.
+
+- `WearLayer` — One layer's switch, metre sizes and 0–1 strength; binary chips use strength for coverage.
+- `wear_factor(g, kind, settings, vector=None, components=None)` — Return a switched wear factor; binary hybrid chips vary coverage instead of transparency.
+- `apply_surface_wear(g, shader, layers, under_shader=None, vector=None)` — Compose requested layers on a Principled shader; return the resulting Surface socket.
+
+## `effects.wear.wear_locations` — Clean edge fields, scene rounding and location extents for wear.
+
+- `WearExtent` — World-metre wear location; edge_distance is a clean-mesh distance socket when available.
+- `face_z(g, frame=None)` — Return world shading-normal Z, independent of the projected mask coordinates.
+- `patch_extent(g, vector, scale_m, frame=None, black=0.46, white=0.66)` — Return a slow patch field with real zero regions, rather than uniform modulation.
+- `location_extent(g, kind, settings, frame=None)` — Gate feet, floor patches and supplied soffit-edge distances; dried marks exclude undersides.
+- `edge_field(b, gi, x0, vertex_junctions=False)` — Distance to the nearest convex arris -> `edge_dist`, and the rest position offset by the group's Seed -> `rest_pos` (noise lookups; a per-object Seed decorrelates repeated objects). Measured on outward-normal meshes: convex arrises give a POSITIVE signed angle, inner corners a negative one.
+- `set_round_radius(radius=ROUND_RADIUS)` — Set the scene's shared radius in metres before building rounded materials.
+- `round_shader(g, normal=None, rounded_edges=True, loc=(-650, -250), frame=None, label='Round edges (TexEdges)', samples=8)` — Build a rounded shader normal using the shared scene radius.
+- `round_geometry(obj, rounded_edges=True, segments=2, min_angle_deg=30.0)` — Bevel a mesh's real edges using the shared scene radius.
+- `switch_rounding(mat, rounded_edges=True)` — Switch an existing material's shared rounded-normal layer on or off.
 
 ## `materials.concrete.concrete_boards` — Concrete boards; canonical implementation behind concrete.
 
@@ -270,7 +275,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `materials.shared.nodes` — Nodes material helpers; canonical implementations.
 
 - `sock(sockets, name)` — Active socket by name (Mix nodes keep hidden same-named sockets per data type).
-- `G` — The node-graph builder for shader and Geometry Nodes trees: frames, nodes (inputs by keyword, or properties with n()), images on a named UV map, links, and the math / map range / noise / named-attribute shorthands. G(material) starts the material's tree empty; G(node_tree) adds to an existing tree (a GN group). effects.wear_nodes supplies the shader shorthands with the argument order used by wear builders.
+- `G` — The node-graph builder for shader and Geometry Nodes trees: frames, nodes (inputs by keyword, or properties with n()), images on a named UV map, links, and the math / map range / noise / named-attribute shorthands. G(material) starts the material's tree empty; G(node_tree) adds to an existing tree (a GN group). effects.wear.nodes supplies the shader shorthands with the argument order used by wear builders.
 - `layer_frame(g, label)` — Create a stacked layer frame and return its label for the graph builder.
 - `layer_switch(g, layer, value, amount, neutral=1.0, frame=None)` — Switch a scalar or vector layer and export its AOV.
 
@@ -289,7 +294,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.stone.granite` — Granite; canonical implementation behind stone.
 
-- `polished_granite(name='GRANITE_POLISHED', grain_m=0.006, roughness=0.04, ior=1.55, base=((0.01, 0.008, 0.007), (0.026, 0.019, 0.015)), flecks=((0.62, (0.055, 0.037, 0.026)), (0.8, (0.13, 0.12, 0.11)), (0.91, (0.34, 0.28, 0.21))))` — Procedural speckled granite in 3-D world space (a solid texture: cut faces and edges agree). Crystals = Voronoi cells of ~grain_m, each coloured by its random value through a constant ramp (black mica / brown feldspar / grey quartz / cream feldspar); a coarse noise drifts the base. Polished = one smooth dielectric (no coat). For MNEE casters/receivers apply effects.round_edges.round_geometry on the object; the shared scene layer owns the radius.
+- `polished_granite(name='GRANITE_POLISHED', grain_m=0.006, roughness=0.04, ior=1.55, base=((0.01, 0.008, 0.007), (0.026, 0.019, 0.015)), flecks=((0.62, (0.055, 0.037, 0.026)), (0.8, (0.13, 0.12, 0.11)), (0.91, (0.34, 0.28, 0.21))))` — Procedural speckled granite in 3-D world space (a solid texture: cut faces and edges agree). Crystals = Voronoi cells of ~grain_m, each coloured by its random value through a constant ramp (black mica / brown feldspar / grey quartz / cream feldspar); a coarse noise drifts the base. Polished = one smooth dielectric (no coat). For MNEE casters/receivers apply effects.wear.wear_locations.round_geometry on the object; the shared scene layer owns the radius.
 
 ## `materials.stone.pavers` — Pavers; canonical implementation behind stone.
 

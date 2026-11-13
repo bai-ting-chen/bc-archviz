@@ -41,7 +41,7 @@ def render(out, project, samples, only=None):
     import faulthandler
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'blender'))
     import core.archviz as archviz
-    from effects.round_edges import set_round_radius
+    from effects.wear.wear_locations import set_round_radius
     faulthandler.dump_traceback_later(60, repeat=True)
     sc, cam = scene_setup(archviz, project, samples, (4, -6, 3.5), (0.45, 0, 1.25), 4.5)
     set_round_radius(0.0025)
@@ -90,7 +90,7 @@ def _specimens():
 
 def _materials(wall, column, floor, archviz):
     import bpy
-    from effects.edge_wear import (weathered_concrete, dice, add_edge_wear, edge_wear_group,
+    from effects.wear import (weathered_concrete, dice, add_edge_wear, edge_wear_group,
                                    add_leak_field, add_runoff, add_cracks, add_edge_cracks,
                                    edge_crack_edges, add_corner_dirt)
     mats, chip_mods = [], []
@@ -157,8 +157,8 @@ def _write_regions(out, samples, sc, cam, wall, column, counts, mats):
 
 def _render_variants(out, only, mats, chip_mods, sc, archviz):
     import bpy
-    from effects.edge_wear import set_input, switch_rounding
-    from effects.edge_dirt import LINE_AMOUNT, DUST_AMOUNT
+    from effects.wear import set_input, switch_rounding
+    from effects.wear.dirt import LINE_AMOUNT, DUST_AMOUNT
     for key in VARIANTS:
         if only and key not in only:
             continue
