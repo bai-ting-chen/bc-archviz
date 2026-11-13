@@ -11,10 +11,10 @@ _DOMAIN_MIN_M, _DOMAIN_MAX_M = -100.0, 1100.0
 
 
 @lru_cache(maxsize=1024)
-def _knots(seed, lo, hi):
+def _knots(seed, min_knot_spacing_m, max_knot_spacing_m):
     rng = np.random.default_rng(seed)
-    n = int((_DOMAIN_MAX_M - _DOMAIN_MIN_M) / lo) + 4
-    x = _DOMAIN_MIN_M + np.r_[0.0, np.cumsum(rng.uniform(lo, hi, n))]
+    n = int((_DOMAIN_MAX_M - _DOMAIN_MIN_M) / min_knot_spacing_m) + 4
+    x = _DOMAIN_MIN_M + np.r_[0.0, np.cumsum(rng.uniform(min_knot_spacing_m, max_knot_spacing_m, n))]
     x = x[: np.searchsorted(x, _DOMAIN_MAX_M) + 2]
     return x, rng.uniform(-1, 1, len(x))
 
@@ -25,9 +25,9 @@ def smoothstep(t):
     return t * t * t * (10 + t * (-15 + 6 * t))
 
 
-def clustered_noise(x, seed, lo, hi):
-    """Irregular smooth noise in [-1, 1] at x metres; knot spacing uniform in [lo, hi] metres."""
-    k, v = _knots(int(seed), float(lo), float(hi))
+def clustered_noise(x, seed, min_knot_spacing_m, max_knot_spacing_m):
+    """Irregular smooth noise in [-1, 1] at x metres; knot spacing uniform in [min_knot_spacing_m, max_knot_spacing_m] metres."""
+    k, v = _knots(int(seed), float(min_knot_spacing_m), float(max_knot_spacing_m))
     x = np.asarray(x, dtype=np.float64)
     if x.size and (x.min() < k[0] or x.max() > k[-1]):
         raise ValueError(f'noise argument outside [{k[0]:.0f}, {k[-1]:.0f}] m')
@@ -36,6 +36,6 @@ def clustered_noise(x, seed, lo, hi):
     return v[i] * (1 - t) + v[i + 1] * t
 
 
-def unit_noise(x, seed, lo, hi):
+def unit_noise(x, seed, min_knot_spacing_m, max_knot_spacing_m):
     """Same noise mapped to [0, 1]."""
-    return .5 + .5 * clustered_noise(x, seed, lo, hi)
+    return .5 + .5 * clustered_noise(x, seed, min_knot_spacing_m, max_knot_spacing_m)

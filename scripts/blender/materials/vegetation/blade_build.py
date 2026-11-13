@@ -10,13 +10,13 @@ from materials.vegetation.blade_config import BLADE_DEFAULTS
 
 from materials.vegetation.blade_wet import _wet
 
-def blade_material(name, tex=None, colour=(0.12, 0.15, 0.05), wet=None, dry_patch=0.55):
+def blade_material(name, texture=None, colour=(0.12, 0.15, 0.05), wet=None, dry_patch=0.55):
     """Thin blade: Principled + Translucent (Add); per-instance value 0.8-1.15 and a patchy straw mix; optional wet film."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     g = NodeGraph(mat)
     out = g.node_with_props("ShaderNodeOutputMaterial", (1300, 0))
-    if tex:
-        t = g.node_with_props("ShaderNodeTexImage", (-900, 200)); t.image = bpy.data.images.load(tex, check_existing=True)
+    if texture:
+        t = g.node_with_props("ShaderNodeTexImage", (-900, 200)); t.image = bpy.data.images.load(texture, check_existing=True)
         col = t.outputs["Color"]
     else:
         rgb = g.node_with_props("ShaderNodeRGB", (-900, 200)); rgb.outputs[0].default_value = (*colour, 1.0)

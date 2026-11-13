@@ -4,13 +4,13 @@ import numpy as np
 from reference_image import load
 
 
-def patches(ref, regions_path, renders):
+def patches(reference_path, regions_path, renders):
     """Print mean display RGB and luminance for every named image region."""
     with open(regions_path, encoding="utf-8") as f:
         regions = json.load(f)
     regions.setdefault("frame", [0, 0, 1, 1])
-    size = load(ref).size
-    for path in [ref, *renders]:
+    size = load(reference_path).size
+    for path in [reference_path, *renders]:
         a = np.asarray(load(path, size), dtype=float) / 255
         h, w = a.shape[:2]
         cells = []

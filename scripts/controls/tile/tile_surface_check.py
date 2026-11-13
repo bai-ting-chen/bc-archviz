@@ -104,8 +104,8 @@ def check_face_maps(folder, fails):
     ob = bpy.context.object
     tile_mapping.planar_uv(ob)
     target = (.3, .35, .4)  # Low contrast avoids clipping; cap behavior is tested separately.
-    kwargs = dict(face=folder, tile_w=2., tile_h=1., joint=0., corner_radius=0.,
-                  body_albedo=target, off=tile_surface.FEATURES)
+    kwargs = dict(face=folder, tile_width_m=2., tile_height_m=1., joint_width_m=0., corner_radius=0.,
+                  body_albedo=target, disabled_features=tile_surface.FEATURES)
     mat = tile_surface.tile_material('FaceProbe', **kwargs)
     ob.data.materials.append(mat)
     photometric_scene.ortho_camera(1., .6, xy=(.5, .5))  # Entire 0.6 m patch lies inside cell (0,0).
@@ -122,7 +122,7 @@ def check_face_maps(folder, fails):
         fails.append(f'linear emission face mean {mean} differs from body_albedo by >2%')
     check_face_contrast(mat, face, fails)
     phase_before = emission_probe(mat, 'TileMapUV')
-    tile_surface.set_param(mat, 'tile_w', 3.)
+    tile_surface.set_param(mat, 'tile_width_m', 3.)
     phase_after = emission_probe(mat, 'TileMapUV')
     if np.max(np.abs(phase_before[..., :2] - phase_after[..., :2])) > 1e-5:
         fails.append('resize changed same-cell map-space patch phase')

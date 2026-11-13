@@ -7,7 +7,7 @@ _REVISION = 1
 PIECE_BINS = 65536
 
 DAMAGE_INPUT_SOCKETS = dict(damage='Fraction',crack_share='Crack Share',chip_share='Chip Share',
-              step_height='Step Height',piece_tilt='Piece Tilt',crack_width='Crack Width',
+              step_height='Step Height',piece_tilt_rad='Piece Tilt',crack_width='Crack Width',
               crack_depth='Crack Depth',chip_size='Chip Size',chip_depth='Chip Depth',
               spall_size='Spall Size',spall_density='Spall Density',glaze_thickness='Glaze Thickness',
               engobe_thickness='Engobe Thickness',glaze_lip_width='Glaze Lip Width',engobe_ring='Engobe Ring',

@@ -8,36 +8,36 @@ import numpy as np
 from materials.water.ballistic_sheet import GRAVITY_M_S2
 
 
-def fall_speed(v0, lip_z, z):
-    """Free-fall speed U = sqrt(v0^2 + 2 g (lip_z - z)), m/s."""
-    return np.sqrt(v0 ** 2 + 2 * GRAVITY_M_S2 * np.clip(lip_z - np.asarray(z), 0, None))
+def fall_speed(launch_speed_m_s, lip_height_m, z):
+    """Free-fall speed U = sqrt(launch_speed_m_s^2 + 2 g (lip_height_m - z)), m/s."""
+    return np.sqrt(launch_speed_m_s ** 2 + 2 * GRAVITY_M_S2 * np.clip(lip_height_m - np.asarray(z), 0, None))
 
 
-def set_velocity(ob, velocity):
+def set_velocity(obj, velocity):
     """Store a per-vertex `velocity` (m/s) and enable deformation motion blur on the object."""
-    me = ob.data
+    me = obj.data
     attr = me.attributes.get('velocity') or me.attributes.new('velocity', 'FLOAT_VECTOR', 'POINT')
     attr.data.foreach_set('vector', np.ascontiguousarray(velocity, dtype=np.float32).ravel())
-    ob.cycles.use_motion_blur = True
-    ob.cycles.use_deform_motion = True
+    obj.cycles.use_motion_blur = True
+    obj.cycles.use_deform_motion = True
 
 
-def film_velocity(front, back, lip_z, v0):
+def film_velocity(front, back, lip_height_m, launch_speed_m_s):
     """Velocity in water.mesh_builders.film_sheet's vertex order: fall speed along each skin's local fall direction."""
     out = []
     for skin in (front, back):
         direction = np.gradient(skin, axis=0)
         direction /= np.linalg.norm(direction, axis=-1, keepdims=True) + 1e-12
-        out.append((direction * fall_speed(v0, lip_z, skin[..., 2])[..., None]).reshape(-1, 3))
+        out.append((direction * fall_speed(launch_speed_m_s, lip_height_m, skin[..., 2])[..., None]).reshape(-1, 3))
     return np.r_[out[0], out[1]]
 
 
-def falling_velocity(ob, lip_z, v0):
+def falling_velocity(obj, lip_height_m, launch_speed_m_s):
     """Straight-down velocity at the local fall speed for every vertex of an object (strings, drops)."""
-    co = np.empty(len(ob.data.vertices) * 3, np.float32)
-    ob.data.vertices.foreach_get('co', co)
-    speed = fall_speed(v0, lip_z, co.reshape(-1, 3)[:, 2])
-    set_velocity(ob, np.c_[np.zeros_like(speed), np.zeros_like(speed), -speed])
+    co = np.empty(len(obj.data.vertices) * 3, np.float32)
+    obj.data.vertices.foreach_get('co', co)
+    speed = fall_speed(launch_speed_m_s, lip_height_m, co.reshape(-1, 3)[:, 2])
+    set_velocity(obj, np.c_[np.zeros_like(speed), np.zeros_like(speed), -speed])
 
 
 def enable_motion_blur(scene, shutter_frames):

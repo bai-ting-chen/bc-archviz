@@ -3,13 +3,13 @@ import bpy
 import numpy as np
 
 
-def save_height_exr(H, path, name='water ripple height (mm)'):
-    """Write H (metres, [s, o]) as a float EXR in millimetres and return the image loaded from that file."""
-    n_s, n_o = H.shape
+def save_height_exr(height_m, path, name='water ripple height (mm)'):
+    """Write height_m (metres, [s, o]) as a float EXR in millimetres and return the image loaded from that file."""
+    n_s, n_o = height_m.shape
     img = bpy.data.images.new(name + ' tmp', n_o, n_s, alpha=False, float_buffer=True)
     img.colorspace_settings.name = 'Non-Color'          # before writing pixels, or the buffer is wiped (api-traps)
     pixels = np.zeros((n_s, n_o, 4), np.float32)
-    pixels[..., :3] = (H * 1000)[..., None]
+    pixels[..., :3] = (height_m * 1000)[..., None]
     pixels[..., 3] = 1
     img.pixels.foreach_set(pixels.ravel())
     settings = bpy.context.scene.render.image_settings

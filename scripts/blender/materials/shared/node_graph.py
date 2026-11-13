@@ -34,10 +34,10 @@ class NodeGraph:
         self.frames[label] = frame
         return frame
 
-    def node(self, kind, loc, frame=None, label=None, **inputs):
-        """Node of type kind at loc, inside a frame, with input default values by keyword."""
+    def node(self, kind, location, frame=None, label=None, **inputs):
+        """Node of type kind at location, inside a frame, with input default values by keyword."""
         node = self.tree.nodes.new(kind)
-        node.location = loc
+        node.location = location
         if label:
             node.label = label
         if frame:
@@ -46,26 +46,26 @@ class NodeGraph:
             node.inputs[name].default_value = value
         return node
 
-    def node_with_props(self, kind, loc, **props):
+    def node_with_props(self, kind, location, **properties):
         """Node with properties (operation, data_type, domain...) set by keyword."""
         node = self.tree.nodes.new(kind)
-        node.location = loc
-        for name, value in props.items():
+        node.location = location
+        for name, value in properties.items():
             setattr(node, name, value)
         return node
 
-    def image_texture(self, path, colorspace, loc, frame, vector, label=None):
+    def image_texture(self, path, colorspace, location, frame, vector, label=None):
         """Image Texture node loading path, repeated, driven by the vector socket."""
-        node = self.node("ShaderNodeTexImage", loc, frame, label)
+        node = self.node("ShaderNodeTexImage", location, frame, label)
         node.image = bpy.data.images.load(path, check_existing=True)
         node.image.colorspace_settings.name = colorspace
         node.extension = "REPEAT"
         self.link(vector, node.inputs["Vector"])
         return node
 
-    def uv_map(self, name, loc, frame):
+    def uv_map(self, name, location, frame):
         """UV Map node for the named UV layer; returns its UV socket."""
-        node = self.node("ShaderNodeUVMap", loc, frame, label="UV: " + name)
+        node = self.node("ShaderNodeUVMap", location, frame, label="UV: " + name)
         node.uv_map = name
         return node.outputs["UV"]
 
@@ -80,54 +80,54 @@ class NodeGraph:
         else:
             self.link(value, socket)
 
-    def math(self, op, a, b, loc, frame=None, clamp=False):
-        """Math node (op on a and b, sockets or values); returns its Value."""
-        node = self.node("ShaderNodeMath", loc, frame)
-        node.operation, node.use_clamp = op, clamp
+    def math(self, operation, a, b, location, frame=None, clamp=False):
+        """Math node (operation on a and b, sockets or values); returns its Value."""
+        node = self.node("ShaderNodeMath", location, frame)
+        node.operation, node.use_clamp = operation, clamp
         for i, value in enumerate((a, b)):
             self.link_or_set(node.inputs[i], value)
         return node.outputs[0]
 
-    def map_range(self, value, fmin, fmax, loc, tmin=0.0, tmax=1.0, frame=None, label=None, smooth=False):
-        """Map Range from [fmin, fmax] to [tmin, tmax], smoothstep when smooth; returns Result."""
-        node = self.node("ShaderNodeMapRange", loc, frame, label)
+    def map_range(self, value, source_min, source_max, location, target_min=0.0, target_max=1.0, frame=None, label=None, smooth=False):
+        """Map Range from [source_min, source_max] to [target_min, target_max], smoothstep when smooth; returns Result."""
+        node = self.node("ShaderNodeMapRange", location, frame, label)
         if smooth:
             node.interpolation_type = "SMOOTHSTEP"
-        for name, bound in (("From Min", fmin), ("From Max", fmax), ("To Min", tmin), ("To Max", tmax)):
+        for name, bound in (("From Min", source_min), ("From Max", source_max), ("To Min", target_min), ("To Max", target_max)):
             self.link_or_set(node.inputs[name], bound)
         self.link(value, node.inputs["Value"])
         return node.outputs["Result"]
 
-    def noise_texture(self, vector, scale, loc, frame=None, detail=6.0, rough=0.6, label=None):
+    def noise_texture(self, vector, scale, location, frame=None, detail=6.0, roughness=0.6, label=None):
         """Noise Texture on a vector socket; returns its Fac."""
-        node = self.node("ShaderNodeTexNoise", loc, frame, label, Scale=scale, Detail=detail, Roughness=rough)
+        node = self.node("ShaderNodeTexNoise", location, frame, label, Scale=scale, Detail=detail, Roughness=roughness)
         self.link(vector, node.inputs["Vector"])
         return node.outputs[0]
 
-    def mix(self, a, b, factor, loc, frame=None, data_type="RGBA", blend="MIX", label=None):
+    def mix(self, a, b, factor, location, frame=None, data_type="RGBA", blend="MIX", label=None):
         """Mix node (data_type RGBA, FLOAT or VECTOR) from sockets or values; returns Result."""
-        node = self.node("ShaderNodeMix", loc, frame, label)
+        node = self.node("ShaderNodeMix", location, frame, label)
         node.data_type, node.blend_type = data_type, blend
         self.link_or_set(node.inputs["Factor"], factor)
         self.link_or_set(active_socket(node.inputs, "A"), a)
         self.link_or_set(active_socket(node.inputs, "B"), b)
         return active_socket(node.outputs, "Result")
 
-    def vector_math(self, op, a, b, loc, frame=None, label=None):
+    def vector_math(self, operation, a, b, location, frame=None, label=None):
         """Vector Math from sockets or values (b None: unary); returns the Value output for
         DOT_PRODUCT / LENGTH / DISTANCE, otherwise the Vector."""
-        node = self.node("ShaderNodeVectorMath", loc, frame, label)
-        node.operation = op
+        node = self.node("ShaderNodeVectorMath", location, frame, label)
+        node.operation = operation
         self.link_or_set(node.inputs[0], a)
         if b is not None:
-            self.link_or_set(node.inputs["Scale"] if op == "SCALE" else node.inputs[1], b)
-        return node.outputs["Value" if op in ("DOT_PRODUCT", "LENGTH", "DISTANCE") else "Vector"]
+            self.link_or_set(node.inputs["Scale"] if operation == "SCALE" else node.inputs[1], b)
+        return node.outputs["Value" if operation in ("DOT_PRODUCT", "LENGTH", "DISTANCE") else "Vector"]
 
-    def color_ramp(self, loc, frame, stops, label=None, interp="LINEAR"):
+    def color_ramp(self, location, frame, stops, label=None, interpolation="LINEAR"):
         """Color Ramp with stops [(position, (r, g, b)), ...]; returns the node."""
-        node = self.node("ShaderNodeValToRGB", loc, frame, label)
+        node = self.node("ShaderNodeValToRGB", location, frame, label)
         ramp = node.color_ramp
-        ramp.interpolation = interp
+        ramp.interpolation = interpolation
         while len(ramp.elements) > 1:
             ramp.elements.remove(ramp.elements[-1])
         ramp.elements[0].position, ramp.elements[0].color = stops[0][0], (*stops[0][1], 1)
@@ -135,30 +135,30 @@ class NodeGraph:
             ramp.elements.new(position).color = (*color, 1)
         return node
 
-    def combine_xyz(self, x, y, z, loc, frame=None):
+    def combine_xyz(self, x, y, z, location, frame=None):
         """Combine XYZ from sockets or numbers; returns the vector socket."""
-        node = self.node("ShaderNodeCombineXYZ", loc, frame)
+        node = self.node("ShaderNodeCombineXYZ", location, frame)
         for i, value in enumerate((x, y, z)):
             self.link_or_set(node.inputs[i], value)
         return node.outputs[0]
 
-    def attribute(self, name, loc, frame=None, out="Fac"):
-        """Shader Attribute node reading a named attribute; returns the out socket."""
-        node = self.node("ShaderNodeAttribute", loc, frame, label="attr: " + name)
+    def attribute(self, name, location, frame=None, output_name="Fac"):
+        """Shader Attribute node reading a named attribute; returns the output_name socket."""
+        node = self.node("ShaderNodeAttribute", location, frame, label="attr: " + name)
         node.attribute_name = name
-        return node.outputs[out]
+        return node.outputs[output_name]
 
-    def store_attribute(self, geometry, name, dtype, value, loc):
+    def store_attribute(self, geometry, name, data_type, value, location):
         """Geometry Nodes Store Named Attribute on points; returns the geometry socket."""
-        node = self.node_with_props("GeometryNodeStoreNamedAttribute", loc, data_type=dtype, domain="POINT")
+        node = self.node_with_props("GeometryNodeStoreNamedAttribute", location, data_type=data_type, domain="POINT")
         node.inputs["Name"].default_value = name
         self.link(geometry, node.inputs["Geometry"])
         self.link(value, active_socket(node.inputs, "Value"))
         return node.outputs["Geometry"]
 
-    def named_attribute(self, name, dtype, loc):
+    def named_attribute(self, name, data_type, location):
         """Geometry Nodes Named Attribute input; returns its value socket."""
-        node = self.node_with_props("GeometryNodeInputNamedAttribute", loc, data_type=dtype)
+        node = self.node_with_props("GeometryNodeInputNamedAttribute", location, data_type=data_type)
         node.inputs["Name"].default_value = name
         return node.outputs[0]
 
@@ -170,32 +170,32 @@ def frame_for(mat, label):
     return graph, label
 
 
-def layer_frame(g, label):
+def layer_frame(graph, label):
     """Create a stacked layer frame and return its label for the graph builder."""
-    node = g.frame(label)
-    node.location.y = -12000 * (sum(n.type == 'FRAME' for n in g.tree.nodes)-1)
+    node = graph.frame(label)
+    node.location.y = -12000 * (sum(n.type == 'FRAME' for n in graph.tree.nodes)-1)
     return label
 
 
-def layer_switch(g, layer, value, amount, neutral=1.0, frame=None):
+def layer_switch(graph, layer, value, amount, neutral=1.0, frame=None):
     """Switch a scalar or vector layer and export its AOV."""
     x, y = value.node.location
     # Keep each control beside its own input chain, followed by Mix and AOV.
-    used = {(tuple(node.location)) for node in g.tree.nodes
-            if node.parent == (g.frames[frame] if frame else None)}
+    used = {(tuple(node.location)) for node in graph.tree.nodes
+            if node.parent == (graph.frames[frame] if frame else None)}
     while any((x+dx, y+dy) in used for dx, dy in ((300, 200), (600, 0), (900, 0))):
         y -= 700
     if isinstance(amount, (int, float)):
-        node = g.node('ShaderNodeValue', (x + 300, y + 200), frame, label=layer + ' amount')
+        node = graph.node('ShaderNodeValue', (x + 300, y + 200), frame, label=layer + ' amount')
         node.outputs[0].default_value = amount
         amount = node.outputs[0]
-    mix = g.node('ShaderNodeMix', (x + 600, y), frame, label=layer)
+    mix = graph.node('ShaderNodeMix', (x + 600, y), frame, label=layer)
     mix.data_type = 'VECTOR' if value.type == 'VECTOR' else 'FLOAT'
-    g.link(amount, mix.inputs[0])
-    g.link_or_set(active_socket(mix.inputs, 'A'), neutral)
-    g.link(value, active_socket(mix.inputs, 'B'))
+    graph.link(amount, mix.inputs[0])
+    graph.link_or_set(active_socket(mix.inputs, 'A'), neutral)
+    graph.link(value, active_socket(mix.inputs, 'B'))
     result = active_socket(mix.outputs, 'Result')
-    aov = g.node('ShaderNodeOutputAOV', (x + 900, y), frame)
+    aov = graph.node('ShaderNodeOutputAOV', (x + 900, y), frame)
     aov.aov_name = aov.name = 'var_' + layer
-    g.link(result, aov.inputs['Color' if value.type == 'VECTOR' else 'Value'])
+    graph.link(result, aov.inputs['Color' if value.type == 'VECTOR' else 'Value'])
     return result

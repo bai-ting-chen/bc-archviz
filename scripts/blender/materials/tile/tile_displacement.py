@@ -8,10 +8,10 @@ import json
 import math
 
 
-def use_displacement(mat, objects, pixel_size=1.0):
+def use_displacement(mat, objects, pixel_size_px=1.0):
     """Opt into world-metre displacement using the shared adaptive subdivision helper."""
     from materials.displacement.displacement import enable_true_displacement
-    if not math.isfinite(pixel_size) or pixel_size <= 0:
+    if not math.isfinite(pixel_size_px) or pixel_size_px <= 0:
         raise ValueError('pixel_size must be positive and finite')
     tree = mat.node_tree
     disp = tree.nodes['TileDisplacement']
@@ -20,24 +20,24 @@ def use_displacement(mat, objects, pixel_size=1.0):
     mat.displacement_method = 'BOTH'
     for name in ('TileBump', 'DamageBump'):
         tree.nodes[name].inputs['Strength'].default_value = 0
-    store_displacement(mat, True, objects, pixel_size)
+    store_displacement(mat, True, objects, pixel_size_px)
     for obj in objects:
-        enable_true_displacement(obj, pixel_size)
+        enable_true_displacement(obj, pixel_size_px)
     return mat
 
 
-def store_displacement(mat, mode, objects, pixel_size):
+def store_displacement(mat, mode, objects, pixel_size_px):
     """Record the displacement mode and its objects so a structural rebuild re-applies exactly that."""
     settings = json.loads(mat['tile_surface_settings'])
-    settings.update(displacement=mode, pixel_size=pixel_size,
+    settings.update(displacement=mode, pixel_size_px=pixel_size_px,
                     displaced_objects=None if mode is False else [o.name for o in objects])
     mat['tile_surface_settings'] = json.dumps(settings)
 
 
-def use_damage_displacement(mat, objects, pixel_size=1.0):
+def use_damage_displacement(mat, objects, pixel_size_px=1.0):
     """Displace only damage (piece steps, chip/crack cuts); profile and joints stay bump (edges move only through damage)."""
     from materials.displacement.displacement import enable_true_displacement
-    if not math.isfinite(pixel_size) or pixel_size <= 0:
+    if not math.isfinite(pixel_size_px) or pixel_size_px <= 0:
         raise ValueError('pixel_size must be positive and finite')
     tree = mat.node_tree
     out = next(n for n in tree.nodes if n.type == 'OUTPUT_MATERIAL' and n.is_active_output)
@@ -46,9 +46,9 @@ def use_damage_displacement(mat, objects, pixel_size=1.0):
     for name in ('TileBump', 'DamageBump'):
         tree.nodes[name].inputs['Strength'].default_value = 1
     mat.displacement_method = 'BOTH'
-    store_displacement(mat, 'damage', objects, pixel_size)
+    store_displacement(mat, 'damage', objects, pixel_size_px)
     for obj in objects:
-        enable_true_displacement(obj, pixel_size)
+        enable_true_displacement(obj, pixel_size_px)
     return mat
 
 
@@ -64,5 +64,5 @@ def use_bump(mat):
     for name in ('TileBump', 'DamageBump'):
         tree.nodes[name].inputs['Strength'].default_value = 1
     mat.displacement_method = 'BUMP'
-    store_displacement(mat, False, (), json.loads(mat['tile_surface_settings']).get('pixel_size', 1.0))
+    store_displacement(mat, False, (), json.loads(mat['tile_surface_settings']).get('pixel_size_px', 1.0))
     return mat   # adaptive-subdivision modifiers stay on the objects: remove them to drop the dicing cost

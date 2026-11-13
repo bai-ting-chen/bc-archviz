@@ -22,7 +22,7 @@ Chipping masks → coat worn off (base shows) or wood broken (under-layer shows)
 ## 3. Code
 All in `scripts/blender/materials/wood/wood.py` (`materials.wood.wood`):
 - `coated_wood()`: base and coat (§4.1, §4.2).
-- `raw_wood_under(g, color, normal)`: the raw-wood under-layer shader (§4.3).
+- `raw_wood_under(graph, color, normal)`: the raw-wood under-layer shader (§4.3).
 - `weathered_wood()`: coated wood + worn coat and grime on the arrises + `raw_wood_under` where chipped.
 - `WOOD_CHIPS`: wood settings for the shared chip group,
   `effects.wear.add_edge_wear(obj, edge_wear_group(**WOOD_CHIPS))`: dents and grain-wise breaks

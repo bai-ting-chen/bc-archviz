@@ -28,8 +28,8 @@ def run(args):
     return subprocess.run(args, capture_output=True, text=True, encoding="utf-8", errors="replace")
 
 
-def search(query, n=5):
-    r = run([YT_DLP_EXE, f"ytsearch{n}:{query}", "--skip-download", "--print",
+def search(query, result_count=5):
+    r = run([YT_DLP_EXE, f"ytsearch{result_count}:{query}", "--skip-download", "--print",
              "%(id)s | %(duration_string)s | %(channel)s | %(upload_date)s | %(title)s"])
     print(r.stdout.strip())
 
@@ -59,7 +59,7 @@ def clean_caption_cues(path):
     return [f"[{int(t // 60):02d}:{int(t % 60):02d}] {s}" for t, s in out]
 
 
-def extract_tutorial(url, out_dir, frames=False, max_height=1080, scene=0.12, every=8):
+def extract_tutorial(url, out_dir, frames=False, max_height_px=1080, scene_change_threshold=0.12, frame_interval_s=8):
     meta = json.loads(run([YT_DLP_EXE, url, "--skip-download", "-J"]).stdout)
     vid = meta["id"]
     d = os.path.join(out_dir, vid)
@@ -79,7 +79,7 @@ def extract_tutorial(url, out_dir, frames=False, max_height=1080, scene=0.12, ev
     n_frames = 0
     if frames:
         video = os.path.join(d, "video.mp4")
-        run([YT_DLP_EXE, url, "-f", f"bv*[height<={max_height}][ext=mp4]/b[height<={max_height}]",
+        run([YT_DLP_EXE, url, "-f", f"bv*[height<={max_height_px}][ext=mp4]/b[height<={max_height_px}]",
              "-o", video, "--no-playlist"])
         fd = os.path.join(d, "frames")
         os.makedirs(fd, exist_ok=True)
@@ -88,7 +88,7 @@ def extract_tutorial(url, out_dir, frames=False, max_height=1080, scene=0.12, ev
         r = run([FFMPEG_EXE, "-hide_banner", "-loglevel", "info", "-i", video, "-vf",
                  # scene changes OR at least one frame every `every` seconds (screen recordings
                  # change subtly -- node graphs grow without a "cut")
-                 f"select='gt(scene,{scene})+isnan(prev_selected_t)+gte(t-prev_selected_t,{every})',"
+                 f"select='gt(scene,{scene_change_threshold})+isnan(prev_selected_t)+gte(t-prev_selected_t,{frame_interval_s})',"
                  "showinfo,scale=1280:-2", "-fps_mode", "vfr",  # ffmpeg 9: no -vsync
                  os.path.join(fd, "f_%05d.jpg")])
         times = [float(t) for t in re.findall(r"pts_time:\s*([0-9.]+)", r.stderr)]
@@ -111,4 +111,4 @@ if __name__ == "__main__":
         mh = int(a[a.index("--max-height-px") + 1]) if "--max-height-px" in a else 1080
         sc = float(a[a.index("--scene-change-threshold") + 1]) if "--scene-change-threshold" in a else 0.12
         ev = float(a[a.index("--frame-interval-s") + 1]) if "--frame-interval-s" in a else 8
-        extract_tutorial(a[0], a[1], frames="--frames" in a, max_height=mh, scene=sc, every=ev)
+        extract_tutorial(a[0], a[1], frames="--frames" in a, max_height_px=mh, scene_change_threshold=sc, frame_interval_s=ev)

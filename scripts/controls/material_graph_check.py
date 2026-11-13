@@ -275,7 +275,7 @@ def run(topic, out):
         elif topic == "vegetation":
             material("dry", lambda: m.blade_material("dry"))
             material("wet", lambda: m.blade_material("wet", wet=m.WET_BLADE_DEFAULTS))
-            material("textured", lambda: m.blade_material("textured", tex=str(folder / "map.png"), wet=m.WET_BLADE_DEFAULTS))
+            material("textured", lambda: m.blade_material("textured", texture=str(folder / "map.png"), wet=m.WET_BLADE_DEFAULTS))
         elif topic == "water":
             material("pool", m.pool_water)
             fresh()

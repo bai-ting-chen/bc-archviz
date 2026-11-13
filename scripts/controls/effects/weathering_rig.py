@@ -21,11 +21,11 @@ def scene():
     sep = b.node('ShaderNodeSeparateXYZ', (-700, 0)); b.link(pos, sep.inputs[0])
     return sc, W, H, wall, m, b, em, sep
 
-def render(sc, W, H, O, TAG):
+def render(scene, wall_width_m, wall_height_m, output_dir, variant_name):
     """Render the lab with its original camera and settings."""
-    cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera = cam
-    cam.data.type = 'ORTHO'; cam.data.ortho_scale = W; cam.location = (W / 2, -10, H / 2); cam.rotation_euler = (1.5708, 0, 0)
-    sc.render.resolution_x, sc.render.resolution_y = 1200, 600
-    sc.render.engine = 'CYCLES'; sc.cycles.samples = 4; archviz.use_gpu(); sc.cycles.device = 'GPU'
-    sc.view_settings.view_transform = 'Standard'; sc.world = None
-    sc.render.filepath = str(O / f'lab_{TAG}.png'); bpy.ops.render.render(write_still=True)
+    cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam')); scene.collection.objects.link(cam); scene.camera = cam
+    cam.data.type = 'ORTHO'; cam.data.ortho_scale = wall_width_m; cam.location = (wall_width_m / 2, -10, wall_height_m / 2); cam.rotation_euler = (1.5708, 0, 0)
+    scene.render.resolution_x, scene.render.resolution_y = 1200, 600
+    scene.render.engine = 'CYCLES'; scene.cycles.samples = 4; archviz.use_gpu(); scene.cycles.device = 'GPU'
+    scene.view_settings.view_transform = 'Standard'; scene.world = None
+    scene.render.filepath = str(output_dir / f'lab_{variant_name}.png'); bpy.ops.render.render(write_still=True)

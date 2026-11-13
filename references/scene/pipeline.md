@@ -194,7 +194,7 @@ Read-only documentation work needs no Blender or Rhino connection.
   used, since it drives whichever Chrome is connected to the account, possibly on another machine:
   1. Open `https://www.fab.com/sellers/Quixel%20Megascans` in the pane.
   2. Send the text of `scripts/scene/assets/fab-search.js` with `javascript_tool`, followed by the
-     call `await fabSearch({q, type, category, max})` in the same call: declarations need not
+     call `await fabSearch({query, type, category, max_results})` in the same call: declarations need not
      survive to the next call (options in the file header). Each row
      holds the Megascans id (e.g. `zcgmefc`, read from the download file name), title, category, tags,
      formats, scan size, texel density, maps, plant species, Fab link and thumbnail. Rows cost about

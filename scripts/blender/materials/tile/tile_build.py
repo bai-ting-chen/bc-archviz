@@ -25,31 +25,31 @@ from materials.shared.node_graph import NodeGraph
 from materials.tile.tile_nodes import _TileGraph
 
 
-def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, row_offset=0.0,
+def tile_material(name, uv="TileUV", tile_width_m=0.045, tile_height_m=0.145, joint_width_m=0.003, row_offset=0.0,
                   rotation=0.0, origin=(0.0, 0.0), face=None, map_size=None,
-                  body_albedo=(0.65, 0.64, 0.61), coat_ior=1.5, coat_rough=0.25,
+                  body_albedo=(0.65, 0.64, 0.61), coat_ior=1.5, coat_roughness=0.25,
                   edge_radius=0.002, recess=0.0015, grout_albedo=(0.36, 0.36, 0.35),
-                  grout_rough=0.9, dust=0.5, dust_width=0.004, tint_var=0.03, rough_var=0.05,
-                  tilt_deg=0.4, wave_amp=0.0001, specks=0.3, macro=0.05, off=(),
+                  grout_rough=0.9, dust=0.5, dust_width=0.004, tint_variation=0.03, roughness_variation=0.05,
+                  tilt_deg=0.4, wave_amplitude_m=0.0001, specks=0.3, macro=0.05, disabled_features=(),
                   corner_radius=0.003, speck_size=0.001, lippage=0.0003,
                   jitter_offset=0.0, jitter_rotation_deg=0.0, face_contrast=1.0, face_saturation=1.0,
                   damage=0.05, crack_share=0.45, chip_share=0.35,
-                  step_height=0.00015, piece_tilt=0.0035, crack_width=0.00018, crack_depth=0.0008,
+                  step_height=0.00015, piece_tilt_rad=0.0035, crack_width=0.00018, crack_depth=0.0008,
                   chip_size=0.004, chip_depth=0.0008,
                   spall_size=0.001, spall_density=0.25, glaze_thickness=0.0003,
                   engobe_thickness=0.0002, glaze_lip_width=0.0002, engobe_ring=0.0003,
-                  force_kind=0, displacement=False, pixel_size=1.0,
+                  force_kind=0, displacement=False, pixel_size_px=1.0,
                   shell_exponent=0.6, crack_dirt=0.85, dirt_width=0.004,
                   warp=0.004, warp_scale=0.02, crack_cell=0.03, crack_density=0.35, chip_density=0.5,
                   displaced_objects=None):
-    """Build tiles in metres; rotation/piece_tilt radians, tilt/jitter_rotation_deg degrees; displacement False|True|'damage'."""
+    """Build tiles in metres; rotation/piece_tilt_rad radians, tilt/jitter_rotation_deg degrees; displacement False|True|'damage'."""
     values = locals().copy()
     if face is not None:
         values['face'] = face = str(face)
     settings = values.copy()
-    if not math.isfinite(pixel_size) or pixel_size <= 0:
+    if not math.isfinite(pixel_size_px) or pixel_size_px <= 0:
         raise ValueError('pixel_size must be positive and finite')
-    unknown = set(off) - set(tile_config.FEATURES)
+    unknown = set(disabled_features) - set(tile_config.FEATURES)
     if unknown:
         raise ValueError(f'Unknown features: {sorted(unknown)}')
     values['map_size'] = tile_maps.resolve_map_size(face, map_size)
@@ -57,7 +57,7 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
     values['jitter_rotation_deg'] = math.radians(jitter_rotation_deg)
     for key in ('body_albedo', 'grout_albedo'):
         values[key] = (*values[key][:3], 1)
-    if tile_w <= 0 or tile_h <= 0 or joint < 0 or corner_radius < 0 or speck_size <= 0 or lippage < 0:
+    if tile_width_m <= 0 or tile_height_m <= 0 or joint_width_m < 0 or corner_radius < 0 or speck_size <= 0 or lippage < 0:
         raise ValueError('Tile dimensions must be positive and joint nonnegative')
     if not 0 <= face_contrast <= 1 or not 0 <= face_saturation <= 1:
         raise ValueError('face_contrast and face_saturation must lie in [0, 1]')
@@ -174,7 +174,7 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
     a.link_or_set(damage_height.outputs[0], ddisp.inputs['Height'])
     ddisp.name = 'DamageDisplacement'
     mat.displacement_method = 'BUMP'
-    for feature in off:
+    for feature in disabled_features:
         tile_finish.toggle(mat, feature, False)
     if displacement:
         # Re-apply only to the objects it was set on (a macro may displace one wall); legacy: every user.
@@ -184,5 +184,5 @@ def tile_material(name, uv="TileUV", tile_w=0.045, tile_h=0.145, joint=0.003, ro
             objects = [o for o in bpy.data.objects if o.type == 'MESH' and
                        any(slot.material == mat for slot in o.material_slots)]
         (tile_displacement.use_damage_displacement if displacement == 'damage'
-         else tile_displacement.use_displacement)(mat, objects, pixel_size)
+         else tile_displacement.use_displacement)(mat, objects, pixel_size_px)
     return mat

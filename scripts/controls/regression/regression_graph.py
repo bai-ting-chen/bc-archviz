@@ -45,15 +45,15 @@ def node_signature(n):
         d = {"type": "NodeFrame", "label": n.label}
     return json.dumps(d, sort_keys=True, default=str)
 
-def graph(nt):
+def graph(node_tree):
     """Fingerprint node content, links and interface without layout or names."""
-    s = {n.name: node_signature(n) for n in nt.nodes}
+    s = {n.name: node_signature(n) for n in node_tree.nodes}
     nodes = sorted(s.values())
     links = sorted(f"{s[l.from_node.name]}|{l.from_socket.identifier}->{s[l.to_node.name]}|{l.to_socket.identifier}"
-                   for l in nt.links)
+                   for l in node_tree.links)
     iface = []
-    if hasattr(nt, "interface"):
-        for it in nt.interface.items_tree:
+    if hasattr(node_tree, "interface"):
+        for it in node_tree.interface.items_tree:
             if it.item_type == "SOCKET":
                 iface.append([it.in_out, it.name, it.socket_type, stable_value(getattr(it, "default_value", None))])
     return {"nodes": nodes, "links": links, "interface": iface}

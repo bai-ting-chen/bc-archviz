@@ -121,13 +121,13 @@ Module names follow the code under `scripts/blender/materials/tile/`:
   scale. Dicing every wall from a macro camera can exhaust VRAM (RULES SAF_02).
 - The mode and its objects are stored in the material, so a structural `set_param` re-applies them.
   `use_bump` undoes the shader side but leaves the subdivision modifiers.
-- `piece_tilt` is in radians.
+- `piece_tilt_rad` is in radians.
 
 | Parameter | Value |
 |---|---|
 | Displacement scope | damage only (main frame); everything only for a macro view on objects in frame |
 | Dicing scale (macro) | high, offscreen |
-| `piece_tilt` | radians |
+| `piece_tilt_rad` | radians |
 
 No generic layers are linked from this file, so there is no generic table here.
 

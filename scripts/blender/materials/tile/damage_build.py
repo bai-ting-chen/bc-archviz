@@ -39,7 +39,7 @@ def damage_group(name='TileDamage'):
         elif key=='force_kind': socket.max_value=3
         elif key=='shell_exponent': socket.min_value,socket.max_value=.2,2
         elif key in ('warp_scale','crack_cell'): socket.min_value=1e-8
-        elif key=='piece_tilt': socket.subtype='ANGLE'
+        elif key=='piece_tilt_rad': socket.subtype='ANGLE'
     _socket(tree,'On',default=1.)
     for label in _OUTPUTS: _socket(tree,label,'OUTPUT')
     a=_DamageGraph(tree); m=a.math

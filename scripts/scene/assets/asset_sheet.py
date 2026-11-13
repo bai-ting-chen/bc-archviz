@@ -28,16 +28,16 @@ def cache_name(url):
     return url.rstrip("/").rsplit("/", 1)[-1] if url else ""
 
 
-def fetch_thumbnail(url, dst):
+def fetch_thumbnail(url, destination):
     """Download one thumbnail into the cache unless it is already there."""
-    if os.path.exists(dst):
+    if os.path.exists(destination):
         return
     if not url or not url.startswith(THUMB_HOSTS):
         raise ValueError(f"not a known thumbnail host: {url}")
-    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    os.makedirs(os.path.dirname(destination), exist_ok=True)
     with urllib.request.urlopen(urllib.request.Request(url, headers=REQUEST_HEADERS)) as r:
         data = r.read()
-    with open(dst, "wb") as f:
+    with open(destination, "wb") as f:
         f.write(data)
 
 
@@ -53,14 +53,14 @@ def draw_tile(sheet, draw, font, row, key, path, x, y):
     draw.text((x + 4, y + TILE_HEIGHT_PX + 17), f"{row['title'][:34]}  {scan}", fill="white", font=font)
 
 
-def build_sheet(rows, out, cols):
+def build_sheet(rows, out, columns):
     """Fetch every row's thumbnail and write the tiled sheet to out."""
     if not rows:
         print("no rows: the search found nothing, no sheet written")
         return
     thumbs = os.path.join(os.path.dirname(os.path.abspath(out)), "thumbs")
-    lines = -(-len(rows) // cols)  # ceiling division
-    sheet = Image.new("RGB", (cols * TILE_WIDTH_PX, lines * (TILE_HEIGHT_PX + LABEL_HEIGHT_PX)), "black")
+    lines = -(-len(rows) // columns)  # ceiling division
+    sheet = Image.new("RGB", (columns * TILE_WIDTH_PX, lines * (TILE_HEIGHT_PX + LABEL_HEIGHT_PX)), "black")
     draw = ImageDraw.Draw(sheet)
     font = ImageFont.load_default()
     for i, row in enumerate(rows):
@@ -70,7 +70,7 @@ def build_sheet(rows, out, cols):
             fetch_thumbnail(row.get("thumb"), path)
         except Exception as ex:
             print(f"thumbnail failed for {key}: {ex}")
-        draw_tile(sheet, draw, font, row, key, path, (i % cols) * TILE_WIDTH_PX, (i // cols) * (TILE_HEIGHT_PX + LABEL_HEIGHT_PX))
+        draw_tile(sheet, draw, font, row, key, path, (i % columns) * TILE_WIDTH_PX, (i // columns) * (TILE_HEIGHT_PX + LABEL_HEIGHT_PX))
     sheet.save(out)
     print(f"{len(rows)} tiles -> {out}")
 
@@ -80,10 +80,10 @@ def main():
     p =argparse.ArgumentParser()
     p.add_argument("rows")
     p.add_argument("out")
-    p.add_argument("--columns", type=int, default=4, dest='cols')
+    p.add_argument("--columns", type=int, default=4, dest='columns')
     a = p.parse_args()
     with open(a.rows, encoding="utf-8") as f:
-        build_sheet(json.load(f), a.out, a.cols)
+        build_sheet(json.load(f), a.out, a.columns)
 
 
 if __name__ == "__main__":

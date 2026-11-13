@@ -26,9 +26,9 @@ OUT = Path(sys.argv[sys.argv.index("--") + 1])
 
 CASES = {
     "default": dict(),
-    "features_off": dict(off=("dust", "specks", "macro")),
-    "damage_displacement": dict(displacement="damage", pixel_size=0.5),
-    "small_tiles_joint": dict(tile_w=0.10, tile_h=0.10, joint=0.0015, row_offset=0.5, rotation=0.3),
+    "features_off": dict(disabled_features=("dust", "specks", "macro")),
+    "damage_displacement": dict(displacement="damage", pixel_size_px=0.5),
+    "small_tiles_joint": dict(tile_width_m=0.10, tile_height_m=0.10, joint_width_m=0.0015, row_offset=0.5, rotation=0.3),
 }
 
 result = {}
@@ -47,8 +47,8 @@ bpy.context.scene.collection.objects.link(plane)
 plane.data.from_pydata([(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0)], [], [(0, 1, 2, 3)])
 plane.data.materials.append(mat)
 steps = [
-    ("set_tile_w", lambda: tile_surface.set_param(mat, "tile_w", 0.06)),
-    ("set_off", lambda: tile_surface.set_param(mat, "off", ("dust", "specks"))),
+    ("set_tile_w", lambda: tile_surface.set_param(mat, "tile_width_m", 0.06)),
+    ("set_off", lambda: tile_surface.set_param(mat, "disabled_features", ("dust", "specks"))),
     ("toggle_macro", lambda: tile_surface.toggle(mat, "macro", False)),
     ("damage_displacement", lambda: tile_surface.use_damage_displacement(mat, [plane], 0.5)),
     ("set_after_displacement", lambda: tile_surface.set_param(mat, "tilt_deg", 0.8)),

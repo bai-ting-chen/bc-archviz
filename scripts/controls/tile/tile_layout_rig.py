@@ -10,20 +10,20 @@ import materials.tile.tile_layout as tile_layout
 
 RESOLUTION_PX, FRAME_SIZE_M = 400, 1.0                       # 400 px over 1 m: 2.5 mm per px
 CASES = {
-    "jitter": dict(tile_w=0.0375, tile_h=0.25, joint=0.004,
+    "jitter": dict(tile_width_m=0.0375, tile_height_m=0.25, joint_width_m=0.004,
                    jitter_offset=0.0004, jitter_rotation=0.0044),
-    "stack":   dict(tile_w=0.10, tile_h=0.05, joint=0.01),
-    "rounded": dict(tile_w=0.10, tile_h=0.05, joint=0.01, corner_radius=0.012),
-    "running": dict(tile_w=0.10, tile_h=0.05, joint=0.01, row_offset=0.5),
-    "rotated": dict(tile_w=0.145, tile_h=0.045, joint=0.008, rotation=0.5236, origin=(0.013, -0.02)),
+    "stack":   dict(tile_width_m=0.10, tile_height_m=0.05, joint_width_m=0.01),
+    "rounded": dict(tile_width_m=0.10, tile_height_m=0.05, joint_width_m=0.01, corner_radius=0.012),
+    "running": dict(tile_width_m=0.10, tile_height_m=0.05, joint_width_m=0.01, row_offset=0.5),
+    "rotated": dict(tile_width_m=0.145, tile_height_m=0.045, joint_width_m=0.008, rotation=0.5236, origin=(0.013, -0.02)),
 }
 OUTPUT_SOCKET_NAMES = ("Edge", "Joint", "Tile UV", "Tile ID")
 
-def plane_with(output, params, RES=RESOLUTION_PX, SIZE=FRAME_SIZE_M):
+def plane_with(output, params, resolution_px=RESOLUTION_PX, frame_size_m=FRAME_SIZE_M):
     """Render one layout output on the requested metre-sized plane."""
-    sc = photometric_scene.black_scene(samples=1, res=RES)
+    sc = photometric_scene.black_scene(samples=1, res=resolution_px)
     sc.cycles.filter_width = 0.01
-    bpy.ops.mesh.primitive_plane_add(size=SIZE)
+    bpy.ops.mesh.primitive_plane_add(size=frame_size_m)
     ob = bpy.context.object
     m = bpy.data.materials.new("probe"); m.use_nodes = True
     nt = m.node_tree; nt.nodes.clear()
@@ -37,12 +37,12 @@ def plane_with(output, params, RES=RESOLUTION_PX, SIZE=FRAME_SIZE_M):
         nt.links.new(src, mul.inputs[0]); src = mul.outputs[0]
     nt.links.new(src, em.inputs["Color"]); nt.links.new(em.outputs[0], out.inputs["Surface"])
     ob.data.materials.append(m)
-    photometric_scene.ortho_camera(1.0, SIZE)
+    photometric_scene.ortho_camera(1.0, frame_size_m)
     return photometric_scene.render_linear()
 
-def pixel_coords(RES=RESOLUTION_PX, SIZE=FRAME_SIZE_M):
+def pixel_coords(resolution_px=RESOLUTION_PX, frame_size_m=FRAME_SIZE_M):
     """Return pixel-centre metre coordinates in the emission probe plane."""
-    c = (np.arange(RES) + 0.5) / RES * SIZE - SIZE / 2
+    c = (np.arange(resolution_px) + 0.5) / resolution_px * frame_size_m - frame_size_m / 2
     return np.meshgrid(c, c)
 
 def stable(mask):                             # pixels whose 3x3 neighbourhood shares the value

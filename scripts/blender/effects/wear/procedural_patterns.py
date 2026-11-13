@@ -6,15 +6,15 @@ from effects.wear.water_marks import dried_marks_field
 from effects.wear.chipping import chipping_field
 
 
-def procedural_field(g, kind, vector, scale_m, scratch_width_m, frame, region=False):
+def procedural_field(graph, kind, vector, scale_m, scratch_width_m, frame, region=False):
     """Return a wear profile or a continuous deposit driver for a hybrid region."""
     kind = canonical_layer(kind)
     if kind == 'grunge':
-        return grunge_field(g, vector, scale_m, frame)
+        return grunge_field(graph, vector, scale_m, frame)
     if kind == 'scratches':
-        return scratches_field(g, vector, scale_m, scratch_width_m, frame)
+        return scratches_field(graph, vector, scale_m, scratch_width_m, frame)
     if kind == 'dried-marks':
-        return dried_marks_field(g, vector, scale_m, frame, region)
+        return dried_marks_field(graph, vector, scale_m, frame, region)
     if kind == 'chipping':
-        return chipping_field(g, vector, scale_m, frame)
+        return chipping_field(graph, vector, scale_m, frame)
     raise ValueError('Unknown wear layer: ' + kind)

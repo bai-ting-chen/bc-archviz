@@ -45,7 +45,7 @@ def fog_volume(centre=(0.0, 0.0), visibility_m=150.0, diameter_um=15.0, box=(500
     sep = g.node_with_props("ShaderNodeSeparateXYZ", (-700, 0)); g.link(geo.outputs["Position"], sep.inputs[0])
     height = g.map_range(sep.outputs["Z"], top[0], top[1], (-500, 100), 1.0, 0.0, smooth=True, label="fog top")
     hollow = g.map_range(sep.outputs["Z"], valley[0], valley[1], (-500, -100), 1.0, 1.0 + valley[2], smooth=True, label="hollows")
-    nz = g.noise_texture(geo.outputs["Position"], patch[0], (-500, -300), detail=3.0, rough=0.5)
+    nz = g.noise_texture(geo.outputs["Position"], patch[0], (-500, -300), detail=3.0, roughness=0.5)
     pt = g.math("ADD", g.math("MULTIPLY", g.math("SUBTRACT", nz, 0.5, (-300, -300)), 2 * patch[1], (-150, -300)), 1.0, (0, -300))
     dens = g.math("MULTIPLY", g.math("MULTIPLY", height, hollow, (-150, 0)), g.math("MAXIMUM", pt, 0.2, (150, -300)), (300, 0))
     dens = g.math("MULTIPLY", dens, sigma_from_visibility(visibility_m), (450, 0))

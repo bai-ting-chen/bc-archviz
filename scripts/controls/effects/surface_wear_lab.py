@@ -82,19 +82,19 @@ def _mask_controls(out):
                                                           disabled_factors_zero=True), indent=2))
 
 
-def _surface_vector(g, centre_x):
-    position = g.node('ShaderNodeNewGeometry', (-5000, 0)).outputs['Position']
-    local = g.node('ShaderNodeVectorMath', (-4700, 0))
+def _surface_vector(graph, centre_x):
+    position = graph.node('ShaderNodeNewGeometry', (-5000, 0)).outputs['Position']
+    local = graph.node('ShaderNodeVectorMath', (-4700, 0))
     local.operation = 'SUBTRACT'
-    g.link(position, local.inputs[0])
+    graph.link(position, local.inputs[0])
     local.inputs[1].default_value = (centre_x - 1, -.1, -1)
-    axes = g.node('ShaderNodeSeparateXYZ', (-4400, 0))
-    g.link(local.outputs[0], axes.inputs[0])
-    return g.combine_xyz(axes.outputs['X'], axes.outputs['Z'], 0, (-4100, 0))
+    axes = graph.node('ShaderNodeSeparateXYZ', (-4400, 0))
+    graph.link(local.outputs[0], axes.inputs[0])
+    return graph.combine_xyz(axes.outputs['X'], axes.outputs['Z'], 0, (-4100, 0))
 
 
-def _base_shader(g, kind):
-    shader = g.node('ShaderNodeBsdfPrincipled', (5000, 0))
+def _base_shader(graph, kind):
+    shader = graph.node('ShaderNodeBsdfPrincipled', (5000, 0))
     color, metallic, roughness = {
         'brushed-metal': ((.5, .53, .57, 1), 1, .3),
         'painted-metal': ((.12, .25, .38, 1), 0, .35),
@@ -105,11 +105,11 @@ def _base_shader(g, kind):
     shader.inputs['Roughness'].default_value = roughness
     if kind == 'brushed-metal':
         shader.inputs['Anisotropic'].default_value = .75
-        tangent = g.node('ShaderNodeTangent', (4700, -800))
+        tangent = graph.node('ShaderNodeTangent', (4700, -800))
         tangent.direction_type = 'UV_MAP'
         tangent.uv_map = 'surface-wear-uv'
-        g.link(tangent.outputs[0], shader.inputs['Tangent'])
-    under = g.node('ShaderNodeBsdfPrincipled', (5000, -1800))
+        graph.link(tangent.outputs[0], shader.inputs['Tangent'])
+    under = graph.node('ShaderNodeBsdfPrincipled', (5000, -1800))
     under.inputs['Base Color'].default_value = (.28, .3, .32, 1) if metallic or kind == 'painted-metal' else (.25, .23, .2, 1)
     under.inputs['Metallic'].default_value = 1 if kind != 'concrete-wall' else 0
     under.inputs['Roughness'].default_value = .42 if kind != 'concrete-wall' else .9

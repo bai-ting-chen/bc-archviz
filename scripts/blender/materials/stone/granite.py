@@ -32,7 +32,7 @@ def polished_granite(name="GRANITE_POLISHED", grain_m=0.006, roughness=0.04, ior
                  Scale=1.0 / grain_m, Randomness=1.0)
     g.link(vadd.outputs["Vector"], vor.inputs["Vector"])
     stops = [(0.0, base[0])] + list(flecks)
-    cr = g.color_ramp((-650, 150), F_C, stops, "mineral palette", interp="CONSTANT")
+    cr = g.color_ramp((-650, 150), F_C, stops, "mineral palette", interpolation="CONSTANT")
     sepv = g.node("ShaderNodeSeparateColor", (-780, 150), F_C)
     g.link(vor.outputs["Color"], sepv.inputs["Color"])
     g.link(sepv.outputs["Red"], cr.inputs["Fac"])

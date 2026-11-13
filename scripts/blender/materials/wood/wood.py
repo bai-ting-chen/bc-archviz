@@ -47,24 +47,24 @@ def coated_wood(name="COATED_PINE", tex_id="coated_pine", coat=0.2, coat_rough=0
     return mat
 
 
-def raw_wood_under(g, color, normal, frame=None, loc=(-1050, -1500), tint=(0.80, 0.60, 0.36),
+def raw_wood_under(graph, color, normal, frame=None, loc=(-1050, -1500), tint=(0.80, 0.60, 0.36),
                    mix=0.30, gain=1.7):
     """Under-layer for solid wood: the base grain lighter and toward a raw tint, rough, with torn
     fibres along the grain (UV U). Returns the BSDF output socket."""
     x0, y0 = loc
-    lift = g.mix(color, (gain, gain * 1.02, gain * 1.08, 1), 1.0, (x0, y0), frame, blend="MULTIPLY",
+    lift = graph.mix(color, (gain, gain * 1.02, gain * 1.08, 1), 1.0, (x0, y0), frame, blend="MULTIPLY",
                  label="inner wood: lighter (no amber varnish)")
-    pale = g.mix(lift, (*tint, 1), mix, (x0 + 200, y0), frame, label="inner wood: toward raw pine")
-    fib = g.node("ShaderNodeMapping", (x0 - 200, y0 - 200), frame, label="fibres along grain (UV U)")
+    pale = graph.mix(lift, (*tint, 1), mix, (x0 + 200, y0), frame, label="inner wood: toward raw pine")
+    fib = graph.node("ShaderNodeMapping", (x0 - 200, y0 - 200), frame, label="fibres along grain (UV U)")
     fib.inputs["Scale"].default_value = (20.0, 900.0, 1.0)
-    g.link(g.uv_map("BoxUV", (x0 - 400, y0 - 200), frame), fib.inputs["Vector"])
-    fbump = g.node("ShaderNodeBump", (x0 + 200, y0 - 250), frame, label="torn fibres", Distance=0.0012)
-    g.link(g.noise_texture(fib.outputs["Vector"], 1.0, (x0, y0 - 250), frame, detail=4), fbump.inputs["Height"])
-    g.link(normal, fbump.inputs["Normal"])
-    inner = g.node("ShaderNodeBsdfPrincipled", (x0 + 450, y0 - 50), frame,
+    graph.link(graph.uv_map("BoxUV", (x0 - 400, y0 - 200), frame), fib.inputs["Vector"])
+    fbump = graph.node("ShaderNodeBump", (x0 + 200, y0 - 250), frame, label="torn fibres", Distance=0.0012)
+    graph.link(graph.noise_texture(fib.outputs["Vector"], 1.0, (x0, y0 - 250), frame, detail=4), fbump.inputs["Height"])
+    graph.link(normal, fbump.inputs["Normal"])
+    inner = graph.node("ShaderNodeBsdfPrincipled", (x0 + 450, y0 - 50), frame,
                    label="Inner wood (raw)", Roughness=0.85)
-    g.link(pale, inner.inputs["Base Color"])
-    g.link(fbump.outputs["Normal"], inner.inputs["Normal"])
+    graph.link(pale, inner.inputs["Base Color"])
+    graph.link(fbump.outputs["Normal"], inner.inputs["Normal"])
     return inner.outputs["BSDF"]
 
 
@@ -85,7 +85,7 @@ def weathered_wood(name="PINE_WEATHERED", wear_band=0.012, wear_amount=0.9, **un
     F_FLD, F_WEAR, F_IN = list(g.frames)
     x0, y0 = -1500, -700
     d = g.attribute("edge_dist", (x0, y0), F_FLD)
-    rest = g.attribute("rest_pos", (x0, y0 - 180), F_FLD, out="Vector")
+    rest = g.attribute("rest_pos", (x0, y0 - 180), F_FLD, output_name="Vector")
     chip = g.map_range(g.attribute("chip", (x0, y0 - 360), F_FLD), 0.0, 0.0003, (x0 + 250, y0 - 360),
                    frame=F_FLD, label="chip mask")
     brk = g.map_range(g.attribute("break", (x0, y0 - 540), F_FLD), 0.0, 0.00015, (x0 + 250, y0 - 540),
@@ -95,7 +95,7 @@ def weathered_wood(name="PINE_WEATHERED", wear_band=0.012, wear_amount=0.9, **un
 
     band = g.map_range(d, 0.0, wear_band, (x0 + 250, y0 + 250), 1.0, 0.0, frame=F_WEAR,
                    label="edge band", smooth=True)
-    blot = g.map_range(g.noise_texture(rest, 28.0, (x0 + 250, y0 + 50), F_WEAR, detail=10, rough=0.65,
+    blot = g.map_range(g.noise_texture(rest, 28.0, (x0 + 250, y0 + 50), F_WEAR, detail=10, roughness=0.65,
                            label="wear breakup"), 0.38, 0.62, (x0 + 450, y0 + 50), frame=F_WEAR)
     wear_m = g.math("MULTIPLY", g.math("MULTIPLY", band, blot, (x0 + 650, y0 + 150), F_WEAR),
                     wear_amount, (x0 + 800, y0 + 150), F_WEAR)

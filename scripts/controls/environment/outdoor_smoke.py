@@ -75,14 +75,14 @@ rot = pane.copy(); rot.data = pane.data.copy(); rot.rotation_euler.z = math.radi
 sc.collection.objects.link(rot)
 _mat_glass.glass_distortion(rot.data.materials[0], rot)
 # hill + ground
-topo = terrain.landform_group("SMOKE_LAND", centre=PAD_CENTER_M, pad_half=PAD_HALF_SIZE_M, size=120, verts=241, fall=4, run=25)
+topo = terrain.landform_group("SMOKE_LAND", centre=PAD_CENTER_M, pad_half_size_m=PAD_HALF_SIZE_M, size=120, vertex_count=241, fall_height_m=4, slope_run_m=25)
 ground = _mat_ground.ground_material("grass_ground", "forest_ground_05", "SMOKE_GROUND", wet_gamma=1.4)
 ter = terrain.add_terrain(topo, ground)
 
 # camera down the slope
 cam = bpy.data.objects.new("CAM", bpy.data.cameras.new("CAM")); sc.collection.objects.link(cam)
 a = math.radians(-120); x, y = 16 * math.cos(a), 16 * math.sin(a)
-cam.location = (x, y, terrain.height(x, y, PAD_CENTER_M, PAD_HALF_SIZE_M, fall=4, run=25) + 1.5)
+cam.location = (x, y, terrain.height(x, y, PAD_CENTER_M, PAD_HALF_SIZE_M, fall_height_m=4, slope_run_m=25) + 1.5)
 cam.rotation_euler = (Vector((0, 0, 1.6)) - cam.location).to_track_quat("-Z", "Y").to_euler()
 archviz.physical_camera(cam, 100, 8.0, 8.0 ** 2 / 2 ** 11.0, 40.0, focus_distance=16)
 archviz.straighten_verticals(cam)

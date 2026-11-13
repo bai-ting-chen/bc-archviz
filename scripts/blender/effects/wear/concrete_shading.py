@@ -22,7 +22,7 @@ def weathered_concrete(name="CONCRETE_WEATHERED", line_width=LINE_WIDTH_M, line_
     F_FLD, F_DIRT, F_CHIP = list(g.frames)
     x0, y0 = -1600, -2300
     d = g.attribute("edge_dist", (x0, y0), F_FLD)
-    rest = g.attribute("rest_pos", (x0, y0 - 180), F_FLD, out="Vector")
+    rest = g.attribute("rest_pos", (x0, y0 - 180), F_FLD, output_name="Vector")
     chip_m = g.attribute("chip", (x0, y0 - 360), F_FLD)
     chip = g.map_range(chip_m, 0.0, 0.0008, (x0 + 250, y0 - 600), frame=F_CHIP, label="chip mask (break edge)")
 
@@ -62,16 +62,16 @@ def weathered_concrete(name="CONCRETE_WEATHERED", line_width=LINE_WIDTH_M, line_
     return mat
 
 
-def _fresh_break(g, clean, rest, F_CHIP, x0, y0):
+def _fresh_break(graph, clean, rest, F_CHIP, x0, y0):
     """Build the lighter fracture shader and its final chip blend."""
-    brk = g.node("ShaderNodeBsdfPrincipled", (x0 + 900, y0 - 500), F_CHIP,
+    brk = graph.node("ShaderNodeBsdfPrincipled", (x0 + 900, y0 - 500), F_CHIP,
                  label="Fresh break (lighter, rough)", Roughness=0.95)
-    tint = g.mix(clean.inputs["Base Color"].links[0].from_socket, (1.16, 1.15, 1.13, 1), 1.0,
+    tint = graph.mix(clean.inputs["Base Color"].links[0].from_socket, (1.16, 1.15, 1.13, 1), 1.0,
                  (x0 + 650, y0 - 450), F_CHIP, blend="MULTIPLY", label="break: lighter paste")
-    g.link(tint, brk.inputs["Base Color"])  # lighter paste, not chalk
-    bump = g.node("ShaderNodeBump", (x0 + 650, y0 - 750), F_CHIP, label="fracture bump",
+    graph.link(tint, brk.inputs["Base Color"])  # lighter paste, not chalk
+    bump = graph.node("ShaderNodeBump", (x0 + 650, y0 - 750), F_CHIP, label="fracture bump",
                   Distance=0.003)
-    g.link(g.noise_texture(rest, 400.0, (x0 + 450, y0 - 750), F_CHIP, detail=6), bump.inputs["Height"])
-    g.link(bump.outputs["Normal"], brk.inputs["Normal"])
-    mix2 = g.node("ShaderNodeMixShader", (x0 + 1200, y0 - 300), F_CHIP, label="chips over surface")
+    graph.link(graph.noise_texture(rest, 400.0, (x0 + 450, y0 - 750), F_CHIP, detail=6), bump.inputs["Height"])
+    graph.link(bump.outputs["Normal"], brk.inputs["Normal"])
+    mix2 = graph.node("ShaderNodeMixShader", (x0 + 1200, y0 - 300), F_CHIP, label="chips over surface")
     return brk, mix2

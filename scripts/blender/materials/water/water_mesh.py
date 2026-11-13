@@ -1,7 +1,7 @@
 """Water mesh; canonical implementation behind water."""
 
-def water_surface(obj, cell=0.1):
-    """Turn a closed water box into its top surface, diced to `cell` metres and smooth -- the build
+def water_surface(obj, cell_m=0.1):
+    """Turn a closed water box into its top surface, diced to `cell_m` metres and smooth -- the build
     MNEE needs (control: scripts/controls/water/mnee_water.py): a one-quad flat caster delivers NO light, the
     same plane diced 40x40 does; a closed box adds a degenerate bottom interface. The volume still
     works: rays enter it crossing the surface downward and leave crossing it upward (opaque basin)."""
@@ -14,8 +14,8 @@ def water_surface(obj, cell=0.1):
     f = bm.faces[0]
     xs = [v.co.x for v in f.verts]
     ys = [v.co.y for v in f.verts]
-    nx = max(1, round((max(xs) - min(xs)) / cell))
-    ny = max(1, round((max(ys) - min(ys)) / cell))
+    nx = max(1, round((max(xs) - min(xs)) / cell_m))
+    ny = max(1, round((max(ys) - min(ys)) / cell_m))
     z = f.verts[0].co.z
     bm.clear()
     bmesh.ops.create_grid(bm, x_segments=nx, y_segments=ny, size=0.5)

@@ -11,7 +11,7 @@ from tile_layout_rig import CASES, plane_with, pixel_coords, stable
 def check_jitter_gaps():
     """Measure face crossings for 200 tiles on each axis and reject overlap."""
     params = CASES["jitter"]
-    w, h, joint = params["tile_w"], params["tile_h"], params["joint"]
+    w, h, joint = params["tile_width_m"], params["tile_height_m"], params["joint_width_m"]
     cells = np.arange(-100, 100)
     ox, oy, angle = tile_layout._jitter_transform(
         cells, cells[::-1], w, h, joint,

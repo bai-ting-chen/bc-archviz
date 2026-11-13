@@ -13,10 +13,10 @@ import zlib
 from PIL import Image, ImageDraw
 
 ap = argparse.ArgumentParser()
-ap.add_argument("edges"); ap.add_argument("ref"); ap.add_argument("out")
+ap.add_argument("edges"); ap.add_argument("reference_path"); ap.add_argument("output_path")
 ap.add_argument("--width-px", type=int, default=1000, dest='w')
 a = ap.parse_args()
-ref = Image.open(a.ref).convert("RGB")
+ref = Image.open(a.reference_path).convert("RGB")
 ref = ref.resize((a.w, round(a.w * ref.height / ref.width)))
 ref = Image.blend(ref, Image.new("RGB", ref.size, (255, 255, 255)), 0.35)
 d = ImageDraw.Draw(ref)
@@ -38,5 +38,5 @@ for lay, pts in edges:
             seg = []
         else:
             seg.append(tuple(p))
-ref.save(a.out)
-print(a.out)
+ref.save(a.output_path)
+print(a.output_path)

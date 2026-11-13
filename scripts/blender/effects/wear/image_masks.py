@@ -28,7 +28,7 @@ class MaskSource:
     offset_uv: tuple = (0.0, 0.0)
 
 
-def image_mask(g, mask, vector=None, frame=None, row=0, mapped_vector=None):
+def image_mask(graph, mask, vector=None, frame=None, row=0, mapped_vector=None):
     """Load a Non-Color mask in surface metres or named real-world box/directional UVs."""
     sizes = mask_dimensions_m(mask.size_m)
     if min(sizes) <= 0 or mask.white <= mask.black or mask.gamma <= 0:
@@ -38,13 +38,13 @@ def image_mask(g, mask, vector=None, frame=None, row=0, mapped_vector=None):
         uv = mapped_vector  # already in tile units; stochastic UV lookups share the same loader
     elif mask.mapping == 'uv':
         # Author with box_uv/directional_uv(size=mask.size_m); do not scale UVs twice.
-        uv = g.uv_map(mask.uv_map, (-2800, y), frame)
+        uv = graph.uv_map(mask.uv_map, (-2800, y), frame)
     elif mask.mapping == 'world':
         if vector is None:
-            vector = surface_coordinates(g, frame)
-        scale = g.node('ShaderNodeVectorMath', (-2800, y), frame)
+            vector = surface_coordinates(graph, frame)
+        scale = graph.node('ShaderNodeVectorMath', (-2800, y), frame)
         scale.operation = 'MULTIPLY' if isinstance(mask.size_m, (tuple, list)) else 'SCALE'
-        g.link(vector, scale.inputs[0])
+        graph.link(vector, scale.inputs[0])
         if isinstance(mask.size_m, (tuple, list)):
             scale.inputs[1].default_value = (1/sizes[0], 1/sizes[1], 1)
         else:
@@ -53,36 +53,36 @@ def image_mask(g, mask, vector=None, frame=None, row=0, mapped_vector=None):
     else:
         raise ValueError('Mask mapping must be world or uv')
     if mask.rotation_deg or any(mask.offset_uv):
-        rotation = g.node('ShaderNodeVectorRotate', (-2700, y - 500), frame)
+        rotation = graph.node('ShaderNodeVectorRotate', (-2700, y - 500), frame)
         rotation.rotation_type = 'AXIS_ANGLE'
         rotation.inputs['Axis'].default_value = (0, 0, 1)
         rotation.inputs['Angle'].default_value = math.radians(mask.rotation_deg)
-        g.link(uv, rotation.inputs['Vector'])
-        offset = g.node('ShaderNodeVectorMath', (-2500, y - 500), frame)
+        graph.link(uv, rotation.inputs['Vector'])
+        offset = graph.node('ShaderNodeVectorMath', (-2500, y - 500), frame)
         offset.operation = 'ADD'
-        g.link(rotation.outputs[0], offset.inputs[0])
+        graph.link(rotation.outputs[0], offset.inputs[0])
         offset.inputs[1].default_value = (*mask.offset_uv, 0)
         uv = offset.outputs[0]
-    tex = g.image_texture(str(mask.path), 'Non-Color', (-2500, y), frame, uv, 'surface-wear mask')
+    tex = graph.image_texture(str(mask.path), 'Non-Color', (-2500, y), frame, uv, 'surface-wear mask')
     tex.interpolation = 'Linear'
-    value = g.map_range(tex.outputs['Color'], mask.black, mask.white, (-2200, y), frame=frame,
+    value = graph.map_range(tex.outputs['Color'], mask.black, mask.white, (-2200, y), frame=frame,
                     label=MASK_LEVELS_LABEL)
-    value = g.math('POWER', value, mask.gamma, (-1900, y), frame)
+    value = graph.math('POWER', value, mask.gamma, (-1900, y), frame)
     value.node.label = MASK_GAMMA_LABEL
     if mask.invert:
-        value = g.math('SUBTRACT', 1, value, (-1600, y), frame)
+        value = graph.math('SUBTRACT', 1, value, (-1600, y), frame)
     return value
 
 
-def mask_field(g, mask, vector=None, frame=None, crossed=False, row=0):
+def mask_field(graph, mask, vector=None, frame=None, crossed=False, row=0):
     """Return one image field, or its union with a rotated/offset copy for crossing scratches."""
-    first = image_mask(g, mask, vector, frame, row)
+    first = image_mask(graph, mask, vector, frame, row)
     if not crossed:
         return first
     second = replace(mask, rotation_deg=mask.rotation_deg + 90,
                      offset_uv=(mask.offset_uv[0] + .37, mask.offset_uv[1] + .19))
-    second = image_mask(g, second, vector, frame, row + 1)
-    return g.math('MAXIMUM', first, second, (-1200, -1600 - row * 3000), frame)
+    second = image_mask(graph, second, vector, frame, row + 1)
+    return graph.math('MAXIMUM', first, second, (-1200, -1600 - row * 3000), frame)
 
 
 def asset_mask(asset_id, map_name='Mask', project=None):
@@ -120,19 +120,19 @@ def scan_size_m(metadata):
             float(height or width)*metres[(height_unit or common_unit).lower()])
 
 
-def surface_coordinates(g, frame=None):
+def surface_coordinates(graph, frame=None):
     """Project world metres onto the dominant face plane for walls, tops and soffits."""
-    geometry = g.node('ShaderNodeNewGeometry', (-5200, -300), frame)
-    position = g.node('ShaderNodeSeparateXYZ', (-5000, -300), frame)
-    normal = g.node('ShaderNodeSeparateXYZ', (-5000, -800), frame)
-    g.link(geometry.outputs['Position'], position.inputs[0])
-    g.link(geometry.outputs['Normal'], normal.inputs[0])
-    normals = [g.math('ABSOLUTE', normal.outputs[axis], 0, (-4700, -800 - i * 250), frame)
+    geometry = graph.node('ShaderNodeNewGeometry', (-5200, -300), frame)
+    position = graph.node('ShaderNodeSeparateXYZ', (-5000, -300), frame)
+    normal = graph.node('ShaderNodeSeparateXYZ', (-5000, -800), frame)
+    graph.link(geometry.outputs['Position'], position.inputs[0])
+    graph.link(geometry.outputs['Normal'], normal.inputs[0])
+    normals = [graph.math('ABSOLUTE', normal.outputs[axis], 0, (-4700, -800 - i * 250), frame)
                for i, axis in enumerate('XYZ')]
-    x_face = g.math('GREATER_THAN', normals[0], normals[1], (-4400, -800), frame)
-    xy_max = g.math('MAXIMUM', normals[0], normals[1], (-4400, -1100), frame)
-    z_face = g.math('GREATER_THAN', normals[2], xy_max, (-4100, -1100), frame)
-    vectors = [g.combine_xyz(position.outputs[a], position.outputs[b], 0, (-4400, i * 250), frame)
+    x_face = graph.math('GREATER_THAN', normals[0], normals[1], (-4400, -800), frame)
+    xy_max = graph.math('MAXIMUM', normals[0], normals[1], (-4400, -1100), frame)
+    z_face = graph.math('GREATER_THAN', normals[2], xy_max, (-4100, -1100), frame)
+    vectors = [graph.combine_xyz(position.outputs[a], position.outputs[b], 0, (-4400, i * 250), frame)
                for i, (a, b) in enumerate((('X', 'Z'), ('Y', 'Z'), ('X', 'Y')))]
-    wall = g.mix(vectors[0], vectors[1], x_face, (-4000, -300), frame, data_type='VECTOR')
-    return g.mix(wall, vectors[2], z_face, (-3600, -300), frame, data_type='VECTOR')
+    wall = graph.mix(vectors[0], vectors[1], x_face, (-4000, -300), frame, data_type='VECTOR')
+    return graph.mix(wall, vectors[2], z_face, (-3600, -300), frame, data_type='VECTOR')

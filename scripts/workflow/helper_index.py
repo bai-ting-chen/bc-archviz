@@ -15,8 +15,8 @@ BLENDER_SCRIPTS_DIR = os.path.join(SCRIPTS, "blender")
 HELPER_REFERENCE_PATH = os.path.join(os.path.dirname(SCRIPTS), "references", "scene", "blender-python-helpers.md")
 
 
-def function_signature(fn):
-    a = fn.args
+def function_signature(function):
+    a = function.args
     pos = a.posonlyargs + a.args
     defaults = [None] * (len(pos) - len(a.defaults)) + a.defaults
     parts = [p.arg + ("=" + ast.unparse(d) if d is not None else "") for p, d in zip(pos, defaults)]

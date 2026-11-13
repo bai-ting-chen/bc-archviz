@@ -65,7 +65,7 @@ the intensity. Otherwise convert from the lumens printed on the fixture — the 
 schedule gives you.
 
 - **Spot/point = point-equivalent**: power is for the full sphere, the cone only masks.
-  F lm into a full beam angle a: `P = F/683 · 4π / (2π(1 - cos a/2))` → `interior.downlight(name, loc, lumens, beam_deg)`.
+  F lm into a full beam angle a: `P = F/683 · 4π / (2π(1 - cos a/2))` → `interior.downlight(name, location_m, lumens, beam_deg)`.
 - **Area = Lambert emitter**: `E = P/(πd²)` on axis; `spread` (`spread_deg` in the helpers) focuses the same power.
   Strip: `P = lm_per_m · L / 683` → `interior.led_strip(name, p0, p1, lm_per_m, normal=…, spread_deg=…)`.
   For a target E at distance d: `P = E·π·d²/683`.

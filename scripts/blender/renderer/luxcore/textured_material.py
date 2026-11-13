@@ -8,13 +8,13 @@ import core.archviz as archviz
 
 from renderer.luxcore.dust_config import DUST_GAIN, DUST_SATURATION, LINE_GAIN, RGB_LUMINANCE
 
-def textured_material(name, folder, me, dust_png=None, uv_tex="BoxUV", uv_dust="DustUV", randomized=True, specular=0.5):
-    """Native LuxCore Disney from a generated/scanned map folder; `me` = the mesh it goes on
+def textured_material(name, folder, mesh, dust_png=None, uv_tex="BoxUV", uv_dust="DustUV", randomized=True, specular=0.5):
+    """Native LuxCore Disney from a generated/scanned map folder; `mesh` = the mesh it goes on
     (its UV layer indices are baked into the tree, so one material per mesh layout)."""
     meta = archviz.read_meta(folder)
-    i_tex = me.uv_layers.find(uv_tex); i_dust = me.uv_layers.find(uv_dust)
+    i_tex = mesh.uv_layers.find(uv_tex); i_dust = mesh.uv_layers.find(uv_dust)
     if i_tex < 0 or (dust_png and i_dust < 0):
-        raise RuntimeError("%s lacks UV layer %s / %s" % (me.name, uv_tex, uv_dust))
+        raise RuntimeError("%s lacks UV layer %s / %s" % (mesh.name, uv_tex, uv_dust))
     m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     tree = bpy.data.node_groups.new(name + "_lux", "luxcore_material_nodes")
     m.luxcore.node_tree = tree; m.luxcore.use_cycles_nodes = False

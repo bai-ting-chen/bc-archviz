@@ -58,35 +58,35 @@ def _interior_masks(kind, settings, override):
     return masks
 
 
-def hybrid_field(g, kind, layer, vector, extent, frame=None, amount=None):
+def hybrid_field(graph, kind, layer, vector, extent, frame=None, amount=None):
     """Return region, scan interior, drying-edge rim and their exact region-times-interior product."""
     kind = canonical_layer(kind)
     settings = layer.hybrid
     masks = _interior_masks(kind, settings, layer.mask)
-    procedural = procedural_field(g, kind, vector, layer.scale_m, layer.scratch_width_m, frame,
+    procedural = procedural_field(graph, kind, vector, layer.scale_m, layer.scratch_width_m, frame,
                                   region=masks is not None)
-    driver = g.math('MULTIPLY', procedural, extent, (-1400, -26000), frame)
+    driver = graph.math('MULTIPLY', procedural, extent, (-1400, -26000), frame)
     if masks is None:
         return dict(region=driver, interior=1., rim=0., factor=driver, fallback=True)
     threshold, width = REGION_EDGES[kind]
     threshold = threshold if settings.region_threshold is None else settings.region_threshold
     width = width if settings.edge_width is None else settings.edge_width
-    region = g.map_range(driver, threshold-width/2, threshold+width/2,
+    region = graph.map_range(driver, threshold-width/2, threshold+width/2,
                      (-1100, -26000), frame=frame, smooth=True)
-    scan = stochastic_mask(g, masks, vector, settings, frame)
-    interior = g.map_range(scan, settings.interior_black, settings.interior_white,
+    scan = stochastic_mask(graph, masks, vector, settings, frame)
+    interior = graph.map_range(scan, settings.interior_black, settings.interior_white,
                        (-1400, -26800), frame=frame)
-    interior = g.math('POWER', interior, settings.interior_gamma, (-1100, -26800), frame)
-    interior = g.math('MULTIPLY', interior, settings.interior_gain, (-800, -26800), frame)
-    interior = g.math('MINIMUM', interior, 1., (-500, -26800), frame)
+    interior = graph.math('POWER', interior, settings.interior_gamma, (-1100, -26800), frame)
+    interior = graph.math('MULTIPLY', interior, settings.interior_gain, (-800, -26800), frame)
+    interior = graph.math('MINIMUM', interior, 1., (-500, -26800), frame)
     if kind == 'chipping':
         # Amount selects chip coverage; it never makes a selected chip translucent.
         amount = layer.amount if amount is None else amount
-        cutoff = g.math('SUBTRACT', settings.flake_threshold+.5, amount, (-1100, -27200), frame)
-        region = g.math('GREATER_THAN', region, .5, (-800, -27200), frame)
-        interior = g.math('GREATER_THAN', interior, cutoff, (-500, -27200), frame)
-    factor = g.math('MULTIPLY', region, interior, (-800, -26000), frame)
-    inverse = g.math('SUBTRACT', 1, region, (-1100, -26400), frame)
-    rim = g.math('MULTIPLY', region, inverse, (-800, -26400), frame)
-    rim = g.math('MULTIPLY', rim, 4, (-500, -26400), frame)
+        cutoff = graph.math('SUBTRACT', settings.flake_threshold+.5, amount, (-1100, -27200), frame)
+        region = graph.math('GREATER_THAN', region, .5, (-800, -27200), frame)
+        interior = graph.math('GREATER_THAN', interior, cutoff, (-500, -27200), frame)
+    factor = graph.math('MULTIPLY', region, interior, (-800, -26000), frame)
+    inverse = graph.math('SUBTRACT', 1, region, (-1100, -26400), frame)
+    rim = graph.math('MULTIPLY', region, inverse, (-800, -26400), frame)
+    rim = graph.math('MULTIPLY', rim, 4, (-500, -26400), frame)
     return dict(region=region, interior=interior, rim=rim, factor=factor, scan=scan, driver=driver)

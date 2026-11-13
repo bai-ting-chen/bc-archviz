@@ -24,10 +24,10 @@ def material(name):
     return mat, NodeGraph(mat)
 
 
-def emission(g, value):
-    node = g.node('ShaderNodeEmission', (900, 0))
-    g.link(value, node.inputs['Color'])
-    g.link(node.outputs[0], g.node('ShaderNodeOutputMaterial', (1100, 0)).inputs['Surface'])
+def emission(graph, value):
+    node = graph.node('ShaderNodeEmission', (900, 0))
+    graph.link(value, node.inputs['Color'])
+    graph.link(node.outputs[0], graph.node('ShaderNodeOutputMaterial', (1100, 0)).inputs['Surface'])
 
 
 def plane(mat, size=64):
@@ -183,9 +183,9 @@ def _marks_fixture():
     return g
 
 
-def _check_macro_graph(g):
+def _check_macro_graph(graph):
     """Check macro-only AOVs, neutral inputs and both amount controls without rendering."""
-    probes={n.aov_name:n for n in g.tree.nodes if n.type=='OUTPUT_AOV' and n.aov_name.startswith('var_')}
+    probes={n.aov_name:n for n in graph.tree.nodes if n.type=='OUTPUT_AOV' and n.aov_name.startswith('var_')}
     assert set(probes)=={'var_macro_tone','var_macro_roughness','var_macro_tone_off','var_macro_roughness_off'}
     for name,node in probes.items():
         switch=node.inputs['Value'].links[0].from_node

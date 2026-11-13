@@ -12,8 +12,8 @@ from tile_damage_rig import METRES_PER_PIXEL, probe_rgb, setup
 def check_square(folder):
     """The network survives square tiles and fine chips remain inside mosaics."""
     pitch=.102
-    sc,ob,mat=setup(4*pitch,5*pitch,round(4*pitch/METRES_PER_PIXEL),round(5*pitch/METRES_PER_PIXEL),tile_w=.1,tile_h=.1,
-                    joint=.002,force_kind=1,chip_share=0,spall_density=0)
+    sc,ob,mat=setup(4*pitch,5*pitch,round(4*pitch/METRES_PER_PIXEL),round(5*pitch/METRES_PER_PIXEL),tile_width_m=.1,tile_height_m=.1,
+                    joint_width_m=.002,force_kind=1,chip_share=0,spall_density=0)
     data=probe_rgb(mat,folder,'square_20',('Crack','Piece Height',None),(1,.002,1))
     cells=0
     for row in range(5):
@@ -21,7 +21,7 @@ def check_square(folder):
             x0,y0=round((col*pitch+.001)/METRES_PER_PIXEL),round((row*pitch+.001)/METRES_PER_PIXEL)
             cells+=(data[y0:y0+400,x0:x0+400,0]>.02).any()
     assert cells>=10, f'Square crack occurrence {cells}/20'
-    sc,ob,mat=setup(.033,.033,132,132,tile_w=.01,tile_h=.01,joint=.001,force_kind=2,chip_size=.008)
+    sc,ob,mat=setup(.033,.033,132,132,tile_width_m=.01,tile_height_m=.01,joint_width_m=.001,force_kind=2,chip_size=.008)
     data=probe_rgb(mat,folder,'mosaic',('Chip Depth Out','UV X','UV Y'),(.002,1,1))
     shell=data[...,0]>1e-6
     assert shell.any()
@@ -31,7 +31,7 @@ def check_square(folder):
 
 def check_rotated(folder):
     """The same eligibility and containment hold after rotation, jitter and swapped axes."""
-    sc,ob,mat=setup(.3,.3,1200,1200,tile_w=.25,tile_h=.0375,rotation=.43,
+    sc,ob,mat=setup(.3,.3,1200,1200,tile_width_m=.25,tile_height_m=.0375,rotation=.43,
                     jitter_rotation_deg=.6,jitter_offset=.0003,force_kind=2)
     data=probe_rgb(mat,folder,'rotated_sites',('Chip Depth Out','Chip Site Edge','Chip Cell'),(.002,.01,.01))
     shell=data[...,0]>1e-6
@@ -42,7 +42,7 @@ def check_rotated(folder):
 
 def check_rate(folder):
     """Sample tile centres; zero fraction clears all physical outputs."""
-    sc,ob,mat=setup(3,3,1200,1200,tile_w=.0375,tile_h=.25,damage=.05)
+    sc,ob,mat=setup(3,3,1200,1200,tile_width_m=.0375,tile_height_m=.25,damage=.05)
     data=probe_rgb(mat,folder,'rate',('Damaged',None,None))[...,0]
     cols=np.arange(int(3/.0405)); rows=np.arange(int(3/.253))
     ix=((cols*.0405+.0015+.0375/2)/3*1200).astype(int)

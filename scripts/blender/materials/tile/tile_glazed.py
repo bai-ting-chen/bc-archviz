@@ -10,7 +10,7 @@ from materials.shared.node_graph import NodeGraph
 
 
 def glazed_tiles(name="POOL_TILES", tile=0.10, grout=0.003, glaze=(0.60, 0.79, 0.83),
-                 glaze_var=0.06, grout_col=(0.50, 0.51, 0.50), uv="BoxUV"):
+                 glaze_var=0.06, grout_color=(0.50, 0.51, 0.50), uv="BoxUV"):
     """Procedural glazed ceramic tiles (Poly Haven has no pool mosaic): Brick Texture with zero
     offset = square grid at real size (UVs in metres), per-tile colour variation, glossy glaze,
     rough grout, rounded tile edges as bump from the mortar mask."""
@@ -31,12 +31,12 @@ def glazed_tiles(name="POOL_TILES", tile=0.10, grout=0.003, glaze=(0.60, 0.79, 0
     lo = tuple(max(0.0, c - glaze_var) for c in glaze)
     br.inputs["Color1"].default_value = (*lo, 1)
     br.inputs["Color2"].default_value = (*glaze, 1)
-    br.inputs["Mortar"].default_value = (*grout_col, 1)
+    br.inputs["Mortar"].default_value = (*grout_color, 1)
     g.link(coords, br.inputs["Vector"])
     tile_b = g.node("ShaderNodeBsdfPrincipled", (-500, 200), F_BRDF, label="glaze", Roughness=0.05, IOR=1.52)
     g.link(br.outputs["Color"], tile_b.inputs["Base Color"])
     grout_b = g.node("ShaderNodeBsdfPrincipled", (-500, -200), F_BRDF, label="grout", Roughness=0.9)
-    grout_b.inputs["Base Color"].default_value = (*grout_col, 1)
+    grout_b.inputs["Base Color"].default_value = (*grout_color, 1)
     bump = g.node("ShaderNodeBump", (-700, -400), F_BRDF, label="rounded tile edges", Distance=0.0015)
     inv = g.node("ShaderNodeMath", (-850, -400), F_BRDF)
     inv.operation = "SUBTRACT"

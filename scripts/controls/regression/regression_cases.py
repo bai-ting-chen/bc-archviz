@@ -47,7 +47,7 @@ def _variation_case(modules, module, function, **kwargs):
     from materials.shared.node_graph import NodeGraph
     g = NodeGraph(bpy.data.materials.new(function))
     if function == 'anti_tile':
-        kwargs['texs'] = [g.node('ShaderNodeTexImage', (0, 0))]
+        kwargs['textures'] = [g.node('ShaderNodeTexImage', (0, 0))]
     if function == 'unit_values':
         kwargs['key'] = modules['effects.variation_per_unit_shading'].unit_key(g)
     return getattr(modules[module], function)(g, **kwargs)

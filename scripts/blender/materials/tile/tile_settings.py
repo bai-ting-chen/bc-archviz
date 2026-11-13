@@ -42,7 +42,7 @@ def read_settings(mat):
         elif key in ('origin', 'map_size'):
             value = list(value[:2])
         values[key] = value
-    values['off'] = [f for f in tile_config.FEATURES if not mat.node_tree.nodes['TileFinish'].inputs[f + ' On'].default_value]
+    values['disabled_features'] = [f for f in tile_config.FEATURES if not mat.node_tree.nodes['TileFinish'].inputs[f + ' On'].default_value]
     damage = mat.node_tree.nodes.get('TileDamage')
     piece = damage.outputs.get('Piece Height') if damage else None
     dirt = damage.outputs.get('Dirt') if damage else None
@@ -69,21 +69,21 @@ def set_param(mat, name, value):
             raise ValueError(f'Material {value!r} already exists')
         mat.name = value
         settings['name'] = mat.name
-    elif name in ('displacement', 'pixel_size', 'displaced_objects'):
-        if name == 'pixel_size' and (not math.isfinite(value) or value <= 0):
+    elif name in ('displacement', 'pixel_size_px', 'displaced_objects'):
+        if name == 'pixel_size_px' and (not math.isfinite(value) or value <= 0):
             raise ValueError('pixel_size must be positive and finite')
         settings[name] = value
         return tile_material(**settings)
     elif name in ('face', 'uv'):
         settings[name] = str(value) if name == 'face' and value is not None else value
         return tile_material(**settings)
-    elif name == 'off':
+    elif name == 'disabled_features':
         unknown = set(value) - set(tile_config.FEATURES)
         if unknown:
             raise ValueError(f'Unknown tile features: {sorted(unknown)}')
         for feature in tile_config.FEATURES:
             tile_finish.toggle(mat, feature, feature not in value)
-        settings['off'] = list(value)
+        settings['disabled_features'] = list(value)
     else:
         node = mat.node_tree.nodes['TileDamage' if name in tile_damage.DAMAGE_INPUT_SOCKETS else 'TileLayout' if name in tile_config.LAYOUT else 'TileFinish']
         label = ({**tile_config.LAYOUT, **tile_config.FINISH, **tile_damage.DAMAGE_INPUT_SOCKETS})[name]
@@ -100,9 +100,9 @@ def set_param(mat, name, value):
             value = (*value, 1.)
         if name in ('face_contrast', 'face_saturation') and not 0 <= value <= 1:
             raise ValueError(f'{name} must lie in [0, 1]')
-        if name in ('tile_w', 'tile_h', 'speck_size') and value <= 0:
+        if name in ('tile_width_m', 'tile_height_m', 'speck_size') and value <= 0:
             raise ValueError(f'{name} must be positive')
-        if name in ('joint', 'corner_radius', 'lippage') and value < 0:
+        if name in ('joint_width_m', 'corner_radius', 'lippage') and value < 0:
             raise ValueError(f'{name} must be nonnegative')
         socket = node.inputs.get(label)
         if socket is not None:

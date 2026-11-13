@@ -2,7 +2,7 @@
 import bpy
 
 
-def _light_obj(name, kind, loc, rot=(0.0, 0.0, 0.0), coll=None):
+def _light_obj(name, kind, location_m, rotation_rad=(0.0, 0.0, 0.0), collection=None):
     ob = bpy.data.objects.get(name)
     if ob is not None and ob.type != "LIGHT":
         raise ValueError(f"'{name}' is a {ob.type} object (e.g. imported from Rhino): give the light another name")
@@ -11,10 +11,10 @@ def _light_obj(name, kind, loc, rot=(0.0, 0.0, 0.0), coll=None):
         ld.type = kind                        # re-run with another kind: switch, keep the datablock
         ld = bpy.data.lights[ld.name]         # re-fetch: the old handle keeps the old subclass
     ob = ob or bpy.data.objects.new(name, ld)
-    coll = coll or bpy.context.scene.collection
-    if ob.name not in coll.objects:
-        coll.objects.link(ob)
-    ob.location, ob.rotation_euler = loc, rot
+    collection = collection or bpy.context.scene.collection
+    if ob.name not in collection.objects:
+        collection.objects.link(ob)
+    ob.location, ob.rotation_euler = location_m, rotation_rad
     return ob, ld
 
 

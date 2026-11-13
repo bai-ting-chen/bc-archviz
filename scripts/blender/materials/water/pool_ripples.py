@@ -11,37 +11,37 @@ import numpy as np
 
 @dataclass
 class RippleParams:
-    """Grid, extent and strengths of the pool ripple field (craters, chop, ring waves, line fronts)."""
-    step: float = .004          # m grid
-    reach_out: float = 2.0      # m from the wall face
-    reach_side: float = 1.0     # m past each end
-    crater: float = 1.0         # strength of crater/crown/capillary relief per impact
-    crater_cap: float = .004    # m soft cap
-    chop: float = 2.0
-    chop_reach: float = .6      # m decay from the wall
-    waves: float = 6.0          # strength of ring waves + line fronts (0 = off)
-    waves_cap: float = .003     # m soft cap
+    """Grid, extent and strengths of the pool ripple field (craters, chop_strength, ring wave_strength, line fronts)."""
+    cell_m: float = .004          # m grid
+    outward_extent_m: float = 2.0      # m from the wall face
+    side_extent_m: float = 1.0     # m past each end
+    crater_strength: float = 1.0         # strength of crater/crown/capillary relief per impact
+    crater_height_cap_m: float = .004    # m soft cap
+    chop_strength: float = 2.0
+    chop_decay_m: float = .6      # m decay from the wall
+    wave_strength: float = 6.0          # strength of ring waves + line fronts (0 = off)
+    wave_height_cap_m: float = .003     # m soft cap
     seed: int = 2310
 
 
-def grid(lip, p):
+def grid(lip, params):
     """Axes (s_axis, o_axis) and 2-D arrays (S, O) indexed [s, o] of the ripple field."""
-    o_axis = np.arange(0., p.reach_out, p.step)
-    s_axis = np.arange(-p.reach_side, lip.length + p.reach_side, p.step)
+    o_axis = np.arange(0., params.outward_extent_m, params.cell_m)
+    s_axis = np.arange(-params.side_extent_m, lip.length_m + params.side_extent_m, params.cell_m)
     S, O = np.meshgrid(s_axis, o_axis, indexing='ij')
     return s_axis, o_axis, S, O
 
 
-def _soft_cap(H, cap):
-    return cap * np.tanh(H / cap)
+def _soft_cap(height_m, cap):
+    return cap * np.tanh(height_m / cap)
 
 
-def _craters(S, O, s_axis, o_axis, s_imp, o_imp, strength, p, rng):
+def _craters(S, O, s_axis, o_axis, s_imp, o_imp, strength, params, rng):
     """Per impact: a crater, a lobed crown ring at radius R and damped capillary ripples outside it."""
     H = np.zeros_like(O)
     for si, oi, k in zip(s_imp, o_imp, strength):
         R = rng.uniform(.012, .04) * (.6 + .5 * k)
-        amp = rng.uniform(.0015, .005) * k * p.crater
+        amp = rng.uniform(.0015, .005) * k * params.crater_strength
         j0, j1 = np.searchsorted(s_axis, [si - .25, si + .25])
         i0, i1 = np.searchsorted(o_axis, [oi - .25, oi + .25])
         do = O[j0:j1, i0:i1] - oi
@@ -53,19 +53,19 @@ def _craters(S, O, s_axis, o_axis, s_imp, o_imp, strength, p, rng):
         outside = (r - R).clip(0)
         h += .35 * amp * np.sin(wavenumber * (r - R) + rng.uniform(0, 6)) * np.exp(-outside / rng.uniform(.04, .12)) * (r > R)
         H[j0:j1, i0:i1] += h
-    return _soft_cap(H, p.crater_cap)
+    return _soft_cap(H, params.crater_height_cap_m)
 
 
-def _chop(S, O, p):
+def _chop(S, O, params):
     """Short irregular chop from 40 random directions, strongest at the wall."""
-    rng = np.random.default_rng(p.seed + 5)
+    rng = np.random.default_rng(params.seed + 5)
     chop = np.zeros_like(O)
     for _ in range(40):
         k_o, k_s = rng.normal(0, 1, 2)
         wavenumber = rng.uniform(2 * np.pi / .09, 2 * np.pi / .02)
         norm = np.hypot(k_o, k_s)
         chop += np.sin(wavenumber * (k_o * O + k_s * S) / norm + rng.uniform(0, 6)) / np.sqrt(40)
-    return p.chop * .0009 * chop * np.exp(-O / p.chop_reach)
+    return params.chop_strength * .0009 * chop * np.exp(-O / params.chop_decay_m)
 
 
 def _ring_waves(S, O, s_imp, o_imp, strength, rng, W):
@@ -98,30 +98,30 @@ def _line_fronts(S, O, s_imp, rng, W):
         W += .00035 * np.sqrt(wavelength / .1) * np.sin(phase) * np.exp(-O / (10 * wavelength)) * past_ends / np.sqrt(6)
 
 
-def _waves(S, O, s_imp, o_imp, strength, p):
-    rng = np.random.default_rng(p.seed + 11)
+def _waves(S, O, s_imp, o_imp, strength, params):
+    rng = np.random.default_rng(params.seed + 11)
     W = np.zeros_like(O)
     _ring_waves(S, O, s_imp, o_imp, strength, rng, W)
     _line_fronts(S, O, s_imp, rng, W)
-    return _soft_cap(W * p.waves, p.waves_cap)
+    return _soft_cap(W * params.wave_strength, params.wave_height_cap_m)
 
 
-def height_field(lip, impact_pts, strength, p):
+def height_field(lip, impact_points, strength, params):
     """Height (m) H[s, o] on the lip-local grid, faded to zero at its borders; returns (s_axis, o_axis, H)."""
-    s_axis, o_axis, S, O = grid(lip, p)
-    s_imp, o_imp = lip.local(impact_pts)
-    rng = np.random.default_rng(p.seed)
-    H = _craters(S, O, s_axis, o_axis, s_imp, o_imp, strength, p, rng) + _chop(S, O, p)
-    if p.waves:
-        H = H + _waves(S, O, s_imp, o_imp, strength, p)
-    fade = (np.clip((p.reach_out - O) / .3, 0, 1)
+    s_axis, o_axis, S, O = grid(lip, params)
+    s_imp, o_imp = lip.local(impact_points)
+    rng = np.random.default_rng(params.seed)
+    H = _craters(S, O, s_axis, o_axis, s_imp, o_imp, strength, params, rng) + _chop(S, O, params)
+    if params.wave_strength:
+        H = H + _waves(S, O, s_imp, o_imp, strength, params)
+    fade = (np.clip((params.outward_extent_m - O) / .3, 0, 1)
             * np.clip((S - s_axis[0]) / .3, 0, 1)
             * np.clip((s_axis[-1] - S) / .3, 0, 1))
     return s_axis, o_axis, H * fade
 
 
-def slope_stats(H, step):
+def slope_stats(height_m, cell_m):
     """RMS and 99th-percentile surface slope (rad) of a height field: ripples need ~0.05-0.15 rad to read."""
-    g1, g2 = np.gradient(H, step)
+    g1, g2 = np.gradient(height_m, cell_m)
     slope = np.arctan(np.hypot(g1, g2))
     return float(np.sqrt((slope ** 2).mean())), float(np.percentile(slope, 99))

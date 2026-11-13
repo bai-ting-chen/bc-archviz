@@ -10,16 +10,16 @@ from scene.lighting.ies_profile import ies_read
 IES_REFERENCE_POWER_W = 177.83 / LM_PER_W
 
 
-def ies_light(name, path, loc, rot=(0.0, 0.0, 0.0), lumens=None, kelvin=3000, radius=0.02,
-              kind="POINT", coll=None):
+def ies_light(name, path, location_m, rotation_rad=(0.0, 0.0, 0.0), lumens=None, kelvin=3000, radius=0.02,
+              kind="POINT", collection=None):
     """A light with the manufacturer's measured distribution. Unscaled (`lumens=None`) it emits
     exactly the file's candela; `lumens` rescales it to another lumen package or a dimmed level.
-    The file is embedded (Internal mode) so the .blend stays self-contained. Aim with `rot`: the
+    The file is embedded (Internal mode) so the .blend stays self-contained. Aim with `rotation_rad`: the
     profile's nadir is the light's -Z, C0 its -Y, a linear fixture's length its -X. `radius` sets the
-    shadow/highlight softness of the emitting lens; place `loc` at least radius + 2 mm from any
+    shadow/highlight softness of the emitting lens; place `location_m` at least radius + 2 mm from any
     surface -- the part of the sphere inside a ceiling or housing is shadowed (0.57x measured)."""
     info = ies_read(path)
-    ob, ld = _light_obj(name, kind, loc, rot, coll=coll)
+    ob, ld = _light_obj(name, kind, location_m, rotation_rad, collection=collection)
     ld.shadow_soft_size = radius
     if kind == "SPOT":
         ld.spot_size, ld.spot_blend = math.pi, 0.0        # cone off: the profile shapes the beam

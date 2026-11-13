@@ -10,10 +10,10 @@ import photometric_scene
 from materials.water import water as water_mat
 from materials.water import falling_film_assembly, ballistic_sheet
 
-def scene(OUT, RES, SAMPLES):
+def scene(output_dir, resolution_px, SAMPLES):
     """Build the same film integration scene."""
-    sc = photometric_scene.black_scene(samples=SAMPLES, res=RES)
-    sc.render.resolution_y = int(RES * .75)
+    sc = photometric_scene.black_scene(samples=SAMPLES, res=resolution_px)
+    sc.render.resolution_y = int(resolution_px * .75)
     bg = sc.world.node_tree.nodes['Background']; bg.inputs['Color'].default_value = (.75, .78, .82, 1); bg.inputs['Strength'].default_value = 1.0
     sc.view_settings.view_transform = 'AgX'
 
@@ -48,8 +48,8 @@ def scene(OUT, RES, SAMPLES):
     cam.location = origin + along * (L * .5) + out * 5.0 + np.array([0, 0, -1.2]) - along * 1.5
     d = target - cam.location; cam.rotation_euler = (math.atan2(math.hypot(d[0], d[1]), -d[2]), 0, math.atan2(d[1], d[0]) - math.pi / 2)
 
-    lip = ballistic_sheet.LaunchLip(origin=origin, along=along, out=out, length=L, drop=H)
-    setup = falling_film_assembly.FallingFilmSetup(cell=.004)
-    objs, stats = falling_film_assembly.falling_film(lip, POOL_Z, film_mat, foam_mat, pool_mat, OUT / 'falling_film_ripple.exr', proxy, setup)
+    lip = ballistic_sheet.LaunchLip(origin_m=origin, along_axis=along, outward_axis=out, length_m=L, drop_m=H)
+    setup = falling_film_assembly.FallingFilmSetup(film_cell_m=.004)
+    objs, stats = falling_film_assembly.falling_film(lip, POOL_Z, film_mat, foam_mat, pool_mat, output_dir / 'falling_film_ripple.exr', proxy, setup)
 
     return sc, objs, stats, proxy, lip, setup, H

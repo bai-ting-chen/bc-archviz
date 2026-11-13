@@ -54,7 +54,7 @@ def graphs(out):
     mat.use_nodes = True
     leaf = scatter.leaf_prototype('control leaf', .07, .045, .012, mat)
     result['leaf'] = object_mesh(leaf)
-    group = terrain.landform_group('control terrain', size=4, verts=9)
+    group = terrain.landform_group('control terrain', size=4, vertex_count=9)
     result['terrain_graph'] = dump_tree(group)
     ter = terrain.add_terrain(group, mat, 'control terrain')
     result['height'] = [terrain.height(x, y, (0, 0), (4, 4)) for x, y in [(0, 0), (5, 5), (20, 10), (100, 100)]]

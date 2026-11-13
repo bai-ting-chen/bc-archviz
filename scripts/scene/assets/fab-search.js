@@ -2,13 +2,13 @@
 // Fab sits behind Cloudflare, so this runs inside a fab.com tab of the built-in browser pane
 // (javascript_tool), where the site's own JSON API answers. No sign-in is needed.
 // Usage: send this file's text followed by one call, e.g.
-//   await fabSearch({q: "concrete", type: "material", category: "building-human-made--concrete", max: 48})
+//   await fabSearch({query: "concrete", type: "material", category: "building-human-made--concrete", max_results: 48})
 // Options:
 //   seller    "Quixel Megascans" (default) or "Quixel Megaplants"
 //   type      material | 3d-model | decal | brush (Fab listing type); omit for all
 //   category  Fab category slug, e.g. "nature-plants--plants"; omit for all
-//   q         keywords
-//   max       rows to return (Fab pages hold 24; pages are followed until max)
+//   query     keywords
+//   max_results  rows to return (Fab pages hold 24; pages are followed until max_results)
 //   details   true (default): fetch scan size, maps, Megascans id, download file and size_mb per row (3 requests each)
 
 const FAB_PAGE_SIZE = 24;        // fixed by Fab: larger counts are ignored
@@ -61,11 +61,11 @@ async function fabDownloadFiles(uid, formats) {
   return [];
 }
 
-async function fabSearch({seller = "Quixel Megascans", type, category, q, max = 24, details = true} = {}) {
+async function fabSearch({seller = "Quixel Megascans", type, category, query, max_results = 24, details = true} = {}) {
   const base = new URLSearchParams({seller, count: String(FAB_PAGE_SIZE)});
   if (type) base.set("listing_types", type);
   if (category) base.set("categories", category);
-  if (q) base.set("q", q);
+  if (query) base.set("q", query);
   const hits = [];
   let cursor = null;
   do {
@@ -75,10 +75,10 @@ async function fabSearch({seller = "Quixel Megascans", type, category, q, max = 
     if (!page) break;
     hits.push(...page.results);
     cursor = page.cursors && page.cursors.next;
-  } while (cursor && hits.length < max);
+  } while (cursor && hits.length < max_results);
 
   const rows = [];
-  for (const h of hits.slice(0, max)) {
+  for (const h of hits.slice(0, max_results)) {
     const formats = h.assetFormats.map(f => f.assetFormatType.code);
     const images = (h.thumbnails[0] && h.thumbnails[0].images) || [];
     const thumb = images.find(i => i.width === 640) || images[images.length - 1];

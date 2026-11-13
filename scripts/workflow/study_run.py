@@ -36,10 +36,10 @@ result = {{"out": sc.render.filepath}}
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("study"); ap.add_argument("out")
+    ap.add_argument("study"); ap.add_argument("output_path")
     ap.add_argument("--rebuild", action="store_true", help="also run scene_geometry.py (re-import)")
     ap.add_argument("--resolution-percent", type=int, default=50, dest='pct'); ap.add_argument("--samples", type=int, default=128, dest='spp')
-    ap.add_argument("--reference", default="_wip/ref.jpg", dest='ref'); ap.add_argument("--regions", default="regions.json")
+    ap.add_argument("--reference", default="_wip/ref.jpg", dest='reference_path'); ap.add_argument("--regions", default="regions.json")
     a = ap.parse_args()
     study = os.path.abspath(a.study)
     scripts = (["scene_geometry.py"] if a.rebuild else []) + ["scene_look.py"]
@@ -52,7 +52,7 @@ def main():
             sys.exit(f"syntax error, nothing sent to Blender: {f}:{e.lineno}: {e.msg}\n  {e.text}")
     os.makedirs(os.path.join(study, "_wip"), exist_ok=True)
     blend = os.path.basename(study.rstrip("\\/")).split("_", 1)[-1] + ".blend"
-    code = RUNNER.format(study=study, scripts=scripts, pct=a.pct, spp=a.spp, out=a.out, blend=blend)
+    code = RUNNER.format(study=study, scripts=scripts, pct=a.pct, spp=a.spp, out=a.output_path, blend=blend)
     tmp = os.path.join(study, "_wip", "_run_now.py")
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(code)
@@ -64,18 +64,18 @@ def main():
     text = r.stdout + r.stderr
     if '"status": "error"' in text or r.returncode:
         sys.exit("Blender error:\n" + text[-3000:].replace("\\n", "\n"))
-    render = os.path.join(study, "_wip", a.out)
-    ref = os.path.join(study, a.ref)
+    render = os.path.join(study, "_wip", a.output_path)
+    ref = os.path.join(study, a.reference_path)
     if not os.path.exists(ref):
         print("rendered", render); return
     from PIL import Image
     rm = [sys.executable, os.path.join(os.path.dirname(TOOLS), "research", "reference_match.py")]
-    subprocess.run(rm + ["pair", render, ref, os.path.join(study, "_wip", "pair_" + a.out)])
+    subprocess.run(rm + ["pair", render, ref, os.path.join(study, "_wip", "pair_" + a.output_path)])
     r_img = Image.open(ref).convert("RGB"); w, h = r_img.size; s = 1225 / w
     sw, sh = round(w * s), round(h * s)
     stack = Image.new("RGB", (sw, sh * 2))
     stack.paste(Image.open(render).convert("RGB").resize((sw, sh)), (0, 0)); stack.paste(r_img.resize((sw, sh)), (0, sh))
-    stack.save(os.path.join(study, "_wip", "stack_" + a.out))
+    stack.save(os.path.join(study, "_wip", "stack_" + a.output_path))
     regions = os.path.join(study, a.regions)
     if os.path.exists(regions):
         subprocess.run(rm + ["patches", ref, regions, render])

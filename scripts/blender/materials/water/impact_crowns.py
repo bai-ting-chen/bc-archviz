@@ -3,14 +3,14 @@ import numpy as np
 from materials.water.impact_config import EMPTY_MESH
 
 
-def crowns(pts, strength, p):
+def crowns(impact_points, strength, params):
     """Clear crowns at the strongest impacts: tilted rings with spiky rims. (V, F); use thin-wall water."""
-    rng = np.random.default_rng(p.seed + 1)
+    rng = np.random.default_rng(params.seed + 1)
     segments = 14
     angle = np.linspace(0, 2 * np.pi, segments, endpoint=False)
     verts, faces, base = [], [], 0
-    for i in np.argsort(-strength)[:int(len(strength) * p.crowns)]:
-        centre, s = pts[i], strength[i]
+    for i in np.argsort(-strength)[:int(len(strength) * params.crown_share)]:
+        centre, s = impact_points[i], strength[i]
         radius = rng.uniform(.006, .02) * (.7 + .5 * s)
         height = rng.uniform(.003, .014) * s
         tilt = rng.normal(0, .3, 2)

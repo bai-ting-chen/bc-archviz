@@ -16,7 +16,7 @@ from tile_damage_rig import TILE_HEIGHT_M, METRES_PER_PIXEL, TILE_WIDTH_M, probe
 
 def displacement_case(folder,kind,whole=False):
     """Compare positions and world normals in an 8 mm, <=20 um-edge diced window."""
-    kw=dict(force_kind=kind,chip_depth=.0015,chip_share=0,spall_density=0,joint=0,recess=.006)
+    kw=dict(force_kind=kind,chip_depth=.0015,chip_share=0,spall_density=0,joint_width_m=0,recess=.006)
     sc,ob,mat=setup(3*TILE_WIDTH_M,TILE_HEIGHT_M,round(3*TILE_WIDTH_M/METRES_PER_PIXEL),round(TILE_HEIGHT_M/METRES_PER_PIXEL),**kw)
     data=probe_rgb(mat,folder,f'locate_{kind}',('Chip Depth Out','Crack','Piece Height'),(.001,1,.002))
     if kind==2:
@@ -36,7 +36,7 @@ def displacement_case(folder,kind,whole=False):
     prefix=('whole_' if whole else '')+('chip' if kind==2 else 'piece')
     before=probe_rgb(mat,folder,prefix+'_expected',('Total Height','Piece Height','Crack'),(.01,.002,1))
     normals_before=probe_rgb(mat,folder,prefix+'_bump_normals',('Normal X','Normal Y','Normal Z'),(2,2,2))
-    tile_surface.use_displacement(mat,[ob],pixel_size=.125 if whole else .5)
+    tile_surface.use_displacement(mat,[ob],pixel_size_px=.125 if whole else .5)
     assert max(width/nx,height/ny)*(.125 if whole else .5)<=.00002
     assert mat.displacement_method=='BOTH'
     assert all(mat.node_tree.nodes[n].inputs['Strength'].default_value==0 for n in ('TileBump','DamageBump'))
@@ -96,7 +96,7 @@ def check_chip_displacement(folder,full=False):
 
 def check_damage_displacement(folder,full=False):
     """Damage-only displacement moves the mesh by the damage height alone, survives a rebuild, use_bump undoes it."""
-    kw=dict(force_kind=1,chip_share=0,spall_density=0,joint=0,step_height=.0003)
+    kw=dict(force_kind=1,chip_share=0,spall_density=0,joint_width_m=0,step_height=.0003)
     sc,ob,mat=setup(3*TILE_WIDTH_M,TILE_HEIGHT_M,round(3*TILE_WIDTH_M/METRES_PER_PIXEL),round(TILE_HEIGHT_M/METRES_PER_PIXEL),**kw)
     data=probe_rgb(mat,folder,'damage_locate',('Crack','Piece Height',None),(1,.002,1))
     yy,xx=np.nonzero(data[...,0]>.02); assert len(yy), 'no crack for window location'
@@ -105,7 +105,7 @@ def check_damage_displacement(folder,full=False):
     origin=(min(max(centre[0]-.004,tile_x),tile_x+TILE_WIDTH_M-.008),min(max(centre[1]-.004,0),TILE_HEIGHT_M-.008))
     sc,ob,mat=setup(.008,.008,400,400,origin=origin,**kw)
     before=probe_rgb(mat,folder,'damage_expected',('Damage Height','Crack',None),(.002,1,1))
-    tile_surface.use_damage_displacement(mat,[ob],pixel_size=.5)
+    tile_surface.use_damage_displacement(mat,[ob],pixel_size_px=.5)
     nodes=mat.node_tree.nodes
     linked=lambda: [l.from_node.name for l in next(n for n in nodes if n.type=='OUTPUT_MATERIAL').inputs['Displacement'].links]
     assert linked()==['DamageDisplacement'] and nodes['DamageDisplacementOn'].outputs[0].default_value==1

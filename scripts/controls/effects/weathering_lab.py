@@ -31,7 +31,7 @@ def main():
     argv = sys.argv[sys.argv.index('--') + 1:]; O = Path(argv[0]); TAG = argv[1]
     P = dict(board_h=.28, j_amp=.24, j_w=18.0, j_len_min=.10, j_len_span=.55, j_density=.55, j_thr=.46,
              wiggle=.06, cluster_scale=.45, cluster_thr=.28, topband_amp=.156, len_min=1.2, len_span=3.0,
-             fade_pow=1.0, streak_amp=.37, streak_w=7.0, streak_len=.45, streak_thr=.44, base_amp=.286,
+             fade_pow=1.0, streak_amp=.37, streak_frequency_per_m=7.0, streak_vertical_frequency_per_m=.45, streak_thr=.44, base_amp=.286,
              base_h=.55, patch_amp=.195, patch_scale=.35, blot_amp=.065, blot_scale=2.5, show_joints=1.0)
     for kv in argv[2:]:
         k, v = kv.split('='); P[k] = float(v)

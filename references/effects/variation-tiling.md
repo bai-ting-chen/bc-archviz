@@ -24,7 +24,7 @@ Hiding the repeat of an image map on a continuous surface.
 - Switch: amount 0 = the plain lookup (RULES MAT_07).
 
 ## 3. Code
-- `scripts/blender/effects/variation_tiling.py`: `anti_tile(g, texs, …, amount)`; `texs`: step 4.
+- `scripts/blender/effects/variation_tiling.py`: `anti_tile(graph, textures, …, amount)`; `textures`: step 4.
 - Control: `scripts/controls/effects/variation_lab.py --only tiling`.
 
 ## 4. Instructions and parameters
@@ -35,7 +35,7 @@ Hiding the repeat of an image map on a continuous surface.
 3. **Lookups.** Offset both U and V; noise ~1.5 m, world space. Copies keep the original's settings. Offsets only: a rotation breaks the tangent space. Methods: table.
    **LuxCore:** native Image › Randomized Tiling, 2D Mapping › Randomized UV ([luxcore.md](../renderer/luxcore.md)).
    Check: the grid is gone on the same wall. Undo: amount 0.
-4. **All maps together.** Albedo, roughness and height go in one `texs` list, so they share offsets and
+4. **All maps together.** Albedo, roughness and height go in one `textures` list, so they share offsets and
    noise and a stain stays on its own relief.
 5. **Relief.** Height through a Bump node; a tangent-space normal map seams where copies blend. Check: no
    seams under grazing light.
@@ -57,7 +57,7 @@ Hiding the repeat of an image map on a continuous surface.
 | Symptom | Cause | Fix |
 |---|---|---|
 | Some rows still in phase | an offset left at zero | offset U and V (step 3) |
-| Stain and its relief apart | maps given separate `anti_tile` calls | one `texs` list (step 4) |
+| Stain and its relief apart | maps given separate `anti_tile` calls | one `textures` list (step 4) |
 | Seams in relief | tangent-space normal map | Bump from height (step 5) |
 | Joints broken into a brick pattern | offsets on a jointed scan | treat the panels as units (step 2) |
 

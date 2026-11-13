@@ -12,7 +12,7 @@ from tile_damage_rig import probe_rgb, render, setup
 def check_onoff(folder):
     """Compare actual surface renders with the switch and fraction-zero paths."""
     # Cracks prove the switch; chips at zero-width joints leak one bump-sampled pixel into the neighbour (chip WIP).
-    sc,ob,mat=setup(.3,.3,400,400,tile_w=.0375,tile_h=.25,joint=0,damage=.5,force_kind=1)
+    sc,ob,mat=setup(.3,.3,400,400,tile_width_m=.0375,tile_height_m=.25,joint_width_m=0,damage=.5,force_kind=1)
     sc.cycles.samples=4
     enabled=render(folder,'on')
     selected=probe_rgb(mat,folder,'on_selection',('Damaged',None,None))[...,0]>.5

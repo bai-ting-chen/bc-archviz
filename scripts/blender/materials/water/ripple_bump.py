@@ -17,7 +17,7 @@ def install_bump(material, image, lip, s_range, o_range):
         rel = nodes.new('ShaderNodeVectorMath')
         rel.operation = 'SUBTRACT'
         links.new(geometry.outputs['Position'], rel.inputs[0])
-        rel.inputs[1].default_value = tuple(lip.origin)
+        rel.inputs[1].default_value = tuple(lip.origin_m)
         dot = nodes.new('ShaderNodeVectorMath')
         dot.operation = 'DOT_PRODUCT'
         links.new(rel.outputs[0], dot.inputs[0])
@@ -30,8 +30,8 @@ def install_bump(material, image, lip, s_range, o_range):
         return remap.outputs['Result']
 
     uv = nodes.new('ShaderNodeCombineXYZ')
-    links.new(lip_coordinate(lip.out, *o_range), uv.inputs['X'])      # image columns = o
-    links.new(lip_coordinate(lip.along, *s_range), uv.inputs['Y'])    # image rows = s
+    links.new(lip_coordinate(lip.outward_axis, *o_range), uv.inputs['X'])      # image columns = o
+    links.new(lip_coordinate(lip.along_axis, *s_range), uv.inputs['Y'])    # image rows = s
     tex = nodes.new('ShaderNodeTexImage')
     tex.image = image
     tex.extension = 'CLIP'

@@ -15,7 +15,7 @@ def check_rebuild(change_interface=False):
     nt = material.node_tree
     nt.nodes.clear()
     tc = nt.nodes.new("ShaderNodeTexCoord")
-    group = tile_layout.add_layout(nt, tc.outputs["Object"], joint=0.004)
+    group = tile_layout.add_layout(nt, tc.outputs["Object"], joint_width_m=0.004)
     sink = nt.nodes.new("ShaderNodeMath")
     nt.links.new(group.outputs["Edge"], sink.inputs[0])
     old = group.node_tree

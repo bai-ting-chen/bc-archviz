@@ -19,19 +19,19 @@ from polyhaven_search import search
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("cmd", choices=["hdri", "tex", "search"])
-    p.add_argument("ids", nargs="+")
-    p.add_argument("--resolution", dest='res')
+    p.add_argument("command", choices=["hdri", "tex", "search"])
+    p.add_argument("asset_ids", nargs="+")
+    p.add_argument("--resolution", dest='resolution')
     p.add_argument("--top", type=int, default=10)
     a = p.parse_args()
-    if a.cmd == "search":
-        search(a.ids[0], a.ids[1], a.top)
+    if a.command == "search":
+        search(a.asset_ids[0], a.asset_ids[1], a.top)
     elif not project_paths.is_study(PROJECT_ROOT):
         print(f"NOTE: downloading into {LIBRARY_DIR}, which is not a study's library (RULES AST_03). "
               f"Set ARCHVIZ_PROJECT=<study folder> unless this is meant.")
-    for i in a.ids if a.cmd != "search" else ():
+    for i in a.asset_ids if a.command != "search" else ():
         try:
-            (fetch_hdri if a.cmd == "hdri" else fetch_texture)(i, a.res or ("4k" if a.cmd == "hdri" else "2k"))
+            (fetch_hdri if a.command == "hdri" else fetch_texture)(i, a.resolution or ("4k" if a.command == "hdri" else "2k"))
         except Exception as ex:
             print(f"FAILED {i}: {ex}")
 

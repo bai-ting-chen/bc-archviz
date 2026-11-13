@@ -6,11 +6,11 @@ import bpy
 import numpy as np
 
 
-def image_rgb(img):
+def image_rgb(image):
     """The image's first three channels as a float64 (pixels, 3) array, as Blender stores them."""
-    px = np.empty(len(img.pixels), dtype=np.float32)
-    img.pixels.foreach_get(px)
-    return px.reshape(-1, img.channels)[:, :3].astype(np.float64)
+    px = np.empty(len(image.pixels), dtype=np.float32)
+    image.pixels.foreach_get(px)
+    return px.reshape(-1, image.channels)[:, :3].astype(np.float64)
 
 
 def srgb_to_linear(rgb):

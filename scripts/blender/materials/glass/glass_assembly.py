@@ -7,21 +7,21 @@ from materials.glass.lathe_geometry import lathe
 GLASS_IOR, WATER_IOR = 1.52, 1.333
 
 
-def glass_of_water(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256, lift=0.0001):
+def glass_of_water(centre=(0.0, 0.0), base_height_m=0.73, water_height_m=0.095, segments=256, lift=0.0001):
     """Build the three surfaces; returns dict of objects and profile info."""
     from mathutils import Vector
-    outer, iface, top, info = tumbler_profiles(z0=z0 + lift, water_h=water_h)
+    outer, iface, top, info = tumbler_profiles(base_height_m=base_height_m + lift, water_height_m=water_height_m)
     c = Vector((centre[0], centre[1], 0))
     radial = lambda p: Vector((p.x - c.x, p.y - c.y, 0)).normalized() if (p.xy - c.xy).length > 1e-6 else Vector((0, 0, -1))
     # glass votes: outer wall/foot should face away from the axis/down; the inner wall (closer to
     # the axis than the outer wall at that height) faces the cavity -- count only outer faces.
     def glass_hint(p):
         r = (p.xy - c.xy).length
-        if p.z < z0 + lift + 0.001:
+        if p.z < base_height_m + lift + 0.001:
             return Vector((0, 0, -1))
         return radial(p) if r > outer_r_at(p.z) - 0.0005 else Vector((0, 0, 0))
     def outer_r_at(z):
-        return 0.035 + (0.050 - 0.035) * (z - z0 - lift) / 0.155
+        return 0.035 + (0.050 - 0.035) * (z - base_height_m - lift) / 0.155
     glass = lathe("GLASS_TUMBLER", outer, centre, segments, normal_hint=glass_hint)
     # interface front = water side, i.e. pointing into the cavity (toward the axis / upward)
     inter = lathe("GLASS_WATER_INTERFACE", iface, centre, segments, normal_hint=lambda p: -radial(p))
@@ -34,7 +34,7 @@ def glass_of_water(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256, lift
     return {"glass": glass, "interface": inter, "water": water, **info}
 
 
-def glass_of_water_mnee(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256, lift=0.0001,
+def glass_of_water_mnee(centre=(0.0, 0.0), base_height_m=0.73, water_height_m=0.095, segments=256, lift=0.0001,
                         gap=0.00005):
     """Native-caustics build: every refractive surface is an MNEE caster and no sun path crosses
     more than 4 interfaces (Cycles MNEE limit). Below the waterline the thin wall is merged into
@@ -44,8 +44,8 @@ def glass_of_water_mnee(centre=(0.0, 0.0), z0=0.73, water_h=0.095, segments=256,
       GLASS_BASE   IOR 1.52 : the thick foot (closed)
     Visible to the camera AND casting caustics -- one view layer."""
     from mathutils import Vector
-    outer, iface, top, info = tumbler_profiles(z0=z0 + lift, water_h=water_h)
-    zb = z0 + lift
+    outer, iface, top, info = tumbler_profiles(base_height_m=base_height_m + lift, water_height_m=water_height_m)
+    zb = base_height_m + lift
     zi = zb + 0.015
     zc = info["contact"]
     r_out = lambda z: 0.035 + (0.050 - 0.035) * (z - zb) / 0.155

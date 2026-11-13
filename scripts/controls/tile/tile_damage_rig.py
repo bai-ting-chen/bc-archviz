@@ -39,7 +39,7 @@ def render(folder, label):
         bpy.data.images.remove(image)
 
 
-def setup(width, height, nx, ny, origin=(0., 0.), **kwargs):
+def setup(width, height, columns, rows, origin=(0., 0.), **kwargs):
     """Build only the observed UV-metre window; no unrelated geometry is diced."""
     bpy.ops.wm.read_homefile(use_empty=True)
     sc = bpy.context.scene
@@ -49,7 +49,7 @@ def setup(width, height, nx, ny, origin=(0., 0.), **kwargs):
     sc.cycles.use_denoising = sc.cycles.use_adaptive_sampling = False
     sc.cycles.seed = 17
     sc.cycles.filter_width = .01
-    sc.render.resolution_x, sc.render.resolution_y = nx, ny
+    sc.render.resolution_x, sc.render.resolution_y = columns, rows
     sc.render.resolution_percentage = 100
     sc.view_settings.view_transform = 'Standard'
     sc.world = bpy.data.worlds.new('ProbeWorld'); sc.world.use_nodes = True
@@ -61,8 +61,8 @@ def setup(width, height, nx, ny, origin=(0., 0.), **kwargs):
     uv = mesh.uv_layers.new(name='TileUV')
     for loop in mesh.loops:
         uv.data[loop.index].uv = mesh.vertices[loop.vertex_index].co[:2]
-    base = dict(tile_w=TILE_WIDTH_M, tile_h=TILE_HEIGHT_M, joint=JOINT_WIDTH_M, corner_radius=0, jitter_offset=0,
-                jitter_rotation_deg=0, damage=1, off=SOLO)
+    base = dict(tile_width_m=TILE_WIDTH_M, tile_height_m=TILE_HEIGHT_M, joint_width_m=JOINT_WIDTH_M, corner_radius=0, jitter_offset=0,
+                jitter_rotation_deg=0, damage=1, disabled_features=SOLO)
     base.update(kwargs)
     mat = tile_surface.tile_material('DamageControl', **base); mesh.materials.append(mat)
     cam = bpy.data.objects.new('ProbeCamera', bpy.data.cameras.new('ProbeCamera'))
@@ -132,15 +132,15 @@ def tiles(shape):
         yield index, (X>x0)&(X<x0+TILE_WIDTH_M)&(Y>JOINT_WIDTH_M/2)&(Y<JOINT_WIDTH_M/2+TILE_HEIGHT_M), x0, X, Y
 
 
-def grid_rig(count,cols,**kw):
+def grid_rig(count,columns,**kw):
     """Observe complete 37.5 x 250 mm cells at 0.25 mm/px."""
-    rows=math.ceil(count/cols)
-    return setup(cols*(TILE_WIDTH_M+JOINT_WIDTH_M),rows*(TILE_HEIGHT_M+JOINT_WIDTH_M),round(cols*(TILE_WIDTH_M+JOINT_WIDTH_M)/METRES_PER_PIXEL),round(rows*(TILE_HEIGHT_M+JOINT_WIDTH_M)/METRES_PER_PIXEL),**kw)
+    rows=math.ceil(count/columns)
+    return setup(columns*(TILE_WIDTH_M+JOINT_WIDTH_M),rows*(TILE_HEIGHT_M+JOINT_WIDTH_M),round(columns*(TILE_WIDTH_M+JOINT_WIDTH_M)/METRES_PER_PIXEL),round(rows*(TILE_HEIGHT_M+JOINT_WIDTH_M)/METRES_PER_PIXEL),**kw)
 
 
-def grid_faces(data,count,cols):
+def grid_faces(data,count,columns):
     """Extract aligned face arrays; joints remain outside every face slice."""
     for index in range(count):
-        col,row=index%cols,index//cols
+        col,row=index%columns,index//columns
         x0=round((col*(TILE_WIDTH_M+JOINT_WIDTH_M)+JOINT_WIDTH_M/2)/METRES_PER_PIXEL); y0=round((row*(TILE_HEIGHT_M+JOINT_WIDTH_M)+JOINT_WIDTH_M/2)/METRES_PER_PIXEL)
         yield index,data[y0:y0+round(TILE_HEIGHT_M/METRES_PER_PIXEL),x0:x0+round(TILE_WIDTH_M/METRES_PER_PIXEL)],(col*(TILE_WIDTH_M+JOINT_WIDTH_M)+JOINT_WIDTH_M/2,row*(TILE_HEIGHT_M+JOINT_WIDTH_M)+JOINT_WIDTH_M/2)

@@ -22,7 +22,7 @@ def report_missing(asset_id,search):
         _missing_reported.add(asset_id)
 
 
-def default_field(g, kind, settings, vector, frame):
+def default_field(graph, kind, settings, vector, frame):
     """Load the layer's default mask, blend dried-mark zones, or use the procedural fallback."""
     kind = canonical_layer(kind)
     fallback = None
@@ -31,23 +31,23 @@ def default_field(g, kind, settings, vector, frame):
         asset_id, map_name, search = DEFAULT_MASKS[key]
         mask = asset_mask(asset_id, map_name)
         if mask is not None:
-            return mask_field(g, mask, vector, frame, crossed=kind == 'scratches', row=row)
+            return mask_field(graph, mask, vector, frame, crossed=kind == 'scratches', row=row)
         report_missing(asset_id,search)
         if fallback is None:
-            fallback = procedural_field(g, kind, vector, settings.scale_m, settings.scratch_width_m, frame)
+            fallback = procedural_field(graph, kind, vector, settings.scale_m, settings.scratch_width_m, frame)
         return fallback
     if kind != 'dried-marks':
         return value(kind, 0)
     vertical = value('dried-vertical', 0)
     up = value('dried-up', 1)
-    geometry = g.node('ShaderNodeNewGeometry', (-1000, -7000), frame)
-    normal = g.node('ShaderNodeSeparateXYZ', (-800, -7000), frame)
-    g.link(geometry.outputs['Normal'], normal.inputs[0])
-    zone = g.map_range(normal.outputs['Z'], .25, .75, (-600, -7000), frame=frame,
+    geometry = graph.node('ShaderNodeNewGeometry', (-1000, -7000), frame)
+    normal = graph.node('ShaderNodeSeparateXYZ', (-800, -7000), frame)
+    graph.link(geometry.outputs['Normal'], normal.inputs[0])
+    zone = graph.map_range(normal.outputs['Z'], .25, .75, (-600, -7000), frame=frame,
                    smooth=True, label='dried marks up-facing zone')
-    mix = g.node('ShaderNodeMix', (-300, -7000), frame)
+    mix = graph.node('ShaderNodeMix', (-300, -7000), frame)
     mix.data_type = 'FLOAT'
-    g.link(zone, mix.inputs[0])
-    g.link(vertical, active_socket(mix.inputs, 'A'))
-    g.link(up, active_socket(mix.inputs, 'B'))
+    graph.link(zone, mix.inputs[0])
+    graph.link(vertical, active_socket(mix.inputs, 'A'))
+    graph.link(up, active_socket(mix.inputs, 'B'))
     return active_socket(mix.outputs, 'Result')

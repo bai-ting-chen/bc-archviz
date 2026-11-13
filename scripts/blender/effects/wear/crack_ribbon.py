@@ -103,26 +103,26 @@ def _mask_image(seed, length, core, halo):
     return image
 
 
-def crooked_ribbon_masks(g, F, along, perp, wob, on, C, L, y, seed=3, physical_length=None):
+def crooked_ribbon_masks(graph, frame, along, perp, wobble, plane_mask, settings, length_m, y, seed=3, physical_length=None):
     """Sample a seeded crooked polyline mask with fine shader wobble and unchanged nominal widths."""
-    length = physical_length if physical_length is not None else L
-    image = _mask_image(seed, length, C['core'], C['halo'])
+    length = physical_length if physical_length is not None else length_m
+    image = _mask_image(seed, length, settings['core'], settings['halo'])
     low_x, low_y, high_x, high_y = image['bounds']
     def m(op, a, b=0):
-        return g.math(op, a, b, (0, y), F)
-    xx = m('DIVIDE', along, L)
+        return graph.math(op, a, b, (0, y), frame)
+    xx = m('DIVIDE', along, length_m)
     # Pin distortion at the source so opening corners and edges remain attached exactly.
-    pin = g.map_range(xx, 0, .04, (0, y), frame=F)
-    yy = m('DIVIDE', m('ADD', perp, m('MULTIPLY', wob, pin)), L)
-    vector = g.node('ShaderNodeCombineXYZ', (200, y), F)
-    g.link(m('DIVIDE', m('SUBTRACT', xx, low_x), high_x - low_x), vector.inputs['X'])
-    g.link(m('DIVIDE', m('SUBTRACT', yy, low_y), high_y - low_y), vector.inputs['Y'])
-    texture = g.node('ShaderNodeTexImage', (400, y), F, label=image.name)
+    pin = graph.map_range(xx, 0, .04, (0, y), frame=frame)
+    yy = m('DIVIDE', m('ADD', perp, m('MULTIPLY', wobble, pin)), length_m)
+    vector = graph.node('ShaderNodeCombineXYZ', (200, y), frame)
+    graph.link(m('DIVIDE', m('SUBTRACT', xx, low_x), high_x - low_x), vector.inputs['X'])
+    graph.link(m('DIVIDE', m('SUBTRACT', yy, low_y), high_y - low_y), vector.inputs['Y'])
+    texture = graph.node('ShaderNodeTexImage', (400, y), frame, label=image.name)
     texture.image = image
     texture.extension = 'CLIP'
     texture.interpolation = 'Linear'
-    g.link(vector.outputs['Vector'], texture.inputs['Vector'])
-    separate = g.node('ShaderNodeSeparateColor', (600, y), F)
-    g.link(texture.outputs['Color'], separate.inputs['Color'])
-    gate = m('MULTIPLY', on, m('GREATER_THAN', along, -1e-8))
+    graph.link(vector.outputs['Vector'], texture.inputs['Vector'])
+    separate = graph.node('ShaderNodeSeparateColor', (600, y), frame)
+    graph.link(texture.outputs['Color'], separate.inputs['Color'])
+    gate = m('MULTIPLY', plane_mask, m('GREATER_THAN', along, -1e-8))
     return m('MULTIPLY', separate.outputs['Red'], gate), m('MULTIPLY', separate.outputs['Green'], gate)

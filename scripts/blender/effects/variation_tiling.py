@@ -14,94 +14,94 @@ def lookup_offsets(count, seed=0):
     return [tuple(rng.uniform(-OFFSET_SPAN, OFFSET_SPAN) for _ in range(3)) for _ in range(count)]
 
 
-def randomized_vectors(g, vector, count=3, seed=0, scale_jitter=.12, frame=None):
+def randomized_vectors(graph, vector, count=3, seed=0, scale_jitter=.12, frame=None):
     """Rotate, slightly rescale and offset independent metre-space image lookups."""
     rng = random.Random(seed + 7919)
     result = []
     for row, offset in enumerate(lookup_offsets(count, seed)):
-        rotation = g.node('ShaderNodeVectorRotate', (-2100, -700*row), frame)
+        rotation = graph.node('ShaderNodeVectorRotate', (-2100, -700*row), frame)
         rotation.rotation_type = 'AXIS_ANGLE'
         rotation.inputs['Axis'].default_value = (0, 0, 1)
         rotation.inputs['Angle'].default_value = rng.uniform(-math.pi, math.pi)
-        g.link(vector, rotation.inputs['Vector'])
-        scale = g.node('ShaderNodeVectorMath', (-1800, -700*row), frame)
+        graph.link(vector, rotation.inputs['Vector'])
+        scale = graph.node('ShaderNodeVectorMath', (-1800, -700*row), frame)
         scale.operation = 'SCALE'
         scale.inputs['Scale'].default_value = rng.uniform(1-scale_jitter, 1+scale_jitter)
-        g.link(rotation.outputs[0], scale.inputs[0])
-        result.append(_shift(g, scale.outputs[0], (*offset[:2], 0), frame, row))
+        graph.link(rotation.outputs[0], scale.inputs[0])
+        result.append(_shift(graph, scale.outputs[0], (*offset[:2], 0), frame, row))
     return result
 
 
-def _lookup(g, tex, vector, frame, row):
-    node = g.node('ShaderNodeTexImage', (-1200, -700*row), frame, label=tex.label)
+def _lookup(graph, tex, vector, frame, row):
+    node = graph.node('ShaderNodeTexImage', (-1200, -700*row), frame, label=tex.label)
     node.image = tex.image
     for prop in ('projection', 'projection_blend', 'interpolation', 'extension'):
         setattr(node, prop, getattr(tex, prop))
-    g.link(vector, node.inputs['Vector'])
+    graph.link(vector, node.inputs['Vector'])
     return node
 
 
-def _shift(g, vector, offset, frame, row):
-    shifted = g.node('ShaderNodeVectorMath', (-1500, -700*row), frame)
+def _shift(graph, vector, offset, frame, row):
+    shifted = graph.node('ShaderNodeVectorMath', (-1500, -700*row), frame)
     shifted.operation = 'ADD'
-    g.link(vector, shifted.inputs[0])
+    graph.link(vector, shifted.inputs[0])
     shifted.inputs[1].default_value = offset
     return shifted.outputs[0]
 
 
-def _relink(g, tex, copies, masks, switch, frame, row):
+def _relink(graph, tex, copies, masks, switch, frame, row):
     consumers = [(link.from_socket.name, link.to_socket) for socket in tex.outputs
                  for link in list(socket.links)]
     results = {}
     for output_index, output in enumerate(tex.outputs):
         blended = output
         for column, (copy, mask) in enumerate(zip(copies, masks)):
-            blended = g.mix(blended, copy.outputs[output.name], mask, (-900+300*column, -700*(row+output_index)), frame)
-        results[output.name] = g.mix(output, blended, switch, (-900+300*len(copies), -700*(row+output_index)), frame)
+            blended = graph.mix(blended, copy.outputs[output.name], mask, (-900+300*column, -700*(row+output_index)), frame)
+        results[output.name] = graph.mix(output, blended, switch, (-900+300*len(copies), -700*(row+output_index)), frame)
     for name, consumer in consumers:
-        g.link(results[name], consumer)
+        graph.link(results[name], consumer)
     return results
 
 
-def _blend_masks(g, lookups, scale_m, amount, frame):
-    world = g.node('ShaderNodeNewGeometry', (-1800, 0), frame).outputs['Position']
-    field = g.noise_texture(world, 1/scale_m, (-1500, 0), frame)
-    field = g.map_range(field, MASK_MEAN-MASK_HALF_RANGE, MASK_MEAN+MASK_HALF_RANGE,
+def _blend_masks(graph, lookups, scale_m, amount, frame):
+    world = graph.node('ShaderNodeNewGeometry', (-1800, 0), frame).outputs['Position']
+    field = graph.noise_texture(world, 1/scale_m, (-1500, 0), frame)
+    field = graph.map_range(field, MASK_MEAN-MASK_HALF_RANGE, MASK_MEAN+MASK_HALF_RANGE,
                     (-1200, 0), frame=frame)
-    masks = [g.map_range(field, i/lookups, (i+1)/lookups, (-900, -700*(i+1)),
+    masks = [graph.map_range(field, i/lookups, (i+1)/lookups, (-900, -700*(i+1)),
                      frame=frame, smooth=True) for i in range(lookups-1)]
-    control = g.node('ShaderNodeValue', (-1800, 600), frame, label='anti_tile amount').outputs[0]
+    control = graph.node('ShaderNodeValue', (-1800, 600), frame, label='anti_tile amount').outputs[0]
     control.default_value = amount
     remaining = 1
     for row, mask in enumerate(masks, 1):
-        inverse = g.math('SUBTRACT', 1, mask, (-600, -700*row), frame)
-        remaining = g.math('MULTIPLY', remaining, inverse, (-300, -700*row), frame)
-    extent = g.math('SUBTRACT', 1, remaining, (0, -700*(len(masks)+1)), frame)
-    layer_switch(g, 'anti_tile', extent, control, 0, frame)
+        inverse = graph.math('SUBTRACT', 1, mask, (-600, -700*row), frame)
+        remaining = graph.math('MULTIPLY', remaining, inverse, (-300, -700*row), frame)
+    extent = graph.math('SUBTRACT', 1, remaining, (0, -700*(len(masks)+1)), frame)
+    layer_switch(graph, 'anti_tile', extent, control, 0, frame)
     return masks, control
 
 
-def anti_tile(g, texs, lookups=3, scale_m=1.5, seed=0, amount=1.0):
+def anti_tile(graph, textures, lookups=3, scale_m=1.5, seed=0, amount=1.0):
     """Relink image consumers to shared XYZ-offset lookups; amount zero is the original."""
-    frame = layer_frame(g, 'VARIATION: TILING')
+    frame = layer_frame(graph, 'VARIATION: TILING')
     offsets = lookup_offsets(lookups-1, seed)
-    masks, switch = _blend_masks(g, lookups, scale_m, amount, frame)
+    masks, switch = _blend_masks(graph, lookups, scale_m, amount, frame)
     default_uv = None
     shifted_vectors = {}
     results = []
-    for index, tex in enumerate(texs):
+    for index, tex in enumerate(textures):
         row = 8 + index*max(2, lookups-1)
         vector = tex.inputs['Vector']
         if not vector.is_linked:
             if default_uv is None:
-                default_uv = g.node('ShaderNodeTexCoord', (-1800, -5600), frame).outputs['UV']
-            g.link(default_uv, vector)
+                default_uv = graph.node('ShaderNodeTexCoord', (-1800, -5600), frame).outputs['UV']
+            graph.link(default_uv, vector)
         vector = vector.links[0].from_socket
         key = vector.as_pointer()
         if key not in shifted_vectors:
-            shifted_vectors[key] = [_shift(g, vector, offset, frame, 8+len(shifted_vectors)*(lookups-1)+i)
+            shifted_vectors[key] = [_shift(graph, vector, offset, frame, 8+len(shifted_vectors)*(lookups-1)+i)
                                     for i, offset in enumerate(offsets)]
-        copies = [_lookup(g, tex, shifted, frame, row+i)
+        copies = [_lookup(graph, tex, shifted, frame, row+i)
                   for i, shifted in enumerate(shifted_vectors[key])]
-        results.append(_relink(g, tex, copies, masks, switch, frame, row))
+        results.append(_relink(graph, tex, copies, masks, switch, frame, row))
     return results

@@ -3,7 +3,7 @@
 _VERSION = 4
 
 _INPUTS = {
-    "tile_w": "Tile W", "tile_h": "Tile H", "joint": "Joint", "corner_radius": "Corner Radius",
+    "tile_width_m": "Tile W", "tile_height_m": "Tile H", "joint_width_m": "Joint", "corner_radius": "Corner Radius",
     "jitter_offset": "Jitter Offset", "jitter_rotation": "Jitter Rotation",
     "row_offset": "Row Offset", "rotation": "Rotation", "origin": "Origin",
 }

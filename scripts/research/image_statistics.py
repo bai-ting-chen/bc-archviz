@@ -15,9 +15,9 @@ def load(path):
     return a
 
 
-def describe(a, label):
-    lum = 0.2126 * a[..., 0] + 0.7152 * a[..., 1] + 0.0722 * a[..., 2]
-    rb = a[..., 0].mean() / max(a[..., 2].mean(), 1e-6)
+def describe(pixels, label):
+    lum = 0.2126 * pixels[..., 0] + 0.7152 * pixels[..., 1] + 0.0722 * pixels[..., 2]
+    rb = pixels[..., 0].mean() / max(pixels[..., 2].mean(), 1e-6)
     print(f"{label:40s} mean {lum.mean():.3f}  p50 {np.median(lum):.3f}  "
           f"p99 {np.quantile(lum, 0.99):.3f}  sigma {lum.std():.3f}  "
           f"clip {100 * (lum >= 0.995).mean():5.2f}%  black {100 * (lum <= 0.005).mean():5.2f}%  "

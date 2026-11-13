@@ -38,31 +38,31 @@ def input_socket(ng, name, kind, default, subtype=None):
 
 
 
-def chip_field(b, gi, rp, dd, seg_scale, bite_scale, soft, prof_end):
+def chip_field(graph, group_input, rest_position, edge_distance_m, segment_scale, bite_scale, soft, profile_end):
     """Chips along the arris: segments of the edge chipped (share -> threshold; Noise clusters
     near 0.5, sd ~0.1), bite noise varies the reach. Returns (chip 0..1, depth profile)."""
-    t = b.math("SUBTRACT", 0.5, gi.outputs["Chipped Share"], (500, -700))
-    t = b.math("MULTIPLY", t, 0.35, (650, -700))
-    t = b.math("ADD", t, 0.5, (750, -700))
-    seg = b.map_range(b.noise_texture(rp, seg_scale, (650, -500), detail=2), b.math("SUBTRACT", t, 0.04, (850, -650)),
-                  b.math("ADD", t, 0.04, (850, -760)), (1000, -550))
-    bite = b.map_range(b.noise_texture(rp, bite_scale, (650, -900), detail=8, rough=0.7), 0.35, 0.75, (1000, -850))
-    reach = b.math("MULTIPLY", b.math("MULTIPLY", bite, seg, (1200, -700)),
-                   gi.outputs["Chip Reach"], (1380, -700))
-    chip = b.map_range(b.math("SUBTRACT", reach, dd, (1550, -500)), 0.0, soft, (1720, -500))
-    prof = b.map_range(dd, 0.0, gi.outputs["Chip Reach"], (1550, -800), 1.0, prof_end)
+    t = graph.math("SUBTRACT", 0.5, group_input.outputs["Chipped Share"], (500, -700))
+    t = graph.math("MULTIPLY", t, 0.35, (650, -700))
+    t = graph.math("ADD", t, 0.5, (750, -700))
+    seg = graph.map_range(graph.noise_texture(rest_position, segment_scale, (650, -500), detail=2), graph.math("SUBTRACT", t, 0.04, (850, -650)),
+                  graph.math("ADD", t, 0.04, (850, -760)), (1000, -550))
+    bite = graph.map_range(graph.noise_texture(rest_position, bite_scale, (650, -900), detail=8, roughness=0.7), 0.35, 0.75, (1000, -850))
+    reach = graph.math("MULTIPLY", graph.math("MULTIPLY", bite, seg, (1200, -700)),
+                   group_input.outputs["Chip Reach"], (1380, -700))
+    chip = graph.map_range(graph.math("SUBTRACT", reach, edge_distance_m, (1550, -500)), 0.0, soft, (1720, -500))
+    prof = graph.map_range(edge_distance_m, 0.0, group_input.outputs["Chip Reach"], (1550, -800), 1.0, profile_end)
     return chip, prof
 
 
-def rejoin(b, moved, sep, go, x0, weld_dist):
+def rejoin(graph, moved, separated_geometry, group_output, node_x, weld_dist):
     """Rejoin the displaced band with the untouched interior and weld the seam."""
-    join = b.node_with_props("GeometryNodeJoinGeometry", (x0, 0))
-    b.link(moved, join.inputs[0])
-    b.link(sep.outputs["Inverted"], join.inputs[0])
-    weld = b.node_with_props("GeometryNodeMergeByDistance", (x0 + 130, 0))
+    join = graph.node_with_props("GeometryNodeJoinGeometry", (node_x, 0))
+    graph.link(moved, join.inputs[0])
+    graph.link(separated_geometry.outputs["Inverted"], join.inputs[0])
+    weld = graph.node_with_props("GeometryNodeMergeByDistance", (node_x + 130, 0))
     weld.inputs["Distance"].default_value = weld_dist
-    b.link(join.outputs[0], weld.inputs["Geometry"])
-    b.link(weld.outputs["Geometry"], go.inputs["Geometry"])
+    graph.link(join.outputs[0], weld.inputs["Geometry"])
+    graph.link(weld.outputs["Geometry"], group_output.inputs["Geometry"])
 
 
 @dataclass
@@ -149,43 +149,43 @@ def edge_wear_group(name="Edge Wear + Chips", band=0.08, level=3, chip_reach=0.0
     return ng
 
 
-def _or_up_facing(b, selected):
+def _or_up_facing(graph, selected):
     """Add faces whose normal points up (Z > 0.9) to a face selection."""
-    nrm = b.node_with_props("GeometryNodeInputNormal", (-350, -500))
-    sepz = b.node_with_props("ShaderNodeSeparateXYZ", (-200, -500))
-    b.link(nrm.outputs["Normal"], sepz.inputs["Vector"])
-    up = b.node_with_props("FunctionNodeCompare", (-50, -500), data_type="FLOAT", operation="GREATER_THAN")
-    b.link(sepz.outputs["Z"], active_socket(up.inputs, "A"))
+    nrm = graph.node_with_props("GeometryNodeInputNormal", (-350, -500))
+    sepz = graph.node_with_props("ShaderNodeSeparateXYZ", (-200, -500))
+    graph.link(nrm.outputs["Normal"], sepz.inputs["Vector"])
+    up = graph.node_with_props("FunctionNodeCompare", (-50, -500), data_type="FLOAT", operation="GREATER_THAN")
+    graph.link(sepz.outputs["Z"], active_socket(up.inputs, "A"))
     active_socket(up.inputs, "B").default_value = 0.9
-    either = b.node_with_props("FunctionNodeBooleanMath", (120, -400), operation="OR")
-    b.link(selected, either.inputs[0])
-    b.link(up.outputs[0], either.inputs[1])
+    either = graph.node_with_props("FunctionNodeBooleanMath", (120, -400), operation="OR")
+    graph.link(selected, either.inputs[0])
+    graph.link(up.outputs[0], either.inputs[1])
     return either.outputs[0]
 
 
-def _grain_breaks(b, gi, rp, grain_stretch):
+def _grain_breaks(graph, group_input, rest_position, grain_stretch):
     """Break depth: sparse patches on top faces x an outline stretched along the grain x fibres."""
-    nrm = b.node_with_props("GeometryNodeInputNormal", (650, -1150))
-    sepn = b.node_with_props("ShaderNodeSeparateXYZ", (800, -1150))
-    b.link(nrm.outputs["Normal"], sepn.inputs["Vector"])
-    top = b.map_range(sepn.outputs["Z"], 0.85, 0.95, (1000, -1150))
-    ts = b.math("ADD", b.math("MULTIPLY", b.math("SUBTRACT", 0.5, gi.outputs["Break Share"],
+    nrm = graph.node_with_props("GeometryNodeInputNormal", (650, -1150))
+    sepn = graph.node_with_props("ShaderNodeSeparateXYZ", (800, -1150))
+    graph.link(nrm.outputs["Normal"], sepn.inputs["Vector"])
+    top = graph.map_range(sepn.outputs["Z"], 0.85, 0.95, (1000, -1150))
+    ts = graph.math("ADD", graph.math("MULTIPLY", graph.math("SUBTRACT", 0.5, group_input.outputs["Break Share"],
                                                  (500, -1300)), 0.35, (650, -1300)), 0.58, (750, -1300))
-    sparse = b.map_range(b.noise_texture(rp, 3.0, (650, -1450), detail=2), ts,
-                     b.math("ADD", ts, 0.04, (850, -1400)), (1000, -1450))
-    stretch = b.node_with_props("ShaderNodeVectorMath", (650, -1650), operation="MULTIPLY")
-    b.link(rp, stretch.inputs[0])
+    sparse = graph.map_range(graph.noise_texture(rest_position, 3.0, (650, -1450), detail=2), ts,
+                     graph.math("ADD", ts, 0.04, (850, -1400)), (1000, -1450))
+    stretch = graph.node_with_props("ShaderNodeVectorMath", (650, -1650), operation="MULTIPLY")
+    graph.link(rest_position, stretch.inputs[0])
     stretch.inputs[1].default_value = grain_stretch
-    outline = b.map_range(b.noise_texture(stretch.outputs["Vector"], 1.0, (800, -1650), detail=7, rough=0.72),
+    outline = graph.map_range(graph.noise_texture(stretch.outputs["Vector"], 1.0, (800, -1650), detail=7, roughness=0.72),
                       0.52, 0.545, (1000, -1650))
-    fib_v = b.node_with_props("ShaderNodeVectorMath", (650, -1850), operation="MULTIPLY")
-    b.link(rp, fib_v.inputs[0])
+    fib_v = graph.node_with_props("ShaderNodeVectorMath", (650, -1850), operation="MULTIPLY")
+    graph.link(rest_position, fib_v.inputs[0])
     fib_v.inputs[1].default_value = (grain_stretch[0] * 14, grain_stretch[1] * 3, grain_stretch[2] * 14)
-    fibres = b.map_range(b.noise_texture(fib_v.outputs["Vector"], 1.0, (800, -1850), detail=3), 0.3, 0.7,
+    fibres = graph.map_range(graph.noise_texture(fib_v.outputs["Vector"], 1.0, (800, -1850), detail=3), 0.3, 0.7,
                      (1000, -1850), 0.55, 1.0)
-    brk = b.math("MULTIPLY", b.math("MULTIPLY", top, sparse, (1200, -1300)), outline, (1380, -1400))
-    return b.math("MULTIPLY", b.math("MULTIPLY", brk, fibres, (1550, -1500)),
-                  gi.outputs["Break Depth"], (1720, -1500))
+    brk = graph.math("MULTIPLY", graph.math("MULTIPLY", top, sparse, (1200, -1300)), outline, (1380, -1400))
+    return graph.math("MULTIPLY", graph.math("MULTIPLY", brk, fibres, (1550, -1500)),
+                  group_input.outputs["Break Depth"], (1720, -1500))
 
 
 def set_input(mod, name, value):
@@ -221,7 +221,7 @@ def flaked_paint_masks(asset_ids=tuple(WORN_SCAN_LEVELS),project=None):
 
 
 
-def chipping_field(g, vector, scale_m, frame=None):
+def chipping_field(graph, vector, scale_m, frame=None):
     """Return the unchanged smooth procedural coating-loss patches."""
-    noise = g.noise_texture(vector, 1 / scale_m, (-1800, 0), frame, detail=3)
-    return g.map_range(noise, .54, .57, (-1500, 0), frame=frame, smooth=True)
+    noise = graph.noise_texture(vector, 1 / scale_m, (-1800, 0), frame, detail=3)
+    return graph.map_range(noise, .54, .57, (-1500, 0), frame=frame, smooth=True)

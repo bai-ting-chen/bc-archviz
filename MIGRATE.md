@@ -653,4 +653,288 @@ Short argparse destinations remain internal until the parameter/field round; cal
 - Search for the old paths and qualified APIs outside this migration history; no obsolete import or invocation should remain.
   Common words, unrelated local bindings, unchanged fields and third-party interfaces retain their established spellings.
 
+# MIGRATE: descriptive parameters and settings (round B)
+From: LAPTOP-25
+
+## What changed
+
+Python parameters, dataclass fields and camera state now name their roles and units. Positional argument order, defaults, calculations, Blender properties and socket names are unchanged. Update external keyword callers and attribute accesses with the tables below; no compatibility aliases are retained.
+
+### Parameters
+
+| Owner (under `scripts/`) | Old → new |
+|---|---|
+| `blender/effects/variation_macro_tone.py:_field` | `g` → `graph` |
+| `blender/effects/variation_macro_tone.py:macro_tone` | `g` → `graph` |
+| `blender/effects/variation_per_unit_shading.py:_cell_key` | `g` → `graph` |
+| `blender/effects/variation_per_unit_shading.py:_hash` | `g` → `graph` |
+| `blender/effects/variation_per_unit_shading.py:_instancer_key` | `g` → `graph` |
+| `blender/effects/variation_per_unit_shading.py:_island_key` | `g` → `graph` |
+| `blender/effects/variation_per_unit_shading.py:_tilt` | `g` → `graph` |
+| `blender/effects/variation_per_unit_shading.py:_with_object` | `g` → `graph` |
+| `blender/effects/variation_per_unit_shading.py:random_tone_material` | `c0` → `color_min`; `c1` → `color_max` |
+| `blender/effects/variation_per_unit_shading.py:unit_key` | `g` → `graph` |
+| `blender/effects/variation_per_unit_shading.py:unit_values` | `g` → `graph` |
+| `blender/effects/variation_tiling.py:_blend_masks` | `g` → `graph` |
+| `blender/effects/variation_tiling.py:_lookup` | `g` → `graph` |
+| `blender/effects/variation_tiling.py:_relink` | `g` → `graph` |
+| `blender/effects/variation_tiling.py:_shift` | `g` → `graph` |
+| `blender/effects/variation_tiling.py:anti_tile` | `g` → `graph`; `texs` → `textures` |
+| `blender/effects/variation_tiling.py:randomized_vectors` | `g` → `graph` |
+| `blender/effects/wear/chipping.py:_grain_breaks` | `b` → `graph`; `gi` → `group_input`; `rp` → `rest_position` |
+| `blender/effects/wear/chipping.py:_or_up_facing` | `b` → `graph` |
+| `blender/effects/wear/chipping.py:chip_field` | `b` → `graph`; `gi` → `group_input`; `rp` → `rest_position`; `dd` → `edge_distance_m`; `seg_scale` → `segment_scale`; `prof_end` → `profile_end` |
+| `blender/effects/wear/chipping.py:chipping_field` | `g` → `graph` |
+| `blender/effects/wear/chipping.py:rejoin` | `b` → `graph`; `sep` → `separated_geometry`; `go` → `group_output`; `x0` → `node_x` |
+| `blender/effects/wear/concrete_shading.py:_fresh_break` | `g` → `graph` |
+| `blender/effects/wear/crack_ribbon.py:crooked_ribbon_masks` | `g` → `graph`; `F` → `frame`; `wob` → `wobble`; `on` → `plane_mask`; `C` → `settings`; `L` → `length_m` |
+| `blender/effects/wear/cracks.py:apply_crack_masks` | `g` → `graph`; `F` → `frame`; `C` → `settings` |
+| `blender/effects/wear/cracks.py:crack_masks` | `g` → `graph`; `F` → `frame`; `C` → `settings` |
+| `blender/effects/wear/decal_stamps.py:_random` | `g` → `graph` |
+| `blender/effects/wear/decal_stamps.py:_size` | `g` → `graph` |
+| `blender/effects/wear/decal_stamps.py:_stamp` | `g` → `graph` |
+| `blender/effects/wear/decal_stamps.py:deposit_stamps` | `g` → `graph` |
+| `blender/effects/wear/decal_stamps.py:scatter_stamps` | `g` → `graph` |
+| `blender/effects/wear/decal_stamps.py:stamps_field` | `g` → `graph` |
+| `blender/effects/wear/default_sources.py:default_field` | `g` → `graph` |
+| `blender/effects/wear/dirt.py:_dust_mask` | `g` → `graph` |
+| `blender/effects/wear/dirt.py:_relative_dust_color` | `g` → `graph` |
+| `blender/effects/wear/dirt.py:corner_dirt_masks` | `g` → `graph` |
+| `blender/effects/wear/dirt.py:dust_surface` | `g` → `graph` |
+| `blender/effects/wear/dirt.py:edge_dirt_masks` | `g` → `graph` |
+| `blender/effects/wear/dirt.py:grunge` | `g` → `graph` |
+| `blender/effects/wear/dirt.py:grunge_field` | `g` → `graph` |
+| `blender/effects/wear/edge_line.py:_line_mask` | `g` → `graph` |
+| `blender/effects/wear/edge_profile.py:_corner_context` | `g` → `graph` |
+| `blender/effects/wear/edge_profile.py:_extent` | `g` → `graph` |
+| `blender/effects/wear/edge_profile.py:_falloff` | `g` → `graph` |
+| `blender/effects/wear/edge_profile.py:_finish_mask` | `g` → `graph` |
+| `blender/effects/wear/edge_profile.py:_join_context` | `g` → `graph` |
+| `blender/effects/wear/edge_profile.py:_noise_context` | `g` → `graph` |
+| `blender/effects/wear/edge_profile.py:_outside_context` | `g` → `graph` |
+| `blender/effects/wear/edge_profile.py:edge_vertex_join` | `g` → `graph` |
+| `blender/effects/wear/hybrid_sources.py:hybrid_field` | `g` → `graph` |
+| `blender/effects/wear/image_masks.py:image_mask` | `g` → `graph` |
+| `blender/effects/wear/image_masks.py:mask_field` | `g` → `graph` |
+| `blender/effects/wear/image_masks.py:surface_coordinates` | `g` → `graph` |
+| `blender/effects/wear/procedural_patterns.py:procedural_field` | `g` → `graph` |
+| `blender/effects/wear/scan_sampling.py:stochastic_mask` | `g` → `graph` |
+| `blender/effects/wear/scratches.py:scratch_hybrid` | `g` → `graph` |
+| `blender/effects/wear/scratches.py:scratches_field` | `g` → `graph` |
+| `blender/effects/wear/water_marks.py:deposit_distance` | `g` → `graph` |
+| `blender/effects/wear/water_marks.py:deposit_profile` | `g` → `graph` |
+| `blender/effects/wear/water_marks.py:dried_marks_field` | `g` → `graph` |
+| `blender/effects/wear/water_marks.py:irregular_deposits` | `g` → `graph` |
+| `blender/effects/wear/wear.py:_multiply_input` | `g` → `graph` |
+| `blender/effects/wear/wear.py:apply_surface_wear` | `g` → `graph` |
+| `blender/effects/wear/wear.py:wear_factor` | `g` → `graph` |
+| `blender/effects/wear/wear_locations.py:edge_field` | `b` → `graph`; `gi` → `group_input`; `x0` → `node_x` |
+| `blender/effects/wear/wear_locations.py:face_z` | `g` → `graph` |
+| `blender/effects/wear/wear_locations.py:location_extent` | `g` → `graph` |
+| `blender/effects/wear/wear_locations.py:patch_extent` | `g` → `graph` |
+| `blender/effects/wear/wear_locations.py:round_shader` | `g` → `graph` |
+| `blender/materials/concrete/concrete_masks.py:_bevel_chips` | `g` → `graph` |
+| `blender/materials/concrete/concrete_masks.py:_edge_mask` | `g` → `graph` |
+| `blender/materials/glass/glass_assembly.py:glass_of_water` | `z0` → `base_height_m`; `water_h` → `water_height_m` |
+| `blender/materials/glass/glass_assembly.py:glass_of_water_mnee` | `z0` → `base_height_m`; `water_h` → `water_height_m` |
+| `blender/materials/glass/glass_shell.py:glass_shell` | `objs` → `objects`; `thickness` → `thickness_m` |
+| `blender/materials/glass/tumbler_profiles.py:tumbler_profiles` | `z0` → `base_height_m`; `r_out_b` → `outer_base_radius_m`; `r_out_t` → `outer_top_radius_m`; `r_in_b` → `inner_base_radius_m`; `r_in_t` → `inner_top_radius_m`; `rim_r` → `rim_radius_m`; `water_h` → `water_height_m`; `cap_len` → `cap_length_m` |
+| `blender/materials/shared/map_measurements.py:image_rgb` | `img` → `image` |
+| `blender/materials/shared/node_graph.py:NodeGraph.attribute` | `loc` → `location`; `out` → `output_name` |
+| `blender/materials/shared/node_graph.py:NodeGraph.color_ramp` | `loc` → `location`; `interp` → `interpolation` |
+| `blender/materials/shared/node_graph.py:NodeGraph.combine_xyz` | `loc` → `location` |
+| `blender/materials/shared/node_graph.py:NodeGraph.image_texture` | `loc` → `location` |
+| `blender/materials/shared/node_graph.py:NodeGraph.map_range` | `fmin` → `source_min`; `fmax` → `source_max`; `tmin` → `target_min`; `tmax` → `target_max`; `loc` → `location` |
+| `blender/materials/shared/node_graph.py:NodeGraph.math` | `op` → `operation`; `loc` → `location` |
+| `blender/materials/shared/node_graph.py:NodeGraph.mix` | `loc` → `location` |
+| `blender/materials/shared/node_graph.py:NodeGraph.named_attribute` | `dtype` → `data_type`; `loc` → `location` |
+| `blender/materials/shared/node_graph.py:NodeGraph.node` | `loc` → `location` |
+| `blender/materials/shared/node_graph.py:NodeGraph.node_with_props` | `loc` → `location`; `props` → `properties` |
+| `blender/materials/shared/node_graph.py:NodeGraph.noise_texture` | `loc` → `location`; `rough` → `roughness` |
+| `blender/materials/shared/node_graph.py:NodeGraph.store_attribute` | `dtype` → `data_type`; `loc` → `location` |
+| `blender/materials/shared/node_graph.py:NodeGraph.uv_map` | `loc` → `location` |
+| `blender/materials/shared/node_graph.py:NodeGraph.vector_math` | `op` → `operation`; `loc` → `location` |
+| `blender/materials/shared/node_graph.py:layer_frame` | `g` → `graph` |
+| `blender/materials/shared/node_graph.py:layer_switch` | `g` → `graph` |
+| `blender/materials/shared/pbr_maps.py:box_maps` | `g` → `graph` |
+| `blender/materials/stone/stone_tiles.py:stone_tiles` | `var` → `tone_variation`; `coat_rough` → `coat_roughness` |
+| `blender/materials/tile/damage_fields.py:_fine_fields` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/tile/damage_fields.py:_piece_fields` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/tile/damage_fields.py:_rand` | `a` → `graph` |
+| `blender/materials/tile/damage_fields.py:_voronoi` | `a` → `graph` |
+| `blender/materials/tile/damage_fields.py:_warp` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/tile/damage_layers.py:_layers` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/tile/damage_shading.py:damage_shaders` | `a` → `graph`; `i` → `inputs`; `d` → `damage_inputs` |
+| `blender/materials/tile/layout_reference.py:_jitter_transform` | `tile_w` → `tile_width_m`; `tile_h` → `tile_height_m`; `joint` → `joint_width_m` |
+| `blender/materials/tile/layout_reference.py:reference` | `tile_w` → `tile_width_m`; `tile_h` → `tile_height_m`; `joint` → `joint_width_m` |
+| `blender/materials/tile/tile_albedo.py:albedo` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/tile/tile_albedo.py:desaturate` | `a` → `graph` |
+| `blender/materials/tile/tile_albedo.py:dust` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/tile/tile_albedo.py:face_tone` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/tile/tile_build.py:tile_material` | `tile_w` → `tile_width_m`; `tile_h` → `tile_height_m`; `joint` → `joint_width_m`; `coat_rough` → `coat_roughness`; `tint_var` → `tint_variation`; `rough_var` → `roughness_variation`; `wave_amp` → `wave_amplitude_m`; `off` → `disabled_features`; `piece_tilt` → `piece_tilt_rad`; `pixel_size` → `pixel_size_px` |
+| `blender/materials/tile/tile_displacement.py:store_displacement` | `pixel_size` → `pixel_size_px` |
+| `blender/materials/tile/tile_displacement.py:use_damage_displacement` | `pixel_size` → `pixel_size_px` |
+| `blender/materials/tile/tile_displacement.py:use_displacement` | `pixel_size` → `pixel_size_px` |
+| `blender/materials/tile/tile_finish.py:gate` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/tile/tile_glazed.py:glazed_tiles` | `grout_col` → `grout_color` |
+| `blender/materials/tile/tile_relief.py:height` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/tile/tile_shading.py:surface_shader` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/tile/tile_specks.py:specks` | `a` → `graph`; `i` → `inputs` |
+| `blender/materials/vegetation/blade_build.py:blade_material` | `tex` → `texture` |
+| `blender/materials/vegetation/blade_wet.py:_wet` | `g` → `graph` |
+| `blender/materials/water/ballistic_sheet.py:carrier_grid` | `d` → `drop_m` |
+| `blender/materials/water/ballistic_sheet.py:effective_depth` | `d` → `drop_m`; `k` → `stretch_exponent`; `d_ref` → `stretch_reference_m` |
+| `blender/materials/water/ballistic_sheet.py:fall_speed_m_s` | `d` → `drop_m` |
+| `blender/materials/water/ballistic_sheet.py:flow_per_width_m2_s` | `d` → `drop_m` |
+| `blender/materials/water/ballistic_sheet.py:launch_speed_m_s` | `d` → `drop_m` |
+| `blender/materials/water/ballistic_sheet.py:sheet_thickness_m` | `d` → `drop_m` |
+| `blender/materials/water/ballistic_sheet.py:stream_factor` | `d` → `drop_m` |
+| `blender/materials/water/ballistic_sheet.py:throw` | `d` → `drop_m` |
+| `blender/materials/water/falling_film_assembly.py:_foot_objects` | `pool_z` → `pool_height_m` |
+| `blender/materials/water/falling_film_assembly.py:_replace_wet_proxy` | `pool_z` → `pool_height_m` |
+| `blender/materials/water/falling_film_assembly.py:falling_film` | `pool_z` → `pool_height_m` |
+| `blender/materials/water/film_meander.py:meander` | `p` → `params`; `v` → `stretched_depth_m`; `d` → `drop_m` |
+| `blender/materials/water/film_ribbons.py:_ribbon` | `p` → `params` |
+| `blender/materials/water/film_ribbons.py:_ribbon_base` | `p` → `params` |
+| `blender/materials/water/film_ribbons.py:_ribbon_seed` | `p` → `params` |
+| `blender/materials/water/film_ribbons.py:ribbon_envelope` | `p` → `params`; `S` → `along_lip_m`; `V` → `stretched_depth_m`; `h` → `thickness_m` |
+| `blender/materials/water/film_surfaces.py:film_surfaces` | `p` → `params`; `d` → `drop_m` |
+| `blender/materials/water/film_swell.py:swell_field` | `v` → `stretched_depth_m` |
+| `blender/materials/water/film_tears.py:_gap_field` | `p` → `params`; `S` → `along_lip_m`; `D` → `drop_m`; `V` → `stretched_depth_m` |
+| `blender/materials/water/film_tears.py:tear_value` | `p` → `params`; `v` → `stretched_depth_m` |
+| `blender/materials/water/film_waves.py:_wave_train` | `v` → `stretched_depth_m` |
+| `blender/materials/water/film_waves.py:roll_waves` | `p` → `params`; `v` → `stretched_depth_m`; `d` → `drop_m` |
+| `blender/materials/water/film_zones.py:zones` | `p` → `params`; `v` → `stretched_depth_m` |
+| `blender/materials/water/fragment_edges.py:edge_drops` | `p` → `params`; `ff` → `film_fields` |
+| `blender/materials/water/fragment_gaps.py:gap_fill` | `p` → `params`; `ff` → `film_fields` |
+| `blender/materials/water/impact_bubbles.py:bubbles` | `p` → `params`; `pts` → `impact_points`; `pool_z` → `pool_height_m` |
+| `blender/materials/water/impact_crowns.py:crowns` | `p` → `params`; `pts` → `impact_points` |
+| `blender/materials/water/impact_drift.py:_drift` | `p` → `params`; `pts` → `impact_points` |
+| `blender/materials/water/impact_drift.py:_span` | `pts` → `impact_points` |
+| `blender/materials/water/impact_foam.py:_fleck` | `p` → `params` |
+| `blender/materials/water/impact_foam.py:foam` | `p` → `params`; `pts` → `impact_points`; `pool_z` → `pool_height_m` |
+| `blender/materials/water/impact_locations.py:impacts` | `p` → `params`; `land_mid` → `landing_midpoints`; `land_keep` → `landing_mask`; `land_thick` → `landing_thickness_m`; `pool_z` → `pool_height_m` |
+| `blender/materials/water/impact_splash.py:splash` | `p` → `params`; `pts` → `impact_points`; `pool_z` → `pool_height_m` |
+| `blender/materials/water/motion_blur.py:fall_speed` | `v0` → `launch_speed_m_s`; `lip_z` → `lip_height_m` |
+| `blender/materials/water/motion_blur.py:falling_velocity` | `ob` → `obj`; `lip_z` → `lip_height_m`; `v0` → `launch_speed_m_s` |
+| `blender/materials/water/motion_blur.py:film_velocity` | `lip_z` → `lip_height_m`; `v0` → `launch_speed_m_s` |
+| `blender/materials/water/motion_blur.py:set_velocity` | `ob` → `obj` |
+| `blender/materials/water/pool_ripples.py:_chop` | `p` → `params` |
+| `blender/materials/water/pool_ripples.py:_craters` | `p` → `params` |
+| `blender/materials/water/pool_ripples.py:_soft_cap` | `H` → `height_m` |
+| `blender/materials/water/pool_ripples.py:_waves` | `p` → `params` |
+| `blender/materials/water/pool_ripples.py:grid` | `p` → `params` |
+| `blender/materials/water/pool_ripples.py:height_field` | `p` → `params`; `impact_pts` → `impact_points` |
+| `blender/materials/water/pool_ripples.py:slope_stats` | `step` → `cell_m`; `H` → `height_m` |
+| `blender/materials/water/ripple_height_image.py:save_height_exr` | `H` → `height_m` |
+| `blender/materials/water/seeded_noise.py:_knots` | `lo` → `min_knot_spacing_m`; `hi` → `max_knot_spacing_m` |
+| `blender/materials/water/seeded_noise.py:clustered_noise` | `lo` → `min_knot_spacing_m`; `hi` → `max_knot_spacing_m` |
+| `blender/materials/water/seeded_noise.py:unit_noise` | `lo` → `min_knot_spacing_m`; `hi` → `max_knot_spacing_m` |
+| `blender/materials/water/water_mesh.py:water_surface` | `cell` → `cell_m` |
+| `blender/materials/water/wet_wall_proxy.py:build_proxy` | `p` → `params`; `pool_z` → `pool_height_m` |
+| `blender/materials/water/wet_wall_proxy.py:wet_mask` | `p` → `params`; `pool_z` → `pool_height_m` |
+| `blender/materials/wood/wood.py:raw_wood_under` | `g` → `graph` |
+| `blender/renderer/luxcore/textured_material.py:textured_material` | `me` → `mesh` |
+| `blender/scene/environment/terrain_graph.py:_centred` | `g` → `graph` |
+| `blender/scene/environment/terrain_graph.py:_noise4` | `g` → `graph` |
+| `blender/scene/environment/terrain_graph.py:landform_group` | `pad_half` → `pad_half_size_m`; `verts` → `vertex_count`; `pad_z` → `pad_height_m`; `crest` → `crest_distance_m`; `fall` → `fall_height_m`; `run` → `slope_run_m` |
+| `blender/scene/environment/terrain_graph.py:pad_distance` | `g` → `graph`; `pad_half` → `pad_half_size_m` |
+| `blender/scene/environment/terrain_height.py:height` | `pad_half` → `pad_half_size_m`; `pad_z` → `pad_height_m`; `crest` → `crest_distance_m`; `fall` → `fall_height_m`; `run` → `slope_run_m` |
+| `blender/scene/lighting/emitter_shading.py:emitter_dots` | `n` → `emitter_count` |
+| `blender/scene/lighting/ies_fixture.py:ies_light` | `loc` → `location_m`; `rot` → `rotation_rad`; `coll` → `collection` |
+| `blender/scene/lighting/light_fixtures.py:downlight` | `loc` → `location_m`; `coll` → `collection` |
+| `blender/scene/lighting/light_fixtures.py:led_strip` | `coll` → `collection` |
+| `blender/scene/lighting/light_fixtures.py:panel_light` | `loc` → `location_m`; `rot` → `rotation_rad`; `coll` → `collection` |
+| `blender/scene/lighting/light_objects.py:_light_obj` | `loc` → `location_m`; `rot` → `rotation_rad`; `coll` → `collection` |
+| `controls/effects/surface_wear_lab.py:_base_shader` | `g` → `graph` |
+| `controls/effects/surface_wear_lab.py:_surface_vector` | `g` → `graph` |
+| `controls/effects/variation_lab.py:_check_macro_graph` | `g` → `graph` |
+| `controls/effects/variation_lab.py:emission` | `g` → `graph` |
+| `controls/effects/weathering_fields.py:joint_leaks` | `P` → `settings` |
+| `controls/effects/weathering_fields.py:runoff` | `P` → `settings` |
+| `controls/effects/weathering_fields.py:zones` | `P` → `settings` |
+| `controls/effects/weathering_nodes.py:operations` | `b` → `graph` |
+| `controls/effects/weathering_rig.py:render` | `sc` → `scene`; `W` → `wall_width_m`; `H` → `wall_height_m`; `O` → `output_dir`; `TAG` → `variant_name` |
+| `controls/effects/weathering_shader.py:shader` | `b` → `graph`; `sep` → `position_components`; `H` → `wall_height_m`; `P` → `settings`; `em` → `emission_node` |
+| `controls/regression/regression_dump.py:dump` | `SRC` → `blender_scripts_dir`; `HERE` → `project_dir`; `OUT` → `output_path` |
+| `controls/regression/regression_dump.py:dump.B` | `fn` → `function` |
+| `controls/regression/regression_graph.py:graph` | `nt` → `node_tree` |
+| `controls/tile/tile_damage_rig.py:grid_faces` | `cols` → `columns` |
+| `controls/tile/tile_damage_rig.py:grid_rig` | `cols` → `columns` |
+| `controls/tile/tile_damage_rig.py:setup` | `nx` → `columns`; `ny` → `rows` |
+| `controls/tile/tile_layout_rig.py:pixel_coords` | `RES` → `resolution_px`; `SIZE` → `frame_size_m` |
+| `controls/tile/tile_layout_rig.py:plane_with` | `RES` → `resolution_px`; `SIZE` → `frame_size_m` |
+| `controls/water/falling_film_physics.py:check_physics` | `H` → `drop_height_m` |
+| `controls/water/falling_film_render.py:check_render` | `OUT` → `output_dir` |
+| `controls/water/falling_film_rig.py:scene` | `OUT` → `output_dir`; `RES` → `resolution_px` |
+| `research/image_statistics.py:describe` | `a` → `pixels` |
+| `research/learning_from_video.py:extract_tutorial` | `max_height` → `max_height_px`; `scene` → `scene_change_threshold`; `every` → `frame_interval_s` |
+| `research/learning_from_video.py:search` | `n` → `result_count` |
+| `research/reference_camera.py:ReferenceCameraSolve.__init__` | `xs` → `repeat_x_px`; `bases` → `base_y_px`; `tops` → `top_y_px`; `pitch` → `repeat_pitch_m`; `f_px` → `focal_length_px`; `cx` → `principal_x_px`; `W` → `image_width_px`; `H` → `image_height_px` |
+| `research/reference_camera.py:ReferenceCameraSolve.pixel_to_facade_plane` | `yf` → `plane_depth_m` |
+| `research/reference_grid.py:grid` | `ref` → `reference_path`; `out` → `output_path` |
+| `research/reference_pair.py:pair` | `ref` → `reference_path`; `out` → `output_path` |
+| `research/reference_patches.py:patches` | `ref` → `reference_path` |
+| `scene/assets/asset_sheet.py:build_sheet` | `cols` → `columns` |
+| `scene/assets/asset_sheet.py:fetch_thumbnail` | `dst` → `destination` |
+| `scene/assets/maxtree_search.py:matches` | `lo` → `min_height_cm`; `hi` → `max_height_cm` |
+| `scene/assets/maxtree_search.py:model_row` | `p` → `product` |
+| `scene/assets/maxtree_search.py:search` | `lo` → `min_height_cm`; `hi` → `max_height_cm` |
+| `scene/assets/polyhaven_hdri.py:fetch_hdri` | `res` → `resolution` |
+| `scene/assets/polyhaven_texture.py:fetch_texture` | `res` → `resolution` |
+| `scene/lighting/ies_write.py:write_ies` | `d` → `profile` |
+| `scene/lighting/ldt_planes.py:planes` | `d` → `profile` |
+| `scene/lighting/photometry_integral.py:lumens` | `v` → `vertical_angles_deg`; `h` → `horizontal_angles_deg` |
+| `workflow/helper_index.py:function_signature` | `fn` → `function` |
+
+### Dataclass fields and camera state
+
+Dataclass constructor keywords, attributes and serialized dataclass keys all follow this table. The camera row covers instance state; its input JSON keys are listed separately below.
+
+| Owner (under `scripts/`) | Old → new |
+|---|---|
+| `blender/materials/water/ballistic_sheet.py:LaunchLip` | `origin` → `origin_m`; `along` → `along_axis`; `out` → `outward_axis`; `length` → `length_m`; `drop` → `drop_m` |
+| `blender/materials/water/ballistic_sheet.py:SheetFlow` | `v0` → `launch_speed_m_s`; `v0_var` → `launch_speed_variation`; `stream_amp` → `stream_variation`; `stream_lo` → `min_stream_width_m`; `stream_hi` → `max_stream_width_m`; `drift` → `stream_drift_m` |
+| `blender/materials/water/falling_film_assembly.py:FallingFilmSetup` | `cell` → `film_cell_m`; `s_range` → `along_lip_range_m`; `foot` → `impacts`; `ripple` → `pool_ripples`; `wet` → `wet_wall`; `motion_shutter` → `motion_shutter_frames` |
+| `blender/materials/water/film_config.py:FilmFields` | `S` → `along_lip_m`; `D` → `drop_m`; `V` → `stretched_depth_m`; `tear_start` → `tear_start_m`; `folded` → `folded_fraction` |
+| `blender/materials/water/film_config.py:FilmParams` | `stretch_k` → `stretch_exponent`; `stretch_ref` → `stretch_reference_m`; `ribbon_spacing` → `ribbon_spacing_m`; `ribbon_wander` → `ribbon_wander_m`; `ribbon_varicose` → `ribbon_width_variation`; `ribbon_twist` → `ribbon_twist_rad`; `ribbons` → `ribbon_relief_strength`; `swell` → `swell_amplitude_m`; `swell_varicose` → `swell_thickness_variation`; `waves` → `wave_amplitude_m`; `wave_len` → `wavelength_m`; `wave_cover_rate` → `wave_coverage_growth_per_m`; `wave_grow` → `wave_amplitude_growth_per_m`; `meander` → `meander_amplitude_m`; `tear_start` → `tear_start_m`; `tear_rate` → `tear_threshold_fall_per_m_power`; `tear_power` → `tear_exponent`; `tear_stretch` → `tear_stretch_threshold`; `slit_lo` → `min_slit_width_m`; `slit_hi` → `max_slit_width_m`; `tear_edge` → `tear_taper_range`; `rim` → `rim_bead_m`; `edge_retreat` → `edge_retreat_coefficient`; `edge_band` → `edge_band_m`; `edge_tear` → `edge_tear_strength` |
+| `blender/materials/water/fragment_config.py:FragmentParams` | `edge_drop_d` → `edge_drop_diameter_m`; `edge_drop_max` → `max_edge_drop_diameter_m`; `string_len` → `string_length_m` |
+| `blender/materials/water/impact_config.py:ImpactParams` | `impact_spacing` → `impact_spacing_m`; `crowns` → `crown_share`; `foam_size` → `foam_size_m`; `foam_max` → `max_foam_size_m`; `foam_focus` → `foam_focus_exponent`; `foam_reach` → `foam_reach_m`; `foam_spread` → `foam_spread_m`; `drift` → `lateral_spread_per_m`; `bubble_d` → `bubble_diameter_m`; `bubble_reach` → `bubble_reach_m`; `max_out` → `max_outward_m` |
+| `blender/materials/water/pool_ripples.py:RippleParams` | `step` → `cell_m`; `reach_out` → `outward_extent_m`; `reach_side` → `side_extent_m`; `crater` → `crater_strength`; `crater_cap` → `crater_height_cap_m`; `chop` → `chop_strength`; `chop_reach` → `chop_decay_m`; `waves` → `wave_strength`; `waves_cap` → `wave_height_cap_m` |
+| `blender/materials/water/wet_wall_proxy.py:WetParams` | `cell` → `cell_m`; `gap` → `wall_gap_m`; `band_lo` → `min_splash_height_m`; `band_hi` → `max_splash_height_m`; `beyond` → `end_decay_m`; `margin` → `end_margin_m` |
+| `research/reference_camera.py:ReferenceCameraSolve` | `F` → `focal_length_px`; `CX` → `principal_x_px`; `W` → `image_width_px`; `H` → `image_height_px`; `HOR` → `horizon_y_px`; `vp` → `vanishing_point_px`; `pts` → `repeat_points_m`; `cam` → `camera_position_m`; `pitch` → `repeat_pitch_m` |
+
+### Saved keys and options
+
+Existing studies count as finished (RULES GOV_01): new data uses only the new keys. There is no old-data compatibility migration. Blender socket labels and property names remain unchanged, including the `tile_surface_settings` container; the JSON inside it uses the new keys.
+
+| Schema / option owner | Old → new |
+|---|---|
+| Tile settings JSON, layout inputs and forwarding wrappers | `tile_w` → `tile_width_m`; `tile_h` → `tile_height_m`; `joint` → `joint_width_m`; `wave_amp` → `wave_amplitude_m`; `tint_var` → `tint_variation`; `rough_var` → `roughness_variation`; `off` → `disabled_features`; `piece_tilt` → `piece_tilt_rad`; `pixel_size` → `pixel_size_px`; `coat_rough` → `coat_roughness` |
+| Reference camera readings JSON | `xs` → `repeat_x_px`; `bases` → `base_y_px`; `tops` → `top_y_px`; `pitch` → `repeat_pitch_m`; `f_px` → `focal_length_px`; `cx` → `principal_x_px`; `W` → `image_width_px`; `H` → `image_height_px` |
+| Terrain group `params` settings | `pad_half` → `pad_half_size_m`; `pad_z` → `pad_height_m`; `crest` → `crest_distance_m`; `fall` → `fall_height_m`; `run` → `slope_run_m` |
+| Poly Haven asset metadata | `res` → `resolution` |
+| Crack settings | `len` → `length_range_m`; `jag` → `jaggedness_m`; `net_dist` → `network_distortion_m`; `net_keep` → `network_keep_share` |
+| Runoff and weathering settings | `streak_w` → `streak_frequency_per_m`; `streak_len` → `streak_vertical_frequency_per_m`; `max_len` → `length_range_m` |
+| Fab search options | `q` → `query`; `max` → `max_results` |
+| scene/assets/polyhaven_fetch.py argparse | `cmd` → `command`; `ids` → `asset_ids`; `res` → `resolution` |
+| scene/assets/asset_sheet.py argparse | `cols` → `columns` |
+| scene/assets/maxtree_search.py argparse | `min_height` → `min_height_cm`; `max_height` → `max_height_cm` |
+| workflow/study_run.py argparse and research/edge_overlay.py argparse | `ref` → `reference_path`; `out` → `output_path` |
+
+Water numeric snapshots use the `FilmFields` names in the field table. Fab still sends the HTTP query key `q`; only its authored options change. The `s` along-lip and `o` outward convention and `throw` remain.
+
+## Steps
+
+1. Update external keyword calls, constructor arguments, attributes and saved-key producers/consumers using the tables. Use the regenerated `references/scene/blender-python-helpers.md` for complete signatures.
+2. Use the new schemas for new studies; do not rebuild finished studies or keep old-name shims.
+3. Regenerate the helper reference with `python scripts/workflow/helper_index.py`.
+
+## Check after pull
+
+- Run `python scripts/workflow/structure_check.py` (0 problems), compile `scripts/`, and headlessly import modules; load controls as declarations without executing renders.
+- In factory-startup Blender with `--python-exit-code 1`, run the 13 `material_graph_check.py` topics listed in the Round A section, the edge/surface/wear graph checks, `variation_lab.py --only marks --check-only`, helper dump+compare, `scene_renderer_graph_check.py`, and `water_numeric_check.check(Path(<output>))`.
+- Use a throwaway copy of the project library: the helper dump writes an albedo cache. Never run it against the source library.
+- Compare with the pre-pull baseline. Numeric values and graph contents must match; normalize only explicitly listed saved-key renames. `FilmFields` contributes the five key changes listed above.
+
 Remove each section after applying it; delete this file when none is left.

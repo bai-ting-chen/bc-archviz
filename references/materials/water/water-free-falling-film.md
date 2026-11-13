@@ -44,11 +44,11 @@ used here with falling-film settings.
   (RULES MAT_04). A close-up reference shows detail that cannot exist at that scale.
 
 ## 3. Code
-`scripts/blender/materials/water/`: `falling_film_assembly.falling_film(lip, pool_z, film_mat, …)` builds every layer in
-§2 from a `ballistic_sheet.LaunchLip` (any straight lip: origin, along, out, length, drop) and returns objects and
+`scripts/blender/materials/water/`: `falling_film_assembly.falling_film(lip, pool_height_m, film_mat, …)` builds every layer in
+§2 from a `ballistic_sheet.LaunchLip` (any straight lip: origin_m, along_axis, outward_axis, length_m, drop_m) and returns objects and
 stats. Parameters live in `falling_film_assembly.FallingFilmSetup` (`ballistic_sheet.SheetFlow`, `falling_film.FilmParams`, `film_fragments.FragmentParams`,
 `pool_impacts.ImpactParams`, `pool_ripples.RippleParams`, `wet_wall_proxy.WetParams`). Modules: `mesh_builders` (geometry), `motion_blur`
-(velocity), `surface_shading` (materials, ripple bump). Defaults = the starting values in §4. `s_range` builds a
+(velocity), `surface_shading` (materials, ripple bump). Defaults = the starting values in §4. `along_lip_range_m` builds a
 strip of the lip for a lab.
 
 Control on an unrelated scene: `scripts/controls/water/falling_film_check.py`.

@@ -6,7 +6,7 @@ import math
 FEATURES = ("profile", "variation", "tilt", "wave", "dust", "specks", "macro", "damage")
 
 # Layout sockets on the TileLayout group, keyed by tile_material keyword.
-LAYOUT = dict(tile_w="Tile W", tile_h="Tile H", joint="Joint", corner_radius="Corner Radius", row_offset="Row Offset",
+LAYOUT = dict(tile_width_m="Tile W", tile_height_m="Tile H", joint_width_m="Joint", corner_radius="Corner Radius", row_offset="Row Offset",
               rotation="Rotation", origin="Origin", jitter_offset="Jitter Offset",
               jitter_rotation_deg="Jitter Rotation")
 OPTIONAL_LAYOUT = ("jitter_offset", "jitter_rotation_deg")
@@ -17,11 +17,11 @@ REMOVED_DAMAGE = ('chip_reach', 'flake_margin', 'crack_wander', 'crack_branch_sh
                   'spall_share', 'spall_reach', 'kink_size', 'kink_amp', 'branch_share')
 
 # Finish sockets on the TileFinish group, keyed by tile_material keyword.
-FINISH = dict(body_albedo="Body Albedo", coat_ior="Coat IOR", coat_rough="Coat Rough",
+FINISH = dict(body_albedo="Body Albedo", coat_ior="Coat IOR", coat_roughness="Coat Rough",
               edge_radius="Edge Radius", recess="Recess", grout_albedo="Grout Albedo",
               grout_rough="Grout Rough", dust="Dust", dust_width="Dust Width",
-              tint_var="Tint Var", rough_var="Rough Var", tilt_deg="Tilt Deg", lippage="Lippage",
-              wave_amp="Wave Amp", specks="Specks", speck_size="Speck Size", macro="Macro", map_size="Map Size",
+              tint_variation="Tint Var", roughness_variation="Rough Var", tilt_deg="Tilt Deg", lippage="Lippage",
+              wave_amplitude_m="Wave Amp", specks="Specks", speck_size="Speck Size", macro="Macro", map_size="Map Size",
               face_contrast="Face Contrast", face_saturation="Face Saturation")
 
 

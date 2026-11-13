@@ -36,9 +36,9 @@ def finish_group(defaults, owner):
     return tree
 
 
-def gate(a, i, feature, value):
-    """Remove a feature's whole contribution when its switch is zero."""
-    return a.math('MULTIPLY', i[feature + ' On'], value)
+def gate(graph, inputs, feature, value):
+    """Remove graph feature's whole contribution when its switch is zero."""
+    return graph.math('MULTIPLY', inputs[feature + ' On'], value)
 
 
 def toggle(mat, feature, on):

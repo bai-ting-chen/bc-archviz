@@ -36,8 +36,8 @@ def emitter(name, luminance_cd, kelvin=3000, color=None):
     return mat
 
 
-def emitter_dots(name, luminance_cd, n=4, radius=0.22, kelvin=3000, housing=(0.02, 0.02, 0.02)):
-    """Multi-head downlight face: n round LED lenses along the object's long (generated X) axis,
+def emitter_dots(name, luminance_cd, emitter_count=4, radius=0.22, kelvin=3000, housing=(0.02, 0.02, 0.02)):
+    """Multi-head downlight face: emitter_count round LED lenses along the object's long (generated X) axis,
     black housing around them. Generated coords span 0..1 over the box."""
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     g = NodeGraph(mat)
@@ -45,7 +45,7 @@ def emitter_dots(name, luminance_cd, n=4, radius=0.22, kelvin=3000, housing=(0.0
     sep = g.node("ShaderNodeSeparateXYZ", (-900, 0))
     g.link(tc.outputs["Generated"], sep.inputs["Vector"])
     cell = g.node("ShaderNodeMath", (-700, 100), label="cell x")
-    cell.operation, cell.inputs[1].default_value = "MULTIPLY", float(n)
+    cell.operation, cell.inputs[1].default_value = "MULTIPLY", float(emitter_count)
     g.link(sep.outputs["X"], cell.inputs[0])
     fr = g.node("ShaderNodeMath", (-550, 100))
     fr.operation = "FRACT"
