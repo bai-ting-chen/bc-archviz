@@ -16,22 +16,22 @@ def _sock(ng, name, typ, io="INPUT", default=None):
     return s
 
 
-def _noise4(graph, vec, scale, w, loc, detail=2.0, rough=0.5):
-    n = graph.node_with_props("ShaderNodeTexNoise", loc, noise_dimensions="4D")      # W exists only on a 4D noise
+def _noise4(graph, vec, scale, w, location, detail=2.0, rough=0.5):
+    n = graph.node_with_props("ShaderNodeTexNoise", location, noise_dimensions="4D")      # W exists only on a 4D noise
     for k, v in (("Scale", scale), ("W", w), ("Detail", detail), ("Roughness", rough)):
         n.inputs[k].default_value = v
     graph.link(vec, n.inputs["Vector"])
     return n.outputs[0]
 
 
-def _centred(graph, v, amp, loc):
+def _centred(graph, v, amp, location):
     """(noise - 0.5) * amp."""
-    return graph.math("MULTIPLY", graph.math("SUBTRACT", v, 0.5, loc), amp, (loc[0] + 150, loc[1]))
+    return graph.math("MULTIPLY", graph.math("SUBTRACT", v, 0.5, location), amp, (location[0] + 150, location[1]))
 
 
-def pad_distance(graph, centre, pad_half_size_m, loc=(-1200, -400)):
+def pad_distance(graph, centre, pad_half_size_m, location=(-1200, -400)):
     """Signed plan distance from a rectangle (negative inside): returns (distance, position)."""
-    x, y = loc
+    x, y = location
     pos = graph.node_with_props("GeometryNodeInputPosition", (x, y)).outputs[0]
     rel = graph.node_with_props("ShaderNodeVectorMath", (x + 150, y), operation="SUBTRACT")
     graph.link(pos, rel.inputs[0]); rel.inputs[1].default_value = (centre[0], centre[1], 0.0)

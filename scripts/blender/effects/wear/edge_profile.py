@@ -13,9 +13,9 @@ DUST_GAIN = (0.825, 0.825, 0.825)  # dust is between the clean surface and line
 CORNER_MASK_CAP, AO_REACH_M = 0.50, 0.30  # contact mask ceiling and dust AO reach in metres
 LINE_UP_WEIGHT, VERTEX_LINE_WEIGHT = 0.45, 0.65  # top-facing line and shared junction weights
 
-def edge_vertex_join(graph, line_width=LINE_WIDTH_M, frame=None, loc=(0, 0)):
+def edge_vertex_join(graph, line_width=LINE_WIDTH_M, frame=None, location=(0, 0)):
     """Return a local outside-junction blend from clean-mesh vertex distance in metres."""
-    x, y = loc
+    x, y = location
     distance = graph.attribute('edge_vertex_dist', (x, y), frame)
     valid = graph.attribute('edge_vertex_valid', (x, y - 180), frame)
     join = graph.map_range(distance, line_width, 4 * line_width, (x + 200, y), 1.0, 0.0,
@@ -27,7 +27,7 @@ def edge_vertex_join(graph, line_width=LINE_WIDTH_M, frame=None, loc=(0, 0)):
 
 def _outside_context(graph, context, line_width):
     """Project macro noise onto the nearby edge and derive orientation from the clean field."""
-    dist, frame, (x, y) = context.dist, context.frame, context.loc
+    dist, frame, (x, y) = context.dist, context.frame, context.location
     geo = graph.node('ShaderNodeNewGeometry', (x - 1200, y - 800), frame)
     bump = graph.node('ShaderNodeBump', (x - 1000, y - 800), frame,
                   label='Field gradient only (not surface bump)', Distance=0.02)
@@ -66,7 +66,7 @@ def _outside_context(graph, context, line_width):
 
 
 def _join_context(graph, context, line_width):
-    frame, (x, y) = context.frame, context.loc
+    frame, (x, y) = context.frame, context.location
     vertex_join = edge_vertex_join(graph, line_width, frame, (x - 1200, y - 2200))
     # All incident faces approach the same weight and world-space coordinate at the vertex.
     line_orient = graph.math('ADD', context.line_orientation, graph.math('MULTIPLY', vertex_join,
@@ -81,14 +81,14 @@ def _join_context(graph, context, line_width):
 
 
 def _corner_context(graph, context, line_width):
-    x, y = context.loc
+    x, y = context.location
     position = graph.node('ShaderNodeNewGeometry', (x - 1200, y - 800), context.frame).outputs['Position']
     vars(context).update(position=position, along_edge=position, coordinates=position,
                          line_orientation=1.0, dust_orientation=1.0, join=None)
 
 
 def _noise_context(graph, context, noise_vec, scale):
-    frame, (x, y) = context.frame, context.loc
+    frame, (x, y) = context.frame, context.location
     macro = graph.noise_texture(context.along_edge, scale / 6.0, (x, y - 500), frame,
                   detail=2, roughness=0.55, label='Edge low-frequency patches')
     macro.node.noise_dimensions = '4D'
@@ -119,14 +119,14 @@ def _noise_context(graph, context, noise_vec, scale):
 
 
 def _extent(graph, context, width_field, width, limits, role):
-    frame, (x, y) = context.frame, context.loc
+    frame, (x, y) = context.frame, context.location
     extent = graph.map_range(width_field, 0.30, 0.70, (x + 400, y),
                     *limits, frame=frame, label=role + ' width modulation', smooth=True)
     return graph.math('MULTIPLY', extent, width, (x + 600, y), frame)
 
 
 def _falloff(graph, context, extent, lip_start, lip_end, role):
-    frame, (x, y) = context.frame, context.loc
+    frame, (x, y) = context.frame, context.location
     fade_end = graph.math('ADD', lip_end, extent, (x + 800, y - 500), frame)
     band = graph.map_range(context.dist, lip_end, fade_end, (x + 800, y), 1.0, 0.0, frame=frame,
                   label='edge ' + role + ' falloff', smooth=True)
@@ -136,7 +136,7 @@ def _falloff(graph, context, extent, lip_start, lip_end, role):
 
 
 def _finish_mask(graph, context, broken, amount, role):
-    frame, (x, y) = context.frame, context.loc
+    frame, (x, y) = context.frame, context.location
     if label := context.recipe['labels'][role]:
         broken.node.label = label
     if context.cap < 1.0:

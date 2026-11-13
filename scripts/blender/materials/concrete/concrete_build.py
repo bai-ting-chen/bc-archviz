@@ -41,17 +41,17 @@ def concrete_study(name="CONCRETE", tex_id="concrete_wall_009",
     g.link(hgt.outputs["Color"], bump.inputs["Height"])
     g.link(nmap.outputs["Normal"], bump.inputs["Normal"])
     relief = round_shader(g, bump.outputs['Normal'], rounded_edges=rounded_edges,
-                         loc=(-650, -250), frame=F_REL)
+                         location=(-650, -250), frame=F_REL)
 
     # Wear mask = max( chips * noise , edge line ); leak streaks come from effects.wear.water_marks
     mask = None
     if bevel_chips:
         mask = _bevel_chips(g, chip_spread, chip_in, noise_scale, noise_band, F_WEAR)
 
-    def _union(a, b, loc):
+    def _union(a, b, location):
         if a is None:
             return b
-        mx = g.node("ShaderNodeMath", loc, F_WEAR, label="Lighten")
+        mx = g.node("ShaderNodeMath", location, F_WEAR, label="Lighten")
         mx.operation = "MAXIMUM"
         g.link(a, mx.inputs[0])
         g.link(b, mx.inputs[1])

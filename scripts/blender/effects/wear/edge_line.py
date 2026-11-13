@@ -2,7 +2,7 @@
 from effects.wear.edge_profile import (OUTSIDE_LINE_PRESENCE, _extent, _falloff, _finish_mask)
 
 def _line_mask(graph, context, fields, width, amount):
-    frame, (x, y) = context.frame, context.loc
+    frame, (x, y) = context.frame, context.location
     extent = _extent(graph, context, fields.width, width, context.recipe['line_limits'], 'line')
     lip_end = graph.math('MINIMUM', 0.006, graph.math('MULTIPLY', extent, 0.45,
                     (x + 600, y - 220), frame), (x + 800, y - 220), frame)

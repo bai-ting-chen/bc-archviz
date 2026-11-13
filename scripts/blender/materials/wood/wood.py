@@ -34,7 +34,7 @@ def coated_wood(name="COATED_PINE", tex_id="coated_pine", coat=0.2, coat_rough=0
     rmix = g.mix(sep.outputs["Green"], 1.0, rough_toward_matte, (-580, 0), F_MAP, data_type="FLOAT",
                  label="roughness toward matte")
     relief = round_shader(g, nmap.outputs['Normal'], rounded_edges=rounded_edges,
-                         loc=(-550, -300), frame=F_REL, label='Round edges', samples=4)
+                         location=(-550, -300), frame=F_REL, label='Round edges', samples=4)
     bsdf = g.node("ShaderNodeBsdfPrincipled", (-250, 200), label="Pine + satin varnish coat")
     g.link(lv, bsdf.inputs["Base Color"])
     g.link(rmix, bsdf.inputs["Roughness"])
@@ -47,11 +47,11 @@ def coated_wood(name="COATED_PINE", tex_id="coated_pine", coat=0.2, coat_rough=0
     return mat
 
 
-def raw_wood_under(graph, color, normal, frame=None, loc=(-1050, -1500), tint=(0.80, 0.60, 0.36),
+def raw_wood_under(graph, color, normal, frame=None, location=(-1050, -1500), tint=(0.80, 0.60, 0.36),
                    mix=0.30, gain=1.7):
     """Under-layer for solid wood: the base grain lighter and toward a raw tint, rough, with torn
     fibres along the grain (UV U). Returns the BSDF output socket."""
-    x0, y0 = loc
+    x0, y0 = location
     lift = graph.mix(color, (gain, gain * 1.02, gain * 1.08, 1), 1.0, (x0, y0), frame, blend="MULTIPLY",
                  label="inner wood: lighter (no amber varnish)")
     pale = graph.mix(lift, (*tint, 1), mix, (x0 + 200, y0), frame, label="inner wood: toward raw pine")

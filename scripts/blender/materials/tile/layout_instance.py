@@ -4,14 +4,14 @@ from materials.tile.layout_build import layout_group
 
 from materials.tile.layout_config import _INPUTS
 
-def add_layout(node_tree, vector_socket, loc=(0, 0), **inputs):
+def add_layout(node_tree, vector_socket, location=(0, 0), **inputs):
     """Add a metre/radian layout group; row_offset accepts any real value and wraps."""
     unknown = inputs.keys() - _INPUTS.keys()
     if unknown:
         raise TypeError(f"Unknown tile layout inputs: {', '.join(sorted(unknown))}")
     node = node_tree.nodes.new("ShaderNodeGroup")
     node.node_tree = layout_group()
-    node.location = loc
+    node.location = location
     for key, value in inputs.items():
         if key == "origin":
             value = tuple(value)

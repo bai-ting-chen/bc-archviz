@@ -80,13 +80,13 @@ def layout_group(name="TileLayout"):
         return g.math(op, a, b, (-1100 + (index // 7) * 220,
                                700 - (index % 7) * 180), clamp=clamp)
 
-    def separate(vector, loc):
-        node = g.node("ShaderNodeSeparateXYZ", loc)
+    def separate(vector, location):
+        node = g.node("ShaderNodeSeparateXYZ", location)
         g.link(vector, node.inputs[0])
         return node.outputs
 
-    def combine(x, y, loc):
-        node = g.node("ShaderNodeCombineXYZ", loc)
+    def combine(x, y, location):
+        node = g.node("ShaderNodeCombineXYZ", location)
         g.link(x, node.inputs["X"])
         g.link(y, node.inputs["Y"])
         node.inputs["Z"].default_value = 0

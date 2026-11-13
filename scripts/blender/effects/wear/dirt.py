@@ -10,7 +10,7 @@ from effects.wear.edge_line import _line_mask
 RGB_LUMINANCE = (0.2126, 0.7152, 0.0722)  # scene-linear luminance
 
 def _dust_mask(graph, context, fields, width, amount):
-    frame, (x, y) = context.frame, context.loc
+    frame, (x, y) = context.frame, context.location
     extent = _extent(graph, context, fields.width_noise, width, (0.65, 1.6), 'dust')
     band, lip = _falloff(graph, context, extent, 0.0, 0.002, 'dust')
     profile = graph.math('MULTIPLY', band, lip, (x + 1000, y), frame)
@@ -25,24 +25,24 @@ def _dust_mask(graph, context, fields, width, amount):
 
 def edge_dirt_masks(graph, dist, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M, noise_vec=None,
                     line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT,
-                    noise_scale=9.0, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside'):
+                    noise_scale=9.0, frame=None, location=(0, 0), mask_cap=1.0, kind='outside'):
     """Return line, dust and the reusable outside-vertex join (None for AO corners)."""
     if line_width <= 0 or dust_width <= 0:
         raise ValueError('edge dirt widths must be positive')
-    context = SimpleNamespace(dist=dist, frame=frame, loc=loc, recipe=EDGE_KINDS[kind], cap=mask_cap)
+    context = SimpleNamespace(dist=dist, frame=frame, location=location, recipe=EDGE_KINDS[kind], cap=mask_cap)
     context.recipe['context'](graph, context, line_width)
     fields = _noise_context(graph, context, context.position if noise_vec is None else noise_vec, noise_scale)
     line = _line_mask(graph, context, fields, line_width, line_amount)
-    context.loc = (loc[0], loc[1] - 300)
+    context.location = (location[0], location[1] - 300)
     dust = _dust_mask(graph, context, fields, dust_width, dust_amount)
     return line, dust, context.join
 
 
 def corner_dirt_masks(graph, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M,
                       line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT,
-                      frame=None, loc=(0, 0), corner_cap=CORNER_MASK_CAP):
+                      frame=None, location=(0, 0), corner_cap=CORNER_MASK_CAP):
     """Return shared masks using cross-object AO remapped to a distance-like metre field."""
-    x, y = loc
+    x, y = location
     ao = graph.node('ShaderNodeAmbientOcclusion', (x - 600, y), frame,
                 label='Corner AO (cross-object)', Distance=AO_REACH_M)
     ao.inside = False
@@ -53,12 +53,12 @@ def corner_dirt_masks(graph, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M,
                        label='corner distance-like 0..1')
     dist = graph.math('MULTIPLY', unit_dist, AO_REACH_M, (x - 200, y), frame)
     return edge_dirt_masks(graph, dist, line_width, dust_width, line_amount=line_amount,
-                           dust_amount=dust_amount, frame=frame, loc=loc, mask_cap=corner_cap, kind='corner')[:2]
+                           dust_amount=dust_amount, frame=frame, location=location, mask_cap=corner_cap, kind='corner')[:2]
 
 
-def _relative_dust_color(graph, color, dust, frame, loc):
+def _relative_dust_color(graph, color, dust, frame, location):
     """Desaturate and gently darken albedo through the independent dust term."""
-    x, y = loc
+    x, y = location
     luma = graph.vector_math('DOT_PRODUCT', color, RGB_LUMINANCE, (x - 220, y - 140), frame,
                    label='Dust source luminance')
     desat = graph.mix(color, luma, 1.0 - DUST_SATURATION, (x, y), frame,
@@ -68,7 +68,7 @@ def _relative_dust_color(graph, color, dust, frame, loc):
     return graph.mix(color, gain, dust, (x + 440, y), frame, label='Dust relative albedo')
 
 
-def dust_surface(graph, surface, dust, frame=None, loc=(0, 0), line=None):
+def dust_surface(graph, surface, dust, frame=None, location=(0, 0), line=None):
     """Apply relative dust/line albedos with line priority, preserving source textures and normals."""
     # Follow only shader links, so colour/bump subgraphs and other output branches stay intact.
     pending, seen, bases = [surface.node], set(), []
@@ -86,21 +86,21 @@ def dust_surface(graph, surface, dust, frame=None, loc=(0, 0), line=None):
         if target.is_linked:
             color = target.links[0].from_socket
         else:
-            value = graph.node('ShaderNodeRGB', (loc[0] - 220, loc[1] - i * 250), frame,
+            value = graph.node('ShaderNodeRGB', (location[0] - 220, location[1] - i * 250), frame,
                            label='Dust original albedo')
             value.outputs[0].default_value = target.default_value
             color = value.outputs[0]
-        adjusted = _relative_dust_color(graph, color, dust, frame, (loc[0], loc[1] - i * 250))
+        adjusted = _relative_dust_color(graph, color, dust, frame, (location[0], location[1] - i * 250))
         if line is not None:
             gain = graph.mix(color, (LINE_GAIN, LINE_GAIN, LINE_GAIN, 1), 1.0,
-                         (loc[0] + 660, loc[1] - i * 250), frame, blend='MULTIPLY',
+                         (location[0] + 660, location[1] - i * 250), frame, blend='MULTIPLY',
                          label='Line relative darkening')
-            adjusted = graph.mix(adjusted, gain, line, (loc[0] + 880, loc[1] - i * 250), frame,
+            adjusted = graph.mix(adjusted, gain, line, (location[0] + 880, location[1] - i * 250), frame,
                              label='Line relative albedo')
             roughness = target.node.inputs.get('Roughness')
             if roughness is not None:
                 original = roughness.links[0].from_socket if roughness.is_linked else roughness.default_value
-                rough = graph.mix(original, LINE_ROUGHNESS, line, (loc[0] + 660, loc[1] - i * 250 - 140),
+                rough = graph.mix(original, LINE_ROUGHNESS, line, (location[0] + 660, location[1] - i * 250 - 140),
                               frame, data_type='FLOAT', label='Line roughness (unchanged target)')
                 graph.link(rough, roughness)
         graph.link(adjusted, target)

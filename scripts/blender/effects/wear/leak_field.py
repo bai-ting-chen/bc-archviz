@@ -49,10 +49,10 @@ def leak_field_group(name="LEAK FIELD", inset=0.02, reach=6.0):
     b.link(up_n.outputs[0], ray.inputs["Ray Direction"])
     b.link(b.math("MULTIPLY", per_m.outputs["Value"], reach, (-450, -950)), ray.inputs["Ray Length"])
 
-    def world_z(vec, loc):
+    def world_z(vec, location):
         """World Z (m) of an object-space point."""
-        wp = b.node_with_props("FunctionNodeTransformPoint", loc); b.link(vec, wp.inputs[0]); b.link(to_world, wp.inputs[1])
-        sz = b.node_with_props("ShaderNodeSeparateXYZ", (loc[0] + 150, loc[1])); b.link(wp.outputs[0], sz.inputs[0])
+        wp = b.node_with_props("FunctionNodeTransformPoint", location); b.link(vec, wp.inputs[0]); b.link(to_world, wp.inputs[1])
+        sz = b.node_with_props("ShaderNodeSeparateXYZ", (location[0] + 150, location[1])); b.link(wp.outputs[0], sz.inputs[0])
         return sz.outputs["Z"]
 
     hit_z = world_z(ray.outputs["Hit Position"], (-50, -300))

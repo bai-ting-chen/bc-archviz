@@ -107,9 +107,9 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `effects.wear.dirt` — Dust build-up and bordered grunge patterns.
 
-- `edge_dirt_masks(graph, dist, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M, noise_vec=None, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, noise_scale=9.0, frame=None, loc=(0, 0), mask_cap=1.0, kind='outside')` — Return line, dust and the reusable outside-vertex join (None for AO corners).
-- `corner_dirt_masks(graph, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, frame=None, loc=(0, 0), corner_cap=CORNER_MASK_CAP)` — Return shared masks using cross-object AO remapped to a distance-like metre field.
-- `dust_surface(graph, surface, dust, frame=None, loc=(0, 0), line=None)` — Apply relative dust/line albedos with line priority, preserving source textures and normals.
+- `edge_dirt_masks(graph, dist, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M, noise_vec=None, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, noise_scale=9.0, frame=None, location=(0, 0), mask_cap=1.0, kind='outside')` — Return line, dust and the reusable outside-vertex join (None for AO corners).
+- `corner_dirt_masks(graph, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, frame=None, location=(0, 0), corner_cap=CORNER_MASK_CAP)` — Return shared masks using cross-object AO remapped to a distance-like metre field.
+- `dust_surface(graph, surface, dust, frame=None, location=(0, 0), line=None)` — Apply relative dust/line albedos with line priority, preserving source textures and normals.
 - `add_corner_dirt(mat, line_width=LINE_WIDTH_M, dust_width=DUST_WIDTH_M, line_amount=LINE_AMOUNT, dust_amount=DUST_AMOUNT, corner_cap=CORNER_MASK_CAP)` — Add independently switchable shared line/dust layers to a Cycles surface material.
 - `grunge(graph, scale_m=0.5, target_sd=0.05, detail=6.0, rough=0.6, amount=1.0)` — Return the legacy calibrated grunge multiplier, preserving existing callers exactly.
 - `grunge_field(graph, vector, scale_m, frame=None)` — Return the unchanged fine grunge times zero-reaching slow patch pattern.
@@ -121,7 +121,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `effects.wear.edge_profile` — Shared distance falloffs and noise context for edge line and dust.
 
-- `edge_vertex_join(graph, line_width=LINE_WIDTH_M, frame=None, loc=(0, 0))` — Return a local outside-junction blend from clean-mesh vertex distance in metres.
+- `edge_vertex_join(graph, line_width=LINE_WIDTH_M, frame=None, location=(0, 0))` — Return a local outside-junction blend from clean-mesh vertex distance in metres.
 
 ## `effects.wear.hybrid_sources` — One hybrid definition: procedural region multiplied by a full-range stochastic scan interior.
 
@@ -187,7 +187,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `location_extent(graph, kind, settings, frame=None)` — Gate feet, floor patches and supplied soffit-edge distances; dried marks exclude undersides.
 - `edge_field(graph, group_input, node_x, vertex_junctions=False)` — Distance to the nearest convex arris -> `edge_dist`, and the rest position offset by the group's Seed -> `rest_pos` (noise lookups; a per-object Seed decorrelates repeated objects). Measured on outward-normal meshes: convex arrises give a POSITIVE signed angle, inner corners a negative one.
 - `set_round_radius(radius=ROUND_RADIUS_M)` — Set the scene's shared radius in metres before building rounded materials.
-- `round_shader(graph, normal=None, rounded_edges=True, loc=(-650, -250), frame=None, label='Round edges (TexEdges)', samples=8)` — Build a rounded shader normal using the shared scene radius.
+- `round_shader(graph, normal=None, rounded_edges=True, location=(-650, -250), frame=None, label='Round edges (TexEdges)', samples=8)` — Build a rounded shader normal using the shared scene radius.
 - `round_geometry(obj, rounded_edges=True, segments=2, min_angle_deg=30.0)` — Bevel a mesh's real edges using the shared scene radius.
 - `switch_rounding(mat, rounded_edges=True)` — Switch an existing material's shared rounded-normal layer on or off.
 
@@ -318,7 +318,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.tile.layout_instance` — Layout instance; canonical implementation behind tile_layout.
 
-- `add_layout(node_tree, vector_socket, loc=(0, 0), **inputs)` — Add a metre/radian layout group; row_offset accepts any real value and wraps.
+- `add_layout(node_tree, vector_socket, location=(0, 0), **inputs)` — Add a metre/radian layout group; row_offset accepts any real value and wraps.
 
 ## `materials.tile.layout_reference` — Layout reference; canonical implementation behind tile_layout.
 
@@ -383,7 +383,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.tile.tile_uv_node` — Tile uv node; canonical implementation behind tile_mapping.
 
-- `layout_vector(node_tree, name='TileUV', loc=(0, 0), obj=None)` — Add a named UV Map node and return its layout vector output socket.
+- `layout_vector(node_tree, name='TileUV', location=(0, 0), obj=None)` — Add a named UV Map node and return its layout vector output socket.
 
 ## `materials.tile.tile_uv_planar` — Tile uv planar; canonical implementation behind tile_mapping.
 
@@ -558,7 +558,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `materials.wood.wood` — Wood: base and coat (coated_wood), raw-wood under-layer, chip preset and weathered assembly.
 
 - `coated_wood(name='COATED_PINE', tex_id='coated_pine', coat=0.2, coat_rough=0.04, rough_toward_matte=0.35, albedo_rgb=(0.52, 0.33, 0.17), levels_gamma=0.5, rounded_edges=True, normal_strength=1.0)` — Coated pine: every map wired; levels solved to a natural pine albedo; satin varnish = LOW coat amount with TIGHT gloss (the coat trap); base roughness spread toward matte instead of cheating Fresnel; round edges combined with the normal map.
-- `raw_wood_under(graph, color, normal, frame=None, loc=(-1050, -1500), tint=(0.8, 0.6, 0.36), mix=0.3, gain=1.7)` — Under-layer for solid wood: the base grain lighter and toward a raw tint, rough, with torn fibres along the grain (UV U). Returns the BSDF output socket.
+- `raw_wood_under(graph, color, normal, frame=None, location=(-1050, -1500), tint=(0.8, 0.6, 0.36), mix=0.3, gain=1.7)` — Under-layer for solid wood: the base grain lighter and toward a raw tint, rough, with torn fibres along the grain (UV U). Returns the BSDF output socket.
 - `weathered_wood(name='PINE_WEATHERED', wear_band=0.012, wear_amount=0.9, **under)` — coated_wood + worn varnish and grime along the arrises + raw_wood_under where the edge_wear_group(**WOOD_CHIPS) chips and breaks cut the skin. under: raw_wood_under settings.
 
 ## `renderer.cycles_render` — Render engine, quality settings and output: the Cycles set-up every render starts from.
@@ -639,7 +639,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `scene.environment.terrain_graph` — Terrain graph; implementation for terrain.
 
-- `pad_distance(graph, centre, pad_half_size_m, loc=(-1200, -400))` — Signed plan distance from a rectangle (negative inside): returns (distance, position).
+- `pad_distance(graph, centre, pad_half_size_m, location=(-1200, -400))` — Signed plan distance from a rectangle (negative inside): returns (distance, position).
 - `landform_group(name='LANDFORM', centre=(0.0, 0.0), pad_half_size_m=(4.0, 4.0), size=300.0, vertex_count=601, pad_height_m=-0.03, crest_distance_m=1.5, fall_height_m=6.0, slope_run_m=40.0, warp=7.0, roll=2.5, hummock=0.12)` — GN group: grid -> hill around a pad (landform grading), stores `pad_d`; plan metres.
 
 ## `scene.environment.terrain_height` — Terrain height; implementation for terrain.

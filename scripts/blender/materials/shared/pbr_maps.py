@@ -4,13 +4,13 @@ import os
 
 import bpy
 
-def _img(nodes, path, colorspace, loc):
+def _img(nodes, path, colorspace, location):
     n = nodes.new("ShaderNodeTexImage")
     n.image = bpy.data.images.load(path, check_existing=True)
     n.image.colorspace_settings.name = colorspace
     n.projection = "BOX"  # world-space box mapping: no UVs needed on Rhino meshes
     n.projection_blend = 0.2
-    n.location = loc
+    n.location = location
     return n
 
 def _ph_maps(tex_id):

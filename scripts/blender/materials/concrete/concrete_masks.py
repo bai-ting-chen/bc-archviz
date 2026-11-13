@@ -1,17 +1,17 @@
 """Concrete masks; canonical implementation behind concrete."""
 
-def _edge_mask(graph, radius, loc, frame, label):
+def _edge_mask(graph, radius, location, frame, label):
     """Convexity mask from the Bevel node: 1 - dot(bevelled normal, true normal), normalised so
     a 90-degree arris reads 1.0. Convex-edge mask with
     sample_spread ~= radius."""
-    geo = graph.node("ShaderNodeNewGeometry", (loc[0] - 400, loc[1] - 120), frame)
-    bev = graph.node("ShaderNodeBevel", (loc[0] - 400, loc[1]), frame, label=label, Radius=radius)
+    geo = graph.node("ShaderNodeNewGeometry", (location[0] - 400, location[1] - 120), frame)
+    bev = graph.node("ShaderNodeBevel", (location[0] - 400, location[1]), frame, label=label, Radius=radius)
     bev.samples = 16
-    dot = graph.node("ShaderNodeVectorMath", (loc[0] - 200, loc[1]), frame)
+    dot = graph.node("ShaderNodeVectorMath", (location[0] - 200, location[1]), frame)
     dot.operation = "DOT_PRODUCT"
     graph.link(bev.outputs["Normal"], dot.inputs[0])
     graph.link(geo.outputs["Normal"], dot.inputs[1])  # shading normal: smooth cylinders stay clean
-    inv = graph.node("ShaderNodeMapRange", (loc[0], loc[1]), frame, label=label + " (0..1)")
+    inv = graph.node("ShaderNodeMapRange", (location[0], location[1]), frame, label=label + " (0..1)")
     inv.inputs["From Min"].default_value, inv.inputs["From Max"].default_value = 1.0, 0.7071
     graph.link(dot.outputs["Value"], inv.inputs["Value"])
     return inv.outputs["Result"]

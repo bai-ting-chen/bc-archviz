@@ -698,10 +698,10 @@ Python parameters, dataclass fields and camera state now name their roles and un
 | `blender/effects/wear/decal_stamps.py:stamps_field` | `g` → `graph` |
 | `blender/effects/wear/default_sources.py:default_field` | `g` → `graph` |
 | `blender/effects/wear/dirt.py:_dust_mask` | `g` → `graph` |
-| `blender/effects/wear/dirt.py:_relative_dust_color` | `g` → `graph` |
-| `blender/effects/wear/dirt.py:corner_dirt_masks` | `g` → `graph` |
-| `blender/effects/wear/dirt.py:dust_surface` | `g` → `graph` |
-| `blender/effects/wear/dirt.py:edge_dirt_masks` | `g` → `graph` |
+| `blender/effects/wear/dirt.py:_relative_dust_color` | `g` → `graph`; `loc` → `location` |
+| `blender/effects/wear/dirt.py:corner_dirt_masks` | `g` → `graph`; `loc` → `location` |
+| `blender/effects/wear/dirt.py:dust_surface` | `g` → `graph`; `loc` → `location` |
+| `blender/effects/wear/dirt.py:edge_dirt_masks` | `g` → `graph`; `loc` → `location` |
 | `blender/effects/wear/dirt.py:grunge` | `g` → `graph` |
 | `blender/effects/wear/dirt.py:grunge_field` | `g` → `graph` |
 | `blender/effects/wear/edge_line.py:_line_mask` | `g` → `graph` |
@@ -712,7 +712,7 @@ Python parameters, dataclass fields and camera state now name their roles and un
 | `blender/effects/wear/edge_profile.py:_join_context` | `g` → `graph` |
 | `blender/effects/wear/edge_profile.py:_noise_context` | `g` → `graph` |
 | `blender/effects/wear/edge_profile.py:_outside_context` | `g` → `graph` |
-| `blender/effects/wear/edge_profile.py:edge_vertex_join` | `g` → `graph` |
+| `blender/effects/wear/edge_profile.py:edge_vertex_join` | `g` → `graph`; `loc` → `location` |
 | `blender/effects/wear/hybrid_sources.py:hybrid_field` | `g` → `graph` |
 | `blender/effects/wear/image_masks.py:image_mask` | `g` → `graph` |
 | `blender/effects/wear/image_masks.py:mask_field` | `g` → `graph` |
@@ -732,9 +732,9 @@ Python parameters, dataclass fields and camera state now name their roles and un
 | `blender/effects/wear/wear_locations.py:face_z` | `g` → `graph` |
 | `blender/effects/wear/wear_locations.py:location_extent` | `g` → `graph` |
 | `blender/effects/wear/wear_locations.py:patch_extent` | `g` → `graph` |
-| `blender/effects/wear/wear_locations.py:round_shader` | `g` → `graph` |
+| `blender/effects/wear/wear_locations.py:round_shader` | `g` → `graph`; `loc` → `location` |
 | `blender/materials/concrete/concrete_masks.py:_bevel_chips` | `g` → `graph` |
-| `blender/materials/concrete/concrete_masks.py:_edge_mask` | `g` → `graph` |
+| `blender/materials/concrete/concrete_masks.py:_edge_mask` | `g` → `graph`; `loc` → `location` |
 | `blender/materials/glass/glass_assembly.py:glass_of_water` | `z0` → `base_height_m`; `water_h` → `water_height_m` |
 | `blender/materials/glass/glass_assembly.py:glass_of_water_mnee` | `z0` → `base_height_m`; `water_h` → `water_height_m` |
 | `blender/materials/glass/glass_shell.py:glass_shell` | `objs` → `objects`; `thickness` → `thickness_m` |
@@ -833,12 +833,12 @@ Python parameters, dataclass fields and camera state now name their roles and un
 | `blender/materials/water/water_mesh.py:water_surface` | `cell` → `cell_m` |
 | `blender/materials/water/wet_wall_proxy.py:build_proxy` | `p` → `params`; `pool_z` → `pool_height_m` |
 | `blender/materials/water/wet_wall_proxy.py:wet_mask` | `p` → `params`; `pool_z` → `pool_height_m` |
-| `blender/materials/wood/wood.py:raw_wood_under` | `g` → `graph` |
+| `blender/materials/wood/wood.py:raw_wood_under` | `g` → `graph`; `loc` → `location` |
 | `blender/renderer/luxcore/textured_material.py:textured_material` | `me` → `mesh` |
-| `blender/scene/environment/terrain_graph.py:_centred` | `g` → `graph` |
-| `blender/scene/environment/terrain_graph.py:_noise4` | `g` → `graph` |
+| `blender/scene/environment/terrain_graph.py:_centred` | `g` → `graph`; `loc` → `location` |
+| `blender/scene/environment/terrain_graph.py:_noise4` | `g` → `graph`; `loc` → `location` |
 | `blender/scene/environment/terrain_graph.py:landform_group` | `pad_half` → `pad_half_size_m`; `verts` → `vertex_count`; `pad_z` → `pad_height_m`; `crest` → `crest_distance_m`; `fall` → `fall_height_m`; `run` → `slope_run_m` |
-| `blender/scene/environment/terrain_graph.py:pad_distance` | `g` → `graph`; `pad_half` → `pad_half_size_m` |
+| `blender/scene/environment/terrain_graph.py:pad_distance` | `g` → `graph`; `pad_half` → `pad_half_size_m`; `loc` → `location` |
 | `blender/scene/environment/terrain_height.py:height` | `pad_half` → `pad_half_size_m`; `pad_z` → `pad_height_m`; `crest` → `crest_distance_m`; `fall` → `fall_height_m`; `run` → `slope_run_m` |
 | `blender/scene/lighting/emitter_shading.py:emitter_dots` | `n` → `emitter_count` |
 | `blender/scene/lighting/ies_fixture.py:ies_light` | `loc` → `location_m`; `rot` → `rotation_rad`; `coll` → `collection` |
@@ -886,6 +886,13 @@ Python parameters, dataclass fields and camera state now name their roles and un
 | `scene/lighting/ldt_planes.py:planes` | `d` → `profile` |
 | `scene/lighting/photometry_integral.py:lumens` | `v` → `vertical_angles_deg`; `h` → `horizontal_angles_deg` |
 | `workflow/helper_index.py:function_signature` | `fn` → `function` |
+| `blender/effects/wear/leak_field.py:world_z` | `loc` → `location` |
+| `blender/materials/concrete/concrete_build.py:_union` | `loc` → `location` |
+| `blender/materials/shared/pbr_maps.py:_img` | `loc` → `location` |
+| `blender/materials/tile/layout_build.py:separate` | `loc` → `location` |
+| `blender/materials/tile/layout_build.py:combine` | `loc` → `location` |
+| `blender/materials/tile/layout_instance.py:add_layout` | `loc` → `location` |
+| `blender/materials/tile/tile_uv_node.py:layout_vector` | `loc` → `location` |
 
 ### Dataclass fields and camera state
 

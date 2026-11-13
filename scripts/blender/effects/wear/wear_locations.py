@@ -140,12 +140,12 @@ def set_round_radius(radius=ROUND_RADIUS_M):
     bpy.context.scene['round_edge_radius'] = radius
 
 
-def round_shader(graph, normal=None, rounded_edges=True, loc=(-650, -250), frame=None,
+def round_shader(graph, normal=None, rounded_edges=True, location=(-650, -250), frame=None,
                  label='Round edges (TexEdges)', samples=8):
     """Build a rounded shader normal using the shared scene radius."""
     if not rounded_edges:
         return normal
-    node = graph.node('ShaderNodeBevel', loc, frame, label=label,
+    node = graph.node('ShaderNodeBevel', location, frame, label=label,
                   Radius=bpy.context.scene.get('round_edge_radius', ROUND_RADIUS_M))
     node.samples = samples
     if normal is not None:
