@@ -1,6 +1,6 @@
 """Wood: base and coat (coated_wood), raw-wood under-layer, chip preset and weathered assembly."""
 import bpy
-from effects.wear.chipping import GrainBreaks
+from effects.wear.chipping import GrainBreaks, chip_exposed_mask, chip_under_layer
 from effects.wear.wear_locations import round_shader
 from materials.shared.node_graph import NodeGraph
 from materials.shared.pbr import _ph_maps, solve_levels
@@ -86,12 +86,11 @@ def weathered_wood(name="PINE_WEATHERED", wear_band=0.012, wear_amount=0.9, **un
     x0, y0 = -1500, -700
     d = g.attribute("edge_dist", (x0, y0), F_FLD)
     rest = g.attribute("rest_pos", (x0, y0 - 180), F_FLD, output_name="Vector")
-    chip = g.map_range(g.attribute("chip", (x0, y0 - 360), F_FLD), 0.0, 0.0003, (x0 + 250, y0 - 360),
-                   frame=F_FLD, label="chip mask")
-    brk = g.map_range(g.attribute("break", (x0, y0 - 540), F_FLD), 0.0, 0.00015, (x0 + 250, y0 - 540),
-                  frame=F_FLD, label="break mask")
-    exposed = g.math("MAXIMUM", chip, brk, (x0 + 450, y0 - 450), F_FLD)
-    exposed.node.label = "exposed inner wood"
+    exposed = chip_exposed_mask(g, 0.0003, 0.00015, F_FLD,
+                                chip_location=(x0, y0 - 360), chip_mask_location=(x0 + 250, y0 - 360),
+                                break_location=(x0, y0 - 540), break_mask_location=(x0 + 250, y0 - 540),
+                                exposed_location=(x0 + 450, y0 - 450), chip_label="chip mask",
+                                break_label="break mask", exposed_label="exposed inner wood")
 
     band = g.map_range(d, 0.0, wear_band, (x0 + 250, y0 + 250), 1.0, 0.0, frame=F_WEAR,
                    label="edge band", smooth=True)
@@ -114,10 +113,8 @@ def weathered_wood(name="PINE_WEATHERED", wear_band=0.012, wear_amount=0.9, **un
     g.link(wear_m, m1.inputs["Fac"])
     g.link(coated.outputs["BSDF"], m1.inputs[1])
     g.link(worn.outputs["BSDF"], m1.inputs[2])
-    m2 = g.node("ShaderNodeMixShader", (500, 0), label="inner wood where broken")
-    g.link(exposed, m2.inputs["Fac"])
-    g.link(m1.outputs["Shader"], m2.inputs[1])
-    g.link(inner, m2.inputs[2])
+    m2 = chip_under_layer(g, exposed, m1.outputs["Shader"], inner,
+                          location=(500, 0), label="inner wood where broken")
     out.location = (700, 0)
     g.link(m2.outputs["Shader"], out.inputs["Surface"])
     mat["recipe"] = "weathered varnished pine: worn edges (shading) + GN dents/breaks (geometry)"

@@ -10,6 +10,37 @@ from dataclasses import dataclass, replace
 from effects.wear.image_masks import asset_mask
 
 
+def chip_exposed_mask(graph, chip_depth_m, break_depth_m=None, frame=None, *,
+                      chip_location=(-800, 0), chip_mask_location=(-500, 0),
+                      break_location=(-800, -200), break_mask_location=(-600, -200),
+                      exposed_location=(-450, -100), mask_frame=None,
+                      chip_label=None, break_label=None, exposed_label=None):
+    """Read GN chip and optional break depths in metres as a 0–1 exposed-under-layer mask."""
+    mask_frame = frame if mask_frame is None else mask_frame
+    chip = graph.map_range(graph.attribute("chip", chip_location, frame), 0.0, chip_depth_m,
+                           chip_mask_location, frame=mask_frame, label=chip_label)
+    if break_depth_m is None:
+        return chip
+    brk = graph.map_range(graph.attribute("break", break_location, frame), 0.0, break_depth_m,
+                          break_mask_location, frame=mask_frame, label=break_label)
+    exposed = graph.math("MAXIMUM", chip, brk, exposed_location, mask_frame)
+    if exposed_label is not None:
+        exposed.node.label = exposed_label
+    return exposed
+
+
+def chip_under_layer(graph, exposed, surface=None, under=None, frame=None,
+                     location=(500, 0), label=None):
+    """Create the exposed-mask shader blend; omitted shader sockets can be linked after building."""
+    blend = graph.node("ShaderNodeMixShader", location, frame, label=label)
+    graph.link(exposed, blend.inputs["Fac"])
+    if surface is not None:
+        graph.link(surface, blend.inputs[1])
+    if under is not None:
+        graph.link(under, blend.inputs[2])
+    return blend
+
+
 def dice(obj, size=0.05):
     """Subdivide in place by repeated halving of over-long edges (grid fill keeps quads)."""
     bm = bmesh.new()

@@ -43,6 +43,10 @@ used here with concrete settings.
 - `scripts/blender/materials/concrete/`: `concrete_build.py` (`concrete_study`), `concrete_tone.py`
   (`retone`, called as `materials.concrete.concrete.retone`), `concrete_masks.py` (edge masks), and
   `concrete.py` (the module the calls go through).
+- `effects.wear.concrete_shading`: `fresh_concrete_under(graph, color, rest)` returns the
+  lighter, rough fracture shader; `weathered_concrete` assembles it with the surface using
+  shared `chip_exposed_mask` and `chip_under_layer` helpers
+  ([chipping.md](../../effects/wear/chipping.md)).
 - Control: none named in this file.
 
 ## 4. Instructions and parameters, per layer

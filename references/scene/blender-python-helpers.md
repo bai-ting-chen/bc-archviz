@@ -62,6 +62,8 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `effects.wear.chipping` — Geometry chips, flaked coating fields and verified bare-substrate scans.
 
+- `chip_exposed_mask(graph, chip_depth_m, break_depth_m=None, frame=None, *, chip_location=(-800, 0), chip_mask_location=(-500, 0), break_location=(-800, -200), break_mask_location=(-600, -200), exposed_location=(-450, -100), mask_frame=None, chip_label=None, break_label=None, exposed_label=None)` — Read GN chip and optional break depths in metres as a 0–1 exposed-under-layer mask.
+- `chip_under_layer(graph, exposed, surface=None, under=None, frame=None, location=(500, 0), label=None)` — Create the exposed-mask shader blend; omitted shader sockets can be linked after building.
 - `dice(obj, size=0.05)` — Subdivide in place by repeated halving of over-long edges (grid fill keeps quads).
 - `chip_field(graph, group_input, rest_position, edge_distance_m, segment_scale, bite_scale, soft, profile_end)` — Chips along the arris: segments of the edge chipped (share -> threshold; Noise clusters near 0.5, sd ~0.1), bite noise varies the reach. Returns (chip 0..1, depth profile).
 - `rejoin(graph, moved, separated_geometry, group_output, node_x, weld_dist)` — Rejoin the displaced band with the untouched interior and weld the seam.
@@ -74,6 +76,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `effects.wear.concrete_shading` — Concrete edge shading and fresh-break material from clean distance and chip fields.
 
 - `weathered_concrete(name='CONCRETE_WEATHERED', line_width=LINE_WIDTH_M, line_amount=LINE_AMOUNT, dirt_noise_scale=9.0, tex_id='concrete_wall_009', dust_width=DUST_WIDTH_M, dust_amount=DUST_AMOUNT, chips_amount=1.0, rounded_edges=True)` — Layer edge line/dust and fresh-break shading over the concrete study material.
+- `fresh_concrete_under(graph, color, rest, frame=None, location=(-700, -2800))` — Return the lighter, rough concrete fracture shader with fine bump on rest position.
 
 ## `effects.wear.crack_ribbon` — Compact Cycles crack masks from seeded polylines; avoids expanding every segment into SVM.
 

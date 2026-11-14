@@ -1,6 +1,7 @@
 """Concrete edge shading and fresh-break material from clean distance and chip fields."""
 from materials.concrete import concrete as _mat_concrete
 from materials.shared.node_graph import NodeGraph
+from effects.wear.chipping import chip_exposed_mask, chip_under_layer
 from effects.wear.dirt import (DUST_AMOUNT, DUST_WIDTH_M, GRIME_TINT, LINE_AMOUNT, LINE_WIDTH_M,
                                dust_surface, edge_dirt_masks)
 
@@ -23,8 +24,9 @@ def weathered_concrete(name="CONCRETE_WEATHERED", line_width=LINE_WIDTH_M, line_
     x0, y0 = -1600, -2300
     d = g.attribute("edge_dist", (x0, y0), F_FLD)
     rest = g.attribute("rest_pos", (x0, y0 - 180), F_FLD, output_name="Vector")
-    chip_m = g.attribute("chip", (x0, y0 - 360), F_FLD)
-    chip = g.map_range(chip_m, 0.0, 0.0008, (x0 + 250, y0 - 600), frame=F_CHIP, label="chip mask (break edge)")
+    chip = chip_exposed_mask(g, 0.0008, frame=F_FLD, chip_location=(x0, y0 - 360),
+                             chip_mask_location=(x0 + 250, y0 - 600), mask_frame=F_CHIP,
+                             chip_label="chip mask (break edge)")
 
     chip = g.math('MULTIPLY', chip, chips_amount, (x0 + 500, y0 - 600), F_CHIP)
     chip.node.label = 'Chips strength'
@@ -48,12 +50,15 @@ def weathered_concrete(name="CONCRETE_WEATHERED", line_width=LINE_WIDTH_M, line_
     worn.label = "Grime BRDF"
     worn.inputs["Base Color"].default_value = (*GRIME_TINT, 1)
 
-    brk, mix2 = _fresh_break(g, clean, rest, F_CHIP, x0, y0)
-    g.link(chip, mix2.inputs["Fac"])
+    brk = fresh_concrete_under(g, clean.inputs["Base Color"].links[0].from_socket, rest,
+                               F_CHIP, (x0 + 900, y0 - 500))
+    # Build the blend before the dust shaders to preserve node creation order.
+    mix2 = chip_under_layer(g, chip, frame=F_CHIP, location=(x0 + 1200, y0 - 300),
+                            label="chips over surface")
     dusty = dust_surface(g, mix.outputs["Shader"], dust, F_DIRT,
                           (x0 + 1500, y0 + 200), line=dirt)
     g.link(dusty, mix2.inputs[1])
-    joined_break = dust_surface(g, brk.outputs['BSDF'], 0.0, F_DIRT,
+    joined_break = dust_surface(g, brk, 0.0, F_DIRT,
                                 (x0 + 1500, y0 - 1000), line=vertex_line)
     g.link(joined_break, mix2.inputs[2])
     g.link(mix2.outputs["Shader"], out.inputs["Surface"])
@@ -62,16 +67,16 @@ def weathered_concrete(name="CONCRETE_WEATHERED", line_width=LINE_WIDTH_M, line_
     return mat
 
 
-def _fresh_break(graph, clean, rest, F_CHIP, x0, y0):
-    """Build the lighter fracture shader and its final chip blend."""
-    brk = graph.node("ShaderNodeBsdfPrincipled", (x0 + 900, y0 - 500), F_CHIP,
+def fresh_concrete_under(graph, color, rest, frame=None, location=(-700, -2800)):
+    """Return the lighter, rough concrete fracture shader with fine bump on rest position."""
+    x0, y0 = location
+    brk = graph.node("ShaderNodeBsdfPrincipled", (x0, y0), frame,
                  label="Fresh break (lighter, rough)", Roughness=0.95)
-    tint = graph.mix(clean.inputs["Base Color"].links[0].from_socket, (1.16, 1.15, 1.13, 1), 1.0,
-                 (x0 + 650, y0 - 450), F_CHIP, blend="MULTIPLY", label="break: lighter paste")
+    tint = graph.mix(color, (1.16, 1.15, 1.13, 1), 1.0,
+                 (x0 - 250, y0 + 50), frame, blend="MULTIPLY", label="break: lighter paste")
     graph.link(tint, brk.inputs["Base Color"])  # lighter paste, not chalk
-    bump = graph.node("ShaderNodeBump", (x0 + 650, y0 - 750), F_CHIP, label="fracture bump",
+    bump = graph.node("ShaderNodeBump", (x0 - 250, y0 - 250), frame, label="fracture bump",
                   Distance=0.003)
-    graph.link(graph.noise_texture(rest, 400.0, (x0 + 450, y0 - 750), F_CHIP, detail=6), bump.inputs["Height"])
+    graph.link(graph.noise_texture(rest, 400.0, (x0 - 450, y0 - 250), frame, detail=6), bump.inputs["Height"])
     graph.link(bump.outputs["Normal"], brk.inputs["Normal"])
-    mix2 = graph.node("ShaderNodeMixShader", (x0 + 1200, y0 - 300), F_CHIP, label="chips over surface")
-    return brk, mix2
+    return brk.outputs["BSDF"]

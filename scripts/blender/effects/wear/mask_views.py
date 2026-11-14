@@ -5,6 +5,7 @@ import bpy
 
 from materials.concrete import concrete as _mat_concrete
 from materials.shared.node_graph import NodeGraph
+from effects.wear.chipping import chip_exposed_mask
 
 
 def mask_material(name, method, radius=0.035):
@@ -25,11 +26,9 @@ def mask_material(name, method, radius=0.035):
     elif method == "edge_dist":
         val = g.map_range(g.attribute("edge_dist", (-800, 0), F), 0.0, radius, (-500, 0), 1.0, 0.0, frame=F)
     elif method == "chip":
-        val = g.map_range(g.attribute("chip", (-800, 0), F), 0.0, 0.0003, (-500, 0), frame=F)
+        val = chip_exposed_mask(g, 0.0003, frame=F)
     elif method == "damage":  # chips + breaks (wood)
-        c = g.map_range(g.attribute("chip", (-800, 0), F), 0.0, 0.0003, (-600, 0), frame=F)
-        k = g.map_range(g.attribute("break", (-800, -200), F), 0.0, 0.00015, (-600, -200), frame=F)
-        val = g.math("MAXIMUM", c, k, (-450, -100), F)
+        val = chip_exposed_mask(g, 0.0003, 0.00015, F, chip_mask_location=(-600, 0))
     em = g.node("ShaderNodeEmission", (-200, 0))
     g.link(val, em.inputs["Color"])
     o = g.node("ShaderNodeOutputMaterial", (0, 0))

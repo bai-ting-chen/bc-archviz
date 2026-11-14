@@ -24,6 +24,8 @@ All in `scripts/blender/materials/wood/wood.py` (`materials.wood.wood`):
 - `coated_wood()`: base and coat (§4.1, §4.2).
 - `raw_wood_under(graph, color, normal)`: the raw-wood under-layer shader (§4.3).
 - `weathered_wood()`: coated wood + worn coat and grime on the arrises + `raw_wood_under` where chipped.
+  It uses the shared `chip_exposed_mask` and `chip_under_layer` helpers
+  ([chipping.md](../../effects/wear/chipping.md)); only the raw-wood look lives here.
 - `WOOD_CHIPS`: wood settings for the shared chip group,
   `effects.wear.add_edge_wear(obj, edge_wear_group(**WOOD_CHIPS))`: dents and grain-wise breaks
   (`GrainBreaks`) that write the `chip` and `break` attributes the shader reads. Run it on a rounded

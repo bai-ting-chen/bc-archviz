@@ -13,13 +13,21 @@ A fresh break uses the clean underlying material, before accumulated dirt.
 ## 3. Code
 - `materials.shared.node_graph.set_modifier_input`: per-object Geometry Nodes input overrides.
 - `scripts/blender/effects/wear/chipping.py`: `dice`, `edge_wear_group` (optional `GrainBreaks`), `add_edge_wear`,
-  `chipping_field`, `flaked_paint_masks`. `concrete_shading.py`: `weathered_concrete`, fresh-break shader.
+  `chipping_field`, `flaked_paint_masks`, `chip_exposed_mask`, `chip_under_layer`.
+- `concrete_shading.py`: `weathered_concrete`, `fresh_concrete_under` (the concrete under-layer look).
 - Coating loss: `WearLayer` key `chipping`, `wear_factor`, `apply_surface_wear` in `wear.py`;
   supply the actual `under_shader`. Deprecated `worn-through` remains an accepted alias.
 - Controls: `scripts/controls/effects/edge_wear_lab.py`, `surface_wear_lab.py`, both graph checks.
 
 ## 4. Instructions and parameters
 ### 4.1 Edge chips and fresh breaks
+`chip_exposed_mask(graph, chip_depth_m, break_depth_m=None)` reads the GN `chip` attribute and,
+when requested, `break`: each depth maps from zero to its metre threshold, clamped to 0–1;
+the maximum selects exposed material. Node positions, frames and labels are layout arguments.
+`chip_under_layer(graph, exposed, surface, under)` builds the MixShader; its shader sockets
+may be linked afterward to keep an assembly's node creation order. Concrete and wood supply
+their own under-layer look; the chip/damage mask previews use the same reader.
+
 Dice coarse meshes first, then apply the chip modifier. Size chip reach from the shot, band to
 contain that reach, subdivision so a chip spans several faces. Limit work to visible outside
 edges; leave floors/slabs coarse. At room scale try half the close-up size and a lower chipped
