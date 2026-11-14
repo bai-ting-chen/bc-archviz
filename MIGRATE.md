@@ -944,4 +944,34 @@ Water numeric snapshots use the `FilmFields` names in the field table. Fab still
 - Use a throwaway copy of the project library: the helper dump writes an albedo cache. Never run it against the source library.
 - Compare with the pre-pull baseline. Numeric values and graph contents must match; normalize only explicitly listed saved-key renames. `FilmFields` contributes the five key changes listed above.
 
+# MIGRATE: shared Geometry Nodes skeleton and group inputs
+From: LAPTOP-25
+
+## What changed
+
+All six geometry builders use `materials.shared.node_graph.geometry_node_group` with explicit
+reuse policy and ordered input specifications. Socket interfaces and graph computations are unchanged.
+Removed helpers have no compatibility aliases:
+
+| Old | New owner in `materials.shared.node_graph` |
+|---|---|
+| `effects.wear.chipping.input_socket` | `add_group_input(group, name, kind, default, subtype)` |
+| `scene.environment.terrain_graph._sock` (also exported by `terrain`) | `add_group_input(group, name, kind, default=...)` for inputs; create output sockets explicitly |
+| `materials.tile.tile_graph._socket` (also exported by `tile_nodes` and `tile_damage`) | `add_group_input(group, name, kind=..., default=...)` for inputs; create output sockets explicitly |
+| `effects.wear.chipping.set_input`, `effects.wear.set_input` | `set_modifier_input(modifier, name, value)` |
+
+## Steps
+
+Update external imports and calls using the table. `add_group_input` supports `subtype`,
+`minimum` and `maximum`; it returns the socket. Its third argument is the socket type,
+with no input/output direction argument. The geometry skeleton returns `(group, created)`;
+reuse callers return immediately when `created` is false. Finished studies need no changes.
+
+## Check after pull
+
+- Run `python scripts/workflow/structure_check.py` (0 problems), compile `scripts/`, and headlessly import modules.
+- Compare saved graph controls, evaluated wear geometry, numeric water controls and ordered group interfaces
+  against the pre-pull baseline. Include the 13 material topics, edge/surface/wear checks, variation marks,
+  helper regression (including caustic and scatter), and scene/renderer controls.
+
 Remove each section after applying it; delete this file when none is left.

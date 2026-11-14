@@ -1,20 +1,16 @@
 """Scatter graph; implementation for scatter."""
-import bpy
+from materials.shared.node_graph import geometry_node_group
 
 
 def scatter_group(name="SCATTER"):
     """GN group: distribute points below a height and inside a noise patch, instance with random rotation/scale."""
-    ng = bpy.data.node_groups.get(name)
-    if ng:
+    inputs = [("Instance", "NodeSocketObject"), ("Density", "NodeSocketFloat"),
+              ("Scale", "NodeSocketFloat"), ("Z Max", "NodeSocketFloat"),
+              ("Seed", "NodeSocketInt"), ("Keep Source", "NodeSocketBool"),
+              ("Patchiness", "NodeSocketFloat")]
+    ng, created = geometry_node_group(name, inputs, reuse=True)
+    if not created:
         return ng
-    ng = bpy.data.node_groups.new(name, "GeometryNodeTree")
-    it = ng.interface
-    it.new_socket("Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
-    for nm, typ in (("Instance", "NodeSocketObject"), ("Density", "NodeSocketFloat"), ("Scale", "NodeSocketFloat"),
-                    ("Z Max", "NodeSocketFloat"), ("Seed", "NodeSocketInt"), ("Keep Source", "NodeSocketBool"),
-                    ("Patchiness", "NodeSocketFloat")):
-        it.new_socket(nm, in_out="INPUT", socket_type=typ)
-    it.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
     N, L = ng.nodes, ng.links
     gi = N.new("NodeGroupInput"); go = N.new("NodeGroupOutput")
     pos = N.new("GeometryNodeInputPosition"); sep = N.new("ShaderNodeSeparateXYZ")

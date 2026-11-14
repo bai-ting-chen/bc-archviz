@@ -5,7 +5,7 @@ import bpy
 
 from materials.tile.tile_config import FEATURES, FINISH
 from materials.tile.tile_nodes import _TileGraph
-from materials.tile.tile_nodes import _socket
+from materials.shared.node_graph import add_group_input
 
 
 def finish_group(defaults, owner):
@@ -15,18 +15,18 @@ def finish_group(defaults, owner):
     for key, label in FINISH.items():
         kind = ('NodeSocketColor' if key.endswith('albedo') else
                 'NodeSocketVector' if key == 'map_size' else 'NodeSocketFloat')
-        socket = _socket(tree, label, kind=kind, default=defaults[key])
+        socket = add_group_input(tree, label, kind=kind, default=defaults[key])
         if key == 'tilt_deg':
             socket.subtype = 'ANGLE'
         elif key in ('face_contrast', 'face_saturation'):
             socket.min_value, socket.max_value = 0., 1.
     for f in FEATURES:
-        _socket(tree, f + ' On', default=1.0)
+        add_group_input(tree, f + ' On', default=1.0)
     # A parameter-only group keeps every dependency flowing outwards to the shader.
     # Images can stay outside groups without feeding any output back into TileFinish.
     inputs = [item for item in tree.interface.items_tree if item.in_out == 'INPUT']
     for item in inputs:
-        _socket(tree, item.name, 'OUTPUT', item.socket_type)
+        tree.interface.new_socket(item.name, in_out='OUTPUT', socket_type=item.socket_type)
     a = _TileGraph(tree)
     source = a.node('NodeGroupInput')
     target = a.node('NodeGroupOutput')

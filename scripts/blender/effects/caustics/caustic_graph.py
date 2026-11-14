@@ -1,26 +1,20 @@
 """Caustic graph; implementation for geometry_node_caustics."""
-import bpy
-from effects.wear.chipping import input_socket as _input
-from materials.shared.node_graph import NodeGraph, active_socket
+from materials.shared.node_graph import NodeGraph, active_socket, geometry_node_group
 
 
 def caustic_sheet_group(name="Wavefront Caustics"):
     """GN group: refract water vertices, raycast to receivers and sun, store E = E_sun T A_perp / A_landed."""
-    ng = bpy.data.node_groups.get(name)
-    if ng:
-        bpy.data.node_groups.remove(ng)
-    ng = bpy.data.node_groups.new(name, "GeometryNodeTree")
-    ng.interface.new_socket("Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
-    for nm, kind in (("Caster", "NodeSocketObject"), ("Receivers", "NodeSocketCollection"),
-                     ("Occluders", "NodeSocketCollection")):
-        ng.interface.new_socket(nm, in_out="INPUT", socket_type=kind)
-    _input(ng, "Sun Direction", "NodeSocketVector", (0.0, 0.0, 1.0))
-    _input(ng, "Sun Irradiance", "NodeSocketFloat", 100.0)
-    _input(ng, "IOR Ratio", "NodeSocketFloat", 1 / 1.333)
-    _input(ng, "Transmission", "NodeSocketFloat", 0.976)     # 1 - Fresnel R of water (R 2.4 %, moderate sun incidence)
-    _input(ng, "Lift", "NodeSocketFloat", 0.001, "DISTANCE")  # m above the receiver, against z-fighting
-    _input(ng, "Sun Blur Iterations", "NodeSocketInt", 2)
-    ng.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
+    inputs = [
+        ("Caster", "NodeSocketObject"), ("Receivers", "NodeSocketCollection"),
+        ("Occluders", "NodeSocketCollection"),
+        ("Sun Direction", "NodeSocketVector", (0.0, 0.0, 1.0)),
+        ("Sun Irradiance", "NodeSocketFloat", 100.0),
+        ("IOR Ratio", "NodeSocketFloat", 1 / 1.333),
+        ("Transmission", "NodeSocketFloat", 0.976),  # 1 - water Fresnel R (2.4%).
+        ("Lift", "NodeSocketFloat", 0.001, "DISTANCE"),  # m above receiver, against z-fighting.
+        ("Sun Blur Iterations", "NodeSocketInt", 2),
+    ]
+    ng, _ = geometry_node_group(name, inputs, reuse=False)
     b = NodeGraph(ng, clear=False)
     L = b.link
     gi = b.node_with_props("NodeGroupInput", (-1800, 0))

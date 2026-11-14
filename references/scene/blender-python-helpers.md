@@ -63,12 +63,10 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 ## `effects.wear.chipping` — Geometry chips, flaked coating fields and verified bare-substrate scans.
 
 - `dice(obj, size=0.05)` — Subdivide in place by repeated halving of over-long edges (grid fill keeps quads).
-- `input_socket(ng, name, kind, default, subtype=None)` — Add a group input with a default (and an optional unit subtype).
 - `chip_field(graph, group_input, rest_position, edge_distance_m, segment_scale, bite_scale, soft, profile_end)` — Chips along the arris: segments of the edge chipped (share -> threshold; Noise clusters near 0.5, sd ~0.1), bite noise varies the reach. Returns (chip 0..1, depth profile).
 - `rejoin(graph, moved, separated_geometry, group_output, node_x, weld_dist)` — Rejoin the displaced band with the untouched interior and weld the seam.
 - `GrainBreaks` — Torn coat on up-facing faces, its outline stretched along the grain (wood). grain_stretch: noise scale per world axis; the small value is the grain axis.
 - `edge_wear_group(name='Edge Wear + Chips', band=0.08, level=3, chip_reach=0.045, chip_depth=0.018, chipped_share=0.55, sharp_deg=30.0, chips=True, bite_scale=22.0, segment_scale=2.2, seed=(0.0, 0.0, 0.0), chip_soft=0.002, profile_end=0.35, fracture=0.4, breaks=None)` — Geometry Nodes modifier: edge field for every point, real chips in the arris band, and optional grain breaks (GrainBreaks) on up-facing faces. fracture: chip-depth variation 0–1. Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern.
-- `set_input(mod, name, value)` — A Geometry Nodes modifier's own input values live at mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the identifier through the group interface. Group defaults are only copied in at creation.
 - `add_edge_wear(obj, group, **inputs)` — Add the modifier; per-object overrides by input name, e.g. add_edge_wear(o, g, Band=0.1).
 - `flaked_paint_masks(asset_ids=tuple(WORN_SCAN_LEVELS), project=None)` — Resolve per-scan Roughness polarity: white is exposed substrate, black is intact paint.
 - `chipping_field(graph, vector, scale_m, frame=None)` — Return the unchanged smooth procedural coating-loss patches.
@@ -274,6 +272,9 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.shared.node_graph` — NodeGraph: the builder for shader and Geometry Nodes trees, and the wear-layer frame and switch.
 
+- `add_group_input(group, name, kind='NodeSocketFloat', default=None, subtype=None, minimum=None, maximum=None)` — Add a group input with optional default, unit subtype and numeric bounds.
+- `geometry_node_group(name, inputs=(), *, reuse, is_modifier=False)` — Return a Geometry in/out group and whether it was created, preserving socket order.
+- `set_modifier_input(modifier, name, value)` — Set a Geometry Nodes modifier override by its group input name.
 - `active_socket(sockets, name)` — Active socket by name (Mix nodes keep hidden same-named sockets per data type).
 - `NodeGraph` — Builds a shader or Geometry Nodes tree: frames, nodes (inputs by keyword, or properties with node_with_props), image textures on a named UV map, links, and shorthands for math, map range, mix, vector math, colour ramp, noise and named attributes. NodeGraph(material) starts the material's tree empty; NodeGraph(node_tree) adds to an existing tree (a GN group).
 - `frame_for(mat, label)` — The material's node builder with one labelled frame for a wear layer; returns (builder, label).

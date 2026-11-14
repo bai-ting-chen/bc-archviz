@@ -2,6 +2,46 @@
 import bpy
 
 
+def add_group_input(group, name, kind="NodeSocketFloat", default=None, subtype=None,
+                    minimum=None, maximum=None):
+    """Add a group input with optional default, unit subtype and numeric bounds."""
+    socket = group.interface.new_socket(name, in_out="INPUT", socket_type=kind)
+    if default is not None:
+        socket.default_value = default
+    if subtype is not None:
+        socket.subtype = subtype
+    if minimum is not None:
+        socket.min_value = minimum
+    if maximum is not None:
+        socket.max_value = maximum
+    return socket
+
+
+def geometry_node_group(name, inputs=(), *, reuse, is_modifier=False):
+    """Return a Geometry in/out group and whether it was created, preserving socket order."""
+    group = bpy.data.node_groups.get(name)
+    if group is not None:
+        if reuse:
+            return group, False
+        bpy.data.node_groups.remove(group)
+    group = bpy.data.node_groups.new(name, "GeometryNodeTree")
+    if is_modifier:
+        group.is_modifier = True
+    add_group_input(group, "Geometry", "NodeSocketGeometry")
+    for spec in inputs:
+        add_group_input(group, *spec)
+    group.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
+    return group, True
+
+
+def set_modifier_input(modifier, name, value):
+    """Set a Geometry Nodes modifier override by its group input name."""
+    # Blender stores overrides under interface identifiers, in entries with empty names.
+    identifier = next(item.identifier for item in modifier.node_group.interface.items_tree
+                      if getattr(item, "in_out", "") == "INPUT" and item.name == name)
+    getattr(modifier.properties.inputs, identifier).value = value
+
+
 def active_socket(sockets, name):
     """Active socket by name (Mix nodes keep hidden same-named sockets per data type)."""
     return next(s for s in sockets if s.name == name and s.enabled)

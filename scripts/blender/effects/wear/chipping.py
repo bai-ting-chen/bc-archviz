@@ -4,8 +4,7 @@ import math
 import bmesh
 import bpy
 
-from materials.shared.node_graph import NodeGraph
-from materials.shared.node_graph import active_socket
+from materials.shared.node_graph import NodeGraph, active_socket, geometry_node_group, set_modifier_input
 from effects.wear.wear_locations import edge_field
 from dataclasses import dataclass, replace
 from effects.wear.image_masks import asset_mask
@@ -26,16 +25,6 @@ def dice(obj, size=0.05):
     bm.to_mesh(obj.data)
     bm.free()
     return len(obj.data.polygons)
-
-
-def input_socket(ng, name, kind, default, subtype=None):
-    """Add a group input with a default (and an optional unit subtype)."""
-    it = ng.interface.new_socket(name, in_out="INPUT", socket_type=kind)
-    it.default_value = default
-    if subtype:
-        it.subtype = subtype
-
-
 
 
 def chip_field(graph, group_input, rest_position, edge_distance_m, segment_scale, bite_scale, soft, profile_end):
@@ -81,22 +70,19 @@ def edge_wear_group(name="Edge Wear + Chips", band=0.08, level=3, chip_reach=0.0
     """Geometry Nodes modifier: edge field for every point, real chips in the arris band, and
     optional grain breaks (GrainBreaks) on up-facing faces. fracture: chip-depth variation 0–1.
     Per object: add_edge_wear(obj, group, Seed=(x, y, z)) moves the chip pattern."""
-    ng = bpy.data.node_groups.get(name)
-    if ng:
-        bpy.data.node_groups.remove(ng)
-    ng = bpy.data.node_groups.new(name, "GeometryNodeTree")
-    ng.interface.new_socket("Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
-    input_socket(ng, "Sharp Angle", "NodeSocketFloat", math.radians(sharp_deg), "ANGLE")
-    input_socket(ng, "Band", "NodeSocketFloat", band, "DISTANCE")
-    input_socket(ng, "Band Subdivisions", "NodeSocketInt", level)
-    input_socket(ng, "Chip Reach", "NodeSocketFloat", chip_reach, "DISTANCE")
-    input_socket(ng, "Chip Depth", "NodeSocketFloat", chip_depth if chips else 0.0, "DISTANCE")
-    input_socket(ng, "Chipped Share", "NodeSocketFloat", chipped_share, "FACTOR")
+    inputs = [
+        ("Sharp Angle", "NodeSocketFloat", math.radians(sharp_deg), "ANGLE"),
+        ("Band", "NodeSocketFloat", band, "DISTANCE"),
+        ("Band Subdivisions", "NodeSocketInt", level),
+        ("Chip Reach", "NodeSocketFloat", chip_reach, "DISTANCE"),
+        ("Chip Depth", "NodeSocketFloat", chip_depth if chips else 0.0, "DISTANCE"),
+        ("Chipped Share", "NodeSocketFloat", chipped_share, "FACTOR"),
+    ]
     if breaks:
-        input_socket(ng, "Break Share", "NodeSocketFloat", breaks.share, "FACTOR")
-        input_socket(ng, "Break Depth", "NodeSocketFloat", breaks.depth_m, "DISTANCE")
-    input_socket(ng, "Seed", "NodeSocketVector", seed)
-    ng.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
+        inputs.extend([("Break Share", "NodeSocketFloat", breaks.share, "FACTOR"),
+                       ("Break Depth", "NodeSocketFloat", breaks.depth_m, "DISTANCE")])
+    inputs.append(("Seed", "NodeSocketVector", seed))
+    ng, _ = geometry_node_group(name, inputs, reuse=False)
     b = NodeGraph(ng, clear=False)
     L = b.link
     gi = b.node_with_props("NodeGroupInput", (-1400, 0))
@@ -188,21 +174,12 @@ def _grain_breaks(graph, group_input, rest_position, grain_stretch):
                   group_input.outputs["Break Depth"], (1720, -1500))
 
 
-def set_input(mod, name, value):
-    """A Geometry Nodes modifier's own input values live at
-    mod.properties.inputs.<identifier>.value. Those entries have EMPTY names, so resolve the
-    identifier through the group interface. Group defaults are only copied in at creation."""
-    ident = next(i.identifier for i in mod.node_group.interface.items_tree
-                 if getattr(i, "in_out", "") == "INPUT" and i.name == name)
-    getattr(mod.properties.inputs, ident).value = value
-
-
 def add_edge_wear(obj, group, **inputs):
     """Add the modifier; per-object overrides by input name, e.g. add_edge_wear(o, g, Band=0.1)."""
     mod = obj.modifiers.new("Edge Wear + Chips", "NODES")
     mod.node_group = group
     for k, v in inputs.items():
-        set_input(mod, k.replace("_", " "), v)
+        set_modifier_input(mod, k.replace("_", " "), v)
     return mod
 
 # Pale exposed substrate is rougher in the first scan; green substrate is smoother in the second.

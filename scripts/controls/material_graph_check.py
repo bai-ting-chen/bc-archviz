@@ -18,6 +18,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "blender"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # graph_dump
 from graph_dump import dump_material, dump_tree, value, write
+from materials.shared.node_graph import add_group_input
 
 # topic -> the facade module whose builders the topic's cases call (wood_wear imports its own)
 TOPIC_MODULES = {
@@ -294,7 +295,7 @@ def run(topic, out):
             new = bpy.data.node_groups.new("New", "ShaderNodeTree")
             for group, inputs in ((old, ("Value", "Bias")), (new, ("Bias", "Extra", "Value"))):
                 for name in inputs:
-                    group.interface.new_socket(name, in_out="INPUT", socket_type="NodeSocketFloat")
+                    add_group_input(group, name)
                 group.interface.new_socket("Result", in_out="OUTPUT", socket_type="NodeSocketFloat")
             mat = bpy.data.materials.new("Users")
             mat.use_nodes = True

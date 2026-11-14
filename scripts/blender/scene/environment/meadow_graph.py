@@ -1,23 +1,17 @@
 """Meadow graph; implementation for scatter."""
 import math
-import bpy
 
 
 def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=None):
     """GN group: Scatter on Surface on a terrain object, masked by species patch noise, shared bare-soil noise, pad clearance and the camera frustum. Reused if it exists (layers point at it)."""
-    from materials.shared.node_graph import NodeGraph
+    from materials.shared.node_graph import NodeGraph, add_group_input, geometry_node_group
     from scene.environment.terrain import BARE_SOIL_NOISE_W
-    ng = bpy.data.node_groups.get(name)
-    if ng:
+    ng, created = geometry_node_group(name, reuse=True, is_modifier=True)
+    if not created:
         return ng
     from scene.environment.terrain import BARE_SOIL_NOISE_SETTINGS
     bare = bare or BARE_SOIL_NOISE_SETTINGS
-    ng = bpy.data.node_groups.new(name, "GeometryNodeTree")
-    ng.is_modifier = True
-    it = ng.interface
-    it.new_socket("Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
-    it.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
-    for nm, typ, dv in (("Terrain", "NodeSocketObject", None), ("Collection", "NodeSocketCollection", None),
+    inputs = (("Terrain", "NodeSocketObject", None), ("Collection", "NodeSocketCollection", None),
                         ("Camera", "NodeSocketObject", None), ("Density", "NodeSocketFloat", 1.0),
                         ("Seed", "NodeSocketInt", 0), ("Patch Scale", "NodeSocketFloat", 0.2),
                         ("Patch Low", "NodeSocketFloat", -1.0), ("Patch High", "NodeSocketFloat", -0.5),
@@ -26,10 +20,9 @@ def meadow_layer_group(scatter_ng, name="MEADOW_LAYER", bare=None):
                         ("Pad Clear", "NodeSocketFloat", 0.08), ("Scale", "NodeSocketFloat", 1.0),
                         ("Scale Random", "NodeSocketFloat", 0.3), ("Sink", "NodeSocketFloat", 0.01),
                         ("Tan X", "NodeSocketFloat", 0.5), ("Tan Y", "NodeSocketFloat", 0.6),
-                        ("Max Distance", "NodeSocketFloat", 150.0), ("Viewport Fraction", "NodeSocketFloat", 0.05)):
-        s_ = it.new_socket(nm, in_out="INPUT", socket_type=typ)
-        if dv is not None:
-            s_.default_value = dv
+                        ("Max Distance", "NodeSocketFloat", 150.0), ("Viewport Fraction", "NodeSocketFloat", 0.05))
+    for spec in inputs:
+        add_group_input(ng, *spec)
     g = NodeGraph(ng, clear=True)
     gi = g.node_with_props("NodeGroupInput", (-1600, 0))
     go = g.node_with_props("NodeGroupOutput", (1600, 0))

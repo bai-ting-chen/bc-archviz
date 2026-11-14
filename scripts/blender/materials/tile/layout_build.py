@@ -12,7 +12,7 @@ def _interface_signature(group):
 def layout_group(name="TileLayout"):
     """Create the metre-based shader layout group or reuse its matching version."""
     import bpy
-    from materials.shared.node_graph import NodeGraph
+    from materials.shared.node_graph import NodeGraph, add_group_input
 
     old = bpy.data.node_groups.get(name)
     if old is not None:
@@ -24,38 +24,27 @@ def layout_group(name="TileLayout"):
             return old
     ng = bpy.data.node_groups.new(name, "ShaderNodeTree")
 
-    def socket(label, direction, kind="NodeSocketFloat", default=None,
-               minimum=None, maximum=None):
-        item = ng.interface.new_socket(label, in_out=direction, socket_type=kind)
-        if default is not None:
-            item.default_value = default
-        if minimum is not None:
-            item.min_value = minimum
-        if maximum is not None:
-            item.max_value = maximum
-        return item
-
-    socket("Vector", "INPUT", "NodeSocketVector", (0, 0, 0))
-    socket("Tile W", "INPUT", default=0.1, minimum=1e-6)
-    socket("Tile H", "INPUT", default=0.1, minimum=1e-6)
-    socket("Joint", "INPUT", default=0.003, minimum=0)
-    socket("Corner Radius", "INPUT", default=0, minimum=0)
-    socket("Jitter Offset", "INPUT", default=0, minimum=0)
-    socket("Jitter Rotation", "INPUT", default=0, minimum=0).subtype = "ANGLE"
-    offset_socket = socket("Row Offset", "INPUT", default=0)
+    add_group_input(ng, "Vector", "NodeSocketVector", (0, 0, 0))
+    add_group_input(ng, "Tile W", default=0.1, minimum=1e-6)
+    add_group_input(ng, "Tile H", default=0.1, minimum=1e-6)
+    add_group_input(ng, "Joint", default=0.003, minimum=0)
+    add_group_input(ng, "Corner Radius", default=0, minimum=0)
+    add_group_input(ng, "Jitter Offset", default=0, minimum=0)
+    add_group_input(ng, "Jitter Rotation", default=0, subtype="ANGLE", minimum=0)
+    offset_socket = add_group_input(ng, "Row Offset", default=0)
     offset_socket.description = "Any real value wraps; usual range 0 to 1"
     # RNA documents no soft bounds on interface float sockets.
     if hasattr(offset_socket, "soft_min") and hasattr(offset_socket, "soft_max"):
         offset_socket.soft_min, offset_socket.soft_max = 0, 1
-    socket("Rotation", "INPUT", default=0).subtype = "ANGLE"
-    socket("Origin", "INPUT", "NodeSocketVector", (0, 0, 0))
-    socket("Tile ID", "OUTPUT", minimum=0, maximum=1)
-    socket("Tile UV", "OUTPUT", "NodeSocketVector")
-    socket("Edge", "OUTPUT")
-    socket("Joint", "OUTPUT", minimum=0, maximum=1)
-    socket("Cell", "OUTPUT", "NodeSocketVector")
-    socket("Tile Size", "OUTPUT", "NodeSocketVector")
-    socket("Joint Width", "OUTPUT")
+    add_group_input(ng, "Rotation", default=0, subtype="ANGLE")
+    add_group_input(ng, "Origin", "NodeSocketVector", (0, 0, 0))
+    for label, kind in (("Tile ID", "NodeSocketFloat"), ("Tile UV", "NodeSocketVector"),
+                        ("Edge", "NodeSocketFloat"), ("Joint", "NodeSocketFloat"),
+                        ("Cell", "NodeSocketVector"), ("Tile Size", "NodeSocketVector"),
+                        ("Joint Width", "NodeSocketFloat")):
+        item = ng.interface.new_socket(label, in_out="OUTPUT", socket_type=kind)
+        if label in ("Tile ID", "Joint"):
+            item.min_value, item.max_value = 0, 1
 
     if old is not None and _interface_signature(old) == _interface_signature(ng):
         bpy.data.node_groups.remove(ng)

@@ -110,16 +110,16 @@ def main():
         sc.view_settings.exposure = 0
         sc.view_settings.view_transform = "Standard"
     def _zero_gn_input(input_name):
-        """Zero a Geometry Nodes modifier input on every object whose group has it (effects.wear.set_input)."""
+        """Zero a Geometry Nodes modifier input on every object whose group has it (materials.shared.node_graph.set_modifier_input)."""
         import os
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from effects.wear import set_input
+        from materials.shared.node_graph import set_modifier_input
         for ob in bpy.data.objects:
             for md in ob.modifiers:
                 if md.type == "NODES" and md.node_group and any(
                         getattr(i, "in_out", "") == "INPUT" and i.name == input_name
                         for i in md.node_group.interface.items_tree):
-                    set_input(md, input_name, 0.0)
+                    set_modifier_input(md, input_name, 0.0)
 
 
     if opts.get("chips") == "off":  # negative control: no chip/dent geometry (and so no chip shading)

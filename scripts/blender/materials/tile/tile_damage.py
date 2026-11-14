@@ -2,7 +2,6 @@
 import math
 import bpy
 from materials.tile.tile_nodes import _TileGraph
-from materials.tile.tile_nodes import _socket
 from materials.tile.tile_nodes import _replace_group_users
 from materials.tile.damage_contract import DAMAGE_DEFAULT_VALUES, DAMAGE_INPUT_SOCKETS, PIECE_BINS, _LAYOUT_INPUTS, _OUTPUTS, _REVISION, _VERSION
 from materials.tile.damage_graph import _DamageGraph

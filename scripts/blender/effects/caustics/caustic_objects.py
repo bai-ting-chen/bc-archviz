@@ -3,7 +3,7 @@ import bpy
 from mathutils import Vector
 from effects.caustics.caustic_graph import caustic_sheet_group
 from effects.caustics.caustic_shading import caustic_sheet_material
-from effects.wear.chipping import set_input
+from materials.shared.node_graph import set_modifier_input
 
 
 def add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_tex=None,
@@ -18,7 +18,7 @@ def add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_te
     for k, v in (("Caster", caster), ("Receivers", receivers), ("Occluders", occluders),
                  ("Sun Direction", tuple(d)), ("Sun Irradiance", sun_obj.data.energy),
                  ("IOR Ratio", 1.0 / ior)):
-        set_input(mod, k, v)
+        set_modifier_input(mod, k, v)
     mat = caustic_sheet_material(floor_tex=floor_tex, floor_tile_m=floor_tile_m, floor_albedo=floor_albedo)
     me.materials.append(mat)
     next(n for n in mod.node_group.nodes if n.type == "SET_MATERIAL").inputs["Material"].default_value = mat

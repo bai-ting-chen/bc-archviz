@@ -3,7 +3,7 @@ import bmesh
 import math
 import random
 import bpy
-from materials.shared.node_graph import NodeGraph
+from materials.shared.node_graph import NodeGraph, add_group_input
 from mathutils import Vector
 from effects.wear.cracks import CRACK_DEFAULTS, apply_crack_masks
 from effects.wear.crack_ribbon import crooked_ribbon_masks
@@ -45,8 +45,7 @@ def _ribbon_group(seed, length):
                                ('Plane', 'NodeSocketVector', (0, 1, 0)),
                                ('Length', 'NodeSocketFloat', 0.1),
                                ('Skew', 'NodeSocketFloat', 0.0)]:
-        socket = ng.interface.new_socket(name=key, in_out='INPUT', socket_type=kind)
-        socket.default_value = default
+        add_group_input(ng, key, kind, default)
     for key in ('Core', 'Halo'):
         ng.interface.new_socket(name=key, in_out='OUTPUT', socket_type='NodeSocketFloat')
     g = NodeGraph(ng)

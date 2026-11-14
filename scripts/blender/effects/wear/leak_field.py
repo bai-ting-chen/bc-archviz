@@ -9,22 +9,17 @@ per object (a stepped sheet needs one object per height, or thickness).
 It must be the FIRST modifier on an object: after the chips, rays slip through the chip-band seam and
 a wrong leak_d spreads over a whole coarse triangle (light triangles under an arris).
 """
-import bpy
 
-from materials.shared.node_graph import NodeGraph
+from materials.shared.node_graph import NodeGraph, geometry_node_group
 
 
 def leak_field_group(name="LEAK FIELD", inset=0.02, reach=6.0):
     """GN: per point, metres below the first surface straight above it (raycast up from `inset` inside the wall) -> `leak_d`, `leak_ok`; a miss falls back to the object's top (Top Fallback). Reused if it exists (other objects' modifiers point at it)."""
-    ng = bpy.data.node_groups.get(name)
-    if ng:
+    # A ray miss on a sheet measures leak_d from the object's top.
+    ng, created = geometry_node_group(name, [("Top Fallback", "NodeSocketBool", True)],
+                                      reuse=True, is_modifier=True)
+    if not created:
         return ng
-    ng = bpy.data.node_groups.new(name, "GeometryNodeTree")
-    ng.is_modifier = True
-    ng.interface.new_socket("Geometry", in_out="INPUT", socket_type="NodeSocketGeometry")
-    fallback = ng.interface.new_socket("Top Fallback", in_out="INPUT", socket_type="NodeSocketBool")
-    fallback.default_value = True  # a miss (no thickness) measures leak_d from the object's top
-    ng.interface.new_socket("Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
     b = NodeGraph(ng, clear=True)
     gi = b.node_with_props("NodeGroupInput", (-1000, 0)); go = b.node_with_props("NodeGroupOutput", (1100, 0))
     pos = b.node_with_props("GeometryNodeInputPosition", (-1000, -300)).outputs[0]

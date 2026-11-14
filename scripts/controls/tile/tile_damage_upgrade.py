@@ -6,6 +6,7 @@ import controls_import_paths  # noqa: E402,F401 -- every controls topic folder o
 import json
 
 import bpy
+from materials.shared.node_graph import add_group_input
 
 import materials.tile.tile_damage as tile_damage
 import materials.tile.tile_surface as tile_surface
@@ -22,10 +23,13 @@ def check_upgrade(folder):
     diagnostics={'Chip','Picked','Crack Distance','Chip Cell','Chip Site Edge'}
     for item in tile_damage.damage_group().interface.items_tree:
         if item.item_type=='SOCKET' and item.name not in missing|diagnostics:
-            socket=legacy.interface.new_socket(name=item.name,in_out=item.in_out,socket_type=item.socket_type)
+            if item.in_out == 'INPUT':
+                socket = add_group_input(legacy, item.name, item.socket_type)
+            else:
+                socket = legacy.interface.new_socket(item.name, in_out='OUTPUT', socket_type=item.socket_type)
             if hasattr(item,'default_value'): socket.default_value=item.default_value
     for label,value in (('Kink Size',.0015),('Kink Amp',.0002),('Branch Share',.35)):
-        socket=legacy.interface.new_socket(name=label,in_out='INPUT',socket_type='NodeSocketFloat'); socket.default_value=value
+        add_group_input(legacy, label, default=value)
     node=mat.node_tree.nodes['TileDamage']; node.node_tree=legacy
     node.inputs['Fraction'].default_value=.37; node.inputs['Chip Depth'].default_value=.00073
     settings=json.loads(mat['tile_surface_settings'])

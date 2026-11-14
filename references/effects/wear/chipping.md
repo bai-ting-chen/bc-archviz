@@ -11,7 +11,8 @@ Shared source composition, scan mapping and stack order live in `references/effe
 A fresh break uses the clean underlying material, before accumulated dirt.
 
 ## 3. Code
-- `scripts/blender/effects/wear/chipping.py`: `dice`, `edge_wear_group` (optional `GrainBreaks`), `add_edge_wear`, `set_input`,
+- `materials.shared.node_graph.set_modifier_input`: per-object Geometry Nodes input overrides.
+- `scripts/blender/effects/wear/chipping.py`: `dice`, `edge_wear_group` (optional `GrainBreaks`), `add_edge_wear`,
   `chipping_field`, `flaked_paint_masks`. `concrete_shading.py`: `weathered_concrete`, fresh-break shader.
 - Coating loss: `WearLayer` key `chipping`, `wear_factor`, `apply_surface_wear` in `wear.py`;
   supply the actual `under_shader`. Deprecated `worn-through` remains an accepted alias.

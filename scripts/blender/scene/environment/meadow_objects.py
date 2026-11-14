@@ -1,6 +1,6 @@
 """Meadow objects; implementation for scatter."""
 import bpy
-from effects.wear import set_input
+from materials.shared.node_graph import set_modifier_input
 
 
 def frustum_tangents(cam, res, margin=1.15):
@@ -18,5 +18,5 @@ def meadow_layer(name, group, terrain, collection, camera, target_collection=Non
     mod = ob.modifiers.new("MEADOW", "NODES")
     mod.node_group = group
     for k, v in dict(Terrain=terrain, Collection=collection, Camera=camera, **inputs).items():
-        set_input(mod, k.replace("_", " "), v)
+        set_modifier_input(mod, k.replace("_", " "), v)
     return ob

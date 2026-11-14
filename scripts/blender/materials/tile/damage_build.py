@@ -2,7 +2,7 @@
 
 import bpy
 
-from materials.tile.tile_graph import _socket
+from materials.shared.node_graph import add_group_input
 
 from materials.tile.group_retarget import _replace_group_users
 
@@ -31,17 +31,18 @@ def damage_group(name='TileDamage'):
         if _is_current(old): return old
     tree=bpy.data.node_groups.new(name,'ShaderNodeTree')
     for label in _LAYOUT_INPUTS:
-        _socket(tree,label,kind='NodeSocketVector' if label in ('Cell','Tile UV','Tile Size') else 'NodeSocketFloat')
+        add_group_input(tree,label,kind='NodeSocketVector' if label in ('Cell','Tile UV','Tile Size') else 'NodeSocketFloat')
     for (key,label),default in zip(DAMAGE_INPUT_SOCKETS.items(),DAMAGE_DEFAULT_VALUES):
-        socket=_socket(tree,label,default=default); socket.min_value=0
+        socket = add_group_input(tree, label, default=default, minimum=0)
         if key in ('damage','crack_share','chip_share','spall_density','crack_dirt','crack_density','chip_density'):
             socket.max_value=1
         elif key=='force_kind': socket.max_value=3
         elif key=='shell_exponent': socket.min_value,socket.max_value=.2,2
         elif key in ('warp_scale','crack_cell'): socket.min_value=1e-8
         elif key=='piece_tilt_rad': socket.subtype='ANGLE'
-    _socket(tree,'On',default=1.)
-    for label in _OUTPUTS: _socket(tree,label,'OUTPUT')
+    add_group_input(tree,'On',default=1.)
+    for label in _OUTPUTS:
+        tree.interface.new_socket(label, in_out='OUTPUT', socket_type='NodeSocketFloat')
     a=_DamageGraph(tree); m=a.math
     i=a.node('NodeGroupInput').outputs
     out=a.node('NodeGroupOutput'); out.is_active_output=True

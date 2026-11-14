@@ -74,10 +74,3 @@ class _TileGraph:
         """Interpolate two scalar values."""
         return self.math('ADD', self.math('MULTIPLY', self.math('SUBTRACT', 1, factor), a),
                       self.math('MULTIPLY', factor, b))
-
-def _socket(tree, name, direction='INPUT', kind='NodeSocketFloat', default=None):
-    """Create an interface socket with an optional default."""
-    s = tree.interface.new_socket(name, in_out=direction, socket_type=kind)
-    if default is not None:
-        s.default_value = default
-    return s

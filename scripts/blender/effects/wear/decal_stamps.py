@@ -154,12 +154,12 @@ def scatter_stamps(graph, vector, atlas, seed=17, vertical=False, extent=None, f
     if radius+atlas.centre_jitter*atlas.cell_m+anchor_shift > atlas.cell_m:
         raise ValueError('Stamp support exceeds the 3x3 neighbour footprint; increase cell_m')
     import bpy
-    from materials.shared.node_graph import NodeGraph
+    from materials.shared.node_graph import NodeGraph, add_group_input
     # One cell sampler graph, reused by all nine neighbours. Keep its parameters local
     # to this scatter call, rather than caching mutable shader state globally.
     group=bpy.data.node_groups.new('surface-wear-stamp-cell','ShaderNodeTree')
     for name in ('Vector','Cell'):
-        group.interface.new_socket(name=name,in_out='INPUT',socket_type='NodeSocketVector')
+        add_group_input(group, name, 'NodeSocketVector')
     group.interface.new_socket(name='Value',in_out='OUTPUT',socket_type='NodeSocketFloat')
     cell_graph=NodeGraph(group)
     inputs=cell_graph.node('NodeGroupInput',(-3000,-20000))

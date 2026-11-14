@@ -157,7 +157,8 @@ def _write_regions(out, samples, sc, cam, wall, column, counts, mats):
 
 def _render_variants(out, only, mats, chip_mods, sc, archviz):
     import bpy
-    from effects.wear import set_input, switch_rounding
+    from effects.wear import switch_rounding
+    from materials.shared.node_graph import set_modifier_input
     from effects.wear.dirt import LINE_AMOUNT, DUST_AMOUNT
     for key in VARIANTS:
         if only and key not in only:
@@ -175,7 +176,7 @@ def _render_variants(out, only, mats, chip_mods, sc, archviz):
         for mat in mats:
             switch_rounding(mat, rounded_edges=key != 'rounded-edge-off')
         for mod in chip_mods:
-            set_input(mod, 'Chip Depth', 0 if key == 'chips-off' else 0.018)
+            set_modifier_input(mod, 'Chip Depth', 0 if key == 'chips-off' else 0.018)
             mod.id_data.update_tag()
         sc.cycles.seed = 79 if key == 'noise-floor' else 43
         bpy.context.view_layer.update()

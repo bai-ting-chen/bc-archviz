@@ -1,19 +1,11 @@
 """Terrain graph; implementation for terrain."""
-import bpy
-from materials.shared.node_graph import NodeGraph
+from materials.shared.node_graph import NodeGraph, add_group_input, geometry_node_group
 
 
 BARE_SOIL_NOISE_W = 11.0                   # 4D-noise W shared by the meadow's bare-soil mask and the ground shader
 
 
 BARE_SOIL_NOISE_SETTINGS = (0.35, 0.62, 0.69)       # that noise: scale (1/m), full sward below, bare soil above
-
-
-def _sock(ng, name, typ, io="INPUT", default=None):
-    s = ng.interface.new_socket(name, in_out=io, socket_type=typ)
-    if default is not None:
-        s.default_value = default
-    return s
 
 
 def _noise4(graph, vec, scale, w, location, detail=2.0, rough=0.5):
@@ -51,14 +43,8 @@ def pad_distance(graph, centre, pad_half_size_m, location=(-1200, -400)):
 def landform_group(name="LANDFORM", centre=(0.0, 0.0), pad_half_size_m=(4.0, 4.0), size=300.0, vertex_count=601,
                    pad_height_m=-0.03, crest_distance_m=1.5, fall_height_m=6.0, slope_run_m=40.0, warp=7.0, roll=2.5, hummock=0.12):
     """GN group: grid -> hill around a pad (landform grading), stores `pad_d`; plan metres."""
-    ng = bpy.data.node_groups.get(name)
-    if ng:
-        bpy.data.node_groups.remove(ng)
-    ng = bpy.data.node_groups.new(name, "GeometryNodeTree")
-    ng.is_modifier = True
-    _sock(ng, "Geometry", "NodeSocketGeometry", "INPUT")
-    _sock(ng, "Geometry", "NodeSocketGeometry", "OUTPUT")
-    mat_s = _sock(ng, "Material", "NodeSocketMaterial")
+    ng, _ = geometry_node_group(name, reuse=False, is_modifier=True)
+    add_group_input(ng, "Material", "NodeSocketMaterial")
     g = NodeGraph(ng, clear=True)
     gi = g.node_with_props("NodeGroupInput", (-1500, 300)); go = g.node_with_props("NodeGroupOutput", (2600, 0))
     grid = g.node_with_props("GeometryNodeMeshGrid", (-1300, 300))
