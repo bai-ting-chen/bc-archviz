@@ -1,5 +1,5 @@
 """Cycles finals in the open UI with no sample/time limit (RULES GAT_04), and post-processing from the
-saved passes. LuxCore finals: from_passes.py. pipeline.md > Final render in the open UI.
+saved passes. LuxCore finals: from_passes.py. render-settings.md > Final in the open UI.
 
     # in the open UI (via MCP), after building the scene:
     import finals; finals.start_in_ui(out_dir, (2400, 3000))

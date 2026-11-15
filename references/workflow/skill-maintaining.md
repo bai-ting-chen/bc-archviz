@@ -32,11 +32,11 @@ leaves it instructions (MIGRATE.md).
   |---|---|---|---|
   | Sequential workflow | steps in a fixed order | numbered steps; what each step needs from the one before; a check after each step; how to undo a failed step | pipeline.md, max-import.md, terrain.md, study-close.md, gates.md, §4 of material and effect references |
   | Multi-MCP coordination | one job spans Rhino (Rook), Blender and host tools | one phase per tool; what is handed to the next phase (file, path, names); a check before the next phase; errors handled in one place | pipeline.md (Rhino → Blender) |
-  | Iterative refinement | quality improves round by round | measurable criteria first; the check script; the loop (fix, re-render, re-measure); when to stop | validation.md, research-loop.md, the look rounds in pipeline.md |
+  | Iterative refinement | quality improves round by round | measurable criteria first; the check script; the loop (fix, re-render, re-measure); when to stop | validation.md, research-loop.md |
   | Context-aware selection | same outcome, different method by case | a decision table with its criteria; the fallback; say which was chosen and why | renderer-choice.md, materials/index.md, texture-selection.md, caustics.md §1 |
   | Domain intelligence | knowledge beyond the tools | rules applied before acting; numbers with units and sources; record what was decided | physical-ranges.md, scale.md, blender-api-traps.md |
 
-  Lookup files (blender-python-helpers.md, capabilities.md, troubleshooting.md) keep their own format.
+  Lookup files (blender-python-helpers.md, capabilities.md, troubleshooting.md, machine-setup.md) keep their own format.
 
 ## Before editing
 1. `git pull` in the skill folder. Other machines push too, and editing a stale copy means a
@@ -67,7 +67,8 @@ Writing MIGRATE.md (before pushing a change):
 
 ## Helpers changed?
 Run `python scripts/workflow/helper_index.py` (MCP venv python) so [blender-python-helpers.md](../scene/blender-python-helpers.md) matches the
-code, and give every new public helper a one-line docstring — that line is its index entry.
+code. The index lists each module's public names after the first sentence of its docstring, so give every
+module a docstring that says what it does, and every public helper a one-line docstring for its reader.
 Refactoring a helper: prove nothing else moved with `scripts/review/helper_regression.py` (dump with the
 old and the new code, then compare; its docstring has the steps).
 Keep one builder per job (one dielectric, one socket helper, one node-graph builder `materials.shared.node_graph.NodeGraph`, one

@@ -33,6 +33,7 @@ Read the files for the stage you are in.
 - Writing Blender code: [Blender Python helpers](references/scene/blender-python-helpers.md) (use these first),
   [Blender API traps](references/scene/blender-api-traps.md) (check before running)
 - [Troubleshooting](references/workflow/troubleshooting.md): errors and unexpected images
+- [Machine setup](references/workflow/machine-setup.md): install, MCP tools, where each tool lives
 
 ### 1. Research (→ GAT_01)
 - [Capabilities](references/scene/capabilities.md): check what the pipeline already does
@@ -41,7 +42,8 @@ Read the files for the stage you are in.
 - [Learning from video](references/research/learning-from-video.md): the source is a video
 
 ### 2. Rhino geometry and import (→ GAT_02)
-- [Pipeline](references/scene/pipeline.md): setup, MCP, runtime checks, Rhino import, assets
+- [Pipeline](references/scene/pipeline.md): the phases, their checks, Rhino and import
+- [Sources](references/workflow/sources.md): downloading assets (Poly Haven, Quixel on Fab, Maxtree)
 - [Max import](references/scene/max-import.md): 3ds Max assets
 - [Terrain](references/scene/environment/terrain.md): naturally sloped ground around a building pad
 
@@ -59,7 +61,7 @@ Read the files for the stage you are in.
 - [Validation](references/review/validation.md): PNG measurements, crops, controls, bisects
 
 ### 5. Final and closure
-- [Pipeline](references/scene/pipeline.md) › Final render in the open UI
+- [Render settings](references/renderer/render-settings.md) › Final in the open UI
 - [Closing a study](references/workflow/study-close.md): the user calls the study finished
 
 ### Skill maintenance
@@ -86,6 +88,6 @@ Reference folders and code folders use the same topic names. Each code folder's 
 | 2. Rhino geometry and import | `references/scene/pipeline.md` | `scripts/blender/scene/io/`, `scripts/blender/core/` |
 | 3. Camera, light, materials | `references/scene/camera/`, `references/scene/lighting/`, `references/materials/` | `scripts/blender/scene/camera/`, `scripts/blender/scene/lighting/`, `scripts/blender/materials/` |
 | 4. Look rounds and controls | `references/renderer/`, `references/review/` | `scripts/blender/renderer/`, `scripts/controls/` |
-| 5. Final and closure | `references/scene/pipeline.md`, `references/workflow/study-close.md` | `scripts/blender/renderer/finals/`, `scripts/workflow/` |
+| 5. Final and closure | `references/renderer/render-settings.md`, `references/workflow/study-close.md` | `scripts/blender/renderer/finals/`, `scripts/workflow/` |
 
-Invocation details live in Pipeline.
+Tool locations and invocation: [machine-setup.md](references/workflow/machine-setup.md).

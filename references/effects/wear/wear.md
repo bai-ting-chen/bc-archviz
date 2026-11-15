@@ -56,7 +56,7 @@ Keep geometry switches and shading amounts independent (RULES MAT_07).
   `stochastic_mask`, reusing `effects.variation_tiling.randomized_vectors`. `image_masks.py` owns
   `MaskSource`, `asset_mask`, `asset_maps`, `scan_size_m`, `image_mask`, `mask_field`.
 - `default_sources.py`: defaults and one missing-id/Fab-search line per process; a missing default scan
-  falls back to procedural. Acquire via pipeline.md Assets; builders never download.
+  falls back to procedural. Acquire via sources.md › Quixel on Fab; builders never download.
 - `decal_stamps.py` / `decal_atlas.py`: explicit neighbour-aware scatter and atlas preparation, separate from hybrid.
 - Controls in `scripts/controls/effects/`: `edge_wear_graph_check.py`, `surface_wear_graph_check.py`,
   `surface_wear_lab.py`, `surface_wear_hybrid_check.py`; reuse the shared rigs and AOV reader.

@@ -23,6 +23,22 @@ Use when: judging a look round against a reference, proving a feature works, or 
    defect, fix only that, and go back to 1.
 5. A change claimed to work gets its control render (VAL_02) before it counts.
 
+**The study runner.** `scripts/workflow/study_run.py <study> vNN.png [--rebuild] [--resolution-percent 50 --samples 128]`
+rebuilds the study from `scene_geometry.py` (import + camera) and `scene_look.py` (materials, lights,
+exposure), renders `_wip/vNN.png` and writes the patch table and `pair-vNN.png` (with `_wip/ref.jpg`
+and `regions.json`). Every change is one edit + one run, at 50 % / 128 spp; each version's reason
+lives as a comment next to the value it changed.
+- The runner `ast.parse`s both scripts first. A scripted edit that appends `# reason` to a line
+  continuing a call comments out the rest of it: put the comment on its own line above the value.
+- Long patches go in a file with `assert old in s` per replacement, not a bash heredoc, so a stale
+  anchor fails loudly; use the Edit tool for lines holding several statements.
+- When patch scripts pile up, fold them back into the scene scripts before the study is reused.
+
+**Feature tests headless:** `blender -b scene.blend --python scripts/blender/renderer/render_variant.py
+-- out.png resolution=800x800 [displacement=off|caustics=off|wear=off|…|camera=NAME]` renders a saved
+.blend with overrides on the GPU and never saves it. Its docstring lists every option; an unknown
+option stops it rather than rendering an unchanged "control".
+
 ### 3. When to stop (RULES VAL_05)
 - **Done:** region ratios agree, exposure is set, every crop reads like the reference in character
   at final-view pixels, and each claimed feature has its control. A number that matches while the

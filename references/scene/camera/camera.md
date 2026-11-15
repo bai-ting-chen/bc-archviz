@@ -89,5 +89,5 @@ balance and depth of field.
 | Image too cold after white balance | temperature set below the lamp's | raise it above the lamp temperature (step 4) |
 | Model crisp against a soft backplate | photographed softness in the HDRI | slight depth of field (step 5) |
 
-A camera from a Rhino named view: `references/scene/pipeline.md` › Rhino reference. Generic render
+A camera from a Rhino named view: `references/scene/pipeline.md` › Phase 2. Generic render
 problems are in troubleshooting.md.

@@ -15,13 +15,13 @@ Cause: nothing listens on port 9876: Blender is closed, the `mcp` add-on is off 
 start, or *Allow Online Access* is off (needed even for localhost). No crash log is not proof of a
 clean exit.
 Check: Blender process running → add-on enabled with autostart → *Allow Online Access* → port 9876 listening.
-Fix: correct the first check that fails, then relaunch. See [pipeline.md](../scene/pipeline.md) › Install.
+Fix: correct the first check that fails, then relaunch. See [machine-setup.md](machine-setup.md) › Install.
 
 ### Blender MCP times out
 Seen as: `Blender connection timed out at 127.0.0.1:9876`
 Cause: Blender is running but has not answered in time: a render or a long script holds it.
 Fix: check what Blender is doing before sending more; never relaunch while a render runs.
-Split long scripts into shorter calls. See [pipeline.md](../scene/pipeline.md) › MCP tools.
+Split long scripts into shorter calls. See [machine-setup.md](machine-setup.md) › MCP tools.
 
 ### Blender MCP returns nothing or garbage
 Seen as: `Empty response from Blender`, `Invalid response from Blender at 127.0.0.1:9876: …` or
@@ -34,20 +34,20 @@ Fix: check whether Blender is still running and re-read the scene state before r
 Seen as: `ModuleNotFoundError: No module named 'numpy'` (or `'PIL'`) from `reference_match.py` / `image_statistics.py`
 Cause: the script ran on an interpreter without numpy and Pillow.
 Fix: run host tools with the MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`), or
-`pip install numpy pillow` into that venv. See [pipeline.md](../scene/pipeline.md) › Install.
+`pip install numpy pillow` into that venv. See [machine-setup.md](machine-setup.md) › Install.
 
 ### Edited look script fails to run
 Seen as: `syntax error, nothing sent to Blender: <file>:<line>: <msg>` from `study_run.py`
 Cause: a scripted edit appended a `# reason` comment to a line that continues a call, so the rest of
 the call became a comment.
 Fix: put the comment on its own line above the value, or edit with the Edit tool. See
-[pipeline.md](../scene/pipeline.md) › Iteration loop.
+[validation.md](../review/validation.md) › The study runner.
 
 ### Poly Haven download fails with HTTP 52x
 Seen as: `HTTP Error 520: …` to `HTTP Error 525: …` from `polyhaven_fetch.py`
 Cause: Cloudflare in front of Poly Haven returned a server-side error.
 Fix: check for a partial or existing download, then retry the same request a bounded number of
-times; stop and report a persistent failure. See [pipeline.md](../scene/pipeline.md) › Assets.
+times; stop and report a persistent failure. See [sources.md](sources.md) › Poly Haven.
 
 ### Script works headless, fails in the UI
 Seen as: `RuntimeError: Operator bpy.ops.… .poll() Context missing active object` from a UI startup script
@@ -61,7 +61,7 @@ report) blocking every call.
 Check: Rhino process CPU → a dialog on Rhino's screen → the target document's state.
 Fix: wait for active work; a dialog only the user can dismiss. Split future calls and use
 closed-form layouts instead of per-element curve queries. Never blindly retry writes or terminate
-Rhino; that is the user's decision. See [pipeline.md](../scene/pipeline.md) › Rhino reference.
+Rhino; that is the user's decision. See [pipeline.md](../scene/pipeline.md) › Rhino.
 
 ### `bpy_struct[key] = val: id properties not supported` on a GN modifier
 Seen as: `bpy_struct[key] = val: id properties not supported`
@@ -81,7 +81,7 @@ Problems of one light type or of the camera are in that file's §5: `references/
 ### Camera from a Rhino named view frames wider or narrower
 Cause: Rhino's lens length on a square view is the FOV of a 24 mm frame side.
 Fix: same lens with `sensor_width = 24` and a square render; match the frustum. See
-[pipeline.md](../scene/pipeline.md) › Rhino reference.
+[pipeline.md](../scene/pipeline.md) › Phase 2.
 
 ### Material or light change has no visible effect
 Cause: a stale mesh or dependency graph, so the render still uses the old data.
@@ -93,11 +93,11 @@ See [validation.md](../review/validation.md).
 ### Imported object has 0 faces
 Cause: the .3dm has no cached render mesh for it.
 Fix: force render meshes in an owned export; extract mesh data without modifying or saving the
-user's document. See [pipeline.md](../scene/pipeline.md) › Rhino reference.
+user's document. See [pipeline.md](../scene/pipeline.md) › Rhino.
 
 ### Rhino boxes or slabs hang below their datum
 Cause: `Extrusion.Create` follows the curve's plane normal, so a clockwise outline extrudes down.
-Fix: `Surface.CreateExtrusion(curve, Vector3d(0, 0, h))` + `CapPlanarHoles`. See [pipeline.md](../scene/pipeline.md) › Rhino reference.
+Fix: `Surface.CreateExtrusion(curve, Vector3d(0, 0, h))` + `CapPlanarHoles`.
 
 ### GN geometry renders with its source's material
 Cause: Object Info and Collection Info geometry keeps the source's materials.

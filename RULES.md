@@ -158,11 +158,11 @@ Read: [study-close.md](references/workflow/study-close.md)
 
 **AST_03 — Acquiring Study Assets**  
 Rule: Keep every asset and metadata in that study’s own library for a self-contained handoff.  
-Read: [pipeline.md](references/scene/pipeline.md)
+Read: [sources.md](references/workflow/sources.md)
 
 **AST_04 — Installing Blender Extensions Or Add-Ons**  
 Rule: Use Blender’s extension installer and software folders; delete downloaded installer zips afterward.  
-Read: [pipeline.md](references/scene/pipeline.md)
+Read: [machine-setup.md](references/workflow/machine-setup.md)
 
 **AST_05 — Naming Study Files And Folders**  
 Rule: Name new files and folders in lowercase kebab-case and Python files in snake_case; `_wip/` keeps its name.  
@@ -170,7 +170,7 @@ Read: [pipeline.md](references/scene/pipeline.md)
 
 **AST_06 — Choosing Shop Assets (Quixel, Maxtree)**  
 Rule: Read the catalog (Fab only in the app's built-in browser pane), pick, and send the candidates in one list as in MAT_10, plants and models included, each with its id, and for Quixel the download file and size. Download nothing before the user's picks. Quixel is free: the agent downloads the picks through the user's Fab sign-in in the built-in pane (the user signs in); the picks approve adding them to the user's library under the free Professional licence of the Fab Standard License. Maxtree is paid: the user buys and downloads. Browse and download only through the scripts (navigate, javascript, host scripts), never by clicking or screenshots. Never sign in, enter credentials or buy.  
-Read: [pipeline.md](references/scene/pipeline.md)
+Read: [sources.md](references/workflow/sources.md)
 
 ### Safety
 

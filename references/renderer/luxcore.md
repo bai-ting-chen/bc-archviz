@@ -165,7 +165,7 @@ island). Build: `bpy.data.node_groups.new(n, "luxcore_material_nodes")`,
 - Save the linear EXR, then graded PNGs from it (AgX at a few EVs) with `img.save_render(p, scene=sc)`.
 
 ## Final in the open UI
-Mechanics: `references/scene/pipeline.md` › *Final render in the open UI*. LuxCore specifics: no halt (`start_in_ui` clears it).
+Mechanics: `references/renderer/render-settings.md` › *Final in the open UI*. LuxCore specifics: no halt (`start_in_ui` clears it).
 - **Two ways to stop, different results.** LuxCore's own Stop (render-window button;
   scriptable as `LuxCoreDisplaySettings.stop_requested = True` from
   `bl_ext.user_default.blendluxcore.properties.display`) ends normally: OIDN, compositor,

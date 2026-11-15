@@ -24,7 +24,22 @@ around that, rather than carrying someone else's numbers.
   several pixels and land on the same pixels; fireflies are lone random pixels. Remove fireflies
   *before* the denoiser (clamping; [luxcore.md](luxcore.md) › Fireflies) — OIDN smears them into blotches.
 
-## Finals with no sample limit (`finals.py`, RULES GAT_04)
+## Final in the open UI (`finals.py`, RULES GAT_04)
+Cycles: `scripts/blender/renderer/finals/finals.py` does the whole run. `start_in_ui(out_dir, res)`
+starts an untiled render with no limit (samples high, `time_limit = 0`, adaptive off; LuxCore no
+halt), registers the savers and fits the view; `stop_in_ui()` ends it; `-- denoise` and `-- png`
+rebuild the finals from the saved passes. The mechanics, for a case it does not cover:
+- `bpy.ops.render.render("INVOKE_DEFAULT")` inside `bpy.context.temp_override(window=…)` returns
+  at once and the user watches it. Register the saver on `render_complete` **and** `render_cancel`
+  (Esc fires only the latter); it `save_render`s every pass to the study folder and removes itself.
+  Wait for the file from the shell.
+- Blender not open yet: launch it **with UI** on the build script (`blender --python build.py -- …`,
+  no `-b`); the script builds the owned scene, saves the .blend only with explicit authorization,
+  and starts the render from `bpy.app.timers.register(start, first_interval=3)`. No render window →
+  put an Image Editor on `Render Result` (blender-api-traps.md).
+- The pre-final full-frame test runs the same build script headless at reduced resolution: it
+  catches broken savers and UI-only context errors before a multi-hour run. Tests and previews run
+  headless, one at a time; tell the user when a CPU-only engine leaves the GPU idle.
 - Estimate before launch from a full-frame test at the final settings: s/sample measured, raw
   noise in a smooth region at two sample counts; noise ~ 1/sqrt(N). Tell the user the time at
   which more samples stop showing (raw ~1-2 % on a smooth sky with OIDN, ~0.4 % = one 8-bit

@@ -23,7 +23,7 @@ Use when: choosing a texture source or method for a surface, then scaling it and
    (`cdn.polyhaven.com/asset_img/thumbs/<id>.png?width=300`) for 10-20 candidates in one image.
    `api.polyhaven.com/assets?t=textures` filtered by id/tags finds what `polyhaven_fetch.py
    search <category>` misses. Search Quixel Megascans in the same pass (`asset_sheet.py`,
-   pipeline.md › Assets); their listings state the scan size. Then send the fits from both
+   sources.md › Quixel on Fab); their listings state the scan size. Then send the fits from both
    sources as one candidate list for review (RULES MAT_10), for example:
 
    | Pick | Source | Id | Asset | Real size | Download | Why it fits |

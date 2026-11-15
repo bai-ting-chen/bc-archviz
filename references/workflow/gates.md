@@ -36,6 +36,6 @@ user before launch. A defect: fix it, back to step 1.
 **Step 3. Launch** in the open Blender UI, with no time or sample limit: the user watches and stops it, and
 saving and denoising run on stop (a halt time cannot be changed once rendering starts, nor a finished render
 resumed). Headless is for tests and previews. Mechanics:
-[pipeline.md › Final render in the open UI](../scene/pipeline.md#final-render-in-the-open-ui-rules-gat_04).
+render-settings.md › *Final in the open UI*.
 
 **Step 4. Saved result.** Look at every surface of the saved file before calling it done or sending it.
