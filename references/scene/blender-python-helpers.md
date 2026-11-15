@@ -402,10 +402,10 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `blade_material(name, texture=None, colour=(0.12, 0.15, 0.05), wet=None, dry_patch=0.55)` — Thin blade: Principled + Translucent (Add); per-instance value 0.8-1.15 and a patchy straw mix; optional wet film.
 
-## `materials.water.ballistic_sheet` — Ballistic carrier of a water sheet thrown off a straight lip (references/materials/water/water-free-falling-film.md §3.1-3.3).
+## `materials.water.ballistic_sheet` — Ballistic carrier of a water sheet thrown off a straight lip (references/materials/water/water-free-falling-film.md §4.1-4.3).
 
 - `LaunchLip` — A straight horizontal lip: origin_m on the wall face, along_axis = increasing s, outward_axis = direction the water is thrown.
-- `SheetFlow` — Launch speed and per-stream flow (§3.1-3.2); seeds make every layer repeatable.
+- `SheetFlow` — Launch speed and per-stream flow (§4.1-4.2); seeds make every layer repeatable.
 - `mean_launch_speed_m_s(flow, s)` — Launch speed before per-stream variation: v0 x (1 +- v0_var) at two smooth scales (metres and decimetres).
 - `stream_factor(flow, s, drop_m)` — Per-stream flow multiplier 1 + m, constant down each stream apart from a slow drift.
 - `flow_per_width_m2_s(flow, s, drop_m)` — Flow per metre width q (m^2/s) at (s, drop_m).
@@ -507,7 +507,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `tubes(name, strings, material=None, collection=None, sides=6)` — Capped tubes along polylines; each string is an (M, 4) array x, y, z, radius.
 
-## `materials.water.motion_blur` — Motion blur for still water: a per-vertex `velocity` attribute (m/s) read by Cycles deformation motion blur (references/materials/water/water-free-falling-film.md §3.9). The mesh does not move; the streak length is speed x shutter / fps (blender-api-traps › Render).
+## `materials.water.motion_blur` — Motion blur for still water: a per-vertex `velocity` attribute (m/s) read by Cycles deformation motion blur (references/materials/water/water-free-falling-film.md §4.9). The mesh does not move; the streak length is speed x shutter / fps (blender-api-traps › Render).
 
 - `fall_speed(launch_speed_m_s, lip_height_m, z)` — Free-fall speed U = sqrt(launch_speed_m_s^2 + 2 g (lip_height_m - z)), m/s.
 - `set_velocity(obj, velocity)` — Store a per-vertex `velocity` (m/s) and enable deformation motion blur on the object.

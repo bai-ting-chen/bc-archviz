@@ -1,5 +1,5 @@
 """Ballistic carrier of a water sheet thrown off a straight lip
-(references/materials/water/water-free-falling-film.md §3.1-3.3).
+(references/materials/water/water-free-falling-film.md §4.1-4.3).
 
 Sheet coordinates: s = metres along the lip from its start (0..length), d = drop below the lip (0..drop).
 World point = origin + s*along + throw(s, d)*out - d*Z. Water leaves horizontally, so every section is a
@@ -48,7 +48,7 @@ class LaunchLip:
 
 @dataclass
 class SheetFlow:
-    """Launch speed and per-stream flow (§3.1-3.2); seeds make every layer repeatable."""
+    """Launch speed and per-stream flow (§4.1-4.2); seeds make every layer repeatable."""
     launch_speed_m_s: float = .32               # m/s mean launch speed (throw at the foot ~ v0 * sqrt(2H/g))
     launch_speed_variation: float = .40           # +- fraction, two smooth scales along the lip
     stream_variation: float = .40       # +- fraction of per-stream flow

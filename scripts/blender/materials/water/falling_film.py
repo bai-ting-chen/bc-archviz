@@ -1,5 +1,5 @@
 """Free-falling film as a field map on the ballistic carrier
-(references/materials/water/water-free-falling-film.md §3.3-3.8).
+(references/materials/water/water-free-falling-film.md §4.3-4.8).
 
 Coordinates (shared by every water module): s = metres along the lip, d = drop below the lip, v = fall-time
 stretched depth (ballistic_sheet.effective_depth). film_surfaces() evaluates every layer on an s x d grid and returns the

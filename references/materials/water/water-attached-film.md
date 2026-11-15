@@ -1,12 +1,11 @@
-# Attached water film (walls, glass, overflow edges)
+# Attached water film
 
 ## 1. Overview
-Water that clings to a surface: a film running down a wall or glass, an overflow wrapping round a
-crest. Where it lands: [water-splash.md](water-splash.md), [water-ripple.md](water-ripple.md),
-[water-foam.md](water-foam.md).
+Water that clings to a surface as it runs down: a film on a wall, a stone face or glass.
 
 **Use when:** the water stays on the surface. Water that leaves a lip and falls free:
-[water-free-falling-film.md](water-free-falling-film.md).
+[water-free-falling-film.md](water-free-falling-film.md). Both are the same film on a different
+carrier, so this file holds only what differs and reuses the free-falling layers.
 
 ## 2. Layers and node-editor diagram
 Specific layers are described in §4. Generic layers are written once, in their own reference, and
@@ -14,131 +13,101 @@ used here with attached-film settings.
 
 ```
                       ATTACHED WATER FILM — LAYER DIAGRAM
- ┌──────────────────────────────────────────────────────────────────────────┐
- │ SPECIFIC (§4)                                                            │
- │   §4.1 Film height field on the wall    → geometry, ropes, roll waves    │
- │   §4.2 Water on a transparent object    → shading (interface IOR)        │
- │   §4.3 Overflow rim strip               → geometry, clinging film        │
- │ GENERIC (own reference)                                                  │
- │   Landing: crowns, splash               → water-splash.md                │
- │   Landing: ripples                      → water-ripple.md                │
- │   Foam, bubbles, whitewater             → water-foam.md                  │
- └──────────────────────────────────────────────────────────────────────────┘
+ ┌───────────────────────────────────────────────────────────────────────────┐
+ │ SPECIFIC (§4)                          GENERIC (own reference)            │
+ │ §4.1 Surface carrier  → geometry       Streams, ribbons, meander, edges,  │
+ │ §4.2 Film thickness   → depth            motion blur                      │
+ │                                          → water-free-falling-film.md     │
+ │                                        Water against glass → glass.md     │
+ │                                        Wet surface around the film        │
+ │                                          → wet-surfaces.md                │
+ │                                        Landing: splash, ripples, foam     │
+ │                                          → water-splash/ripple/foam.md    │
+ └───────────────────────────────────────────────────────────────────────────┘
+   surface carrier (§4.1) ─► film coordinates (s along the surface, d down it)
+   thickness (§4.2) × free-falling layers ─► film surface = carrier + thickness along the normal
+   film surface ─► water material; on glass, the wetted face takes the interface IOR
 ```
 
-Flow:
-```
-   wall surface ──► raycast front-most surface along −N, (u, z) grid ──► depth, low-passed (§4.1)
-   depth + thickness (§4.1) ──► film surface, kept ≥ wall + 0.3 mm
-   wetted face of a transparent object (§4.2) and film surface ──► transmission IOR
-   rim strip (§4.3): pond band → roll over the crest → film down the wall
-   film lands ──► generic layers (splash, ripples, foam)
-```
-
-- The film follows broad relief and fills only the fine one (§4.1 sets the scale).
-- Shared-row quads only, so the sheet ends cleanly at each lip.
-- A flat sheet of constant thickness is a parallel plate; calm water needs uneven thickness between
-  its two faces to bend the wall behind (§4.1).
+- **One water body on the surface:** a single skin offset from the carrier; the wall or glass under it
+  is the other face. Uneven thickness between the two faces is what bends the surface behind; a
+  constant thickness is a parallel plate and bends nothing.
+- **Same field layers as the free-falling film,** evaluated in the same (s, v) coordinates on the
+  surface carrier instead of the ballistic one. Each stays its own term with its own switch (RULES MAT_07).
+- **Size from the final view first** (RULES MAT_03): most rope and wave detail is sub-pixel at a
+  building-scale view and reads only in aggregate (RULES MAT_04).
 
 ## 3. Code
-No builder or control script yet: index.md › Water lists the attached film as "none yet"
-(raycast height field). The one built example of the interface rule (§4.2) is a glass of water:
-`glassware.glass_of_water()` in `scripts/blender/materials/glass/`.
+No builder yet. The free-falling field modules in `scripts/blender/materials/water/`
+(`film_ribbons`, `film_meander`, `film_waves`, `film_zones`, `film_swell`, `film_tears`) take only the
+film coordinates, not the carrier; `film_surfaces.film_surfaces()` is the one place that evaluates them
+on the ballistic carrier. An attached builder adds a surface carrier (§4.1) and calls the same field
+modules; it does not copy them (skill-maintaining.md › one builder per job).
 
 ## 4. Instructions and parameters, per layer
 Table values are starting points; size them from the shot (RULES MAT_03) and record the final values
 in the study notes (RULES GOV_01).
 
-### 4.1 Film height field on the wall (geometry)
-- **Check the section before choosing the flow.** Shingled or tilted units decide what water can
-  do: a lip standing in front of the unit below (set-back) makes a strong flow leave the first lip
-  and fall as one free sheet in front of everything below
-  ([water-free-falling-film.md](water-free-falling-film.md)); a moderate flow wraps under a sharp
-  lip (teapot effect) and rejoins the face below. A face leaning out a few degrees still holds a
-  moving film. Measure the depth profile down one vertical line (raycast) before modelling.
-- **Thickness:** laminar (Nusselt) h = (3·ν·q / g)^(1/3), q = flow per metre width. At fountain
-  flows (Re = q/ν ~ 10²–10³) the film is wavy: roll waves (horizontal-ish crests, λ several cm)
-  and rivulet **ropes** (thicker vertical streaks that meander). The "volumetric" look of a good
-  reference = wide glossy ropes refracting the wall behind into vertical streaks, plus trapped bubbles
-  and aeration at the foot.
-- **Build as a height field on the wall plane:** raycast the front-most surface along −N on a
-  (u, z) grid (ropes are vertical), per row/surface run: depth low-passed at the capillary scale plus
-  thickness, kept ≥ surface + 0.3 mm so the two never touch.
-- **The film follows broad relief, fills only the fine one.** A ~1 mm film over folds of λ ≫ film
-  keeps their full distortion (air/water 0.33 + water/glass 0.19 ≈ dry glass 0.52); it smooths only
-  crinkle and creases at the capillary scale. Wet patterned glass is *not* generally clearer than dry.
-- **Character traps:** fine relief + roll waves draw squiggly contour-like highlights. Judge at
-  native resolution (RULES VAL_01).
+### 4.1 Surface carrier (geometry)
+- **Check the section first.** A lip standing in front of the unit below (set-back) makes a strong
+  flow leave the lip and fall free (free-falling film). A moderate flow wraps under a sharp lip
+  (teapot effect) and rejoins the face below; a face leaning out a few degrees still holds a film.
+  Measure the depth profile down one vertical line (raycast) before choosing.
+- **Raycast the front-most surface** along −N on an (s, d) grid, finer across than down (streams run
+  down). Low-pass the depth at the capillary scale, then add the thickness (§4.2), keeping the film
+  clear of the surface so the two never touch.
+- **The film follows broad relief and fills only the fine one.** A film of ~1 mm over folds much
+  wider than itself keeps their full distortion: the film only splits the air → glass step (0.52) into
+  air → water (0.33) and water → glass (0.19). It smooths only crinkle and creases at the capillary
+  scale, so wet patterned glass is not generally clearer than dry.
+- **Shared-row quads only,** so the sheet ends cleanly at each lip.
 
 | Parameter | Value |
 |---|---|
-| Mean thickness | ~0.5–1.5 mm (Nusselt, §4.1 thickness bullet) |
-| Ropes | several mm thick, λ 2–9 cm |
-| Roll waves | ~0.2 mm |
-| Height-field grid | ~3 mm across, ~6 mm down |
+| Grid | ~3 mm across, ~6 mm down |
 | Low-pass (capillary scale) | σ ≈ 5 mm |
-| Clearance wall to film | ≥ 0.3 mm |
+| Clearance surface to film | ≥ 0.3 mm |
 
-### 4.2 Water on a transparent object (shading)
-- Cycles has no nested-IOR priority: it cannot tell that a ray leaving glass enters water, not air.
-  Wherever water touches another transparent solid (a film on glass, a drink in a tumbler, a pool
-  against a glass wall), give each surface the IOR of the step it really is:
-  - the solid's dry faces: its own IOR;
-  - the wetted face, shared by solid and water: the ratio of the two;
-  - the water's free surface: 1.333.
-- Model the wetted face once, as one surface with the ratio. Two coincident surfaces refract twice.
-- Check the normals of every wall; a flipped one inverts its step.
-- Lathe round vessels at a high segment count for close-ups (`glass_of_water(segments=…)`).
+### 4.2 Film thickness (depth)
+- **Mean thickness from the flow:** laminar (Nusselt) h = (3·ν·q / g)^(1/3), q = flow per metre width.
+  It replaces the free-falling h = q/U.
+- **Uneven, never constant:** at fountain flows (Re = q/ν ~ 10²–10³) the film is wavy. Thicker
+  meandering streams (ropes) come from the free-falling stream flow and meander layers; roll waves
+  from its ribbons layer, much weaker here.
 
 | Parameter | Value |
 |---|---|
-| Glass, dry faces | 1.52 |
-| Wetted glass face | 1.14 (1.52 / 1.333) |
-| Water free surface | 1.333 |
-| Vessel segments, close-up | 256 |
-
-### 4.3 Overflow edge and rim strip (geometry)
-- **Spill:** head h over a sharp crest → q ≈ 1.84·h^1.5 (m²/s); brink depth ≈ 0.715 × critical
-  depth (2h/3); brink speed ≈ √(g·2h/3) — a few mm of head gives ~0.2 m/s, so the sheet **clings**
-  round the edge and down the trench wall as a thin roped film.
-- **Model the crest at the water line.** A slot drawn as a hole in the water surface, or a slot
-  whose rim sits below the pond level, is a flooded channel, not an overflow. Ask which is meant.
-- **Sight lines:** the visible depth into a gap = gap width × tan(camera depression angle). A low
-  camera sees only the top centimetres of a narrow trench, so its white water must run high
-  (tens of mm under the crest) and boil up in bursts to show — check this before tuning foam.
-- **Rim strip:** one strip mesh round the rim (pond band with draw-down → roll over a rounded edge →
-  film down the wall) parameterised by (perimeter s, distance d); square offset contours at the
-  corners so it meets a rectangular hole in the far pond.
-
-| Parameter | Value |
-|---|---|
-| Spill rate | q ≈ 1.84·h^1.5 (m²/s) |
-| Brink depth | ≈ 0.715 × critical depth (2h/3) |
-| Brink speed | ≈ √(g·2h/3); a few mm of head ≈ 0.2 m/s |
-| Curb knife edge | ~10 mm (a wide curb top under a few mm of water reads as a dark frame) |
-| Visible depth into a gap | gap width × tan(camera depression angle) |
+| Mean thickness | ~0.5–1.5 mm |
+| Rope thickness | several mm, λ 2–9 cm across |
+| Roll waves | ~0.2 mm |
 
 Generic layers, attached-film settings:
 
 | Layer | Reference | Note for this material |
 |---|---|---|
+| Stream flow q(y) | [water-free-falling-film.md](water-free-falling-film.md) §4.2 | ropes; q sets the Nusselt thickness, not the throw |
+| Fall-time stretch | [water-free-falling-film.md](water-free-falling-film.md) §4.3 | k = 0: a film on a surface soon runs at a steady speed, so nothing stretches with the drop |
+| Fine ribbons, calm zones, roll waves | [water-free-falling-film.md](water-free-falling-film.md) §4.4 | roll waves ~0.2 mm; judge at native resolution (RULES VAL_01) |
+| Sideways meander | [water-free-falling-film.md](water-free-falling-film.md) §4.5 | ropes meander; no folding, the film stays on the surface |
+| Tears | [water-free-falling-film.md](water-free-falling-film.md) §4.6 | same mask and rounded rims; dry patches and rivulets where the flow is low, not where the meander stretches |
+| Dissolving edges | [water-free-falling-film.md](water-free-falling-film.md) §4.8 | side edges pull in to rivulets |
+| Motion blur | [water-free-falling-film.md](water-free-falling-film.md) §4.9 | streak from the film's surface speed, far below a free fall |
+| Water against glass | [glass.md](../glass/glass.md) §4.3 | the wetted glass face takes the interface IOR |
+| Wet surface around the film | [wet-surfaces.md](../../effects/wet-surfaces.md) | splashed and damp margin beside and below the film |
 | Landing: crowns, splash | [water-splash.md](water-splash.md) | where the film lands |
 | Landing: ripples | [water-ripple.md](water-ripple.md) | where the film lands |
-| Foam, bubbles, whitewater in the trench | [water-foam.md](water-foam.md) › Whitewater | the trench white water; the sight-line rule in §4.3 comes first |
+| Foam, bubbles, aeration at the foot | [water-foam.md](water-foam.md) | where the film lands |
+
+The ballistic carrier (§4.1 there) and strings and drops (§4.7 there) are not used.
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |
 |---|---|---|
-| Calm water bends nothing; film reads as clear glass | flat sheet of constant thickness: a parallel plate | uneven thickness between the two faces (§4.1) |
-| Squiggly contour-like highlights | fine relief + roll waves too strong | roll waves ~0.2 mm, ropes λ 2–9 cm (§4.1) |
-| Wet patterned glass looks clearer than dry | film smooths folds it should keep | film follows broad relief, fills only the fine one (§4.1) |
-| Water against glass looks wrong at the waterline | nested IOR not handled | three surfaces: dry, wetted, free (§4.2) |
-| Vessel faceted in close-up | low segment count | re-lathe at a high count (§4.2) |
-| Strong flow falls free in front of the units below | set-back lip | free-falling film file: [water-free-falling-film.md](water-free-falling-film.md) |
-| Moderate flow wraps under a sharp lip and rejoins the face below | teapot effect | check the section before choosing the flow (§4.1) |
-| Dark frame round a trench | wide curb top under a few mm of water | knife edge ~10 mm (§4.3) |
-| Slot reads as a flooded channel | crest drawn as a hole, or rim below the pond level | model the crest at the water line (§4.3) |
-| Trench white water does not show | low camera sees only the top centimetres | white water tens of mm under the crest, boiling in bursts (§4.3) |
+| Calm water bends nothing; film reads as clear glass | constant thickness: a parallel plate | uneven thickness from streams and ribbons (§2, §4.2) |
+| Wet patterned glass looks clearer than dry | film smooths folds it should keep | follow broad relief, fill only the fine one (§4.1) |
+| Film touches or cuts into the surface | no clearance | keep ≥ 0.3 mm between surface and film (§4.1) |
+| Strong flow falls free in front of the units below | set-back lip | check the section; use the free-falling film (§4.1) |
+| Squiggly contour-like highlights | fine relief and roll waves too strong | roll waves ~0.2 mm (§4.2) |
 
-Generic problems: `references/workflow/troubleshooting.md` (not linked from this file: a link here
-would close a reference loop).
+Streak, flute, comb and washboard problems of the shared layers: the free-falling film's §5.
+Generic problems are in troubleshooting.md.

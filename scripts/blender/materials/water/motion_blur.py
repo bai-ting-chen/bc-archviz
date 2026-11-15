@@ -1,5 +1,5 @@
 """Motion blur for still water: a per-vertex `velocity` attribute (m/s) read by Cycles deformation motion blur
-(references/materials/water/water-free-falling-film.md §3.9). The mesh does not move; the streak length is
+(references/materials/water/water-free-falling-film.md §4.9). The mesh does not move; the streak length is
 speed x shutter / fps (blender-api-traps › Render).
 """
 import bpy
