@@ -1,8 +1,6 @@
-"""Volumetric fog / mist (run in Blender). lighting-camera.md > Fog and mist.
+"""Volumetric Mie fog and mist with visibility-based extinction.
 
-    import scene.lighting.atmosphere as atmosphere
-    atmosphere.fog_volume(centre=(25, 25), visibility_m=150, clear_boxes=[house_bbox])
-    atmosphere.volume_render_settings()
+See references/scene/lighting/fog.md.
 
 Radiation fog and mist are water droplets of ~5-20 um: Mie scattering, strongly forward-peaked,
 no absorption (white). Volume Scatter has a native Mie phase function with a droplet
@@ -23,10 +21,10 @@ def sigma_from_visibility(visibility_m):
     return 3.912 / visibility_m
 
 
-def fog_volume(centre=(0.0, 0.0), visibility_m=150.0, diameter_um=15.0, box=(500.0, 500.0, -25.0, 130.0),
-               top=(25.0, 85.0), valley=(0.0, -8.0, 0.5), patch=(0.012, 0.6), clear_boxes=(),
+def fog_volume(centre, visibility_m, box, top, diameter_um=15.0,
+               valley=None, patch=(0.012, 0.6), clear_boxes=(),
                name="FOG_VOLUME", collection=None):
-    """Box of heterogeneous Mie fog: sigma(V) x height fade (full below top[0], clear at top[1]) x valley boost x patch noise; zero in clear_boxes [(xmin,xmax,ymin,ymax,zmax)]."""
+    """Box of heterogeneous Mie fog: sigma(V) x height fade (full below top[0], clear at top[1]) x optional valley boost (None disables it) x patch noise; zero in clear_boxes [(xmin,xmax,ymin,ymax,zmax)]."""
     sx, sy, z0, z1 = box
     me = bpy.data.meshes.new(name)
     bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0); bm.to_mesh(me); bm.free()
@@ -44,7 +42,9 @@ def fog_volume(centre=(0.0, 0.0), visibility_m=150.0, diameter_um=15.0, box=(500
     geo = g.node_with_props("ShaderNodeNewGeometry", (-900, 0))
     sep = g.node_with_props("ShaderNodeSeparateXYZ", (-700, 0)); g.link(geo.outputs["Position"], sep.inputs[0])
     height = g.map_range(sep.outputs["Z"], top[0], top[1], (-500, 100), 1.0, 0.0, smooth=True, label="fog top")
-    hollow = g.map_range(sep.outputs["Z"], valley[0], valley[1], (-500, -100), 1.0, 1.0 + valley[2], smooth=True, label="hollows")
+    hollow = 1.0
+    if valley is not None:
+        hollow = g.map_range(sep.outputs["Z"], valley[0], valley[1], (-500, -100), 1.0, 1.0 + valley[2], smooth=True, label="hollows")
     nz = g.noise_texture(geo.outputs["Position"], patch[0], (-500, -300), detail=3.0, roughness=0.5)
     pt = g.math("ADD", g.math("MULTIPLY", g.math("SUBTRACT", nz, 0.5, (-300, -300)), 2 * patch[1], (-150, -300)), 1.0, (0, -300))
     dens = g.math("MULTIPLY", g.math("MULTIPLY", height, hollow, (-150, 0)), g.math("MAXIMUM", pt, 0.2, (150, -300)), (300, 0))

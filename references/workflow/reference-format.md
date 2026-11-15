@@ -1,6 +1,7 @@
 # Material and effect reference format
 
-Every material and effect reference uses the same five sections, in this order. A section with
+Every material and effect reference uses the same five sections, in this order; so do the lighting,
+camera and reference-match references, as procedures. A section with
 nothing to say keeps its heading and says why in one line (e.g. "No code: the layers are node graph only").
 
 A file that is one procedure, not a stack of layers (e.g. variation-tiling.md): the §2 box shows its steps

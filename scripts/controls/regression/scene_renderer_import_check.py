@@ -8,7 +8,7 @@ import importlib
 from pathlib import Path
 import sys
 
-FACADES = ('scene.lighting.interior', 'scene.environment.scatter',
+FACADES = ('scene.lighting.artificial', 'scene.environment.scatter',
            'effects.caustics.geometry_node_caustics', 'materials.glass.glassware', 'renderer.finals.finals',
            'scene.environment.terrain', 'blend_references', 'materials.water.falling_film', 'materials.water.pool_impacts',
            'materials.water.mesh_builders', 'materials.water.surface_shading', 'materials.water.film_fragments')

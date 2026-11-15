@@ -1,4 +1,6 @@
-"""Camera: which camera is active, its lens and sensor, real-world exposure, and architectural framing.
+"""Camera activation, lens and sensor, physical exposure and architectural framing.
+
+See references/scene/camera/camera.md.
 
 A physical camera (ISO, f-stop, shutter) drives both exposure and depth of field, so brightness and
 DOF stay in sync. straighten_verticals keeps verticals parallel with a lens shift instead of tilt.

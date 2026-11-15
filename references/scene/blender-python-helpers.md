@@ -616,6 +616,12 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `main()` — Run the command against the supplied files; never save a scene.
 
+## `scene.camera.camera` — Camera activation, lens and sensor, physical exposure and architectural framing.
+
+- `use_camera(name, lens=None)` — Make the named camera active, optionally setting its focal length (mm).
+- `physical_camera(cam_obj, iso, fstop, shutter_s, focal_mm, sensor_mm=36.0, focus_distance=None, dof=True)` — Real camera triple -> Blender. Exposure follows the saturation-based sensor model (pixel = L / (1.2 * 2^EV100), L in cd/m2): stops = log2(683 / 1.2) - EV100. The same f-stop drives depth of field, so brightness and DOF stay in sync.
+- `straighten_verticals(cam_obj)` — Architectural shift lens: level the camera (pitch 90 deg) and recover the framing with vertical lens shift, so verticals stay parallel.
+
 ## `scene.environment.leaf_geometry` — Leaf geometry; implementation for scatter.
 
 - `leaf_prototype(name, length, width, curl, material)` — A small curled elliptical leaf (10-gon) in a hidden PROTOS collection; reused if present.
@@ -675,45 +681,38 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 - `import_rhino(path, collection_name=None)` — Import a .3dm as geometry only. Layers -> nested collections, blocks -> instances, named views -> cameras. Any material that rides along is discarded.
 
-## `scene.lighting.atmosphere` — Volumetric fog / mist (run in Blender). lighting-camera.md > Fog and mist.
+## `scene.lighting.atmosphere` — Volumetric Mie fog and mist with visibility-based extinction.
 
 - `sigma_from_visibility(visibility_m)` — Koschmieder: extinction coefficient (1/m) for a meteorological visibility (m).
-- `fog_volume(centre=(0.0, 0.0), visibility_m=150.0, diameter_um=15.0, box=(500.0, 500.0, -25.0, 130.0), top=(25.0, 85.0), valley=(0.0, -8.0, 0.5), patch=(0.012, 0.6), clear_boxes=(), name='FOG_VOLUME', collection=None)` — Box of heterogeneous Mie fog: sigma(V) x height fade (full below top[0], clear at top[1]) x valley boost x patch noise; zero in clear_boxes [(xmin,xmax,ymin,ymax,zmax)].
+- `fog_volume(centre, visibility_m, box, top, diameter_um=15.0, valley=None, patch=(0.012, 0.6), clear_boxes=(), name='FOG_VOLUME', collection=None)` — Box of heterogeneous Mie fog: sigma(V) x height fade (full below top[0], clear at top[1]) x optional valley boost (None disables it) x patch noise; zero in clear_boxes [(xmin,xmax,ymin,ymax,zmax)].
 - `volume_render_settings(bounces=8, max_bounces=16)` — Forward-peaked Mie fog needs multiple scattering: volume bounces 8 (default 0 = murky/dark).
 
-## `scene.lighting.camera` — Camera: which camera is active, its lens and sensor, real-world exposure, and architectural framing.
-
-- `use_camera(name, lens=None)` — Make the named camera active, optionally setting its focal length (mm).
-- `physical_camera(cam_obj, iso, fstop, shutter_s, focal_mm, sensor_mm=36.0, focus_distance=None, dof=True)` — Real camera triple -> Blender. Exposure follows the saturation-based sensor model (pixel = L / (1.2 * 2^EV100), L in cd/m2): stops = log2(683 / 1.2) - EV100. The same f-stop drives depth of field, so brightness and DOF stay in sync.
-- `straighten_verticals(cam_obj)` — Architectural shift lens: level the camera (pitch 90 deg) and recover the framing with vertical lens shift, so verticals stay parallel.
-
-## `scene.lighting.emitter_shading` — Emitter shading; implementation for interior.
+## `scene.lighting.emitter_shading` — Visible emitter luminance and ray visibility.
 
 - `lens_luminance(lumens, area_m2)` — Luminance of a Lambertian lens of area A emitting `lumens` into its half-space: L = F / (pi A).
 - `lit_once(objs)` — Decorative lenses whose flux is carried by an analytic light: keep them visible to the camera and in reflections, but out of diffuse AND transmission paths -- a diffuse bounce that then passes through water continues as a transmission ray and would see the lens again.
 - `emitter(name, luminance_cd, kelvin=3000, color=None)` — Visible light source surface (LED lens, lit panel) with a luminance in cd/m2. Cycles emission strength S is radiance in W/m2/sr, so S = L / 683.
-- `emitter_dots(name, luminance_cd, emitter_count=4, radius=0.22, kelvin=3000, housing=(0.02, 0.02, 0.02))` — Multi-head downlight face: emitter_count round LED lenses along the object's long (generated X) axis, black housing around them. Generated coords span 0..1 over the box.
 
-## `scene.lighting.ies_fixture` — Ies fixture; implementation for interior.
-
-- `ies_light(name, path, location_m, rotation_rad=(0.0, 0.0, 0.0), lumens=None, kelvin=3000, radius=0.02, kind='POINT', collection=None)` — A light with the manufacturer's measured distribution. Unscaled (`lumens=None`) it emits exactly the file's candela; `lumens` rescales it to another lumen package or a dimmed level. The file is embedded (Internal mode) so the .blend stays self-contained. Aim with `rotation_rad`: the profile's nadir is the light's -Z, C0 its -Y, a linear fixture's length its -X. `radius` sets the shadow/highlight softness of the emitting lens; place `location_m` at least radius + 2 mm from any surface -- the part of the sphere inside a ceiling or housing is shadowed (0.57x measured).
-
-## `scene.lighting.ies_profile` — Ies profile; implementation for interior.
-
-- `ies_read(path)` — Parse an LM-63 type C file. Returns header lumens, integrated luminaire lumens, peak cd, beam (50 % of peak) and field (10 %) full angles in degrees, and the [MANUFAC]/[LUMCAT] tags.
-
-## `scene.lighting.light_fixtures` — Light fixtures; implementation for interior.
-
-- `downlight(name, location_m, lumens=800.0, beam_deg=24.0, kelvin=3000, radius=0.02, blend=0.3, collection=None)` — Recessed spot pointing straight down. `lumens` = flux inside the beam.
-- `led_strip(name, p0, p1, lm_per_m=1000.0, kelvin=2700, width=0.012, normal=(0, 0, -1), spread_deg=120.0, collection=None)` — Linear LED (cove) as a thin rectangular area light from p0 to p1 facing `normal`.
-- `panel_light(name, location_m, rotation_rad, size=(0.2, 0.2), lumens=500.0, kelvin=3000, spread_deg=180.0, collection=None)` — Rectangular area light emitting `lumens` (Lambert, `spread_deg` like a louvre).
-
-## `scene.lighting.lighting` — HDRI world and sun: the natural light of a scene, scaled in physical units.
+## `scene.lighting.hdri` — HDRI worlds for day, night or interiors, scaled in physical units, plus a test sun.
 
 - `world_hdri(hdri_id, strength=1.0, rotation_deg=0.0, res=None)` — World = equirect HDRI from library/polyhaven/hdris/<id>, Z-rotated; strength is raw (use world_hdri_lux for lux).
 - `hdri_analyse(hdri_id, rotation_deg=0.0)` — Horizontal illuminance (lux at strength 1) and direction to the brightest region of an equirect HDRI, in Blender world space after a Z rotation. The sun direction is the luminance centroid of the top 0.05 % texels.
 - `world_hdri_lux(hdri_id, target_lux, rotation_deg=0.0, visible=True)` — HDRI world scaled so the upper hemisphere delivers `target_lux` on a horizontal plane.
 - `sun_from_direction(direction, strength_lux, angle_deg=0.53, name='Sun_matched')` — Sun lamp pointing along -direction (direction = towards the sun). Strength in lux. Only for scenes WITHOUT an HDRI (tests, controls): with an HDRI sky the map is the sole natural light and its own sun does this job (RULES LGT_02).
+
+## `scene.lighting.ies_fixture` — IES-distributed light fixtures in photometric units.
+
+- `ies_light(name, path, location_m, rotation_rad=(0.0, 0.0, 0.0), lumens=None, kelvin=3000, radius=0.02, kind='POINT', collection=None)` — A light with the manufacturer's measured distribution. Unscaled (`lumens=None`) it emits exactly the file's candela; `lumens` rescales it to another lumen package or a dimmed level. The file is embedded (Internal mode) so the .blend stays self-contained. Aim with `rotation_rad`: the profile's nadir is the light's -Z, C0 its -Y, a linear fixture's length its -X. `radius` sets the shadow/highlight softness of the emitting lens; place the emitting sphere clear of any surface -- the part inside a ceiling or housing is shadowed.
+
+## `scene.lighting.ies_profile` — LM-63 type C photometric profile parsing.
+
+- `ies_read(path)` — Parse an LM-63 type C file. Returns header lumens, integrated luminaire lumens, peak cd, beam (50 % of peak) and field (10 %) full angles in degrees, and the [MANUFAC]/[LUMCAT] tags.
+
+## `scene.lighting.light_fixtures` — Photometric spot, strip and panel fixtures.
+
+- `downlight(name, location_m, lumens, beam_deg, kelvin=3000, radius=0.02, blend=0.3, collection=None)` — Recessed spot pointing straight down. `lumens` = flux inside the beam.
+- `led_strip(name, p0, p1, lm_per_m, kelvin=2700, width=0.012, normal=(0, 0, -1), spread_deg=120.0, collection=None)` — Linear LED (cove) as a thin rectangular area light from p0 to p1 facing `normal`.
+- `panel_light(name, location_m, rotation_rad, size, lumens, kelvin=3000, spread_deg=180.0, collection=None)` — Rectangular area light emitting `lumens` (Lambert, `spread_deg` like a louvre).
 
 ## `scene.lighting.photometry` — Photometric conversions shared by lights, the physical camera and the HDRI world.
 

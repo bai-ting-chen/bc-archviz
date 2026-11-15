@@ -1,8 +1,8 @@
 # Troubleshooting
 
 Use when: an error message appears, or a render shows something unexpected and the cause is not yet
-known. Generic problems only: a problem that belongs to one material or effect is in that file's
-§5 Troubleshooting.
+known. Generic problems only: a problem that belongs to one material, effect, light type or the
+camera is in that file's §5 Troubleshooting.
 
 Each entry: the symptom as you meet it; **Seen as:** the exact text, for problems that print one;
 **Cause**; **Check:** the order to test, where one symptom has several causes; **Fix**.
@@ -76,66 +76,17 @@ correct `uvindex` before export. See [luxcore.md](../renderer/luxcore.md#native-
 
 ## Camera and lighting
 
-### Camera framing far off after setting lens shift
-Cause: with `sensor_fit = HORIZONTAL`, `shift_x/shift_y` are fractions of the frame **width** even on a
-portrait frame, and +shift_x moves the frame right.
-Fix: the shift formulas in lighting-camera.md › Recreating a reference › 1. Camera; check by
-projecting a far point with `world_to_camera_view`. See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Scripted camera faces the wrong way, or a huge lens shift
-Cause: `matrix_world` is stale after setting the rotation.
-Fix: `view_layer.update()` before reading it (done in `straighten_verticals`). See [lighting-camera.md](../scene/lighting-camera.md).
+Problems of one light type or of the camera are in that file's §5: `references/scene/lighting/` (index, hdri, artificial-light, ies-profiles, fog), `references/scene/camera/camera.md`, `references/research/reference-match.md`.
 
 ### Camera from a Rhino named view frames wider or narrower
 Cause: Rhino's lens length on a square view is the FOV of a 24 mm frame side.
 Fix: same lens with `sensor_width = 24` and a square render; match the frustum. See
 [pipeline.md](../scene/pipeline.md) › Rhino reference.
 
-### Render white, or exposure ignored
-Cause: `archviz.render_setup` resets the view exposure, so calling it after `physical_camera` wipes it.
-Fix: call `render_setup` before `physical_camera`. See [blender-api-traps.md](../scene/blender-api-traps.md).
-
 ### Material or light change has no visible effect
 Cause: a stale mesh or dependency graph, so the render still uses the old data.
 Fix: `update_tag()` and `view_layer.update()`, then prove the change with a control (RULES VAL_02).
 See [validation.md](../review/validation.md).
-
-### Lamp or bulb invisible in the render
-Cause: camera visibility depends on the light type and the Blender version.
-Fix: check `visible_camera` and confirm the actual source in a small control. See [lighting-camera.md](../scene/lighting-camera.md).
-
-### IES or point light much dimmer than the hand calculation
-Cause: its sphere (radius) sits partly inside the ceiling or housing.
-Fix: centre it radius + 2 mm clear (lighting-camera.md › IES). See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Colour cast from a pool or glass
-Cause: a lens or emitter reaches surfaces through water or glass as *transmission* rays; visibility
-follows the last bounce, so turning diffuse off alone still leaks.
-Fix: `interior.lit_once()` (`visible_diffuse` and `visible_transmission` off). Ray visibility is an
-emitter-path approximation; declare its bias (RULES REN_02). See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Unwanted scallops on a washed wall
-Cause: spots used as wall washers.
-Fix: a linear source along the wall. See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Image too cold after white balance
-Cause: the white-balance temperature names the light rendered neutral; warming depends on the current
-neutral point and tint.
-Fix: use the current warming and tint procedure and compare the whole reference image before changing
-the temperature. See [lighting-camera.md](../scene/lighting-camera.md).
-
-### Glazing far darker than the reference
-Cause: the room seen through it or the environment it reflects is too dark; Fresnel depends on angle and IOR.
-Check: room lighting → HDRI reflection direction, against the reference.
-Fix: correct the darker of the two; declare any added room light. See [lighting-camera.md](../scene/lighting-camera.md).
-
-### An area renders black that is bright in the reference
-Cause: the model may be roofed where the reference is open to the sky.
-Fix: check sky access over that area against the reference. See [lighting-camera.md](../scene/lighting-camera.md).
-
-### House edge crisp against a soft HDRI backplate
-Cause: the rendered subject and the photographed backplate have different depth-of-field softness.
-Fix: slight DOF in front of the subject (lighting-camera.md › Soft backplate). See [lighting-camera.md](../scene/lighting-camera.md).
 
 ## Materials, geometry and images
 

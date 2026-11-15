@@ -7,7 +7,7 @@ What the pipeline can do and which technique does it; each row was proved with a
 |---|---|---|
 | Directional roughness | shared [anisotropy](../effects/anisotropy.md) on a BSDF; reflection and glass transmission | control: reflection and transmission |
 | Daylight | HDRI scaled to real lux, rotated to place its sun; the sole natural light | solid |
-| Specified light fixtures | manufacturer IES on a point light at 177.83/683 W (`interior.ies_light`), candela reproduced 1.000; room direct illuminance = hand calc ±1 % | solid |
+| Specified light fixtures | manufacturer IES on a point light at 177.83/683 W (`artificial.ies_light`), candela reproduced 1.000; room direct illuminance = hand calc ±1 % | solid |
 | Linear fixtures (cove, linear pendant) | the IES split into N point lights at lumens/N along the run | solid |
 | Eulumdat-only fixtures | `scripts/scene/lighting/ldt_to_ies.py` (lumens checked; rotational symmetry tested, other symmetries untested) | partial |
 | Camera | `physical_camera`, `straighten_verticals` | solid |

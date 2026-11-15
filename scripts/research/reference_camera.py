@@ -8,12 +8,10 @@ camera; z up from the base) and the Blender camera for it.
     python reference_camera.py readings.json            # print the solve
     from reference_camera import ReferenceCameraSolve  # then .pixel_to_floor / .pixel_to_facade_plane / .pixel_to_height / .fit_circle
 
-readings.json:
-    {"image_width_px": 2450, "image_height_px": 1000, "repeat_pitch_m": 4.5, "focal_length_px": 2700, "principal_x_px": 1225,
-     "repeat_x_px": [...], "base_y_px": [...], "top_y_px": [...], "widths": [...],     # widths optional
-     "horizon": 715}                                                    # optional override
+readings.json fields: image_width_px, image_height_px, repeat_pitch_m, focal_length_px,
+principal_x_px, repeat_x_px, base_y_px and top_y_px; widths and horizon are optional.
 
-Method (lighting-camera.md > Camera from a repeated element): base and top lines meet at the
+Method (references/research/reference-match.md > Camera from a repeated element): base and top lines meet at the
 façade vanishing point -> horizon; 1/h steps equal -> equal pitch; pitch fixes scale; eye
 height = H * (y_base - horizon) / h. Focal is the weak unknown: estimate it with
 `focal_from_sagitta` per round base and confirm in the overlay. The line residual (`residual_m`)

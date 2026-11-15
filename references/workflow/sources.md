@@ -12,7 +12,7 @@ procedure in its topic reference.
 | Quixel Megaplants (Fab) | procedural trees; Blender only via USD | built-in browser pane (`fab-search.js`, `fab-download.js`) + `fab_fetch.py`, RULES AST_06 | free, Fab Standard License | agent, after the user's picks | [pipeline.md](../scene/pipeline.md) › Assets |
 | Maxtree | plant models (single models and volumes) | public Store API (`maxtree_search.py`), RULES AST_06 | paid per model or volume | user | [pipeline.md](../scene/pipeline.md) › Assets |
 | 3ds Max files | models from the user's own libraries | local files | per file | user | [max-import.md](../scene/max-import.md) |
-| IES files | measured light distributions | manufacturer sites | per manufacturer | user or agent | [lighting-camera.md](../scene/lighting-camera.md) |
+| IES files | measured light distributions | manufacturer sites | per manufacturer | user or agent | [ies-profiles.md](../scene/lighting/ies-profiles.md) |
 
 Candidate lists: RULES MAT_10. "Agent" is whoever builds in the current work mode ([study-stages.md](study-stages.md)).
 

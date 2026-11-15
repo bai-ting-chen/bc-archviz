@@ -17,8 +17,8 @@ Use when: judging a look round against a reference, proving a feature works, or 
 1. Render the wip frame with the study runner (`scripts/workflow/study_run.py`).
 2. Measure the PNG the renderer wrote (VAL_03), then look at the stacked pair: region numbers miss
    joint grids, missing objects and wrongly roofed areas.
-3. Ratios off: fix light or material region by region (lighting-camera.md › Recreating a
-   reference) and go back to 1.
+3. Ratios off: fix light or material region by region (`references/research/reference-match.md`,
+   step 3) and go back to 1.
 4. Ratios agree: compare native-resolution crops beside the reference (VAL_01), name the worst
    defect, fix only that, and go back to 1.
 5. A change claimed to work gets its control render (VAL_02) before it counts.

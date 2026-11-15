@@ -67,7 +67,7 @@ the method below (RULES REN_02, REN_03), say which and why, then build and check
 
 ### Step 3. Build
 - **Light, both methods:** the HDRI's own sun (RULES LGT_02); choose the map by its sun share
-  (lighting-camera.md › Pick the HDRI by its sun). The fill sets the contrast between caustic and
+  (hdri.md, step 2). The fill sets the contrast between caustic and
   surface: a clearer, bluer map (higher sun share) separates them far more than a material or grade does.
 
 #### 3a. LuxCore
@@ -103,7 +103,7 @@ the method below (RULES REN_02, REN_03), say which and why, then build and check
 |---|---|---|
 | Renderer choice | `references/renderer/renderer-choice.md` | the §1 table applies REN_02 and REN_03 |
 | LuxCore setup | [luxcore.md](../renderer/luxcore.md) | PATH + light tracing, *Use CPUs* on (step 3a) |
-| HDRI sun | `references/scene/lighting-camera.md` | the sun share sets crispness and contrast (step 3) |
+| HDRI sun | `references/scene/lighting/hdri.md` | the sun share sets crispness and contrast (step 3) |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

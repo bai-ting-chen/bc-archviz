@@ -56,7 +56,7 @@ Read: [research-loop.md](references/research/research-loop.md)
 
 **RES_03 — Making A Look Decision Or Recreating A Reference**  
 Rule: Shortlist the reference library; solve the reference camera first and adjust exposure last.  
-Read: [reference-library.md](references/research/reference-library.md)
+Read: [reference-library.md](references/research/reference-library.md), [reference-match.md](references/research/reference-match.md)
 
 ### Renderer Choice
 
@@ -76,11 +76,11 @@ Read: [renderer-choice.md](references/renderer/renderer-choice.md)
 
 **LGT_01 — Setting Lights Or Camera**  
 Rule: Use photometric units and physical camera exposure; count each emitter once, white-balance and keep verticals parallel.  
-Read: [lighting-camera.md](references/scene/lighting-camera.md)
+Read: [lighting/index.md](references/scene/lighting/index.md), [camera.md](references/scene/camera/camera.md)
 
 **LGT_02 — Lighting Daylight**  
 Rule: Use a matching HDRI as the sole natural source; declare Sky Texture fallback only if none fits.  
-Read: [lighting-camera.md](references/scene/lighting-camera.md)
+Read: [hdri.md](references/scene/lighting/hdri.md)
 
 ### Materials
 

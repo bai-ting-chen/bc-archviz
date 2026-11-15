@@ -1,4 +1,7 @@
-"""Ies fixture; implementation for interior."""
+"""IES-distributed light fixtures in photometric units.
+
+See references/scene/lighting/ies-profiles.md.
+"""
 import math
 import os
 import bpy
@@ -16,8 +19,8 @@ def ies_light(name, path, location_m, rotation_rad=(0.0, 0.0, 0.0), lumens=None,
     exactly the file's candela; `lumens` rescales it to another lumen package or a dimmed level.
     The file is embedded (Internal mode) so the .blend stays self-contained. Aim with `rotation_rad`: the
     profile's nadir is the light's -Z, C0 its -Y, a linear fixture's length its -X. `radius` sets the
-    shadow/highlight softness of the emitting lens; place `location_m` at least radius + 2 mm from any
-    surface -- the part of the sphere inside a ceiling or housing is shadowed (0.57x measured)."""
+    shadow/highlight softness of the emitting lens; place the emitting sphere clear of any
+    surface -- the part inside a ceiling or housing is shadowed."""
     info = ies_read(path)
     ob, ld = _light_obj(name, kind, location_m, rotation_rad, collection=collection)
     ld.shadow_soft_size = radius

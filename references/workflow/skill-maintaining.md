@@ -23,7 +23,7 @@ leaves it instructions (MIGRATE.md).
 - **State each rule once, in [RULES.md](../../RULES.md).** [SKILL.md](../../SKILL.md) and the references carry only the how-to
   (commands, functions, numbers) and a pointer such as "(RULES AST_03)". A rule repeated in several
   files drifts apart the first time it changes. `RULES.md` stays a separate file at the skill root, upper case.
-- **Reference layout:** every material and effect reference follows [reference-format.md](reference-format.md)
+- **Reference layout:** every material, effect, lighting, camera and reference-match reference follows [reference-format.md](reference-format.md)
   (Overview, Layers and node-editor diagram, Code, Instructions and parameters, Troubleshooting).
 - **Writing patterns:** other references take the pattern from Anthropic's skill guide that fits their
   job, applied only when the user asks for that file's revision (one file at a time):
@@ -34,7 +34,7 @@ leaves it instructions (MIGRATE.md).
   | Multi-MCP coordination | one job spans Rhino (Rook), Blender and host tools | one phase per tool; what is handed to the next phase (file, path, names); a check before the next phase; errors handled in one place | pipeline.md (Rhino → Blender) |
   | Iterative refinement | quality improves round by round | measurable criteria first; the check script; the loop (fix, re-render, re-measure); when to stop | validation.md, research-loop.md, the look rounds in pipeline.md |
   | Context-aware selection | same outcome, different method by case | a decision table with its criteria; the fallback; say which was chosen and why | renderer-choice.md, materials/index.md, texture-selection.md, caustics.md §1 |
-  | Domain intelligence | knowledge beyond the tools | rules applied before acting; numbers with units and sources; record what was decided | physical-ranges.md, scale.md, lighting-camera.md, blender-api-traps.md |
+  | Domain intelligence | knowledge beyond the tools | rules applied before acting; numbers with units and sources; record what was decided | physical-ranges.md, scale.md, blender-api-traps.md |
 
   Lookup files (blender-python-helpers.md, capabilities.md, troubleshooting.md) keep their own format.
 

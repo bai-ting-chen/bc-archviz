@@ -1,4 +1,6 @@
-"""HDRI world and sun: the natural light of a scene, scaled in physical units.
+"""HDRI worlds for day, night or interiors, scaled in physical units, plus a test sun.
+
+See references/scene/lighting/hdri.md.
 
 The HDRI world is the sole natural light when one is used (RULES LGT_02); the sun helper is for
 scenes without an HDRI (tests, controls).

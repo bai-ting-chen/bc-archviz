@@ -106,7 +106,7 @@ tx, ty = scatter.frustum_tangents(cam, (400, 500))
 scatter.meadow_layer("SMOKE_GRASS", grp, ter, blades, cam, Density=400.0, Tan_X=tx, Tan_Y=ty, Max_Distance=40.0)
 
 # fog + sky
-atmosphere.fog_volume(centre=PAD_CENTER_M, visibility_m=150, box=(200, 200, -20, 80), top=(20, 60),
+atmosphere.fog_volume(centre=PAD_CENTER_M, visibility_m=150, box=(200, 200, -20, 80), top=(20, 60), valley=(0.0, -8.0, 0.5),
                       clear_boxes=[(-2.0, 2.0, -1.6, 1.6, 2.8)])
 atmosphere.volume_render_settings()
 archviz.world_hdri_lux("kloofendal_misty_morning", 12000)

@@ -46,7 +46,9 @@ Read the files for the stage you are in.
 - [Terrain](references/scene/environment/terrain.md): naturally sloped ground around a building pad
 
 ### 3. Camera, light and materials (→ GAT_03)
-- [Lighting and camera](references/scene/lighting-camera.md): HDRI, lumens/IES, camera, reference solve, fog
+- [Lighting](references/scene/lighting/index.md): HDRI, lumens, IES fixtures, fog; the cheat sheet of common values
+- [Camera](references/scene/camera/camera.md): view, verticals, exposure, white balance, depth of field
+- [Reference match](references/research/reference-match.md): recreating a reference image, camera first
 - [Materials](references/materials/index.md): general rules, material families (water in `materials/water/`) and
   shared effects (`references/effects/`: wear, variation, wet surfaces, caustics, anisotropy); the index routes all three
 
@@ -82,7 +84,7 @@ Reference folders and code folders use the same topic names. Each code folder's 
 |---|---|---|
 | 1. Research | `references/research/` | `scripts/research/` |
 | 2. Rhino geometry and import | `references/scene/pipeline.md` | `scripts/blender/scene/io/`, `scripts/blender/core/` |
-| 3. Camera, light, materials | `references/scene/lighting-camera.md`, `references/materials/` | `scripts/blender/scene/lighting/`, `scripts/blender/materials/` |
+| 3. Camera, light, materials | `references/scene/camera/`, `references/scene/lighting/`, `references/materials/` | `scripts/blender/scene/camera/`, `scripts/blender/scene/lighting/`, `scripts/blender/materials/` |
 | 4. Look rounds and controls | `references/renderer/`, `references/review/` | `scripts/blender/renderer/`, `scripts/controls/` |
 | 5. Final and closure | `references/scene/pipeline.md`, `references/workflow/study-close.md` | `scripts/blender/renderer/finals/`, `scripts/workflow/` |
 

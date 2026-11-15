@@ -1,4 +1,7 @@
-"""Ies profile; implementation for interior."""
+"""LM-63 type C photometric profile parsing.
+
+See references/scene/lighting/ies-profiles.md.
+"""
 import math
 
 

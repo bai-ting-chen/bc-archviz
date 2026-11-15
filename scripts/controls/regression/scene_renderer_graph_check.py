@@ -31,25 +31,24 @@ def graphs(out):
     import scene.lighting.atmosphere as atmosphere
     import materials.glass.glassware as glassware
     import effects.caustics.geometry_node_caustics as geometry_node_caustics
-    import scene.lighting.interior as interior
+    import scene.lighting.artificial as artificial
     import scene.environment.scatter as scatter
     import scene.environment.terrain as terrain
     ies = out / 'control.ies'
     ies.write_text('IESNA:LM-63-2002\n[MANUFAC] Control\nTILT=NONE\n1 800 1 5 1 1 2 0 0 0 1 1 10\n0 45 90 135 180\n0\n200 150 50 10 0\n')
-    result = dict(ies=interior.ies_read(str(ies)), luminance=interior.lens_luminance(800, .02))
-    lights = [interior.downlight('control spot', (0, 0, 2)),
-              interior.led_strip('control strip', (0, 0, 2), (1, 0, 2)),
-              interior.panel_light('control panel', (0, 0, 2), (0, 0, 0)),
-              interior.ies_light('control ies', str(ies), (0, 0, 2)),
-              interior.ies_light('control ies spot', str(ies), (0, 0, 2), lumens=500, kind='SPOT')]
-    interior.lit_once(lights)
+    result = dict(ies=artificial.ies_read(str(ies)), luminance=artificial.lens_luminance(800, .02))
+    lights = [artificial.downlight('control spot', (0, 0, 2), lumens=800.0, beam_deg=24.0),
+              artificial.led_strip('control strip', (0, 0, 2), (1, 0, 2), lm_per_m=1000.0),
+              artificial.panel_light('control panel', (0, 0, 2), (0, 0, 0), size=(0.2, 0.2), lumens=500.0),
+              artificial.ies_light('control ies', str(ies), (0, 0, 2)),
+              artificial.ies_light('control ies spot', str(ies), (0, 0, 2), lumens=500, kind='SPOT')]
+    artificial.lit_once(lights)
     result['lights'] = {o.name: dict(type=o.data.type, energy=o.data.energy, color=list(o.data.color),
                                     temperature=o.data.temperature, location=list(o.location), rotation=list(o.rotation_euler),
                                     diffuse=o.visible_diffuse, transmission=o.visible_transmission,
                                     tree=dump_tree(o.data.node_tree) if o.data.node_tree else None) for o in lights}
-    result['emitter'] = dump_material(interior.emitter('control emitter', 1000))
-    result['emitter_color'] = dump_material(interior.emitter('control emitter color', 1000, color=(.2, .5, .8)))
-    result['dots'] = dump_material(interior.emitter_dots('control dots', 1000))
+    result['emitter'] = dump_material(artificial.emitter('control emitter', 1000))
+    result['emitter_color'] = dump_material(artificial.emitter('control emitter color', 1000, color=(.2, .5, .8)))
     mat = bpy.data.materials.new('control ground')
     mat.use_nodes = True
     leaf = scatter.leaf_prototype('control leaf', .07, .045, .012, mat)
@@ -81,7 +80,8 @@ def graphs(out):
                            ('mnee', glassware.glass_of_water_mnee(centre=(.3, 0), segments=12))]:
         result[kind] = {k: dict(mesh=object_mesh(v), material=dump_material(v.data.materials[0]))
                         if isinstance(v, bpy.types.Object) else v for k, v in objects.items()}
-    fog = atmosphere.fog_volume(clear_boxes=[(-1, 1, -1, 1, 3)])
+    fog = atmosphere.fog_volume(centre=(0.0, 0.0), visibility_m=150.0, box=(500.0, 500.0, -25.0, 130.0),
+                                top=(25.0, 85.0), valley=(0.0, -8.0, 0.5), clear_boxes=[(-1, 1, -1, 1, 3)])
     result['fog'] = dump_material(fog.data.materials[0])
     return result
 

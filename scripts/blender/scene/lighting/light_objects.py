@@ -1,4 +1,7 @@
-"""Light objects; implementation for interior."""
+"""Light object creation and colour temperature.
+
+See references/scene/lighting/artificial-light.md.
+"""
 import bpy
 
 

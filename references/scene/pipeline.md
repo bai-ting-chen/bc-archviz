@@ -54,16 +54,16 @@ Read-only documentation work needs no Blender or Rhino connection.
    vein-cut stone, ribbed sheet, weave, long tiles) `archviz.directional_uv(obj, size_m, axis)` so the
    direction follows the element on every face ([texture-selection.md](../materials/texture-selection.md)).
 2. **Materials** by layer → [materials/index.md](../materials/index.md).
-3. **Light**: daylight (RULES LGT_02) `archviz.world_hdri_lux`, rotated by its `hdri_analyse` sun
-   direction; artificial: the fixture's IES file `interior.ies_light` when it is specified, else
-   `interior.downlight / led_strip / lens_luminance` → [lighting-camera.md](lighting-camera.md).
+3. **Light**: the HDRI world (RULES LGT_02) `archviz.world_hdri_lux`, rotated by its `hdri_analyse`
+   direction; artificial: the fixture's IES file `artificial.ies_light` when it is specified, else
+   `artificial.downlight / led_strip / lens_luminance` → [lighting/index.md](lighting/index.md).
 4. **Render settings first, then camera**: `archviz.render_setup(...)` (it resets view exposure),
    then `archviz.physical_camera(cam, iso, f, shutter, focal)`, `straighten_verticals`, white balance
-   if lights are warm. Settings → [render-settings.md](../renderer/render-settings.md); LuxCore case
+   if lights are warm → [camera.md](camera/camera.md). Settings → [render-settings.md](../renderer/render-settings.md); LuxCore case
    ([RULES REN_03](../renderer/renderer-choice.md)) → [LuxCore setup](../renderer/luxcore.md).
 5. **From a reference image:** `reference_match.py grid` → solve the camera (`reference_camera.py` when the image has
    a repeated element) → `archviz.framing_render(root, path)` + `reference_match.py pair --overlay`; then
-   light region by region with `study_run.py` (lighting-camera.md › *Recreating a reference*).
+   light region by region with `study_run.py` → [reference-match.md](../research/reference-match.md).
 6. **Hands over:** a full first build rendered from the final camera.
 7. **Gate:** the material gate (RULES GAT_03) before any look round.
 
@@ -324,7 +324,7 @@ hand tools (sculpt, knife, gizmos). The MCP bundles the 5.x manual + API offline
 | Outdoor | `terrain`, `scatter`, `atmosphere`; `materials.ground.ground` and `materials.vegetation.vegetation` for shading. |
 | Finals (Cycles) | `scripts\blender\renderer\finals\finals.py`: untiled no-limit final in the UI, savers, OIDN from passes, graded PNG |
 | 3ds Max assets | `scripts\blender\scene\io\max_import.py`: `load` (io_scene_max extension + repairs), `tidy`, `open_loops`, `origin_to_root` — [max-import.md](max-import.md) |
-| Photometry | `scripts\scene\lighting\ldt_to_ies.py in.ldt out.ies` (Eulumdat → IES for Cycles, lumens checked); IES files → `interior.ies_light` |
+| Photometry | `scripts\scene\lighting\ldt_to_ies.py in.ldt out.ies` (Eulumdat → IES for Cycles, lumens checked); IES files → `artificial.ies_light` |
 | Measure | `scripts\research\image_statistics.py stats|patch|diff`; `scripts\research\reference_match.py grid|pair|patches` (render vs reference) — MCP venv python (`%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python`) |
 | Geometry check | `scripts\rhino\project_edges.py` (in Rhino via Rook, with the solved camera) → `scripts\research\edge_overlay.py edges.json ref.png out.png` |
 | Reference recreation | `scripts\research\reference_camera.py readings.json` (camera from a repeated element + image→plan); `scripts\workflow\study_run.py <study> vNN.png [--rebuild]` (syntax-check, render via MCP, pair + stack + patches) |

@@ -1,7 +1,7 @@
 # Fabric
 
 ## 1. Overview
-Sheer curtain fabric. The lit room seen through it: lighting-camera.md › Glass and what it shows.
+Sheer curtain fabric.
 
 ## 2. Layers and node-editor diagram
 This file is a single layer: one sheer-curtain material, with no stack and no generic layers of its
@@ -16,7 +16,8 @@ own. It is a Mix of Diffuse and Translucent at about 0.5, at high albedo (§4.1)
 
 ### 4.1 Sheer curtain (Mix of Diffuse and Translucent)
 - Mix(Diffuse, Translucent, ~0.5) at high albedo, so a lit room behind glows through the curtain.
-- The glow depends on the lit room behind (see lighting-camera.md in §1), not on the curtain alone.
+- The glow comes from the light on the curtain's back, not from the material: a sheer that reads
+  brighter than the wall beside it needs a lit room behind it.
 
 | Parameter | Value |
 |---|---|
@@ -26,7 +27,7 @@ own. It is a Mix of Diffuse and Translucent at about 0.5, at high albedo (§4.1)
 ### Generic layers, fabric settings
 | Layer | Reference | Fabric note |
 |---|---|---|
-| Lit room behind the curtain | lighting-camera.md › Glass and what it shows (plain text) | the source of the glow (§4.1) |
+| Lit room behind the curtain | `references/scene/lighting/artificial-light.md` | the source of the glow (§4.1) |
 
 ## 5. Troubleshooting
 No symptoms are recorded for this file. Generic problems are in

@@ -1,10 +1,13 @@
-"""Light fixtures; implementation for interior."""
+"""Photometric spot, strip and panel fixtures.
+
+See references/scene/lighting/artificial-light.md.
+"""
 import math
 from core.archviz import LM_PER_W
 from scene.lighting.light_objects import _light_obj, _warm
 
 
-def downlight(name, location_m, lumens=800.0, beam_deg=24.0, kelvin=3000, radius=0.02, blend=0.3, collection=None):
+def downlight(name, location_m, lumens, beam_deg, kelvin=3000, radius=0.02, blend=0.3, collection=None):
     """Recessed spot pointing straight down. `lumens` = flux inside the beam."""
     ob, ld = _light_obj(name, "SPOT", location_m, collection=collection)
     a = math.radians(beam_deg)
@@ -15,7 +18,7 @@ def downlight(name, location_m, lumens=800.0, beam_deg=24.0, kelvin=3000, radius
     return ob
 
 
-def led_strip(name, p0, p1, lm_per_m=1000.0, kelvin=2700, width=0.012, normal=(0, 0, -1),
+def led_strip(name, p0, p1, lm_per_m, kelvin=2700, width=0.012, normal=(0, 0, -1),
               spread_deg=120.0, collection=None):
     """Linear LED (cove) as a thin rectangular area light from p0 to p1 facing `normal`."""
     from mathutils import Matrix, Vector
@@ -33,7 +36,7 @@ def led_strip(name, p0, p1, lm_per_m=1000.0, kelvin=2700, width=0.012, normal=(0
     return ob
 
 
-def panel_light(name, location_m, rotation_rad, size=(0.2, 0.2), lumens=500.0, kelvin=3000, spread_deg=180.0, collection=None):
+def panel_light(name, location_m, rotation_rad, size, lumens, kelvin=3000, spread_deg=180.0, collection=None):
     """Rectangular area light emitting `lumens` (Lambert, `spread_deg` like a louvre)."""
     ob, ld = _light_obj(name, "AREA", location_m, rotation_rad, collection=collection)
     ld.shape, ld.size, ld.size_y = "RECTANGLE", size[0], size[1]

@@ -34,8 +34,8 @@ used here with glass settings.
   - `clear_glass(name, tint, roughness, ior)`: the one clear-glass builder (§4.1).
   - `glass_distortion(mat, obj, wave_period, wave_amp_mm, pillow_mm, roughness)`: adds §4.2 to `mat`,
     with the dome centred on `obj`.
-  - `glass_shell(objs, thickness)`: turns solid lamp globes into thin shells; its use is in
-    `references/scene/lighting-camera.md`.
+  - `glass_shell(objs, thickness)`: turns solid lamp globes into thin shells (a solid glass sphere is
+    a lens ball).
 - Controls: `scripts/controls/material_graph_check.py` topic `glass` (node-graph baseline of the base, the
   shell and the distortion); `scripts/controls/environment/outdoor_smoke.py` renders a distorted pane.
 
@@ -86,6 +86,7 @@ in the study notes (RULES GOV_01).
 | Reflections are ruler-straight, pane reads as CG | no distortion | add §4.2 |
 | Glass turns green or dark through several panes | tint multiplied at every crossing | tint closer to white (§4.1) |
 | Dome runs through the glass thickness | panes sharing the material have different thin axes | one material per orientation (§4.2) |
+| Glazing far darker than a reference | glass reflects only ~5–8 % at 30–50° incidence, so glazing that reads bright is lit from behind | light the room behind it and declare the added light |
+| Glazing reflects the wrong part of the sky | the mirrored camera ray meets a dark part of the HDRI | rotate the HDRI, not the glass (`references/scene/lighting/hdri.md`) |
 
-- Glass that looks too reflective, or shows nothing: `references/scene/lighting-camera.md` › Glass and
-  what it shows. Other generic problems are in troubleshooting.md.
+Generic problems are in troubleshooting.md.

@@ -974,4 +974,30 @@ reuse callers return immediately when `created` is false. Finished studies need 
   against the pre-pull baseline. Include the 13 material topics, edge/surface/wear checks, variation marks,
   helper regression (including caustic and scatter), and scene/renderer controls.
 
+# MIGRATE: lighting and camera split; generic helpers only
+From: LAPTOP-25
+
+## What changed
+
+| Old | New |
+|---|---|
+| `references/scene/lighting-camera.md` | `references/scene/lighting/` (index, hdri, artificial-light, ies-profiles, fog), `references/scene/camera/camera.md`, `references/research/reference-match.md` |
+| `scene.lighting.lighting` | `scene.lighting.hdri` |
+| `scene.lighting.camera` | `scene.camera.camera` |
+| `scene.lighting.interior` | `scene.lighting.artificial` (no `_light_obj`, `_warm` re-exports) |
+| `emitter_dots` | deleted |
+| `downlight`, `led_strip`, `panel_light` defaults | `lumens`, `beam_deg`, `lm_per_m`, `size` are required |
+| `fog_volume` defaults | `centre`, `visibility_m`, `box`, `top` are required; `valley=None` means no hollow boost; `diameter_um` comes after them |
+
+The `archviz` facade names are unchanged.
+
+## Steps
+
+Update external imports and calls using the table. Finished studies need no changes.
+
+## Check after pull
+
+- `python scripts/workflow/structure_check.py` (0 problems).
+- `grep -rnE "scene\.lighting\.(interior|lighting|camera)|emitter_dots|lighting-camera" scripts/ references/` returns nothing.
+
 Remove each section after applying it; delete this file when none is left.
