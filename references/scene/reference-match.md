@@ -60,8 +60,8 @@ Host side, MCP venv python (numpy, Pillow):
    - Prefer the structurally plausible reading, and check that no member covers something the
      reference shows. If still ambiguous, state the reading and let the user correct it.
    Check: repeats fall on one straight line in plan.
-3. **Light.** Needs: camera and geometry. Measure every round as the look round in validation.md;
-   this step says what to change when the region ratios disagree.
+3. **Light.** Needs: camera and geometry. Run the rounds as the look round in validation.md;
+   this step says what to change when a region line fails.
    1. Read where the light comes from before placing any: cast shadows give direction (a member of
       depth d throwing a shadow of width w puts the source at elevation ≈ atan(d/w)); a region
       brighter than its visible sources can reach means a source outside the frame. Add it, check
@@ -69,7 +69,7 @@ Host side, MCP venv python (numpy, Pillow):
    2. When one element is too bright, find the light it sits in and narrow or re-aim that light.
    3. Graded references: choose the AgX look from the reference's contrast, and tone the material
       albedo before touching grading.
-   Check: the look round's ratio criterion (validation.md).
+   Check: every region line of the match list passes (validation.md).
 4. **Exposure.** Needs: equal ratios. The common ratio is the exposure step
    (`references/scene/camera/camera.md`). If the ratios are unequal, go back to step 3.
 

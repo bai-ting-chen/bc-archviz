@@ -20,8 +20,8 @@ GAT_01–GAT_04); a study built from a scripted test scene has no model gate.
 5. **Prove**: control render, image_statistics numbers, native-resolution crops beside the reference
    (RULES VAL_02). A number that matches while the image does not is a fail.
 6. **Judge as the steering model would**: does it read like the reference at the final camera?
-   Name the worst defect in the crop, fix only that, rerun. Stop after 3 rounds without a clear
-   gain and record why (a dead end is a result).
+   Tune it in look rounds (validation.md › The look round, RULES VAL_02); a dead end that hits the
+   stop rule is a result.
 7. **Record** in study-notes.md: answer, numbers, renders, traps, cost (time, VRAM, cache size).
    Promote what is scene-independent to the skill (step 9); keep scene results in the study.
 8. **Next question** — back to 1. Keep a short log `STUDY/_wip/loop-log.md` (time, question,

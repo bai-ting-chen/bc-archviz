@@ -107,7 +107,7 @@ Rule: Prove it with feature-off and repeated-baseline renders, noise-floor measu
 Read: [validation.md](references/review/validation.md)
 
 **VAL_02 — Judging And Ending A Look Round**  
-Rule: Compare native-resolution crops beside the reference after every change to a feature. Done when region ratios agree, exposure is set, crops read like the reference in character at final-view pixels and every claimed feature has its control; after 3 rounds without a clear gain, stop and record why.  
+Rule: Write the match list before the first round. Each round makes one change for one failing line and is kept only when that line improves and no passing line gets worse in native-resolution crops; otherwise return to the best version. Done when every line passes with exposure set last; after 2 rounds in a row reverted, change the approach; after 3 rounds without a new passing line, stop, record why and show the user the best version.  
 Read: [validation.md](references/review/validation.md)
 
 ### Assets And Lifecycle

@@ -58,7 +58,8 @@ Read the files for the stage you are in.
 - [Renderer choice](references/renderer/renderer-choice.md): Cycles, or LuxCore for caustics
 - [Caustics](references/effects/caustics.md), [LuxCore](references/renderer/luxcore.md): when caustics are needed
 - [Render settings](references/renderer/render-settings.md): quality, VRAM, denoising
-- [Validation](references/review/validation.md): PNG measurements, crops, controls, bisects
+- [Validation](references/review/validation.md): the match list and look rounds, controls, PNG measurements, bisects
+- [Study run](references/workflow/study-run.md): rendering one look round with `study_run.py`
 
 ### 5. Final and closure
 - [Render settings](references/renderer/render-settings.md) › Final in the open UI

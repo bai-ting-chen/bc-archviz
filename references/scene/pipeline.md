@@ -51,9 +51,9 @@ Read-only documentation work needs no Blender or Rhino connection.
 7. **Gate:** the material gate (RULES GAT_03) before any look round.
 
 ## Phase 4. Look rounds (Blender, host tools)
-1. Run the rounds as [validation.md](../review/validation.md) › *The look round*: criteria, the
-   study runner loop, the stop rule.
-2. Prove each feature with a control (RULES VAL_01); before every "done", the crop pass (RULES VAL_02).
+1. Run the rounds as [validation.md](../review/validation.md) › *The look round*: the match list, one
+   change per round, keep or revert, the stop rule.
+2. Prove each feature with a control (RULES VAL_01).
 3. Reuse the helpers in [blender-python-helpers.md](blender-python-helpers.md) instead of
    re-deriving node plumbing: the traps they wrap get hit again otherwise.
 4. **Hands over:** the look the user approved.

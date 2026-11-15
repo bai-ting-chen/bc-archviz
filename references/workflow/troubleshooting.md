@@ -41,7 +41,7 @@ Seen as: `syntax error, nothing sent to Blender: <file>:<line>: <msg>` from `stu
 Cause: a scripted edit appended a `# reason` comment to a line that continues a call, so the rest of
 the call became a comment.
 Fix: put the comment on its own line above the value, or edit with the Edit tool. See
-[validation.md](../review/validation.md) › The study runner.
+[study-run.md](study-run.md).
 
 ### Poly Haven download fails with HTTP 52x
 Seen as: `HTTP Error 520: …` to `HTTP Error 525: …` from `polyhaven_fetch.py`
