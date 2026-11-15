@@ -2,7 +2,7 @@
 
 Design a look layer here (renders take seconds), then install the exact node graph in the scene
 (references/effects/wear/water-marks.md > Runoff; references/review/validation.md > Flat-wall lab).
-Factors, all multiplicative around 1 (RULES MAT_07):
+Factors, all multiplicative around 1 (RULES MAT_05):
   1 run-off streaks from the top: two widths, clustered, meandering, own length per streak
   2 dirt band under the top     3 damp base with an uneven edge
   4 large soft patches          5 medium blotches

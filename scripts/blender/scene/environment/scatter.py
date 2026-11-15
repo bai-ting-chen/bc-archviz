@@ -19,7 +19,7 @@ clearance from the pad (`pad_d` from terrain.landform_group), camera frustum + d
 stays upright (Align Rotation off) and picks random variants of the collection.
 """
 
-# Compatibility imports; each implementation has one owner (GOV_04).
+# Compatibility imports; each implementation has one owner (GOV_03).
 from scene.environment.scatter_graph import scatter_group  # noqa: F401
 from scene.environment.leaf_geometry import leaf_prototype  # noqa: F401
 from scene.environment.scatter_objects import scatter  # noqa: F401

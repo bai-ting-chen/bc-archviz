@@ -31,7 +31,7 @@ used here with board-form settings.
    base roughness ± grime ± wet ─────────────────────────────────────────► Roughness
 ```
 
-Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacement setup is in
+Assembly follows RULES MAT_05 (layers) and [wear-locations.md](../../effects/wear/wear-locations.md) § 2 (geometry fields); displacement setup is in
 [displacement.md](../displacement/displacement.md).
 - **Joints displace, faces bump:** everything at a board joint (fins, grooves, steps, arrises,
   chips) is true displacement; everything on a board face (grain) is bump only. Faces stay cheap;
@@ -75,14 +75,14 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
   cannot cancel another (a summed groove erased the fin) or exceed the cap.
 - **Clamp every distance** that drives a fin or a displacement.
 - **Chips:** mostly the thin paste fin breaking off in short ragged lengths, plus small shallow
-  losses at the arris — no deep bites. Method and fresh-break colour: [chipping.md](../../effects/wear/chipping.md)
-  (RULES MAT_02), sized from the shot (RULES MAT_03). On meshes already subdivided wall-wide, build
+  losses at the arris — no deep bites. Method and fresh-break colour: [chipping.md](../../effects/wear/chipping.md),
+  sized from the shot (RULES MAT_02). On meshes already subdivided wall-wide, build
   the chip field as displacement through the adaptive dicing (wear/chipping.md › §4.1 Edge chips and fresh breaks).
 
 | Parameter | Value |
 |---|---|
 | Fin height | a few mm proud |
-| Fin continuity | broken in places, never a continuous bead (RULES MAT_05) |
+| Fin continuity | broken in places, never a continuous bead (RULES MAT_03) |
 | Groove depth | ≥ 2 × the grain depth |
 | Groove width at the surface | ≥ 2 px at the final view |
 | Chip reach / depth | ~5–10 mm / ~2–3 mm |
@@ -91,7 +91,7 @@ Assembly follows RULES MAT_07 (layers) and MAT_08 (geometry fields); displacemen
 - **Relief:** ridges of hard latewood (raised on the board by weathering or sandblasting) cast as
   **grooves** in the concrete: the dark figure of the grain map is recessed. Prove the sign on a
   test plane with a raking light before the scene (one dark stripe must read as a groove).
-- **Relief alone is too faint at room scale.** Add a print, as colour multipliers (RULES MAT_07):
+- **Relief alone is too faint at room scale.** Add a print, as colour multipliers (RULES MAT_05):
   - **ink 1:** density field × grain map, calibrated to a small mean darkening;
   - **ink 2 (optional):** the darkest figure only, near-black, in its own patches, so some areas
     read crisp and others faded.
@@ -111,7 +111,7 @@ graph:
 - sample per board from plank interiors only.
 
 **Continuity rule.** Grain is continuous within a board and never continuous across a joint. No two
-formwork boards are alike, so neighbours differ (RULES MAT_06):
+formwork boards are alike, so neighbours differ (RULES MAT_04):
 - give each board its own window of the grain source: offset over the whole usable map, flip in u
   and v, about ±0.5° angle, about ±10 % scale; choose windows whose grain runs along the board;
 - crop windows with a Mapping node per board (origin and size as attributes), not by cutting pixels;
@@ -128,10 +128,10 @@ formwork boards are alike, so neighbours differ (RULES MAT_06):
 | Neighbour check | grain correlation across each joint (2 cm strips) below a threshold |
 
 **Proof:** a raking-light patch beside the reference before any final-view render. Then check the
-final view's mm per pixel: relief finer than a pixel reads only through its tone (RULES MAT_04).
+final view's mm per pixel: relief finer than a pixel reads only through its tone (RULES MAT_02).
 
 ### 4.5 Board tone (colour)
-- Soft per-board tone from absorbency: the `geometry` key of [variation-per-unit-shading.md](../../effects/variation-per-unit-shading.md) (RULES MAT_06).
+- Soft per-board tone from absorbency: the `geometry` key of [variation-per-unit-shading.md](../../effects/variation-per-unit-shading.md) (RULES MAT_04).
 - Small, and never stepping harder than the joints themselves.
 
 ### 4.6 Printed board map (fallback for distant walls)
@@ -150,7 +150,7 @@ final view's mm per pixel: relief finer than a pixel reads only through its tone
 | Dirty joints / edge grime | [dirt.md](../../effects/wear/dirt.md) | joint band rougher and darker (§4.3) |
 | Run-off streaks | [water-marks.md](../../effects/wear/water-marks.md) › Run-off | from each wall's own top; vertical faces only |
 | Joint leaks | [water-marks.md](../../effects/wear/water-marks.md) › Run-off | short drips under the horizontal joints, a pattern per joint, ending at the next joint |
-| Concave dust | [dirt.md](../../effects/wear/dirt.md) › §4.1 Dust and build-up (RULES MAT_06) | at inside corners and wall feet |
+| Concave dust | [dirt.md](../../effects/wear/dirt.md) › §4.1 Dust and build-up (RULES MAT_04) | at inside corners and wall feet |
 | Wet | [wet-surfaces.md](../../effects/wet-surfaces.md) | darkens and smooths all layers above |
 
 ## 5. Troubleshooting

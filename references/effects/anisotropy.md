@@ -5,7 +5,7 @@ Directional roughness: highlights, and the blur seen through glass, stretch acro
 grooves.
 
 **Use when:** brushed or ground metal; reeded, fluted or ribbed glass whose ribs are too small to model
-at the shot's distance; brushed or linearly ground glass; brushed acrylic (RULES MAT_03, MAT_04). Ribs
+at the shot's distance; brushed or linearly ground glass; brushed acrylic (RULES MAT_02). Ribs
 large enough to see are geometry: `references/materials/glass/glass-relief.md`.
 **Not when:** clear float glass, or evenly frosted or sandblasted glass with no preferred direction.
 
@@ -23,7 +23,7 @@ large enough to see are geometry: `references/materials/glass/glass-relief.md`.
  | Check              off / on / 90-degree turn / off repeat -> PNG widths |
  +-------------------------------------------------------------------------+
 ```
-The helper edits the existing BSDF. Its amount is the off switch (RULES MAT_07).
+The helper edits the existing BSDF. Its amount is the off switch (RULES MAT_05).
 Colour, IOR, metal response and surface relief remain the material's terms (RULES MAT_01).
 
 ## 3. Code
@@ -56,7 +56,7 @@ Colour, IOR, metal response and surface relief remain the material's terms (RULE
    |---|---|
    | Roughness, brushed transparent surface | 0.24; the control resolves both grid-edge widths |
    | Roughness, reflective control | 0.12; the control resolves reflected grid-edge widths |
-   | Roughness, production material | material-specific; size the appearance from the shot (RULES MAT_03) |
+   | Roughness, production material | material-specific; size the appearance from the shot (RULES MAT_02) |
 
 3. **Set direction.** Pass a nonzero world-space tangent vector lying in the surface, such as
    `(1, 0, 0)` on an XY pane. Alternatively run `archviz.directional_uv(obj, size, name, axis,
@@ -87,7 +87,7 @@ Colour, IOR, metal response and surface relief remain the material's terms (RULE
    | Metal settings | retain the material's own anisotropy and brush-streak values |
 
 5. **Check the response.** Run the lab and inspect its pair (left to right: off, on, rotated)
-   and equally amplified feature/noise diffs (RULES VAL_02, VAL_03). The JSON measures 10–90%
+   and equally amplified feature/noise diffs (RULES VAL_01; [validation.md](../review/validation.md) › Measuring the rendered look). The JSON measures 10–90%
    display-PNG grid-edge widths along X and Y. The directional split must exceed the repeated-off
    width variation; rotating must reverse its sign, and feature MAE must exceed baseline MAE.
    Repeat this comparison in the intended shot. Undo the directional response with amount 0.

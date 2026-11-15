@@ -100,7 +100,7 @@ Module names follow the code under `scripts/blender/materials/tile/`:
   wick into the crack and the porous body (`Crack Dirt`, `Dirt Width`).
 - **Tune on a flat pattern sheet first:** render the damage masks (emission, 1 sample) on a flat wall
   of the real tile size with the joints drawn, several parameter sets side by side. Each sheet takes
-  seconds. Then confirm in the final view (RULES MAT_03). Use the scene's own depth and width values
+  seconds. Then confirm in the final view (RULES MAT_02). Use the scene's own depth and width values
   on the sheet: defaults differ, and a sheet without joints makes edge damage look like islands.
 - **Chips and edge flakes** are in development and are not yet a method.
 
@@ -118,7 +118,7 @@ Module names follow the code under `scripts/blender/materials/tile/`:
 - **Do not displace the full tile height.** It pulls the wall's boundary edges inward along the joint
   recess and opens bright slits to the sky at floor and ceiling junctions.
 - A macro view can displace everything, but only on the objects in frame, with a high offscreen dicing
-  scale. Dicing every wall from a macro camera can exhaust VRAM (RULES SAF_02).
+  scale. Dicing every wall from a macro camera can exhaust VRAM ([render-settings.md](../../renderer/render-settings.md) › Memory).
 - The mode and its objects are stored in the material, so a structural `set_param` re-applies them.
   `use_bump` undoes the shader side but leaves the subdivision modifiers.
 - `piece_tilt_rad` is in radians.

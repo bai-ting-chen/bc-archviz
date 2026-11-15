@@ -8,7 +8,7 @@ Three interfaces, each its own surface, normals defining which medium is in fron
 GLASS + INTERFACE enclose the glass solid; INTERFACE + WATER_TOP enclose the water.
 """
 
-# Compatibility imports; each implementation has one owner (GOV_04).
+# Compatibility imports; each implementation has one owner (GOV_03).
 from materials.glass.tumbler_profiles import tumbler_profiles  # noqa: F401
 from materials.glass.lathe_geometry import lathe  # noqa: F401
 from materials.glass.glass_assembly import glass_of_water, glass_of_water_mnee  # noqa: F401

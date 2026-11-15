@@ -2,7 +2,7 @@
 
 ## 1. Overview
 Recreating a reference image: solving its camera, reading geometry through that camera, matching
-the light region by region, and setting exposure last (RULES RES_03).
+the light region by region, and setting exposure last (RULES RES_02).
 
 **Use when:** a reference photo or render is to be matched. A camera for a new view is in
 `references/scene/camera/camera.md`.

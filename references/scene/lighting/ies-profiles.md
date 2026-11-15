@@ -36,7 +36,7 @@ carries the beam shape and the absolute intensity.
 1. **File.** The manufacturer's product page is the source of truth: match the catalogue number,
    lumen package, CCT and optic. Aggregators: ieslibrary.com (account), luminaires.dialux.com
    (direct *Photometric data* zip per article). Save it in the study's `library/local/ies/` with a
-   `meta.json` (maker, catalogue, URL, lumens) (RULES AST_03). Cycles reads IES only: convert LDT.
+   `meta.json` (maker, catalogue, URL, lumens) (RULES AST_01). Cycles reads IES only: convert LDT.
 2. **Read.** `ies_read`. LED files are absolute (lamp lumens −1); older lamp files are relative and
    already include the luminaire efficiency. Either way the file is self-calibrated: use it unscaled.
 3. **Host.** `ies_light` on a point light (or a spot with the cone opened to 180°). Cycles converts

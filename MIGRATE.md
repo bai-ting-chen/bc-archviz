@@ -1036,4 +1036,21 @@ From: LAPTOP-25
 - `python scripts/workflow/structure_check.py` (0 problems).
 - `grep -rnE "research/reference-match|scripts/research/(reference|edge_overlay|image_statistics)" scripts/ references/ SKILL.md RULES.md` returns nothing.
 
+# MIGRATE: RULES.md trimmed to 28 rules and renumbered without gaps
+From: LAPTOP-25
+
+## What changed
+- Rule ids changed. Older MIGRATE sections and any unpushed edits on this clone still use the old ids. Old → new:
+  GOV_01, GOV_02 → GOV_01; GOV_03 → GOV_02; GOV_04 → GOV_03; RES_03 → RES_02; REN_01, REN_02 → REN_01;
+  REN_03 → REN_02; MAT_03, MAT_04 → MAT_02; MAT_05 → MAT_03; MAT_06 → MAT_04; MAT_07 → MAT_05; MAT_09 → MAT_06;
+  MAT_10, AST_06 → AST_04; VAL_01 → VAL_02 (merged with VAL_05); VAL_02 → VAL_01; AST_01, AST_03 → AST_01;
+  AST_05 → AST_03. Unchanged: PIP_01–02, GAT_01–04, RES_01, LGT_01–02, MAT_01, AST_02, SAF_01.
+- No longer rules, now how-to in their reference: MAT_02 → wear.md; MAT_08 → wear-locations.md § 2;
+  VAL_03, VAL_04 → validation.md (Measuring the rendered look, Diagnosing odd behaviour); AST_04 → machine-setup.md;
+  SAF_02 → render-settings.md › Memory.
+
+## Check after pull
+- Any of this clone's unpushed skill edits use the new ids.
+- `python scripts/workflow/structure_check.py` reports 0 problems.
+
 Remove each section after applying it; delete this file when none is left.

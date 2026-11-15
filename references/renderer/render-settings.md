@@ -17,7 +17,7 @@ around that, rather than carrying someone else's numbers.
 - **Know your noise floor before trusting any comparison.** Render the same frame twice with
   only the seed changed; that difference is the floor. At moderate sample counts with denoising
   it is high enough to swamp a real effect — hence finals at a thousand-plus samples, and the
-  control criterion of RULES VAL_02.
+  control criterion of RULES VAL_01.
 - Light tree on (default); `light_sampling_threshold` is ignored while it is on.
 - **Fireflies vs real highlights:** per region compare the raw *mean / median* (≈ 1 clean, ≫ 1 =
   energy in rare samples) and look again in an independent render: real caustic hot spots span
@@ -61,7 +61,8 @@ caustics off, Fast GI, `volume_biased`, shadow-transparent glass. Unbiased: Russ
 (`min_light_bounces`), adaptive sampling, blue-noise pattern, denoising (post).
 
 ## Memory
-VRAM first (RULES SAF_02). Tools: `texture_limit_render`, `texture_resolution_render`;
+Know the GPU's VRAM before committing to a heavy scene; adaptive subdivision over large diced
+surfaces is the usual way to exhaust it. Tools: `texture_limit_render`, `texture_resolution_render`;
 Texture Cache (`render.use_texture_cache`; auto-generate writes `.tx` beside each image — set
 Preferences `texture_cache_directory` first to keep `library/` clean); a large `tile_size`
 (small tiles are slow on GPU); instances (Alt+D); `use_persistent_data` for re-render loops.
@@ -80,9 +81,3 @@ Per-file working space (Rec.709 default / Rec.2020 / ACEScg) — pick it at proj
 changing it later re-reads every material. Views: AgX (our default), ACES 2.0, Khronos PBR
 Neutral. Pick the AgX look from the reference's contrast, not from habit. `film_exposure` acts on
 render data, `view_settings.exposure` on the view; we set exposure via `physical_camera`.
-
-
-## SAF_02 procedure
-
-Know the GPU's VRAM before committing to a heavy scene; adaptive subdivision over large
-    diced surfaces is the usual way to exhaust it (render-settings.md › Memory).

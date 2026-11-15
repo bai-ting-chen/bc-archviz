@@ -15,7 +15,7 @@ roughness. Units that really tilt or step: variation-per-unit-geometry.md.
  │                  map offset ─► lookup; normal tilt ─► Normal       │
  └────────────────────────────────────────────────────────────────────┘
 ```
-- Each value is a multiplier around 1 or an offset around 0 (RULES MAT_07); amount 0 = all units equal.
+- Each value is a multiplier around 1 or an offset around 0 (RULES MAT_05); amount 0 = all units equal.
 
 ## 3. Code
 - `scripts/blender/effects/variation_per_unit_shading.py`: `unit_key`, `set_unit_keys` (step 1),
@@ -52,7 +52,7 @@ roughness. Units that really tilt or step: variation-per-unit-geometry.md.
 ### Generic layers
 | Layer | Reference | Note for this material |
 |---|---|---|
-| Concave joint dust | [dirt.md](wear/dirt.md) › §4.1 Dust and build-up | darkest in the corner (RULES MAT_06) |
+| Concave joint dust | [dirt.md](wear/dirt.md) › §4.1 Dust and build-up | darkest in the corner (RULES MAT_04) |
 | Repeat inside one unit | variation-tiling.md | large units |
 
 ## 5. Troubleshooting

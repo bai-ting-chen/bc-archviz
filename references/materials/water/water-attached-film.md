@@ -33,9 +33,9 @@ used here with attached-film settings.
   is the other face. Uneven thickness between the two faces is what bends the surface behind; a
   constant thickness is a parallel plate and bends nothing.
 - **Same field layers as the free-falling film,** evaluated in the same (s, v) coordinates on the
-  surface carrier instead of the ballistic one. Each stays its own term with its own switch (RULES MAT_07).
-- **Size from the final view first** (RULES MAT_03): most rope and wave detail is sub-pixel at a
-  building-scale view and reads only in aggregate (RULES MAT_04).
+  surface carrier instead of the ballistic one. Each stays its own term with its own switch (RULES MAT_05).
+- **Size from the final view first** (RULES MAT_02): most rope and wave detail is sub-pixel at a
+  building-scale view and reads only in aggregate (RULES MAT_02).
 
 ## 3. Code
 No builder yet. The free-falling field layers in `scripts/blender/materials/water/film_fields.py`
@@ -44,7 +44,7 @@ No builder yet. The free-falling field layers in `scripts/blender/materials/wate
 attached builder adds a surface carrier (§4.1) and calls the same field layers; it does not copy them (skill-maintaining.md › one builder per job).
 
 ## 4. Instructions and parameters, per layer
-Table values are starting points; size them from the shot (RULES MAT_03) and record the final values
+Table values are starting points; size them from the shot (RULES MAT_02) and record the final values
 in the study notes (RULES GOV_01).
 
 ### 4.1 Surface carrier (geometry)
@@ -86,7 +86,7 @@ Generic layers, attached-film settings:
 |---|---|---|
 | Stream flow q(y) | [water-free-falling-film.md](water-free-falling-film.md) §4.2 | ropes; q sets the Nusselt thickness, not the throw |
 | Fall-time stretch | [water-free-falling-film.md](water-free-falling-film.md) §4.3 | k = 0: a film on a surface soon runs at a steady speed, so nothing stretches with the drop |
-| Fine ribbons, calm zones, roll waves | [water-free-falling-film.md](water-free-falling-film.md) §4.4 | roll waves ~0.2 mm; judge at native resolution (RULES VAL_01) |
+| Fine ribbons, calm zones, roll waves | [water-free-falling-film.md](water-free-falling-film.md) §4.4 | roll waves ~0.2 mm; judge at native resolution (RULES VAL_02) |
 | Sideways meander | [water-free-falling-film.md](water-free-falling-film.md) §4.5 | ropes meander; no folding, the film stays on the surface |
 | Tears | [water-free-falling-film.md](water-free-falling-film.md) §4.6 | same mask and rounded rims; dry patches and rivulets where the flow is low, not where the meander stretches |
 | Dissolving edges | [water-free-falling-film.md](water-free-falling-film.md) §4.8 | side edges pull in to rivulets |

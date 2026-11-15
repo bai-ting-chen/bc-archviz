@@ -3,7 +3,7 @@
 Each case builds a material from scratch (fresh file) and records every node (type, name, label,
 settings, input defaults), every link, and the nested node groups. Random owner ids and custom
 properties are left out, so the dump is deterministic. Used as the refactor proof for
-scripts/blender/materials/tile/tile_surface.py (RULES GOV_04): dump before, dump after, compare.
+scripts/blender/materials/tile/tile_surface.py (RULES GOV_03): dump before, dump after, compare.
 
 Usage: blender -b --factory-startup --python scripts/controls/tile/tile_graph_check.py -- <out.json>
 """

@@ -12,7 +12,7 @@ pasture hummocks. Steepest slope = 1.5 * fall / run (keep < 0.25 = 4:1 for a gen
 hill). The group stores `pad_d` (signed plan distance to the pad, m) for scatter masks.
 """
 
-# Compatibility imports; each implementation has one owner (GOV_04).
+# Compatibility imports; each implementation has one owner (GOV_03).
 from scene.environment.terrain_graph import BARE_SOIL_NOISE_W, BARE_SOIL_NOISE_SETTINGS, _noise4, _centred, pad_distance, landform_group  # noqa: F401
 from scene.environment.terrain_height import height  # noqa: F401
 from scene.environment.terrain_objects import add_terrain  # noqa: F401

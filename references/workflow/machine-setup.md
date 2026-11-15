@@ -40,7 +40,7 @@ Only one Blender may hold the MCP port: quit an idle finished-final window first
   `/api/v1/repos/lab/blender_mcp/...` works with curl.
 - Add-ons and extensions install through Blender's own installer into its extension folder:
   `blender -c extension install-file -r user_default --enable <zip>`. Delete the downloaded zip
-  afterwards; software is not study output (RULES AST_04).
+  afterwards; software is not study output.
 - Prefs, set headless with `blender -b --python set_prefs.py` ending in `bpy.ops.wm.save_userpref()`:
   `system.use_online_access = True` (required even for localhost), MCP `use_autostart` and port
   9876, Cycles `compute_device_type = OPTIX` + `refresh_devices()`.

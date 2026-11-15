@@ -23,7 +23,7 @@ Isotropic noise reads as smoke. Start on the flat-wall control, then install the
 check joints introduce no step. Sunlit walls can need full strength. Origin fields are owned by
 wear-locations.md §4.3; do not derive them from chipped geometry.
 
-| Parameter | Starting point (RULES MAT_03) |
+| Parameter | Starting point (RULES MAT_02) |
 |---|---|
 | Default source | procedural; the 0.25 m leakage mask visibly tiled |
 | Stretch across / down | approximately ×14 / ×0.6 |
@@ -50,7 +50,7 @@ and uneven rims, with no identical circle primitive. Roughness changes represent
 | Raw-mask assignment | Roughness vertical, Mask up-facing |
 | Region threshold / edge width | 0.07 / 0.08 normalized field units |
 | Drying rim | `4 × region × (1-region)`; up to 25% extra colour darkening weighted by wear |
-| `scale_m` / `amount` | 0.25 m / 0.85; readable starting points, inspect shot (RULES MAT_03) |
+| `scale_m` / `amount` | 0.25 m / 0.85; readable starting points, inspect shot (RULES MAT_02) |
 | Colour / roughness at factor 1 | ×0.35 / ×1.45 |
 
 ### 4.3 Explicit stamp alternative

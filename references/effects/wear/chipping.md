@@ -37,7 +37,7 @@ Fresh break: sample clean base before grime, lighten/roughen it and add a fine f
 sampling finished weathered colour makes a dark spot. Wood uses the same group with real bevels and
 grain-wise breaks (`GrainBreaks`, preset `WOOD_CHIPS` in `references/materials/wood/wood.md`).
 
-| Parameter | Existing starting point (RULES MAT_03) |
+| Parameter | Existing starting point (RULES MAT_02) |
 |---|---|
 | `dice` size / chip band | 0.05 m / 0.08 m |
 | Chip reach / depth | 0.045 m / 0.018 m |
@@ -52,7 +52,7 @@ Only antialiasing mixes pixels at edges. Amount changes coverage through the sca
 Displacement distributions overlap paint and substrate in these assets; registered BaseColor
 instead verifies opposite Roughness polarities. Preserve those verified signals.
 Several scan-shaped flakes should fit a region; override `MaskSource.size_m` when the shot needs
-it and record the world sizes, leaving asset metadata untouched (RULES MAT_03). A paler test
+it and record the world sizes, leaving asset metadata untouched (RULES MAT_02). A paler test
 coat helps inspection; its colour is scene code, not a skill default.
 The procedural alternative thresholds noise smoothly. Raw/procedural/stamps preserve the
 existing thin darker transition border; binary hybrid bypasses that border shader.

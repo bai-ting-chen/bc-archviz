@@ -62,7 +62,7 @@ layer in its own reference (§4.6), so there is no single diagram.
 | Floor finish | glossier than walls, with a coat |
 
 ### 4.4 Slab floors as separate pieces
-- Model each slab or band as its own object. Per-object random variation (RULES MAT_06) makes
+- Model each slab or band as its own object. Per-object random variation (RULES MAT_04) makes
   neighbours differ, as laid stone does. Ranges are in the generic table (§4.6).
 - Joints are a material hairline, slightly darker, not a gap.
 

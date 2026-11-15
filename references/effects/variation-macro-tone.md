@@ -14,7 +14,7 @@ Broad tone variation across a surface.
  world position -> slow noise -> albedo multiplier / roughness addition
                 -> independent amount switches -> AOVs -> shader inputs
 ```
-- Compose the colour multiplier and roughness addition around the existing base (RULES MAT_07).
+- Compose the colour multiplier and roughness addition around the existing base (RULES MAT_05).
 
 ## 3. Code
 - `scripts/blender/effects/variation_macro_tone.py`: `macro_tone` returns an albedo multiplier
@@ -26,7 +26,7 @@ Broad tone variation across a surface.
 ### 4.1 Macro tone
 - Use a slow world-space noise to multiply albedo and add roughness.
 - Check the full frame: tone drifts across the surface without becoming small blobs.
-- Size the drift from the final view (RULES MAT_03).
+- Size the drift from the final view (RULES MAT_02).
 
 | Parameter | Starting point |
 |---|---|

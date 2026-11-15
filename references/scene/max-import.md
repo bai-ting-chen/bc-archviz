@@ -10,7 +10,7 @@ new model before look-dev. A check that fails with no fix given: stop and report
 Download the zip, compare its sha256 with the platform's `archive_hash`
 (`https://extensions.blender.org/api/v1/extensions/?type=add-on`), then
 `blender -b -c extension install-file -r user_default --enable <zip>` and delete the zip. It lives in
-Blender's extension folder, never in a project (RULES AST_04). Reads Editable Mesh/Poly, primitives, Corona,
+Blender's extension folder, never in a project ([machine-setup.md](../workflow/machine-setup.md)). Reads Editable Mesh/Poly, primitives, Corona,
 Physical and Multi/Sub materials. Not: Forest Pack / RailClone scatter, GrowFX, modifier stacks.
 Check: sha256 equals `archive_hash`; if not, do not install.
 
@@ -51,7 +51,7 @@ vendor materials by hand in Blender from the supplied maps (RULES PIP_01). Vendo
 - Bark: albedo, roughness, normal, IOR 1.52.
 - Checks: map assignments verified, missing maps reported; the leaf maps' linear means; vendor bark albedo
   maps can be dark (~0.04 linear): compare with measured bark before a final; close-ups at native resolution
-  (RULES VAL_01).
+  (RULES VAL_02).
 
 ## Render
 **Step 5.** Light, camera and render as any scene; `transparent_max_bounces` 64 for stacked alpha cards (foliage).

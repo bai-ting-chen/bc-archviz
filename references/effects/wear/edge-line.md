@@ -19,14 +19,14 @@ existing local junction bridge preserved. Shared stacking: `references/effects/w
 ## 4. Instructions and parameters
 ### 4.1 Connected arris line
 Long runs measured in metres, rare short gaps, near-constant width (about ±15%); variation belongs
-mainly in darkness. Fine speckle stays inside the band (RULES MAT_05). Peak a few millimetres behind
+mainly in darkness. Fine speckle stays inside the band (RULES MAT_03). Peak a few millimetres behind
 the edge, leaving its rounding light. Strongest where water wraps onto an underside; about half
 strength on up-facing edges. Continue through junctions rather than making dashed segments.
 Inside corners have almost no line; use broader dust there. Exclude clean chip faces with
 `1-chip`, preserving the established junction blend. Match band-to-face brightness and dirty
 share of the edge against a reference, not just the amount value.
 
-| Parameter | Existing starting point (RULES MAT_03) |
+| Parameter | Existing starting point (RULES MAT_02) |
 |---|---|
 | `line_width` | 0.015 m nominal; about 20 mm is a visual starting estimate |
 | `line_amount` | 1.70 mask gain |

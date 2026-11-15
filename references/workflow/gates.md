@@ -20,8 +20,8 @@ After the first build (camera, light, first-pass materials on every layer), show
 - a material schedule, per layer: material, source (Poly Haven, procedural or own file), real size and
   direction, target albedo and roughness, the reference it matches;
 - a first-pass render at the final camera;
-- native crops of each material beside the reference (RULES VAL_01);
-- the other candidates (RULES MAT_10) side by side for any material in doubt.
+- native crops of each material beside the reference (RULES VAL_02);
+- the other candidates (RULES AST_04) side by side for any material in doubt.
 
 Approved: look rounds tune only approved materials. A material swap later comes back to this gate.
 

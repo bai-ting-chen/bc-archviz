@@ -7,22 +7,22 @@ Use when: judging a look round against a reference, proving a feature works, or 
 ### 1. Set the criteria before rendering
 - **Where:** about ten regions in 0..1 fractions (each lit surface type, the shadow side, floor near
   and far, the background) and, per material or effect, the reference crop at the same
-  footprint. Compute mm per pixel at the feature in the final view first (VAL_01 › Final-view pixels).
-- **Which numbers decide:** the ratios between regions from `reference_match.py patches` on the PNG (VAL_03);
-  exposure is set last (RULES RES_03), so match ratios, not absolute means. For a feature claim,
-  *changed > 2 %* and several times the noise floor (VAL_02).
+  footprint. Compute mm per pixel at the feature in the final view first (VAL_02 › Final-view pixels).
+- **Which numbers decide:** the ratios between regions from `reference_match.py patches` on the PNG (› Measuring the rendered look);
+  exposure is set last (RULES RES_02), so match ratios, not absolute means. For a feature claim,
+  *changed > 2 %* and several times the noise floor (VAL_01).
 - **Which character points:** feature size, edge sharpness, contrast, density, orientation,
-  distribution (VAL_01).
+  distribution (VAL_02).
 
 ### 2. Loop
 1. Render the wip frame with the study runner (`scripts/workflow/study_run.py`).
-2. Measure the PNG the renderer wrote (VAL_03), then look at the stacked pair: region numbers miss
+2. Measure the PNG the renderer wrote (› Measuring the rendered look), then look at the stacked pair: region numbers miss
    joint grids, missing objects and wrongly roofed areas.
 3. Ratios off: fix light or material region by region (`references/scene/reference-match.md`,
    step 3) and go back to 1.
-4. Ratios agree: compare native-resolution crops beside the reference (VAL_01), name the worst
+4. Ratios agree: compare native-resolution crops beside the reference (VAL_02), name the worst
    defect, fix only that, and go back to 1.
-5. A change claimed to work gets its control render (VAL_02) before it counts.
+5. A change claimed to work gets its control render (VAL_01) before it counts.
 
 **The study runner.** `scripts/workflow/study_run.py <study> vNN.png [--rebuild] [--resolution-percent 50 --samples 128]`
 rebuilds the study from `scene_geometry.py` (import + camera) and `scene_look.py` (materials, lights,
@@ -40,28 +40,15 @@ lives as a comment next to the value it changed.
 .blend with overrides on the GPU and never saves it. Its docstring lists every option; an unknown
 option stops it rather than rendering an unchanged "control".
 
-### 3. When to stop (RULES VAL_05)
+### 3. When to stop (RULES VAL_02)
 - **Done:** region ratios agree, exposure is set, every crop reads like the reference in character
   at final-view pixels, and each claimed feature has its control. A number that matches while the
   image does not is a fail.
-- **A look layer missed twice in full renders:** move it to the flat-wall lab (VAL_02 › Lab).
-- **Odd behaviour:** bisect it (VAL_04).
+- **A look layer missed twice in full renders:** move it to the flat-wall lab (VAL_01 › Lab).
+- **Odd behaviour:** bisect it (› Diagnosing odd behaviour).
 - **Stuck:** after 3 rounds without a clear gain, stop and record why (the research loop's rule).
 
 ## VAL_01 procedure
-
-**Detail pass at native resolution.** Region means match long before the image does. Once they
-agree, crop each material or effect at full resolution beside the same crop of the reference and
-judge its *character*: feature size, edge sharpness, contrast, density, orientation, distribution.
-A feature can match in mean and still read wrong in character. Repeat after every change to that
-feature; half-res pairs hide it.
-
-**Final-view pixels.** Before matching a reference, compute mm per pixel at the feature in the final
-view (vertical and along a foreshortened wall separately). A close-up reference shows detail that is
-sub-pixel in the shot; matching it adds features the final view cannot show (and loses the ones it
-does). Crop the reference to the same footprint, or judge its look at the final view's scale.
-
-## VAL_02 procedure
 
 **A control render is the only proof.** Render feature OFF, and the same scene twice for the noise
 floor (same seed for the feature diff). Read *changed > 2 %*, several times the noise floor, and look
@@ -82,13 +69,26 @@ at grazing angles (water films, their foot), the lab is a strip of the real scen
 with a render border around a short stretch (about a minute per variant), one variant file per try
 and a side-by-side sheet.
 
-## VAL_03 procedure
+## VAL_02 procedure
+
+**Detail pass at native resolution.** Region means match long before the image does. Once they
+agree, crop each material or effect at full resolution beside the same crop of the reference and
+judge its *character*: feature size, edge sharpness, contrast, density, orientation, distribution.
+A feature can match in mean and still read wrong in character. Repeat after every change to that
+feature; half-res pairs hide it.
+
+**Final-view pixels.** Before matching a reference, compute mm per pixel at the feature in the final
+view (vertical and along a foreshortened wall separately). A close-up reference shows detail that is
+sub-pixel in the shot; matching it adds features the final view cannot show (and loses the ones it
+does). Crop the reference to the same footprint, or judge its look at the final view's scale.
+
+## Measuring the rendered look
 
 Measure on the PNG the renderer wrote (`image_statistics.py`, `reference_match.py`): AgX rolls off whites, so
 linear values mislead for look matching. Physical calibration controls may inspect linear EXR energy
 data. Processed frames go to the study's `_wip/`.
 
-## VAL_04 procedure
+## Diagnosing odd behaviour
 
 Bisect odd behaviour in a minimal headless scene (`scripts/controls/`) before tuning the real one: a
 small scene isolates the cause in minutes where the full scene hides it.

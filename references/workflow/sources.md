@@ -8,13 +8,13 @@ procedure in its topic reference.
 | Source | Gives | Access | Licence / cost | Who downloads | Procedure |
 |---|---|---|---|---|---|
 | Poly Haven | materials, HDRIs | public API (`polyhaven_fetch.py`) | CC0 | agent | *Poly Haven* below |
-| Quixel Megascans (Fab) | materials, 3D models, plants, decals, brushes | built-in browser pane (`fab-search.js`, `fab-download.js`) + `fab_fetch.py`, RULES AST_06 | free, Fab Standard License (since Nov 2026) | agent, after the user's picks | *Quixel on Fab* below |
-| Quixel Megaplants (Fab) | procedural trees; Blender only via USD | built-in browser pane (`fab-search.js`, `fab-download.js`) + `fab_fetch.py`, RULES AST_06 | free, Fab Standard License | agent, after the user's picks | *Quixel on Fab* below |
-| Maxtree | plant models (single models and volumes) | public Store API (`maxtree_search.py`), RULES AST_06 | paid per model or volume | user | *Maxtree* below |
+| Quixel Megascans (Fab) | materials, 3D models, plants, decals, brushes | built-in browser pane (`fab-search.js`, `fab-download.js`) + `fab_fetch.py`, RULES AST_04 | free, Fab Standard License (since Nov 2026) | agent, after the user's picks | *Quixel on Fab* below |
+| Quixel Megaplants (Fab) | procedural trees; Blender only via USD | built-in browser pane (`fab-search.js`, `fab-download.js`) + `fab_fetch.py`, RULES AST_04 | free, Fab Standard License | agent, after the user's picks | *Quixel on Fab* below |
+| Maxtree | plant models (single models and volumes) | public Store API (`maxtree_search.py`), RULES AST_04 | paid per model or volume | user | *Maxtree* below |
 | 3ds Max files | models from the user's own libraries | local files | per file | user | [max-import.md](../scene/max-import.md) |
 | IES files | measured light distributions | manufacturer sites | per manufacturer | user or agent | [ies-profiles.md](../scene/lighting/ies-profiles.md) |
 
-Candidate lists: RULES MAT_10. "Agent" is whoever builds in the current work mode ([study-stages.md](study-stages.md)).
+Candidate lists: RULES AST_04. "Agent" is whoever builds in the current work mode ([study-stages.md](study-stages.md)).
 
 ## Research
 | Source | Gives | Access | Procedure |
@@ -28,7 +28,7 @@ Candidate lists: RULES MAT_10. "Agent" is whoever builds in the current work mod
 
 When to stop for the user: RULES GAT_01.
 
-## Where assets go (RULES AST_03)
+## Where assets go (RULES AST_01)
 Each study owns its assets, so it moves, archives or hands over self-contained: HDRIs, textures,
 edited HDRIs, generated maps and their `meta.json` live in the study's own `library/`, downloaded
 again even when another study has the same file. Never repoint a study at another study's or a
@@ -48,11 +48,13 @@ names and tags, query `api.polyhaven.com/assets?t=textures|hdris` and judge a th
 HTTP 520–525 is Cloudflare: retry the same call. Credit "Powered by Poly Haven" if the live API is
 used in published work.
 
-## Quixel on Fab (RULES AST_06)
+## Quixel on Fab (RULES AST_04)
 Two sellers: `Quixel Megascans` (Blender takes the texture-set zip, FBX or glTF) and
 `Quixel Megaplants` (only listings with `usd` import into Blender). Plain HTTP gets a Cloudflare 403,
 so the catalog is read in the app's built-in browser pane (`mcp__Claude_Browser__*`), which runs on
 this machine even while hidden. Claude in Chrome is not used: it may drive a Chrome on another machine.
+Browse and download only through the scripts below (navigate, javascript, host scripts), never by clicking
+or from screenshots.
 1. Open `https://www.fab.com/sellers/Quixel%20Megascans` in the pane.
 2. In one `javascript_tool` call send the text of `scripts/scene/assets/fab-search.js` followed by
    `await fabSearch({query, type, category, max_results})` (options in the file header). Each row
@@ -60,7 +62,7 @@ this machine even while hidden. Claude in Chrome is not used: it may drive a Chr
    species, Fab link and thumbnail. Category slugs come from a row's `category` path (`a/b` → `a--b`).
 3. Save the rows to `<study>/_wip/fab/<topic>.json`, run
    `python scripts/scene/assets/asset_sheet.py <topic>.json <topic>-sheet.png` and judge the sheet.
-4. Send the fits as the candidate list (RULES MAT_10) with each Fab link, download file and size
+4. Send the fits as the candidate list (RULES AST_04) with each Fab link, download file and size
    (`file`, `size_mb`; the first file is the largest, so name a smaller one when 2K is enough).
    Megaplants have no id: give the USD file name and check it names the listed species.
 5. After the user's picks, in the same tab send `fab-search.js`, `scripts/scene/assets/fab-download.js`
@@ -72,7 +74,7 @@ this machine even while hidden. Claude in Chrome is not used: it may drive a Chr
    It saves each pick to `library/local/<id>/`, checks the size, unzips, writes `meta.json` and
    deletes the zip. Check the map names carry the id, then delete the links file.
 
-## Maxtree (RULES AST_06)
+## Maxtree (RULES AST_04)
 Plant models read over plain HTTP from the shop's public Store API; its own search knows Latin names only.
 1. `python scripts/scene/assets/maxtree_search.py <study>/_wip/maxtree search <words>
    [--category Conifers] [--min-height-cm 300 --max-height-cm 800] [--out <topic>.json]`. The first

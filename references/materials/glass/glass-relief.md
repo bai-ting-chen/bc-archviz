@@ -30,13 +30,13 @@ No builder: the relief is modelled geometry. The glass on it is `materials.glass
 The numpy preview of the thrown light is described in caustics.md step 2.
 
 ## 4. Instructions and parameters
-Table values are starting points; size them from the shot (RULES MAT_03) and record the final values
+Table values are starting points; size them from the shot (RULES MAT_02) and record the final values
 in the study notes (RULES GOV_01).
 
 ### Step 1. Geometry or blur
 - Model the relief as geometry. A bump or normal map gives no parallax, and in LuxCore it leaves dark
   seams (luxcore.md).
-- Relief below a pixel at the final view is not modelled (RULES MAT_04): use directional roughness.
+- Relief below a pixel at the final view is not modelled (RULES MAT_02): use directional roughness.
 
 ### Step 2. Shape the height field
 - **Sum many waves, never one.** A single sine throws one bright line per ridge, repeated per unit.
@@ -87,7 +87,7 @@ in the study notes (RULES GOV_01).
 
 ### Step 6. Light pattern
 - If the pattern the glass throws on a floor or wall carries the shot, size λ and slope from the
-  receiver distance and render in LuxCore: caustics.md step 2 (RULES REN_03).
+  receiver distance and render in LuxCore: caustics.md step 2 (RULES REN_02).
 
 ### Generic layers
 | Layer | Reference | Note for this material |

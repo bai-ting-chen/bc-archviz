@@ -19,7 +19,7 @@ Clean mesh → edge fields → rounding geometry/normal → BSDF Normal.
 Base (§4.1) → surface marks and edge masks → BSDF Base Color / Roughness.
 Directional UV and streak noise (§4.2) → BSDF Tangent / Anisotropy / Roughness → Surface.
 
-- Compose the terms at those inputs (RULES MAT_07); geometry-field order follows RULES MAT_08.
+- Compose the terms at those inputs (RULES MAT_05); geometry-field order follows [wear-locations.md](../../effects/wear/wear-locations.md) § 2.
 
 ## 3. Code
 - `scripts/blender/materials/metal/metal.py`: `materials.metal.metal.polished_steel(name="metal")`

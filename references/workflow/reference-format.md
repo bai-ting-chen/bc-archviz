@@ -23,17 +23,17 @@ Every box header ends in its kind: "— LAYER DIAGRAM" or "— PROCEDURE DIAGRAM
   layers (each in its own reference) with what each one drives.
 - A flow block: order of evaluation and the node-editor output each step feeds (carrier → geometry →
   displacement → bump → colour → roughness).
-- Assembly bullets only: how the layers combine (RULES MAT_07 layers, MAT_08 geometry fields).
+- Assembly bullets only: how the layers combine (RULES MAT_05 layers; geometry fields: [wear-locations.md](../effects/wear/wear-locations.md) § 2).
 
 ## 3. Code
 - Script paths under `scripts/`, the builder, its parameter dataclasses and its switch per layer
-  (RULES MAT_07), and the control scene that checks the look. Paths stay portable (see skill-maintaining.md).
+  (RULES MAT_05), and the control scene that checks the look. Paths stay portable (see skill-maintaining.md).
 - No code listings. Only what a user needs to call or run.
 
 ## 4. Instructions and parameters, per layer
 - One `###` per specific layer, numbered `4.1`, `4.2`, …: bullets with the method, the traps and the
   "why", then one parameter table (parameter | value).
-- Table values are starting points. Size them from the shot (RULES MAT_03) and record the final values in
+- Table values are starting points. Size them from the shot (RULES MAT_02) and record the final values in
   the study notes (RULES GOV_01).
 - Generic layers are not explained here. Close the section with one table:
   Layer | Reference | Note for this material.
@@ -45,9 +45,9 @@ Every box header ends in its kind: "— LAYER DIAGRAM" or "— PROCEDURE DIAGRAM
   here, not in troubleshooting.md.
 
 ## Writing rules
-- State each rule once, in RULES.md. Cite it as `(RULES MAT_07)`; do not restate it.
+- State each rule once, in RULES.md. Cite it as `(RULES MAT_05)`; do not restate it.
 - Refer to sections inside the file as `§N.N`; renumber every reference when a section moves.
-- No project names, study names or client names (RULES GOV_02).
+- No project names, study names or client names (RULES GOV_01).
 - No reference loops between skill files (A → B → C → A). Deep nesting is fine. Links run one
   way, toward the file that holds the method or procedure the reader needs next: a router to
   its files, a material to the effect it uses, upstream water to downstream (a falling film links to

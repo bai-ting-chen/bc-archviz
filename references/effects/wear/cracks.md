@@ -25,7 +25,7 @@ into the face. Keep a few; symmetric opposite pairs read as one long line. At ro
 hairline vanishes; a dirt-darkened core and halo over a shallow groove carries the reading.
 Glazed tile cracking is a separate per-tile network in `references/materials/tile/tiles.md`.
 
-| Parameter | Starting point (RULES MAT_03) |
+| Parameter | Starting point (RULES MAT_02) |
 |---|---|
 | Opening direction / length | 45 degrees ±15 / 0.4–1 m |
 | Edge length | approximately 0.05–0.20 m |

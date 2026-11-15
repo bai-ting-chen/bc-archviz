@@ -16,7 +16,7 @@ Control: `scripts/controls/effects/surface_wear_lab.py`, `surface_wear_graph_che
 
 ## 4. Instructions and parameters
 ### 4.1 Crossing strokes
-Size thin strokes from final-view pixels (RULES MAT_03), vary lengths and independent phases.
+Size thin strokes from final-view pixels (RULES MAT_02), vary lengths and independent phases.
 Use grazing illumination or reflection of a bright area to resolve glints on painted/brushed metal.
 Raw masks cross a rotated second copy. The held hybrid modulates procedural strokes by a scan
 in the existing 0.7–1.0 range; this is the explicit legacy exception, not a newly judged source.

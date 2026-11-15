@@ -1,7 +1,7 @@
 # Pipeline capabilities
 
 What the pipeline can do and which technique does it; each row was proved with a control render
-(RULES VAL_02).
+(RULES VAL_01).
 
 | Effect | Technique | State |
 |---|---|---|
@@ -17,7 +17,7 @@ What the pipeline can do and which technique does it; each row was proved with a
 | Edge chips (geometry) | GN band subdivision + Set Position; per-object `Seed` | solid |
 | Displacement | Displacement + adaptive subdivision | solid, fast |
 | Tiling by real height | `height_span_uv` + REPEAT | solid |
-| Caustics | GN wavefront for sun through a water body; all glass and lamps → LuxCore ([RULES REN_03](../renderer/renderer-choice.md)) | solid |
+| Caustics | GN wavefront for sun through a water body; all glass and lamps → LuxCore ([RULES REN_02](../renderer/renderer-choice.md)) | solid |
 | Caustics through patterned glass / glass block (sun, room-scale) | LuxCore PATH, GPU + CPU light tracing (luxcore.md), energy-checked ([caustics.md](../effects/caustics.md)) | solid |
 | Glass-block wall | block definitions with real inner relief, random variants + turns, mortar mesh ([glass-block.md](../materials/glass/glass-block.md), [glass-relief.md](../materials/glass/glass-relief.md)) | solid |
 | Baked procedural textures for LuxCore (terrazzo, smooth concrete, sand mortar) | numpy seamless colour + roughness maps | test |

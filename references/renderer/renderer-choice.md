@@ -1,4 +1,4 @@
-# Choosing a renderer and method (RULES REN_01–REN_03)
+# Choosing a renderer and method (RULES REN_01, REN_02)
 
 ## REN_01 procedure
 
@@ -6,16 +6,13 @@
    Texture) before self-written external tools — native work stays editable in the .blend and
    survives Blender updates; external tools are a last resort, and say so when used.
 
-
-## REN_02 procedure
-
 **Unbiased first.** Order: (a) Cycles path tracing; (b) native physically based approximations
    (for example, GN wavefront caustics on a water body; see [caustics.md](../effects/caustics.md)) only when (a) cannot converge — state why and the bias;
    (c) external tools only when nothing native works — tell the user. Fakes (light-path tricks,
    projected patterns) only as a declared fallback. The point of the studies is renders that
    hold up as physics, so a bias must always be named, never hidden.
 
-## REN_03 procedure
+## REN_02 procedure
 
 **Renderer: Cycles by default, LuxCore for detailed caustics**. When
    caustics or heavy refraction carry the shot — sun through patterned glass or glass block,

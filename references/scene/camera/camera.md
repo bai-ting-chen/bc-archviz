@@ -40,7 +40,7 @@ balance and depth of field.
    `exposure = log2(683/1.2) − EV100`. Pick the triple a photographer would use for that light
    (table); on a tripod, keep a mid aperture and move shutter or ISO. From a measured illuminance
    E instead: `EV100 = log2(E_lux / 2.5)`. Check: a mid-grey surface lands mid-range in the written PNG
-   (RULES VAL_03).
+   ([validation.md](../../review/validation.md) › Measuring the rendered look).
 4. **White balance.** `view_settings.use_white_balance`, `white_balance_temperature` = the colour
    shown neutral; lower is cooler. Setting it above the lamp temperature keeps warmth in the image.
    Move the temperature only and leave `white_balance_tint` at 10. Check: the hue of the whole frame,

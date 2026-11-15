@@ -48,7 +48,7 @@ bubbles with the film.
   sideways drift grows with the distance travelled, so foam carries **past both ends of the fall**.
 - **Shape:** irregular polygons (7–13 vertices, radius noise ±45 %), size lognormal, stretched
   along the drift the further they travel. Identical discs in a row read as fake at once.
-- **Size from the final view** (RULES MAT_03): flecks under ~1 px vanish; at ~4–10 mm/px the
+- **Size from the final view** (RULES MAT_02): flecks under ~1 px vanish; at ~4–10 mm/px the
   median must be ~1 cm.
 - Flat, just above the surface; a short subsurface.
 

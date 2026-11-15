@@ -1,6 +1,6 @@
 """Packed, bounded headless acceptance probes; --only SECTION, --full for slow evidence.
 
-Runner only: each section lives in its own module (RULES GOV_04):
+Runner only: each section lives in its own module (RULES GOV_03):
     tile_damage_rig          scene set-up, packed EXR probe, aligned tile grids (shared)
     tile_damage_geometry     pixel-mask helpers (shared)
     tile_damage_crack        crack network

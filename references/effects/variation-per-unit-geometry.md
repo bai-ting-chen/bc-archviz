@@ -18,7 +18,7 @@ Repeated units that really tilt and step in or out. Tone and roughness per unit:
  │                   ─► shading key `geometry`                              │
  └──────────────────────────────────────────────────────────────────────────┘
 ```
-- Switch: excursion 0 = flat units (RULES MAT_07). Measure geometry fields before the move (RULES MAT_08).
+- Switch: excursion 0 = flat units (RULES MAT_05). Measure geometry fields before the move ([wear-locations.md](wear/wear-locations.md) § 2).
 
 ## 3. Code
 - Rhino: Rook `rhino_block_transform_instance_batch`, one transform per instance.

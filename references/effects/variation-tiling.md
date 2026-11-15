@@ -21,7 +21,7 @@ Hiding the repeat of an image map on a continuous surface.
  │ Leftover stains  diffuse part-way to its mean ─► colour            │
  └────────────────────────────────────────────────────────────────────┘
 ```
-- Switch: amount 0 = the plain lookup (RULES MAT_07).
+- Switch: amount 0 = the plain lookup (RULES MAT_05).
 
 ## 3. Code
 - `scripts/blender/effects/variation_tiling.py`: `anti_tile(graph, textures, …, amount)`; `textures`: step 4.
@@ -29,7 +29,7 @@ Hiding the repeat of an image map on a continuous surface.
 
 ## 4. Instructions and parameters
 1. **Coordinates.** The mesh's real-size UVs (`box_uv`, texture-selection.md).
-2. **Decide.** Ask the user first (RULES MAT_06). Not for a featureless map (nothing to repeat) or a scan with
+2. **Decide.** Ask the user first (RULES MAT_04). Not for a featureless map (nothing to repeat) or a scan with
    joints or tie holes (formwork, boards: units; offsets break the joints). Go on only if, on a wall four
    repeats wide, a feature recurs on a grid.
 3. **Lookups.** Offset both U and V; noise ~1.5 m, world space. Copies keep the original's settings. Offsets only: a rotation breaks the tangent space. Methods: table.

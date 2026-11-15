@@ -11,7 +11,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
  ┌───────────────────────────────────────────────────────────────────────────┐
  │ SPECIFIC (§4)                              GENERIC (own reference)        │
  │ 1 Wet look   → colour, roughness, coat     Water body → water-surface.md  │
- │ 2 Wet extent → mask for layer 1            Patchy extent → RULES MAT_05   │
+ │ 2 Wet extent → mask for layer 1            Patchy extent → RULES MAT_03   │
  └───────────────────────────────────────────────────────────────────────────┘
    wet extent (2) ─► mask 0–1 ─► mixes dry and wet values
    dry albedo ─► 1 dry^gamma ─► Base Color;  roughness and water coat ─► Principled
@@ -57,7 +57,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
   - falling water in front of a wall: the sheet stands off the wall (tens of cm at the foot), so distance to the
     water leaves the wall behind it dry. Use a proxy mesh lying on the wall face over the whole footprint of the
     fall (`materials.water.wet_wall_proxy.build_proxy`); behind the water everything is wet from spray, run-down and condensation.
-- **Ragged edge (RULES MAT_05).** A slow noise along the edge drives the wet width, down to negative (dry). Behind
+- **Ragged edge (RULES MAT_03).** A slow noise along the edge drives the wet width, down to negative (dry). Behind
   falling water the wet edge wanders past each end of the fall, with run-off fingers hanging from the top near
   the ends. A constant-width band or a straight wet/dry line is a rigid tell.
 - **Splash fades with distance.** Splash drops (Voronoi) thin out away from the water. Above a pool the splash
@@ -79,7 +79,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 | Layer | Reference | Note for this material |
 |---|---|---|
 | Water body (pool, clear water) | water-surface.md | the wet surfaces are here; the water itself is there |
-| Patchy extent of wet | RULES MAT_05 | slow noise that reaches zero (§4.2) |
+| Patchy extent of wet | RULES MAT_03 | slow noise that reaches zero (§4.2) |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

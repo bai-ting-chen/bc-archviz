@@ -1,6 +1,6 @@
 """Baseline for the archviz helper API: every public helper that is cheap to run headless, dumped as JSON.
 
-Used as the refactor proof for scripts/blender/core/archviz.py (RULES GOV_04): dump before the change,
+Used as the refactor proof for scripts/blender/core/archviz.py (RULES GOV_03): dump before the change,
 dump after, compare. Renders are skipped (they are covered by the scene controls); the helpers that
 import Rhino or write files are not run here.
 

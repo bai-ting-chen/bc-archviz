@@ -29,7 +29,7 @@ _PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 if _PACKAGE_ROOT not in sys.path:
     sys.path.insert(0, _PACKAGE_ROOT)
 
-# Compatibility imports; each implementation has one owner (GOV_04).
+# Compatibility imports; each implementation has one owner (GOV_03).
 from renderer.finals.final_settings import setup_unlimited  # noqa: E402,F401
 from renderer.finals.final_session import _STATE, _save, _on_complete, _on_cancel, remove_handlers, start_in_ui, stop_in_ui  # noqa: E402,F401
 from renderer.finals.final_images import denoise_from_passes, png_from_exr  # noqa: E402,F401

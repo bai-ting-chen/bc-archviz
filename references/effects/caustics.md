@@ -2,13 +2,13 @@
 
 ## 1. Overview
 Light patterns a refractor focuses onto a receiver: sun through a pool, glass or patterned glass. Choose
-the method below (RULES REN_02, REN_03), say which and why, then build and check it (§4).
+the method below (RULES REN_01, REN_02), say which and why, then build and check it (§4).
 
 ### Choosing the method
 | Case | Method | Why |
 |---|---|---|
 | Sun through a water body (pool, pond, water feature) onto matte surfaces below | GN wavefront (step 3b) | native, noise-free, energy-exact for one refraction |
-| Glass (glassware, patterned glass, glass block), lamps, or several interfaces, when the caustic carries the shot (RULES REN_03) | LuxCore (step 3a) | unbiased, energy-correct; the only engine that converged (step 1) |
+| Glass (glassware, patterned glass, glass block), lamps, or several interfaces, when the caustic carries the shot (RULES REN_02) | LuxCore (step 3a) | unbiased, energy-correct; the only engine that converged (step 1) |
 | Glass whose caustic does not carry the shot | stay in Cycles; no caustics method | Cycles renders the glass; its caustic stays faint or absent |
 
 ## 2. Layers and node-editor diagram
@@ -101,7 +101,7 @@ the method below (RULES REN_02, REN_03), say which and why, then build and check
 ### Generic layers
 | Layer | Reference | Note for this material |
 |---|---|---|
-| Renderer choice | `references/renderer/renderer-choice.md` | the §1 table applies REN_02 and REN_03 |
+| Renderer choice | `references/renderer/renderer-choice.md` | the §1 table applies REN_01 and REN_02 |
 | LuxCore setup | [luxcore.md](../renderer/luxcore.md) | PATH + light tracing, *Use CPUs* on (step 3a) |
 | HDRI sun | `references/scene/lighting/hdri.md` | the sun share sets crispness and contrast (step 3) |
 

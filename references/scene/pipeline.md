@@ -14,9 +14,9 @@ Read-only documentation work needs no Blender or Rhino connection.
 - [ ] Blender open, MCP answering on 9876 (get_blendfile_summary_datablocks)
 - [ ] Rhino: which document is open and is it modified? A user's file stays untouched (Rhino below)
 - [ ] Local studies: studies/README.md + the latest study-notes.md (open items carry over)
-- [ ] Study folder set: archviz.set_project(<study>); assets into the study's library/ (RULES AST_03)
+- [ ] Study folder set: archviz.set_project(<study>); assets into the study's library/ (RULES AST_01)
 - [ ] New technique: research gate first (RULES RES_01, GAT_01)
-- [ ] Caustics through glass or water central to the shot → LuxCore (RULES REN_03), else Cycles
+- [ ] Caustics through glass or water central to the shot → LuxCore (RULES REN_02), else Cycles
 ```
 
 ## Phase 1. Geometry in Rhino (Rook)
@@ -53,7 +53,7 @@ Read-only documentation work needs no Blender or Rhino connection.
 ## Phase 4. Look rounds (Blender, host tools)
 1. Run the rounds as [validation.md](../review/validation.md) › *The look round*: criteria, the
    study runner loop, the stop rule.
-2. Prove each feature with a control (RULES VAL_02); before every "done", the crop pass (RULES VAL_01).
+2. Prove each feature with a control (RULES VAL_01); before every "done", the crop pass (RULES VAL_02).
 3. Reuse the helpers in [blender-python-helpers.md](blender-python-helpers.md) instead of
    re-deriving node plumbing: the traps they wrap get hit again otherwise.
 4. **Hands over:** the look the user approved.
@@ -94,8 +94,8 @@ Blender, where the look has one place to edit; Rhino materials don't translate.
 
 ## Study layout
 `studies/<yymmdd>-<topic>/`: Rhino build script, `*.3dm`, `scene_geometry.py` + `scene_look.py`
-(the names `study_run.py` expects), `.blend`, finals, `study-notes.md`, `library/` (RULES AST_03)
+(the names `study_run.py` expects), `.blend`, finals, `study-notes.md`, `library/` (RULES AST_01)
 and `_wip/`. Everything a study makes (crops, comparisons, test renders, measurements, downloads,
 throwaway scripts) goes in its `_wip/`, never the session scratchpad or %TEMP%, so one place holds
 it all; tell subagents the path too (RULES AST_01). Delete `*.blend1` / `*.3dmbak`. Names: RULES
-AST_05. Closing: [study-close.md](../workflow/study-close.md).
+AST_03. Closing: [study-close.md](../workflow/study-close.md).

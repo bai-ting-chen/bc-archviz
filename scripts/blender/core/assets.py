@@ -13,7 +13,7 @@ import core.project_paths as project_paths
 
 # Code lives in the skill; assets live in a study's (or project's) library/ (polyhaven/, local/).
 # The folder: set_project(path), else env ARCHVIZ_PROJECT, else project_paths.find_project from
-# the open .blend, then the working directory (a study stops the search at itself, RULES AST_03).
+# the open .blend, then the working directory (a study stops the search at itself, RULES AST_01).
 _PROJECT = os.environ.get("ARCHVIZ_PROJECT")
 
 

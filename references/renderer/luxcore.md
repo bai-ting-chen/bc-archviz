@@ -42,7 +42,7 @@ What it sets, against BlendLuxCore's defaults:
 - **GPU + CPU is the fast setup**, same image as CPU-only (bias < 1 %). Measured at equal time
   against a 14 h CPU reference, per region (6-core CPU + mid-range RTX): walls and ceiling — whose
   noise is camera paths — reached equal noise 4–6× sooner, glass seen from inside 4×, a floor
-  lit purely by the caustic 2.2× (it is still bound by the CPU's light tracing). Never render LuxCore CPU-only (RULES REN_03).
+  lit purely by the caustic 2.2× (it is still bound by the CPU's light tracing). Never render LuxCore CPU-only.
 - **Speed — what did not help** (same comparison): more light-ray share on CPU-only (the 20 %
   default was best overall; 50/80 % helped one wall and hurt everything camera-path lit);
   `light_strategy` POWER vs LOG_POWER (no change when the sun dominates); the env-light cache

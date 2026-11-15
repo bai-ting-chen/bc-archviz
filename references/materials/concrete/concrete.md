@@ -84,7 +84,7 @@ used here with concrete settings.
 | Vertical (walls) | damp band at the foot (§4.4) |
 
 ### 4.3 Grunge patches
-- Grunge comes in patches, not streaks (RULES MAT_05); check the reference before adding any streak.
+- Grunge comes in patches, not streaks (RULES MAT_03); check the reference before adding any streak.
 - Shape, all world-space Noise: a low-frequency patch field (with some Distortion) plus a centred
   high-frequency field at low amplitude, summed *before* a narrow threshold. That sum gives ragged,
   speckled borders instead of soft blobs.
@@ -163,14 +163,14 @@ used here with concrete settings.
 ### 4.10 Faint arris dirt on huge meshes
 - Faint dirty arris on huge meshes (30 m slabs, canopies): use the shader **Bevel normal vs true
   normal** as the edge mask (no dicing needed). GN `edge_dist` would need the mesh diced.
-- "Very faint" sits just above visibility: set the darkening with a control (RULES VAL_02), since a
+- "Very faint" sits just above visibility: set the darkening with a control (RULES VAL_01), since a
   value that looks faint in the shader can vanish entirely in the render.
 
 | Parameter | Value |
 |---|---|
 | Edge mask | Bevel normal vs true normal |
 | Dicing | not needed (GN `edge_dist` would need it) |
-| Darkening | set with a control (RULES VAL_02) |
+| Darkening | set with a control (RULES VAL_01) |
 
 ### 4.11 Bounce colour
 - A neutral white next to a strongly coloured surface takes its bounce colour (a soffit over a

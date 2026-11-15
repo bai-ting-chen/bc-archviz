@@ -26,7 +26,7 @@ Choosing the map, measuring it, rotating it and scaling it to lux.
   - `world_hdri_lux(hdri_id, target_lux, rotation_deg, visible)`: builds the world at a target lux.
   - `world_hdri(hdri_id, strength, rotation_deg, res)`: the raw world.
   - `sun_from_direction(direction, strength_lux)`: a sun lamp for scenes with no HDRI (tests, controls).
-- Maps are read from the study library, `library/polyhaven/hdris/<id>` (RULES AST_03).
+- Maps are read from the study library, `library/polyhaven/hdris/<id>` (RULES AST_01).
 
 ## 4. Instructions and parameters
 1. **Choose.** Shortlist by tag (Poly Haven API `api.polyhaven.com/assets?t=hdris`), then judge on the

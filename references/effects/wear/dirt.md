@@ -24,9 +24,9 @@ edge/corner helpers preserve their orientation weighting; choose top/foot fields
 those locations. Dust is lighter than edge line, several times wider and smoothly fading onto
 faces. Tonal order: surface > dust > line. Darken/desaturate the original albedo, retaining its
 texture; a fixed tint can become a pale highlight or black stroke. Inside corners are stronger
-low down and fainter at ceilings (RULES MAT_06). Judge width in the full frame.
+low down and fainter at ceilings (RULES MAT_04). Judge width in the full frame.
 
-| Parameter | Starting point (RULES MAT_03) |
+| Parameter | Starting point (RULES MAT_02) |
 |---|---|
 | Edge dust width / amount | 0.150 m / 0.40 |
 | Relative dust albedo / saturation | ×0.825 / 0.90 retained saturation |
@@ -48,7 +48,7 @@ contrast: do not feather grunge into a field, and do not give dust an outline.
 | Interior scans | `uh4tfagc`, `uh4uabdc`: 0.7 m each, 4K `_Mask` |
 | Scan levels | black/white 0/1, gamma 1, no inversion |
 | Region threshold / edge width | 0.24 / 0.20 normalized field units |
-| `scale_m` / `amount` | 0.25 m / 0.45; shot-sized starting points (RULES MAT_03) |
+| `scale_m` / `amount` | 0.25 m / 0.45; shot-sized starting points (RULES MAT_02) |
 | Procedural field | detail 3; fine range 0.35–0.65 × noise at 4× size, range 0.43–0.57 |
 | Colour / roughness at factor 1 | ×0.52 / ×1.35 |
 

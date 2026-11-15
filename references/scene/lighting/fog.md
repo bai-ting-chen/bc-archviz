@@ -30,7 +30,7 @@ Volumetric fog and mist with a density taken from the visibility distance; local
 1. **Density.** Extinction coefficient from the meteorological visibility (Koschmieder, 2 % contrast).
    Check: an object at distance d keeps exp(−sigma·d) of its contrast.
 2. **Shape.** A box around the site with the camera inside: full below the fog top, a smooth fade
-   to clear air above it, denser in hollows, patchy by noise (RULES MAT_05). Size the box and the
+   to clear air above it, denser in hollows, patchy by noise (RULES MAT_03). Size the box and the
    levels from the site.
 3. **Clear boxes.** Indoor air has no fog; a fog-filled dark room behind glass is also a noise source.
 4. **Scatter.** Droplets scatter forward and do not absorb: Volume Scatter, phase Mie, white.

@@ -3,7 +3,7 @@ the mask views, the leak field, runoff and cracks, dumped as JSON.
 
 Each case starts from an empty file. The legacy library (ARCHVIZ_PROJECT=<folder with
 library/polyhaven/textures/concrete_wall_009>) supplies the concrete maps. Used as the refactor proof for
-scripts/blender/effects/wear/__init__.py (RULES GOV_04): dump before, dump after, compare.
+scripts/blender/effects/wear/__init__.py (RULES GOV_03): dump before, dump after, compare.
 
 Usage: ARCHVIZ_PROJECT=<project> blender -b --factory-startup --python scripts/controls/effects/edge_wear_graph_check.py -- <out.json>
 """

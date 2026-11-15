@@ -5,7 +5,8 @@ Location fields for wear: edge distances, rounding, feet, drip origins, face ori
 
 ## 2. Layers and node-editor diagram
 These fields feed the location input of wear mechanisms; they are not a separate wear stack.
-Measure on the clean carrier, store attributes, then modify geometry and shade (RULES MAT_08).
+Measure every geometry field (edge, leak, proximity distances) on the clean carrier, before any modifier
+that moves or cracks it; store attributes, then modify geometry and shade.
 The family assembly and source method live in `references/effects/wear/wear.md`.
 
 ## 3. Code
@@ -34,7 +35,7 @@ The family assembly and source method live in `references/effects/wear/wear.md`.
 
 | Parameter | Starting point |
 |---|---|
-| Scene rounding radius | 0.0025 m; typically 2–3 mm, size from shot (RULES MAT_03) |
+| Scene rounding radius | 0.0025 m; typically 2–3 mm, size from shot (RULES MAT_02) |
 | Geometry bevel | two segments, 30 degree threshold |
 | Corner AO reach / mask cap | 0.30 m / 0.50 |
 
@@ -47,9 +48,9 @@ The family assembly and source method live in `references/effects/wear/wear.md`.
   scans blend vertical/up zones over Z 0.25–0.75. Use world normals, not projected coordinates.
 - A supplied `drip_top_m` defines an actual vertical origin; below it, `drip_length_m` fades downward.
   Multiply location by slow patch noise with real zero regions. Some areas must be unmarked;
-  avoid a uniform band or contour ring (RULES MAT_05).
+  avoid a uniform band or contour ring (RULES MAT_03).
 
-| `WearExtent` parameter | Starting point (RULES MAT_03) |
+| `WearExtent` parameter | Starting point (RULES MAT_02) |
 |---|---|
 | `enabled`, `floor_z_m` | True, 0 m |
 | `foot_full_m`, `foot_height_m` | 0.02 m, 0.7 m |

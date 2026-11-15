@@ -1,7 +1,7 @@
 # Reference library
 
 
-## RES_03 procedure
+## RES_02 procedure
 
 Profile the Render Reference Library slice before a look decision — a tagged image library in a
    per-machine folder (usually `%USERPROFILE%\PROJECT\Render Reference Library`; ask if it isn't

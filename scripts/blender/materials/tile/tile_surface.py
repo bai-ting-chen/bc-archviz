@@ -1,6 +1,6 @@
 """Independent tile layout, glazed face, rounded shoulder and grout shading.
 
-This module is the one import point; each job lives in its own module (RULES GOV_04):
+This module is the one import point; each job lives in its own module (RULES GOV_03):
     tile_build         tile_material: assemble one tile node tree from its parts
     tile_settings      read settings back, set_param (structural rebuilds)
     tile_displacement  bump / full / damage-only displacement

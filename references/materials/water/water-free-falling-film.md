@@ -35,13 +35,13 @@ used here with falling-film settings.
 - **One water body:** front and back skins of one closed mesh (a 2.5 mm grid over (y, d) is
   enough for the final view); strings and drops are separate meshes with the same water
   material. No stacked parallel layers (they add bands, not volume).
-- **Each layer its own term** (RULES MAT_07): each scales a deviation and can be switched off for a
+- **Each layer its own term** (RULES MAT_05): each scales a deviation and can be switched off for a
   control. Change one layer at a time; a look that works stays byte-identical while another
   layer changes.
-- **Size from the final view first** (RULES MAT_03): compute mm per pixel on the curtain (vertical
+- **Size from the final view first** (RULES MAT_02): compute mm per pixel on the curtain (vertical
   and along the wall, which is foreshortened). At a typical courtyard view one pixel covers
   ~4 mm × 10 mm, so drops, strings and roll-wave arcs are sub-pixel and read only in aggregate
-  (RULES MAT_04). A close-up reference shows detail that cannot exist at that scale.
+  (RULES MAT_02). A close-up reference shows detail that cannot exist at that scale.
 
 ## 3. Code
 `scripts/blender/materials/water/`: `falling_film_assembly.falling_film(lip, pool_height_m, film_mat, …)` builds every layer in
@@ -56,7 +56,7 @@ Control on an unrelated scene: `scripts/controls/water/falling_film_check.py`.
 
 ## 4. Instructions and parameters, per layer
 Table values are starting points that held at one courtyard-scale view (~4 × 10 mm per pixel);
-size them from the shot (RULES MAT_03), judge in a strip lab (validation.md), and record the final
+size them from the shot (RULES MAT_02), judge in a strip lab (validation.md), and record the final
 values in the study notes (RULES GOV_01).
 
 ### 4.1 Ballistic carrier (geometry)
@@ -204,7 +204,7 @@ values in the study notes (RULES GOV_01).
   objects only. Foam, bubbles and splash stay sharp.
 - Units and shutter: blender-api-traps › Render. Streak at the foot = U_foot × shutter time;
   size it in pixels at the final view.
-- Motion blur stores extra vertex steps: check VRAM on a heavy film before the final (RULES SAF_02).
+- Motion blur stores extra vertex steps: check VRAM on a heavy film before the final ([render-settings.md](../../renderer/render-settings.md) › Memory).
 
 | Parameter | Value |
 |---|---|

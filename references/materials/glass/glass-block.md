@@ -69,14 +69,14 @@ Table values are starting points; take the real unit from the manufacturer's she
   mortar and glass so the two surfaces never coincide.
 
 ### Step 6. Variation
-- Per-unit tone and tilt, and which relief variant each unit gets (RULES MAT_06).
+- Per-unit tone and tilt, and which relief variant each unit gets (RULES MAT_04).
 
 ### Generic layers
 | Layer | Reference | Note for this material |
 |---|---|---|
 | Relief on the inner faces | [glass-relief.md](glass-relief.md) | step 4 |
 | Per-unit tone | [variation-per-unit-shading.md](../../effects/variation-per-unit-shading.md) | small normal tilt |
-| Light thrown into the room | [caustics.md](../../effects/caustics.md) | when it carries the shot (RULES REN_03) |
+| Light thrown into the room | [caustics.md](../../effects/caustics.md) | when it carries the shot (RULES REN_02) |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

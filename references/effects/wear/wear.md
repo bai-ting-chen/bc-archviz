@@ -22,6 +22,7 @@ Hybrid has one definition: **wear = procedural region × bitmap interior**. The 
 procedural pattern × location, feathered by the layer's edge width. Only the interior sees scans.
 Keep their full contrast; do not replace it with near-one modulation. Chipping thresholds region
 and interior to binary coat/bare selection. Scratches retain their held legacy modulation.
+Dirty-edge shading (dust, edge line) and geometric chips stay separate layers; one never stands in for the other.
 
 ```
  +-- WEAR ASSEMBLY — LAYER DIAGRAM ----------------------------------------+
@@ -31,9 +32,9 @@ and interior to binary coat/bare selection. Scratches retain their held legacy m
  | flaked coat + under-material -> shader selection -> Material Surface     |
  +-------------------------------------------------------------------------+
 ```
-Capture fields before modifiers move the mesh (RULES MAT_08). Leak origin runs before chips;
+Capture fields before modifiers move the mesh ([wear-locations.md](wear-locations.md) § 2). Leak origin runs before chips;
 base variation precedes shading wear. Supply `apply_surface_wear` layers in order, chipping last.
-Keep geometry switches and shading amounts independent (RULES MAT_07).
+Keep geometry switches and shading amounts independent (RULES MAT_05).
 
 | Layer | Default source | Reason / status |
 |---|---|---|
@@ -74,7 +75,7 @@ optionally select between scans. Check polarity against registered BaseColor whe
 raw-mask controls otherwise. Keep clean/paint background black and marks a minority: interior
 mean and strong-mark area below one half. Filtered nonzero pixels do not measure coverage.
 
-| Parameter | Starting point (RULES MAT_03) |
+| Parameter | Starting point (RULES MAT_02) |
 |---|---|
 | `HybridSource.seed` / `blend_scale_m` / `scale_jitter` | 17 / 1.7 m / 0.12 (0.88–1.12 scale) |
 | Interior post-tiling remap | black/white 0/1, gamma/gain 1/1; cap at 1 |

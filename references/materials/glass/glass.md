@@ -28,7 +28,7 @@ used here with glass settings.
 
 - The distortion is added to a finished base material; it changes the normal only, plus a trace of
   roughness.
-- Off switch (RULES MAT_07): the base alone is the pane without §4.2; on a built material, mute the
+- Off switch (RULES MAT_05): the base alone is the pane without §4.2; on a built material, mute the
   Bump node labelled "roller wave + pillowing".
 
 ## 3. Code
@@ -46,7 +46,7 @@ used here with glass settings.
   shell and the distortion); `scripts/controls/environment/outdoor_smoke.py` renders a distorted pane.
 
 ## 4. Instructions and parameters, per layer
-Table values are starting points; size them from the shot (RULES MAT_03) and record the final values
+Table values are starting points; size them from the shot (RULES MAT_02) and record the final values
 in the study notes (RULES GOV_01).
 
 ### 4.1 Clear glass base

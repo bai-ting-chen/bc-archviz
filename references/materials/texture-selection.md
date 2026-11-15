@@ -24,14 +24,14 @@ Use when: choosing a texture source or method for a surface, then scaling it and
    `api.polyhaven.com/assets?t=textures` filtered by id/tags finds what `polyhaven_fetch.py
    search <category>` misses. Search Quixel Megascans in the same pass (`asset_sheet.py`,
    sources.md › Quixel on Fab); their listings state the scan size. Then send the fits from both
-   sources as one candidate list for review (RULES MAT_10), for example:
+   sources as one candidate list for review (RULES AST_04), for example:
 
    | Pick | Source | Id | Asset | Real size | Download | Why it fits |
    |---|---|---|---|---|---|---|
    | 1 | Quixel | `pjefk0` | Smooth Concrete | 1 × 1 m | `smooth_concrete_pjefk0_4k.zip`, 36 MB | pale, even, no tie holes |
    | 2 | Poly Haven | `concrete_floor_02` | Concrete Floor 02 | 2 × 2 m | 2K maps | larger scan, less repeat |
 
-   The agent downloads the picks (RULES AST_06). Steps 2–8 run on the picks.
+   The agent downloads the picks (RULES AST_04). Steps 2–8 run on the picks.
 2. **Open the colour map itself**, not the sphere thumbnail or the tags — a "white, clean" tag can
    sit on painted boards or a weathered, stained surface. Check its features against the table.
 3. **Judge the map by its measured mean, not its thumbnail.** Average the diffuse map in linear

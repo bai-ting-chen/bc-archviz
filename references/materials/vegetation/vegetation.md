@@ -82,7 +82,7 @@ used here with vegetation settings.
 ### 4.3 Blade material (grass shading)
 - `materials.vegetation.vegetation.blade_material`: Principled plus Translucent. Green leaf transmits
   a little light at the 550 nm peak and less across the rest of the visible range.
-- Per-instance value and a patchy straw or dry mix on the instance location (RULES MAT_05, MAT_06).
+- Per-instance value and a patchy straw or dry mix on the instance location (RULES MAT_03, MAT_04).
 - **Canopy albedo is low.** A grass canopy's visible albedo is only ~0.05–0.1, and under a
   high-contrast AgX look it sinks. Choose a softer look rather than brightening the albedo.
 

@@ -36,7 +36,7 @@ def engine_setup(halt_s=None, backend="CUDA", clamp=CAMERA_RADIANCE_CLAMP, camer
     sc.render.engine = "LUXCORE"
     cfg = sc.luxcore.config
     cfg.engine = "PATH"
-    cfg.device = "OCL"                                     # always GPU + CPU, never CPU only (RULES REN_03)
+    cfg.device = "OCL"                                     # always GPU + CPU, never CPU only (luxcore.md)
     bpy.context.preferences.addons[ADDON_MODULE].preferences.gpu_backend = backend
     sc.luxcore.devices.use_native_cpu = True               # light tracing runs only on CPU threads, GPU engine too
     p = cfg.path

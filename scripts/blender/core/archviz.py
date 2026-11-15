@@ -7,7 +7,7 @@ settings -- is built here, from the local Poly Haven library.
     import core.archviz as archviz
 
 This module is the one import point: each job lives in its own module, re-exported here so
-callers keep working (RULES GOV_04, one module per job):
+callers keep working (RULES GOV_03, one module per job):
     assets       project folder, library(), read_meta / write_meta
     photometry   LM_PER_W, ev100
     render       use_gpu, render_setup, render_to, framing_render

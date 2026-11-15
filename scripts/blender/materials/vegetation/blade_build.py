@@ -21,7 +21,7 @@ def blade_material(name, texture=None, colour=(0.12, 0.15, 0.05), wet=None, dry_
     else:
         rgb = g.node_with_props("ShaderNodeRGB", (-900, 200)); rgb.outputs[0].default_value = (*colour, 1.0)
         col = rgb.outputs[0]
-    # per-instance variation (RULES MAT_06) and dryness patches across the field (MAT_05)
+    # per-instance variation (RULES MAT_04) and dryness patches across the field (MAT_03)
     oi = g.node_with_props("ShaderNodeObjectInfo", (-900, -200))
     val = g.map_range(oi.outputs["Random"], 0.0, 1.0, (-650, -100), 0.8, 1.15)
     nz = g.node_with_props("ShaderNodeTexNoise", (-650, -350)); nz.inputs["Scale"].default_value = 0.08; nz.inputs["Detail"].default_value = 3.0

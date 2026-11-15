@@ -10,7 +10,7 @@ Simplifications: one refraction (exact for a pool), constant Fresnel T, sun disc
 point direction (slightly too crisp), matte receivers only.
 """
 
-# Compatibility imports; each implementation has one owner (GOV_04).
+# Compatibility imports; each implementation has one owner (GOV_03).
 from effects.caustics.caustic_graph import caustic_sheet_group  # noqa: F401
 from effects.caustics.caustic_shading import caustic_sheet_material  # noqa: F401
 from effects.caustics.caustic_objects import add_caustic_sheet  # noqa: F401

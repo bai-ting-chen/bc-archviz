@@ -85,7 +85,7 @@ Fix: same lens with `sensor_width = 24` and a square render; match the frustum. 
 
 ### Material or light change has no visible effect
 Cause: a stale mesh or dependency graph, so the render still uses the old data.
-Fix: `update_tag()` and `view_layer.update()`, then prove the change with a control (RULES VAL_02).
+Fix: `update_tag()` and `view_layer.update()`, then prove the change with a control (RULES VAL_01).
 See [validation.md](../review/validation.md).
 
 ## Materials, geometry and images
@@ -137,7 +137,7 @@ Fix: route `DENOISED` through the compositor. See [luxcore.md](../renderer/luxco
 ### Cloudy blotches on smooth walls or ceiling after OIDN
 Cause: fireflies from caustic-bounce paths, which OIDN smears into clouds.
 Fix: radiance clamping, not more time (`engine_setup` sets it; luxcore.md › Fireflies). Clamping is
-biased; disclose it (RULES REN_02). See [luxcore.md](../renderer/luxcore.md).
+biased; disclose it (RULES REN_01). See [luxcore.md](../renderer/luxcore.md).
 
 ## Final output
 
