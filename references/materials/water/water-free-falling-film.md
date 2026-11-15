@@ -46,9 +46,10 @@ used here with falling-film settings.
 ## 3. Code
 `scripts/blender/materials/water/`: `falling_film_assembly.falling_film(lip, pool_height_m, film_mat, …)` builds every layer in
 §2 from a `ballistic_sheet.LaunchLip` (any straight lip: origin_m, along_axis, outward_axis, length_m, drop_m) and returns objects and
-stats. Parameters live in `falling_film_assembly.FallingFilmSetup` (`ballistic_sheet.SheetFlow`, `falling_film.FilmParams`, `film_fragments.FragmentParams`,
-`pool_impacts.ImpactParams`, `pool_ripples.RippleParams`, `wet_wall_proxy.WetParams`). Modules: `mesh_builders` (geometry), `motion_blur`
-(velocity), `surface_shading` (materials, ripple bump). Defaults = the starting values in §4. `along_lip_range_m` builds a
+stats. Parameters live in `falling_film_assembly.FallingFilmSetup` (`ballistic_sheet.SheetFlow`, `film_config.FilmParams`, `film_fragments.FragmentParams`,
+`impact_config.ImpactParams`, `pool_ripples.RippleParams`, `wet_wall_proxy.WetParams`). Modules: `film_fields` (the field layers),
+`film_surfaces` (the layers on the ballistic carrier), `mesh_builders` (geometry), `motion_blur` (velocity), `ripple_bump` (ripple bump),
+`pool_material` (thin-wall water). Defaults = the starting values in §4. `along_lip_range_m` builds a
 strip of the lip for a lab.
 
 Control on an unrelated scene: `scripts/controls/water/falling_film_check.py`.

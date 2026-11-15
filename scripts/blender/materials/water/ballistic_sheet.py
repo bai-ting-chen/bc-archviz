@@ -84,7 +84,12 @@ def launch_speed_m_s(flow, s, drop_m):
 def fall_speed_m_s(flow, s, drop_m):
     """Sheet speed U = sqrt(v0^2 + 2 g drop_m), m/s."""
     v0 = launch_speed_m_s(flow, s, drop_m)
-    return np.sqrt(v0 * v0 + 2 * GRAVITY_M_S2 * np.maximum(drop_m, 0))
+    return speed_after_drop_m_s(v0, drop_m)
+
+
+def speed_after_drop_m_s(launch_speed_m_s, drop_m):
+    """Speed after a nonnegative vertical drop, from launch speed (m/s) and drop (m)."""
+    return np.sqrt(launch_speed_m_s ** 2 + 2 * GRAVITY_M_S2 * np.maximum(drop_m, 0))
 
 
 def sheet_thickness_m(flow, s, drop_m):

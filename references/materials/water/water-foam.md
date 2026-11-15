@@ -13,7 +13,7 @@ in their own reference, and used here with foam settings.
  │ SPECIFIC (§4)                                                            │
  │   §4.1 Foam flecks (surface)            → white flecks, drift past ends  │
  │   §4.2 Floating bubbles                 → clear domes, sparkle far out   │
- │   §4.3 Whitewater (plunge zones)        → opaque milky surface, trench   │
+ │   §4.3 Whitewater (plunge zones)        → opaque milky surface           │
  │ GENERIC (own reference)                                                  │
  │   Impacts: landing line, crowns, splash → water-splash.md                │
  └──────────────────────────────────────────────────────────────────────────┘
@@ -36,7 +36,8 @@ Flow:
 - `impact_bubbles.py`: `bubbles(lip, pts, strength, pool_z, p)` (floating bubbles, §4.2).
 - Parameters: `ImpactParams` in `impact_config.py`.
 
-No script is named in this file for whitewater (§4.3). No control scene is named.
+No script for whitewater (§4.3). Control: `scripts/controls/water/falling_film_check.py` builds flecks and
+bubbles with the film.
 
 ## 4. Instructions and parameters, per layer
 
@@ -64,7 +65,7 @@ No script is named in this file for whitewater (§4.3). No control scene is name
 - Clear domes sitting on the water, single or in small rafts; they travel much further than foam
   and give the scattered sparkle far from the fall.
 - Dome = upper hemisphere squashed to ~0.85 of its radius, sunk ~20 % of the radius; material:
-  thin-wall water (glints and rim, no bending).
+  thin-wall water ([water-surface.md](water-surface.md) §4.5).
 - Spawned at impacts, carried out with the same growing sideways drift.
 
 | Parameter | Value |
@@ -76,25 +77,26 @@ No script is named in this file for whitewater (§4.3). No control scene is name
 | Spawn weight | strength^0.3 |
 | Dome | ~0.85 of radius, sunk ~20 % of radius |
 
-### 4.3 Whitewater (plunge zones, trenches)
+### 4.3 Whitewater (plunge zones)
 - **Optics:** a bubble cloud scatters σ_s ≈ 1.5·α / r (void fraction α, bubble radius r). Ten
-  centimetres is optically thick: the floor of a churning trench never shows.
+  centimetres is optically thick: the floor under churning water never shows.
 - **Render it as an opaque milky surface, not a volume.** A scattering volume in a shaded slot
   renders dark grey and slow. Use Burley subsurface under a wet sheen, foam (rougher, short radius)
   blended in as soft marbled streaks and lace; a few darker, less aerated streaks — never clear holes.
-- **Never a hard foam switch.** Opaque white beside clear water over a dark trench reads as
-  snow with black holes.
-- **Fill below the surface.** An open water sheet over a void lets sight lines bent through
-  adjacent glass end on the dark floor → a black band at the waterline. Put an opaque milky body
-  just under the wave troughs (whitewater only; clear pools keep their clear body).
-- **Bursts, not a uniform band:** one along-line "scallop" field (bursts every 0.15–0.6 m) drives
-  foam width, boil height and splash density together.
+- **Never a hard foam switch.** Opaque white beside clear water over a dark floor reads as snow
+  with black holes.
+- **Milky below the surface too.** Whitewater is opaque in depth: put a milky body just under the
+  wave troughs, so no sight line through the chop reaches a dark void (whitewater only; clear pools
+  keep their clear body).
+- **Bursts, not a uniform band:** one along-line burst field (every 0.15–0.6 m) scales the impact
+  strength (water-splash.md §4.1), so foam width, boil height and splash density follow it together.
+- The chop and boils under the whitewater are geometry: water-ripple.md §4.3.
 
 | Parameter | Value |
 |---|---|
 | Scatter | σ_s ≈ 1.5·α/r; 10 %, 1 mm → 150 /m; 30 %, 0.5 mm → ~900 /m |
 | Subsurface | Burley, radius 3–4 cm |
-| Wet sheen | IOR 1.33, roughness ~0.06 |
+| Wet sheen | IOR 1.333, roughness ~0.06 |
 | Base albedo | 0.35–0.45 |
 | Foam albedo | 0.8 (rougher, short radius) |
 | Burst spacing | 0.15–0.6 m |
@@ -111,10 +113,9 @@ Generic layers, foam settings:
 | Foam in one line of identical discs | one band, one size | impact-spawned, lognormal, irregular (§4.1) |
 | Foam invisible at the final view | sizes under a pixel | size from mm/px (§4.1) |
 | Foam stops where the fall stops | no sideways drift | drift growing with distance (§4.1) |
-| White clumps at strong impacts | crowns as open shells (light trapped), not foam | thin-wall crowns (water-splash.md) |
 | Only white foam, no sparkle far out | no floating bubbles | bubbles (§4.2) |
-| Snow cones with black holes | spiky short boils and a hard foam switch over a dark trench | rounded chop (`references/materials/water/water-ripple.md`), soft mask, milky body (§4.3) |
-| Black band at a waterline seen through glass | an open water sheet over a dark void below the troughs | in whitewater and trough contexts, the scoped milky body below the troughs (§4.3); a clear pool keeps its clear body, never made opaque silently |
+| Snow cones with black holes | spiky short boils and a hard foam switch over a dark floor | rounded chop (`references/materials/water/water-ripple.md`), soft mask, milky body (§4.3) |
+| Dark band or holes through the troughs | sight lines through the chop reach a dark void | milky body under the troughs (§4.3); a clear pool keeps its clear body |
 
 Generic problems: `references/workflow/troubleshooting.md` (not linked from this file: a link here
 would close a reference loop).

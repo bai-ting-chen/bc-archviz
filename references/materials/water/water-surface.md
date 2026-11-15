@@ -18,7 +18,7 @@ and used here with pool settings.
  │   §4.2 Pool geometry (top face, diced)  → mesh                           │
  │   §4.3 Rippled sunlit pool (Ocean)      → geometry waves, micro bump     │
  │   §4.4 Opaque pool look (stylised)      → shader, only when asked        │
- │   §4.5 Steam (not water)                → volume above the pool          │
+ │   §4.5 Thin-wall water                  → shader for open shells         │
  │ GENERIC (own reference)                                                  │
  │   Impact ripples, choppy plunge pools   → water-ripple.md                │
  └──────────────────────────────────────────────────────────────────────────┘
@@ -28,7 +28,7 @@ Flow:
 ```
    §4.2 top face of the basin (diced, smooth) ──► §4.3 Ocean waves on the same plane (short waves = caustics)
    §4.1 shader on that mesh: absorption by depth, IOR 1.333, shallow ripple bump
-   §4.4 replaces the clear body only when asked; §4.5 is a separate volume
+   §4.4 replaces the clear body only when asked; §4.5 is the same water for open shells (crowns, bubbles)
 ```
 
 - Colour comes from depth (§4.1), not from a gradient map.
@@ -36,11 +36,10 @@ Flow:
 
 ## 3. Code
 `scripts/blender/materials/water/`:
-- `pool_material.py`: `pool_water()` (§4.1).
+- `pool_material.py`: `pool_water()` (§4.1), `thin_wall_copy(material, name)` (§4.5).
 - `water_mesh.py`: `water_surface(obj, …)` (§4.2).
-- `scripts/blender/materials/shared/volumes.py`: `steam()` (§4.5).
 
-No control scene is named in this file.
+No control scene for the pool body yet; `scripts/controls/water/mnee_water.py` renders a water plane for caustics.
 
 ## 4. Instructions and parameters, per layer
 
@@ -48,6 +47,9 @@ No control scene is named in this file.
 - `pool_water()`: Principled transmission 1, IOR 1.333, a shallow ripple bump, and **Volume
   Absorption** for the tint — depth does the colour work, so a pool reads green in the deep end and
   clear at the step without any gradient map.
+- **The floor sets the pool's tone.** Water reflects little until the view grazes (Fresnel at IOR
+  1.333: ~4 % at 55°, ~9 % at 65°, ~13 % at 70° incidence), so the pool's colour is mostly the floor
+  seen through the body. Judge and choose the floor first.
 - **To try (manual-confirmed):** **Volume Coefficients** node (absorption per channel in 1/m, from
   measured water absorption) + Volume Scatter phase **Fournier-Forand** (IOR 1.0–1.2,
   backscatter) for haze and light shafts; noise → roughness for wind patches; Gabor texture for
@@ -58,6 +60,7 @@ No control scene is named in this file.
 | Transmission | 1 |
 | IOR | 1.333 |
 | Tint | Volume Absorption (depth), no gradient map |
+| Fresnel reflection | ~4 % at 55°, ~9 % at 65°, ~13 % at 70° incidence |
 | Ripple bump | shallow |
 | To try: scatter phase | Fournier-Forand, IOR 1.0–1.2 |
 
@@ -71,16 +74,14 @@ No control scene is named in this file.
 | Waterline | just under the coping |
 
 ### 4.3 Rippled sunlit pool (Ocean geometry, wind ripples)
-- Rippled sunlit pool: Ocean modifier on a diced plane — no choppiness on short waves, and
-  `wave_scale_min` >= 5 x grid spacing or the waves alias. Short wavelengths give the tight
-  caustic networks; long swell does not.
-- **Wind ripples are geometry, not a bump** when they carry caustics or are read as shapes (mm-high
-  impact ripples that only break reflections can be a bump: [water-ripple.md](water-ripple.md) › Bump
-  or geometry). A noise bump faking short ripples reads artificial, and stretching it "because
-  ripples look flat" doubles what perspective already does — never stretch. Dice the surface finer,
-  sized from the ripples visible in the shot, and let the Ocean carry them (wave_scale_min >= 5 x
-  cell, a little choppiness for crisp crests; check for downward faces = folds). Keep only a
-  millimetre-scale micro bump in the shader. Size the swell by RMS slope, not just amplitude.
+- Ocean modifier on a diced plane, `wave_scale_min` >= 5 × grid spacing or the waves alias. Short
+  wavelengths give the tight caustic networks; long swell does not.
+- Wind ripples that carry caustics or read as shapes are geometry (the choice:
+  [water-ripple.md](water-ripple.md) › Bump or geometry). Dice the surface finer, sized from the
+  ripples visible in the shot, and keep only a millimetre-scale micro bump in the shader.
+- **Never stretch** the ripples "because they look flat": perspective already does that.
+- **A little choppiness** for crisp crests, never enough to fold the surface: check for downward faces.
+- Size the swell by RMS slope, not just amplitude.
 
 | Parameter | Value |
 |---|---|
@@ -92,22 +93,25 @@ No control scene is named in this file.
 | Stretch | never |
 
 ### 4.4 Opaque pool look (stylisation, only when asked)
-- Opaque diffuse body under an exact IOR 1.333 surface. Declare it; near-field sky reflection is
-  Fresnel-limited, so a reference that is near-white there is showing a pale floor through clear
-  water.
+- Opaque diffuse body under an exact IOR 1.333 surface. Declare it. Near-field sky reflection is
+  small (§4.1), so a reference that is near-white there is showing a pale floor through clear water.
 
 | Parameter | Value |
 |---|---|
 | Surface IOR | 1.333 |
-| Fresnel reflection at 55–65° | ~6–12 % |
 
-### 4.5 Steam (not water)
-- `steam()`: Principled Volume, noise × height fade, anisotropy ~0.5. Listed here because it sits in
-  this file; it is not a water layer.
+### 4.5 Thin-wall water (open shells)
+- `thin_wall_copy(material, name)`: a copy of a water material with Principled Thin Wall on. It gives
+  glints and rims with straight transmission, no bending.
+- Use it for small open shells standing on or above the water: splash crowns, floating bubbles. A
+  solid water material on an open shell traps light and glows white.
+- Never as a second skin over the pool for ripples: it adds its own reflection
+  ([water-ripple.md](water-ripple.md) §2).
 
 | Parameter | Value |
 |---|---|
-| Anisotropy | ~0.5 |
+| Thin Wall | on |
+| IOR | 1.333 (from the source material) |
 
 Generic layers, pool settings:
 

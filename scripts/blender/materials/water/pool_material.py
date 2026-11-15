@@ -1,11 +1,12 @@
-"""Pool material; canonical implementation behind water."""
-
+"""Pool volume materials and thin-wall copies for open water shells."""
 import bpy
 
-from materials.shared.node_graph import NodeGraph, active_socket
+from materials.shared.dielectric import WATER_IOR
+from materials.shared.node_graph import NodeGraph
+
 
 def pool_water(name="POOL_WATER", tint=(0.45, 0.85, 0.72), density=1.0, ripple_scale=2.0,
-               ripple_m=0.0015, ior=1.333):
+               ripple_m=0.0015, ior=WATER_IOR):
     """Water as a closed volume: refractive surface (IOR 1.333) + Volume Absorption, so colour
     grows with path length (shallow steps stay clear, depth turns green). Absorption coefficient
     = density * (1 - tint) per metre. Gentle ripples as bump on the surface only."""
@@ -29,3 +30,13 @@ def pool_water(name="POOL_WATER", tint=(0.45, 0.85, 0.72), density=1.0, ripple_s
     g.link(b.outputs["BSDF"], out.inputs["Surface"])
     g.link(va.outputs["Volume"], out.inputs["Volume"])
     return mat
+
+
+def thin_wall_copy(material, name):
+    """Copy of a water material with Principled Thin Wall on (an open shell with solid water glows white)."""
+    copy = material.copy()
+    copy.name = name
+    for node in copy.node_tree.nodes:
+        if node.type == 'BSDF_PRINCIPLED':
+            node.inputs['Thin Wall'].default_value = True
+    return copy

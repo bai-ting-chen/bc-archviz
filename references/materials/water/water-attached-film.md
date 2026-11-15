@@ -21,8 +21,8 @@ used here with attached-film settings.
  │                                        Water against glass → glass.md     │
  │                                        Wet surface around the film        │
  │                                          → wet-surfaces.md                │
- │                                        Landing: splash, ripples, foam     │
- │                                          → water-splash/ripple/foam.md    │
+ │                                        Entering the pool: ripples, foam   │
+ │                                          → water-ripple/foam.md           │
  └───────────────────────────────────────────────────────────────────────────┘
    surface carrier (§4.1) ─► film coordinates (s along the surface, d down it)
    thickness (§4.2) × free-falling layers ─► film surface = carrier + thickness along the normal
@@ -38,11 +38,10 @@ used here with attached-film settings.
   building-scale view and reads only in aggregate (RULES MAT_04).
 
 ## 3. Code
-No builder yet. The free-falling field modules in `scripts/blender/materials/water/`
-(`film_ribbons`, `film_meander`, `film_waves`, `film_zones`, `film_swell`, `film_tears`) take only the
-film coordinates, not the carrier; `film_surfaces.film_surfaces()` is the one place that evaluates them
-on the ballistic carrier. An attached builder adds a surface carrier (§4.1) and calls the same field
-modules; it does not copy them (skill-maintaining.md › one builder per job).
+No builder yet. The free-falling field layers in `scripts/blender/materials/water/film_fields.py`
+(zones, swell, roll waves, meander, ribbons, tears) take only the film coordinates, not the carrier;
+`film_surfaces.film_surfaces()` is the one place that evaluates them on the ballistic carrier. An
+attached builder adds a surface carrier (§4.1) and calls the same field layers; it does not copy them (skill-maintaining.md › one builder per job).
 
 ## 4. Instructions and parameters, per layer
 Table values are starting points; size them from the shot (RULES MAT_03) and record the final values
@@ -94,9 +93,8 @@ Generic layers, attached-film settings:
 | Motion blur | [water-free-falling-film.md](water-free-falling-film.md) §4.9 | streak from the film's surface speed, far below a free fall |
 | Water against glass | [glass.md](../glass/glass.md) §4.3 | the wetted glass face takes the interface IOR |
 | Wet surface around the film | [wet-surfaces.md](../../effects/wet-surfaces.md) | splashed and damp margin beside and below the film |
-| Landing: crowns, splash | [water-splash.md](water-splash.md) | where the film lands |
-| Landing: ripples | [water-ripple.md](water-ripple.md) | where the film lands |
-| Foam, bubbles, aeration at the foot | [water-foam.md](water-foam.md) | where the film lands |
+| Ripples where the film enters the pool | [water-ripple.md](water-ripple.md) | the film runs in along the surface: ring waves and chop from its foot, no crater or crown |
+| Foam, bubbles, aeration at the foot | [water-foam.md](water-foam.md) | parents along the foot of the film |
 
 The ballistic carrier (§4.1 there) and strings and drops (§4.7 there) are not used.
 

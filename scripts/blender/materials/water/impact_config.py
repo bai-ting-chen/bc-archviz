@@ -1,4 +1,4 @@
-"""Foot config; implementation for water.pool_impacts."""
+"""Foot config; water impact fields and geometry."""
 from dataclasses import dataclass
 import numpy as np
 

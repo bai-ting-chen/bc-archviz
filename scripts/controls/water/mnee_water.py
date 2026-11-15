@@ -16,7 +16,7 @@ import bpy
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "blender"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import materials.water.water as _mat_water
+from materials.water import pool_material, water_mesh
 from photometric_scene import black_scene, render_linear, white_lambert  # noqa: E402
 
 
@@ -50,14 +50,14 @@ def run(kind="SPOT", water="plane", mnee=True, volume=False, caustics=True, samp
     floor.cycles.is_caustics_receiver = mnee
     if water != "none":
         w = box("water", -2, -2, -1.2 + 0.0005, 2, 2, 0.0, top_only=(water == "plane"), cuts=cuts)
-        wm = _mat_water.pool_water("W", density=1.0, ripple_m=0.0)
+        wm = pool_material.pool_water("W", density=1.0, ripple_m=0.0)
         if not volume:
             for l in list(wm.node_tree.links):
                 if l.to_socket.name == "Volume":
                     wm.node_tree.links.remove(l)
         w.data.materials.append(wm)
         if smooth:
-            _mat_water.smooth_flat(w)
+            water_mesh.smooth_flat(w)
         w.cycles.is_caustics_caster = mnee
     ld = bpy.data.lights.new("L", kind)
     ld.energy = 100.0

@@ -1,10 +1,7 @@
 """Glass assembly; implementation for glassware."""
-from materials.shared.pbr import dielectric
+from materials.shared.dielectric import dielectric, GLASS_IOR, WATER_IOR
 from materials.glass.tumbler_profiles import tumbler_profiles
 from materials.glass.lathe_geometry import lathe
-
-
-GLASS_IOR, WATER_IOR = 1.52, 1.333
 
 
 def glass_of_water(centre=(0.0, 0.0), base_height_m=0.73, water_height_m=0.095, segments=256, lift=0.0001):

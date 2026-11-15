@@ -83,7 +83,7 @@ the method below (RULES REN_02, REN_03), say which and why, then build and check
   overlay of albedo·E/π.
 - Limits: sun only, one refraction (exact for a water body), constant T, matte receivers. Receivers are
   sorted into floor (`floor_albedo` or `floor_tex`) and walls (`wall_albedo` in `caustic_sheet_material`).
-- The water caster: the diced, smooth top plane (`materials.water.water.water_surface`).
+- The water caster: the diced, smooth top plane (`materials.water.water_mesh.water_surface`).
 
 | Parameter | Value |
 |---|---|

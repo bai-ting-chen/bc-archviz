@@ -7,7 +7,8 @@ import math
 import bpy
 import numpy as np
 import photometric_scene
-from materials.water import water as water_mat
+from materials.shared.dielectric import dielectric, WATER_IOR
+from materials.water import pool_material
 from materials.water import falling_film_assembly, ballistic_sheet
 
 def scene(output_dir, resolution_px, SAMPLES):
@@ -27,15 +28,13 @@ def scene(output_dir, resolution_px, SAMPLES):
     wall.scale = (L + 2, .3, Z_LIP + .6); wall.rotation_euler = (0, 0, ang)
     wall.location = origin + along * (L / 2) - out * .15 + np.array([0, 0, -(Z_LIP + .6) / 2 + .0])
     wall.data.materials.append(concrete)
-    pool_mat = water_mat.pool_water('control pool water')
+    pool_mat = pool_material.pool_water('control pool water')
     bpy.ops.mesh.primitive_plane_add(size=1)
     pool = bpy.context.object; pool.name = 'pool'
     pool.scale = (L + 3, 4, 1); pool.rotation_euler = (0, 0, ang)
     pool.location = origin + along * (L / 2) + out * 2 + np.array([0, 0, POOL_Z - Z_LIP])
     pool.data.materials.append(pool_mat)
-    film_mat = bpy.data.materials.new('control film water'); film_mat.use_nodes = True
-    b = film_mat.node_tree.nodes['Principled BSDF']; b.inputs['Transmission Weight'].default_value = 1.0
-    b.inputs['IOR'].default_value = 1.333; b.inputs['Roughness'].default_value = 0.0
+    film_mat = dielectric('control film water', WATER_IOR, tint=(0.8, 0.8, 0.8))
     foam_mat = photometric_scene.white_lambert('foam', .7)
     proxy = bpy.data.objects.new('wet proxy', bpy.data.meshes.new('wet proxy')); sc.collection.objects.link(proxy)
     proxy.hide_render = True

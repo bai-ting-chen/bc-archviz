@@ -1,4 +1,4 @@
-"""Foot crowns; implementation for water.pool_impacts."""
+"""Foot crowns; water impact fields and geometry."""
 import numpy as np
 from materials.water.impact_config import EMPTY_MESH
 

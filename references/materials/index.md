@@ -39,12 +39,12 @@ is made of; effects used only by that family live with it (water ripple, foam, s
 | [Fabric](fabric/fabric.md) | `materials.fabric.fabric` |
 | Ground shader | `materials.ground.ground` |
 | [Vegetation](vegetation/vegetation.md) | `materials.vegetation.vegetation` |
-| Water: [Surface](water/water-surface.md) | `materials.water.water` |
-| Water: [Free-Falling Film](water/water-free-falling-film.md) | `materials.water.falling_film_assembly.falling_film` (`materials.water.ballistic_sheet`, `materials.water.falling_film`, `materials.water.film_fragments`) |
-| Water: [Attached Film](water/water-attached-film.md) | none yet; reuses the free-falling field modules (`film_ribbons`, `film_meander`, `film_waves`, `film_zones`, `film_swell`, `film_tears`) |
-| Water: [Ripple](water/water-ripple.md) | `materials.water.pool_ripples`, `materials.water.surface_shading` |
-| Water: [Foam](water/water-foam.md) | `materials.water.pool_impacts` (foam, bubbles) |
-| Water: [Splash](water/water-splash.md) | `materials.water.pool_impacts` (impacts, crowns, splash) |
+| Water: [Surface](water/water-surface.md) | `materials.water.pool_material`, `materials.water.water_mesh` |
+| Water: [Free-Falling Film](water/water-free-falling-film.md) | `materials.water.falling_film_assembly.falling_film` (`materials.water.ballistic_sheet`, `materials.water.film_surfaces`, `materials.water.film_fields`, `materials.water.film_fragments`) |
+| Water: [Attached Film](water/water-attached-film.md) | none yet; reuses the free-falling field layers (`materials.water.film_fields`) |
+| Water: [Ripple](water/water-ripple.md) | `materials.water.pool_ripples`, `materials.water.ripple_bump` |
+| Water: [Foam](water/water-foam.md) | `materials.water.impact_foam`, `materials.water.impact_bubbles` |
+| Water: [Splash](water/water-splash.md) | `materials.water.impact_locations`, `materials.water.impact_crowns`, `materials.water.impact_splash` |
 
 | Effects (shared) | Canonical helper |
 |---|---|

@@ -1,7 +1,7 @@
 # Fog and mist
 
 ## 1. Overview
-Volumetric fog and mist with a density taken from the visibility distance.
+Volumetric fog and mist with a density taken from the visibility distance; local steam over hot water.
 
 ## 2. Layers and node-editor diagram
 ```
@@ -23,6 +23,7 @@ Volumetric fog and mist with a density taken from the visibility distance.
   - `fog_volume(centre, visibility_m, box, top, diameter_um=…, valley=…, patch=…, clear_boxes=…)`: the
     fog box; pass the options by keyword.
   - `sigma_from_visibility(visibility_m)`; `volume_render_settings(bounces, max_bounces)`.
+- Steam: `scripts/blender/materials/shared/volumes.py` (`steam()`), a small Principled Volume over hot water.
 - Control: `scripts/controls/lighting/fog_koschmieder.py` (transmission = exp(−sigma·d) to 1.000).
 
 ## 4. Instructions and parameters
@@ -44,6 +45,14 @@ Volumetric fog and mist with a density taken from the visibility distance.
 | Droplet diameter | 5–20 µm |
 | Volume bounces | 8 |
 | Render cost | ~2.5–3.5× a clear scene |
+
+**Steam over hot water** (a hot tub, a heated pool) is a small local volume, not site fog: `steam()`,
+density = noise × a fade with height above the water, forward-scattering (anisotropy ~0.5). Steps 1–3
+do not apply; step 5 does.
+
+| Parameter | Value |
+|---|---|
+| Steam anisotropy | ~0.5 |
 
 ## 5. Troubleshooting
 | Symptom | Cause | Fix |

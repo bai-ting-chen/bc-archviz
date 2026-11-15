@@ -1,24 +1,8 @@
-"""Foot bubbles; implementation for water.pool_impacts."""
+"""Foot bubbles; water impact fields and geometry."""
 import numpy as np
+from materials.water import mesh_builders
 from materials.water.impact_config import EMPTY_MESH
 from materials.water.impact_drift import _span, _drift
-
-
-def _dome():
-    """Unit dome (upper hemisphere, 8 segments): vertices and quad/triangle faces."""
-    angle = np.linspace(0, 2 * np.pi, 9)[:-1]
-    elevation = np.array([0., .55, 1.05, 1.45])
-    ring = np.array([[np.cos(e) * np.cos(t), np.cos(e) * np.sin(t), np.sin(e)] for e in elevation[:-1] for t in angle])
-    unit = np.r_[ring, [[0, 0, 1]]]
-    faces = []
-    for r in range(len(elevation) - 2):
-        for j in range(8):
-            a0 = r * 8 + j
-            a1 = r * 8 + (j + 1) % 8
-            faces.append([a0, a1, a1 + 8, a0 + 8])
-    top = (len(elevation) - 2) * 8
-    faces += [[top + j, top + (j + 1) % 8, len(unit) - 1] for j in range(8)]
-    return unit, faces
 
 
 def bubbles(lip, impact_points, strength, pool_height_m, params):
@@ -28,7 +12,7 @@ def bubbles(lip, impact_points, strength, pool_height_m, params):
     if count == 0:
         return EMPTY_MESH
     s, o, _, _ = _drift(lip, impact_points, rng, params.bubble_reach_m, strength ** .3, count, params, extra=.05)
-    unit, dome_faces = _dome()
+    unit, dome_faces = mesh_builders._dome()
     verts, faces, base = [], [], 0
     for i in range(count):
         if o[i] > params.max_outward_m:

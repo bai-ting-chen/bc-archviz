@@ -1,4 +1,5 @@
 """Caustic graph; implementation for geometry_node_caustics."""
+from materials.shared.dielectric import WATER_IOR
 from materials.shared.node_graph import NodeGraph, active_socket, geometry_node_group
 
 
@@ -9,7 +10,7 @@ def caustic_sheet_group(name="Wavefront Caustics"):
         ("Occluders", "NodeSocketCollection"),
         ("Sun Direction", "NodeSocketVector", (0.0, 0.0, 1.0)),
         ("Sun Irradiance", "NodeSocketFloat", 100.0),
-        ("IOR Ratio", "NodeSocketFloat", 1 / 1.333),
+        ("IOR Ratio", "NodeSocketFloat", 1 / WATER_IOR),
         ("Transmission", "NodeSocketFloat", 0.976),  # 1 - water Fresnel R (2.4%).
         ("Lift", "NodeSocketFloat", 0.001, "DISTANCE"),  # m above receiver, against z-fighting.
         ("Sun Blur Iterations", "NodeSocketInt", 2),

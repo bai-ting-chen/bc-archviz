@@ -31,9 +31,6 @@ Flow:
    film, crest and pool stay procedural
 ```
 
-- One impact strength drives crater/crown size, crowns, foam and bubbles, and splash, so they
-  cluster together, never as a regular array of identical elements.
-
 ## 3. Code
 `scripts/blender/materials/water/`:
 - `impact_locations.py`: `impacts(lip, land_mid, land_keep, land_thick, drops, pool_z, p)` (§4.1).
@@ -43,7 +40,7 @@ Flow:
   (`falling_film()`).
 
 No script is named in this file for the simulated plunge zone (§4.4); the simulator it names is the
-FLIP Fluids add-on. No control scene is named.
+FLIP Fluids add-on. Control: `scripts/controls/water/falling_film_check.py` builds the foot with the film.
 
 ## 4. Instructions and parameters, per layer
 
@@ -63,7 +60,7 @@ FLIP Fluids add-on. No control scene is named.
 ### 4.2 Crowns
 - Clear water crowns standing up at the strongest impacts: a tilted ring with an irregular,
   spiky rim. Each one different in size, height and tilt.
-- **Material: thin-wall water.** Open shells with a solid water material trap light and glow white.
+- **Material: thin-wall water** ([water-surface.md](water-surface.md) §4.5).
 
 | Parameter | Value |
 |---|---|
@@ -86,10 +83,9 @@ FLIP Fluids add-on. No control scene is named.
 | Throw from the wall | 0–12 cm |
 
 ### 4.4 Simulated plunge zone (when the still procedural foot is not enough)
-- **Where simulation pays:** the plunge zone (splash, foam clumps, spray) in motion. Hybrid:
-  simulate a short stretch (~1 m domain, 3–5 mm cells) with secondary particles (spray / foam /
-  bubble), instance it along the line with random offsets and flips; keep film, crest and pool
-  procedural. Method choice: materials/index.md › Water.
+- Method choice: materials/index.md › Water. Hybrid: simulate a short stretch (~1 m domain, 3–5 mm
+  cells) with secondary particles (spray / foam / bubble), instance it along the line with random
+  offsets and flips; keep film, crest and pool procedural.
 - **Thin-sheet inlets:** compute liquid thickness before choosing a domain: δ = q / V. If δ is
   below one voxel, a fully occupied one-cell source cannot preserve both speed and discharge: a
   q-matched source slows to V′ = q / dx; a speed-matched source over-discharges by dx / δ. State the

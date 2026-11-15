@@ -13,19 +13,12 @@ import os as _os, sys as _sys
 _sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 import controls_import_paths  # noqa: E402,F401 -- every controls topic folder on sys.path
 import json
-import math
 import os
 import sys
 from pathlib import Path
 
-import bpy
-import numpy as np
-
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "blender"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import photometric_scene
-from materials.water import water as water_mat
-from materials.water import falling_film_assembly, ballistic_sheet
 
 from falling_film_rig import scene
 from falling_film_geometry import check_geometry

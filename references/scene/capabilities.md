@@ -38,7 +38,7 @@ What the pipeline can do and which technique does it; each row was proved with a
 | Opaque stylised pool | opaque diffuse body under IOR 1.333 surface (declared) | solid |
 | 3ds Max assets (vegetation) | io_scene_max + `max_import` repairs (bands, IDs, slots, UV channel), materials rebuilt by hand from maps; checked on 4 models 25–320 MB | solid |
 | Foliage cards | Principled + Translucent (transmission map) cut by opacity; roughness from the glossiness map | solid, control-proved |
-| Wet surround, splashes, dried marks | analytic edge distance mask; dry**1.4 + coat film IOR 1.33; patchy by noise | test |
+| Wet surround, splashes, dried marks | analytic edge distance mask; dry**1.4 + coat film IOR 1.333; patchy by noise | test |
 | Hill / landform around a building pad | GN smoothstep fall on noise-warped pad distance ([terrain](environment/terrain.md)) | solid |
 | Meadow on terrain (multi-species, upright) | native Scatter on Surface + patch / bare-soil / pad / frustum masks (`scatter.meadow_layer_group`) | solid |
 | Modelled grass blades | Principled + Translucent, per-instance tone + dry patches (`materials.vegetation.vegetation.blade_material`) | solid |
@@ -51,7 +51,7 @@ What the pipeline can do and which technique does it; each row was proved with a
 | Whitewater / plunge foam | opaque milky subsurface surface + soft marbled foam + milky body below + splash drops ([water-foam.md](../materials/water/water-foam.md)) | test |
 | Choppy pool hiding the floor | shared geometry wave field (64 cosines + gust envelope) + dark floor + absorption ([water-ripple.md](../materials/water/water-ripple.md)) | test |
 | Free-falling curtain off a lip | 2D field map on a ballistic carrier: stream flow, fall-time stretch, meander, tears into braids, gap strings/drops, dissolving edges, velocity motion blur ([water-free-falling-film.md](../materials/water/water-free-falling-film.md)) | used (one study, user-approved); `materials.water.falling_film_assembly.falling_film`, control `falling_film_check.py` |
-| Foot of a fall: impacts, crowns, foam, bubbles, pool waves | impacts from the film's landing row; thin-wall crowns; drifting foam and bubbles; pool bump from a float height map ([water-splash.md](../materials/water/water-splash.md), [water-foam.md](../materials/water/water-foam.md), [water-ripple.md](../materials/water/water-ripple.md)) | used (one study, user-approved); `materials.water.pool_impacts`, `materials.water.pool_ripples`, `materials.water.surface_shading` |
+| Foot of a fall: impacts, crowns, foam, bubbles, pool waves | impacts from the film's landing row; thin-wall crowns; drifting foam and bubbles; pool bump from a float height map ([water-splash.md](../materials/water/water-splash.md), [water-foam.md](../materials/water/water-foam.md), [water-ripple.md](../materials/water/water-ripple.md)) | used (one study, user-approved); `materials.water.impact_locations`, `impact_crowns`, `impact_foam`, `impact_bubbles`, `materials.water.pool_ripples`, `materials.water.ripple_bump` |
 | Fluid simulation (splash, plunge) | FLIP source/Demo bakes and hybrid slice integration tested; sub-voxel inlet flux/momentum and pool boundaries require validation ([water-splash.md](../materials/water/water-splash.md)); Mantaflow alternative | research; no matched-physics superiority established |
 | Soft backplate vs crisp model | measured edge widths + slight DOF in front of the subject | solid |
 | No-limit Cycles final in the UI | `finals.py` (untiled, savers, OIDN from passes) | solid |

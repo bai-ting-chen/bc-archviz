@@ -1000,4 +1000,24 @@ Update external imports and calls using the table. Finished studies need no chan
 - `python scripts/workflow/structure_check.py` (0 problems).
 - `grep -rnE "scene\.lighting\.(interior|lighting|camera)|emitter_dots|lighting-camera" scripts/ references/` returns nothing.
 
+# MIGRATE: water modules merged; one import path per job
+From: LAPTOP-25
+
+## What changed
+- Removed from `materials.water` (re-export modules and merged files): `falling_film`, `water`, `surface_shading`,
+  `pool_impacts`, `film_zones`, `film_swell`, `film_waves`, `film_meander`, `film_ribbons`, `film_tears`,
+  `fragment_config`, `fragment_cells`, `fragment_edges`, `fragment_gaps`, `mesh_objects`, `mesh_sheet`, `mesh_tubes`,
+  `mesh_drops`, `ripple_height_image`, `thin_wall_material`, `water_normals`.
+- New owners: `film_fields` (field layers), `film_config` / `film_surfaces` (FilmParams, film_surfaces), `film_fragments`,
+  `mesh_builders`, `ripple_bump` (save_height_exr, height_range_mm, install_bump), `pool_material` (pool_water,
+  thin_wall_copy), `water_mesh` (water_surface, smooth_flat), `impact_*` (impacts, crowns, foam, bubbles, splash, ImpactParams).
+- `WATER_IOR` and `GLASS_IOR` live in `materials.shared.dielectric`; wet blade coat IOR is now 1.333 (was 1.33).
+
+## Steps
+- Study scripts on this machine that import a removed module: switch them to the owner above.
+
+## Check after pull
+- `python scripts/workflow/structure_check.py` (0 problems).
+- `grep -rnE "materials\.water\.(falling_film|water|surface_shading|pool_impacts)" scripts/ references/` returns nothing.
+
 Remove each section after applying it; delete this file when none is left.

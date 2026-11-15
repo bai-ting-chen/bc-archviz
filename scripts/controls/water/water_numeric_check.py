@@ -39,33 +39,38 @@ def object_mesh(ob):
 
 def check(out):
     """Exercise water layers, assembly, image roundtrip and empty geometry paths."""
-    from materials.water import falling_film_assembly, ballistic_sheet, falling_film, pool_impacts, film_fragments, mesh_builders, motion_blur, pool_ripples, surface_shading, wet_wall_proxy
+    from materials.water import (
+        ballistic_sheet, falling_film_assembly, film_config, film_fragments,
+        film_surfaces, impact_bubbles, impact_config, impact_crowns,
+        impact_foam, impact_locations, impact_splash, mesh_builders,
+        pool_material, pool_ripples, wet_wall_proxy,
+    )
     lip = ballistic_sheet.LaunchLip((1., 2., 2.35), (.866, .5, 0), (.5, -.866, 0), 1.2, 2.4)
     flow = ballistic_sheet.SheetFlow()
     s, d = np.linspace(0, lip.length_m, 121), np.linspace(0, lip.drop_m, 241)
-    ff = falling_film.film_surfaces(lip, flow, falling_film.FilmParams(), s, d)
+    ff = film_surfaces.film_surfaces(lip, flow, film_config.FilmParams(), s, d)
     result = {k: array(v) for k, v in vars(ff).items()}
     strings, drops = film_fragments.gap_fill(ff, lip, film_fragments.FragmentParams(), s, d)
     edge = film_fragments.edge_drops(ff, lip, film_fragments.FragmentParams(), s, d)
     result['strings'] = [array(v) for v in strings]
     result['drops'], result['edge'] = array(drops), array(edge)
-    pts, strength = pool_impacts.impacts(lip, (ff.front[-1] + ff.back[-1]) / 2, ff.keep[-1],
-                                np.linalg.norm(ff.front[-1] - ff.back[-1], axis=-1), drops, -.05, pool_impacts.ImpactParams())
+    pts, strength = impact_locations.impacts(lip, (ff.front[-1] + ff.back[-1]) / 2, ff.keep[-1],
+                                np.linalg.norm(ff.front[-1] - ff.back[-1], axis=-1), drops, -.05, impact_config.ImpactParams())
     result['impacts'], result['strength'] = array(pts), array(strength)
-    for key, geometry in dict(crowns=pool_impacts.crowns(pts, strength, pool_impacts.ImpactParams()),
-                              foam=pool_impacts.foam(lip, pts, strength, -.05, pool_impacts.ImpactParams()),
-                              bubbles=pool_impacts.bubbles(lip, pts, strength, -.05, pool_impacts.ImpactParams())).items():
+    for key, geometry in dict(crowns=impact_crowns.crowns(pts, strength, impact_config.ImpactParams()),
+                              foam=impact_foam.foam(lip, pts, strength, -.05, impact_config.ImpactParams()),
+                              bubbles=impact_bubbles.bubbles(lip, pts, strength, -.05, impact_config.ImpactParams())).items():
         result[key] = [array(geometry[0]), geometry[1]]
-    result['splash'] = array(pool_impacts.splash(lip, pts, strength, -.05, pool_impacts.ImpactParams()))
+    result['splash'] = array(impact_splash.splash(lip, pts, strength, -.05, impact_config.ImpactParams()))
     for key, geometry in dict(sheet=mesh_builders.film_sheet('numeric sheet', ff.front, ff.back, ff.keep),
                               tubes=mesh_builders.tubes('numeric tubes', strings[:3]),
                               drops=mesh_builders.spheroids('numeric drops', drops[:4]),
                               empty_tubes=mesh_builders.tubes('empty tubes', []),
                               empty_drops=mesh_builders.spheroids('empty drops', [])).items():
         result[key] = object_mesh(geometry)
-    for key, values in dict(crowns=pool_impacts.crowns(np.zeros((0, 3)), np.zeros(0), pool_impacts.ImpactParams()),
-                            foam=pool_impacts.foam(lip, np.zeros((0, 3)), np.zeros(0), -.05, pool_impacts.ImpactParams()),
-                            bubbles=pool_impacts.bubbles(lip, np.zeros((0, 3)), np.zeros(0), -.05, pool_impacts.ImpactParams())).items():
+    for key, values in dict(crowns=impact_crowns.crowns(np.zeros((0, 3)), np.zeros(0), impact_config.ImpactParams()),
+                            foam=impact_foam.foam(lip, np.zeros((0, 3)), np.zeros(0), -.05, impact_config.ImpactParams()),
+                            bubbles=impact_bubbles.bubbles(lip, np.zeros((0, 3)), np.zeros(0), -.05, impact_config.ImpactParams())).items():
         result['empty_' + key] = [array(values[0]), values[1]]
     rp = pool_ripples.RippleParams(cell_m=.03)
     sa, oa, H = pool_ripples.height_field(lip, pts, strength, rp)
@@ -81,5 +86,5 @@ def check(out):
                                     wet_proxy=proxy, setup=falling_film_assembly.FallingFilmSetup(film_cell_m=.02), name='numeric build')
     result['build'] = dict(stats=stats, objects={k: object_mesh(v) for k, v in objs.items()},
                            pool=dump_material(pool), proxy=object_mesh(proxy))
-    result['thin_wall'] = dump_material(surface_shading.thin_wall_copy(mat, 'numeric thin wall'))
+    result['thin_wall'] = dump_material(pool_material.thin_wall_copy(mat, 'numeric thin wall'))
     return result

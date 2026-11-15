@@ -1,13 +1,8 @@
-"""Film build; implementation for water.falling_film."""
+"""Film build; falling-film parameters and surfaces."""
 import numpy as np
-from materials.water import ballistic_sheet, seeded_noise
+from materials.water import ballistic_sheet
 from materials.water.film_config import FilmFields
-from materials.water.film_zones import zones
-from materials.water.film_swell import swell_field
-from materials.water.film_waves import roll_waves
-from materials.water.film_meander import meander
-from materials.water.film_ribbons import ribbon_envelope
-from materials.water.film_tears import _gap_field
+from materials.water import film_fields
 
 
 def film_surfaces(lip, flow, params, s, drop_m):
@@ -17,18 +12,18 @@ def film_surfaces(lip, flow, params, s, drop_m):
     stream = (ballistic_sheet.stream_factor(flow, S, D) - 1) / max(flow.stream_variation, 1e-6)
     h = ballistic_sheet.sheet_thickness_m(flow, S, D)
 
-    env_front, env_back = ribbon_envelope(params, S, V, h)
+    env_front, env_back = film_fields.ribbon_envelope(params, S, V, h)
     relief_front = np.maximum(env_front - h / 2, 0)
     relief_back = np.minimum(env_back + h / 2, 0)
-    zone = zones(params, S, V, stream)
-    varicose = 1 + params.swell_thickness_variation * swell_field(S, V, params.seed + 41)
-    sinuous = params.swell_amplitude_m * swell_field(S, V, params.seed + 40)
-    front = (h / 2 + params.ribbon_relief_strength * zone * relief_front) * varicose + params.wave_amplitude_m * roll_waves(params, S, V, D)
+    zone = film_fields.zones(params, S, V, stream)
+    varicose = 1 + params.swell_thickness_variation * film_fields.swell_field(S, V, params.seed + 41)
+    sinuous = params.swell_amplitude_m * film_fields.swell_field(S, V, params.seed + 40)
+    front = (h / 2 + params.ribbon_relief_strength * zone * relief_front) * varicose + params.wave_amplitude_m * film_fields.roll_waves(params, S, V, D)
     back = (-h / 2 + params.ribbon_relief_strength * zone * relief_back) * varicose
 
     start = .38 * lip.drop_m if params.tear_start_m is None else params.tear_start_m
-    lateral = params.meander_amplitude_m * meander(params, S, V, D)
-    gap = _gap_field(params, lip, s, S, D, V, lateral, start)
+    lateral = params.meander_amplitude_m * film_fields.meander(params, S, V, D)
+    gap = film_fields._gap_field(params, lip.length_m, s, S, D, V, lateral, start)
     taper = np.sqrt(np.clip(gap / params.tear_taper_range, 0, 1))                  # rounded rim, zero thickness at the tear
     bead = params.rim_bead_m * np.exp(-((gap - .03) / .03) ** 2) * (D > start)
     mid = (front + back) / 2 + sinuous

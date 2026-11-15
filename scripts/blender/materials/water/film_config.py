@@ -1,4 +1,4 @@
-"""Film config; implementation for water.falling_film."""
+"""Film config; falling-film parameters and surfaces."""
 from dataclasses import dataclass
 import numpy as np
 

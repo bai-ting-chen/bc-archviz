@@ -37,7 +37,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `effects.caustics.caustic_objects` — Caustic objects; implementation for geometry_node_caustics.
 
-- `add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_tex=None, floor_tile_m=2.0, name='CAUSTIC_SHEET', floor_albedo=(0.5, 0.5, 0.5))` — Create the overlay object with the GN modifier; inputs set on the modifier itself.
+- `add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=WATER_IOR, floor_tex=None, floor_tile_m=2.0, name='CAUSTIC_SHEET', floor_albedo=(0.5, 0.5, 0.5))` — Create the overlay object with the GN modifier; inputs set on the modifier itself.
 
 ## `effects.caustics.caustic_shading` — Caustic shading; implementation for geometry_node_caustics.
 
@@ -255,7 +255,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 
 ## `materials.shared.dielectric` — Dielectric; canonical implementation behind pbr.
 
-- `dielectric(name, ior=1.52, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None, *, anisotropy=None, rotation=0.0, tangent=None)` — The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled, transmission 1. `tint` multiplies every crossing, so keep it within a few % of white.
+- `dielectric(name, ior=GLASS_IOR, tint=(1.0, 1.0, 1.0), roughness=0.0, label=None, *, anisotropy=None, rotation=0.0, tangent=None)` — The one clear-dielectric builder (glass, water, glass-to-water interfaces): Principled, transmission 1. `tint` multiplies every crossing, so keep it within a few % of white.
 
 ## `materials.shared.flat_color_materials` — Simple; canonical implementation behind pbr.
 
@@ -411,6 +411,7 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `flow_per_width_m2_s(flow, s, drop_m)` — Flow per metre width q (m^2/s) at (s, drop_m).
 - `launch_speed_m_s(flow, s, drop_m)` — Local launch speed v0 = (g q)^(1/3), m/s.
 - `fall_speed_m_s(flow, s, drop_m)` — Sheet speed U = sqrt(v0^2 + 2 g drop_m), m/s.
+- `speed_after_drop_m_s(launch_speed_m_s, drop_m)` — Speed after a nonnegative vertical drop, from launch speed (m/s) and drop (m).
 - `sheet_thickness_m(flow, s, drop_m)` — Sheet thickness h = q / U, m.
 - `throw(flow, s, drop_m)` — Outward distance of the sheet mid-surface from the wall face, m.
 - `effective_depth(flow, s, drop_m, stretch_exponent=0.5, stretch_reference_m=0.15)` — Fall-time stretch coordinate v = stretch_reference_m + integral of (U(stretch_reference_m)/U)^stretch_exponent, unchanged above stretch_reference_m; metres.
@@ -422,90 +423,60 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `FallingFilmSetup` — Grid, flow and every layer's parameters (all with starting-value defaults).
 - `falling_film(lip, pool_height_m, film_mat, foam_mat=None, pool_mat=None, exr_path=None, wet_proxy=None, setup=None, collection=None, name='Water')` — Build film, strings, drops, foot, pool bump and wet proxy for one lip; returns (objects dict, stats dict).
 
-## `materials.water.film_config` — Film config; implementation for water.falling_film.
+## `materials.water.film_config` — Film config; falling-film parameters and surfaces.
 
 - `FilmParams` — Layer strengths and scales (metres unless noted); starting values from one courtyard-scale view.
 - `FilmFields` — Result of film_surfaces: grids are (nd, ns) or (nd, ns, 3), rows = drop.
 
-## `materials.water.film_meander` — Film meander; implementation for water.falling_film.
+## `materials.water.film_fields` — Carrier-free film layers in along-lip and stretched-depth coordinates (metres).
 
+- `zones(params, s, stretched_depth_m, stream)` — Calm/busy multiplier in [zone_min, 1]: clustered patches 0.3-1 m, busier on thick streams (stream in [-1, 1]).
+- `swell_field(s, stretched_depth_m, seed)` — Smooth broad swell in [-1, 1]: 32 noncommensurate modes, 80-200 mm across, ~60 mm half-width along stretched_depth_m.
+- `roll_waves(params, s, stretched_depth_m, drop_m)` — Roll-wave arcs across the flow, ~[0, 3]: two trains, on/off per stream, more and taller down the fall.
 - `meander(params, s, stretched_depth_m, drop_m)` — Sideways meander shape (x params.meander = metres): two along-fall scales, phase changing over a few cm across.
-
-## `materials.water.film_ribbons` — Film ribbons; implementation for water.falling_film.
-
 - `ribbon_envelope(params, along_lip_m, stretched_depth_m, thickness_m)` — Front/back offsets of the union of twisted elliptical ribbons over a sheet of thickness thickness_m (front >= thickness_m/2).
+- `tear_value(params, s, stretched_depth_m)` — High = torn: narrow across (slit_lo..slit_hi), long and finite along the stretched fall.
 
-## `materials.water.film_surfaces` — Film build; implementation for water.falling_film.
+## `materials.water.film_fragments` — Strings and drops inside torn film cells and along their edges.
+
+- `FragmentParams` — Densities and sizes of gap strings, gap drops and edge drops (starting values; size from the shot).
+- `edge_drops(film_fields, lip, params, s, d)` — Drops and ligaments shed at torn edges, weighted toward the foot: array (N, 5).
+- `gap_fill(film_fields, lip, params, s, d)` — Strings (list of (M, 4) arrays) and drops (N, 5) inside torn cells.
+
+## `materials.water.film_surfaces` — Film build; falling-film parameters and surfaces.
 
 - `film_surfaces(lip, flow, params, s, drop_m)` — Evaluate every layer on the grid s x drop_m (metres) and return FilmFields.
 
-## `materials.water.film_swell` — Film swell; implementation for water.falling_film.
-
-- `swell_field(s, stretched_depth_m, seed)` — Smooth broad swell in [-1, 1]: 32 noncommensurate modes, 80-200 mm across, ~60 mm half-width along stretched_depth_m.
-
-## `materials.water.film_tears` — Film tears; implementation for water.falling_film.
-
-- `tear_value(params, s, stretched_depth_m)` — High = torn: narrow across (slit_lo..slit_hi), long and finite along the stretched fall.
-
-## `materials.water.film_waves` — Film waves; implementation for water.falling_film.
-
-- `roll_waves(params, s, stretched_depth_m, drop_m)` — Roll-wave arcs across the flow, ~[0, 3]: two trains, on/off per stream, more and taller down the fall.
-
-## `materials.water.film_zones` — Film zones; implementation for water.falling_film.
-
-- `zones(params, s, stretched_depth_m, stream)` — Calm/busy multiplier in [zone_min, 1]: clustered patches 0.3-1 m, busier on thick streams (stream in [-1, 1]).
-
-## `materials.water.fragment_config` — Fragment config; implementation for water.film_fragments.
-
-- `FragmentParams` — Densities and sizes of gap strings, gap drops and edge drops (starting values; size from the shot).
-
-## `materials.water.fragment_edges` — Fragment edges; implementation for water.film_fragments.
-
-- `edge_drops(film_fields, lip, params, s, d)` — Drops and ligaments shed at torn edges, weighted toward the foot: array (N, 5).
-
-## `materials.water.fragment_gaps` — Fragment gaps; implementation for water.film_fragments.
-
-- `gap_fill(film_fields, lip, params, s, d)` — Strings (list of (M, 4) arrays) and drops (N, 5) inside torn cells.
-
-## `materials.water.impact_bubbles` — Foot bubbles; implementation for water.pool_impacts.
+## `materials.water.impact_bubbles` — Foot bubbles; water impact fields and geometry.
 
 - `bubbles(lip, impact_points, strength, pool_height_m, params)` — Floating clear domes (single or in rafts), carried far out and past the ends. (V, F); use thin-wall water.
 
-## `materials.water.impact_config` — Foot config; implementation for water.pool_impacts.
+## `materials.water.impact_config` — Foot config; water impact fields and geometry.
 
 - `ImpactParams` — Impact spacing, crown_share, foam, floating bubbles and splash (starting values; size from the shot).
 
-## `materials.water.impact_crowns` — Foot crowns; implementation for water.pool_impacts.
+## `materials.water.impact_crowns` — Foot crowns; water impact fields and geometry.
 
 - `crowns(impact_points, strength, params)` — Clear crowns at the strongest impacts: tilted rings with spiky rims. (V, F); use thin-wall water.
 
-## `materials.water.impact_foam` — Foot foam; implementation for water.pool_impacts.
+## `materials.water.impact_foam` — Foot foam; water impact fields and geometry.
 
 - `foam(lip, impact_points, strength, pool_height_m, params)` — Irregular foam flecks clustered at impacts, drifting out and past the ends, stretched as they travel. (V, F).
 
-## `materials.water.impact_locations` — Foot impacts; implementation for water.pool_impacts.
+## `materials.water.impact_locations` — Foot impacts; water impact fields and geometry.
 
 - `impacts(lip, landing_midpoints, landing_mask, landing_thickness_m, drops, pool_height_m, params)` — Impact points (N, 3) on the pool surface and strengths (N,), from the film's bottom row and falling drops.
 
-## `materials.water.impact_splash` — Foot splash; implementation for water.pool_impacts.
+## `materials.water.impact_splash` — Foot splash; water impact fields and geometry.
 
 - `splash(lip, impact_points, strength, pool_height_m, params)` — Splash drops thrown up and out from the strongest impacts: array (N, 5) = x, y, z, diameter, stretch.
 
-## `materials.water.mesh_drops` — Mesh drops; implementation for water.mesh_builders.
-
-- `spheroids(name, drops, material=None, collection=None)` — Low-poly drops from an (N, 5) array x, y, z, diameter, stretch along z.
-
-## `materials.water.mesh_objects` — Mesh objects; implementation for water.mesh_builders.
+## `materials.water.mesh_builders` — Water meshes: closed sheets, string tubes, drop spheroids and bubble domes.
 
 - `from_arrays(name, verts, faces, material=None, collection=None, smooth=True)` — Object from vertices (N, 3) and a face list (any polygon sizes).
-
-## `materials.water.mesh_sheet` — Mesh sheet; implementation for water.mesh_builders.
-
 - `film_sheet(name, front, back, keep, material=None, collection=None)` — Closed water body from front/back grids (nd, ns, 3); quads whose four corners are all torn are removed.
-
-## `materials.water.mesh_tubes` — Mesh tubes; implementation for water.mesh_builders.
-
 - `tubes(name, strings, material=None, collection=None, sides=6)` — Capped tubes along polylines; each string is an (M, 4) array x, y, z, radius.
+- `spheroids(name, drops, material=None, collection=None)` — Low-poly drops from an (N, 5) array x, y, z, diameter, stretch along z.
 
 ## `materials.water.motion_blur` — Motion blur for still water: a per-vertex `velocity` attribute (m/s) read by Cycles deformation motion blur (references/materials/water/water-free-falling-film.md §4.9). The mesh does not move; the streak length is speed x shutter / fps (blender-api-traps › Render).
 
@@ -515,25 +486,23 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `falling_velocity(obj, lip_height_m, launch_speed_m_s)` — Straight-down velocity at the local fall speed for every vertex of an object (strings, drops).
 - `enable_motion_blur(scene, shutter_frames)` — Turn on scene motion blur with the shutter in frames.
 
-## `materials.water.pool_material` — Pool material; canonical implementation behind water.
+## `materials.water.pool_material` — Pool volume materials and thin-wall copies for open water shells.
 
-- `pool_water(name='POOL_WATER', tint=(0.45, 0.85, 0.72), density=1.0, ripple_scale=2.0, ripple_m=0.0015, ior=1.333)` — Water as a closed volume: refractive surface (IOR 1.333) + Volume Absorption, so colour grows with path length (shallow steps stay clear, depth turns green). Absorption coefficient = density * (1 - tint) per metre. Gentle ripples as bump on the surface only.
+- `pool_water(name='POOL_WATER', tint=(0.45, 0.85, 0.72), density=1.0, ripple_scale=2.0, ripple_m=0.0015, ior=WATER_IOR)` — Water as a closed volume: refractive surface (IOR 1.333) + Volume Absorption, so colour grows with path length (shallow steps stay clear, depth turns green). Absorption coefficient = density * (1 - tint) per metre. Gentle ripples as bump on the surface only.
+- `thin_wall_copy(material, name)` — Copy of a water material with Principled Thin Wall on (an open shell with solid water glows white).
 
-## `materials.water.pool_ripples` — Pool-surface height field around falling water: craters, crowns, rings, wall-parallel fronts, chop (references/materials/water/water-ripple.md). Pure numpy; water.surface_shading installs it as a bump on the pool material.
+## `materials.water.pool_ripples` — Pool-surface height field around falling water: craters, crowns, rings, wall-parallel fronts, chop (references/materials/water/water-ripple.md). Pure numpy; water.ripple_bump installs it as a bump on the pool material.
 
 - `RippleParams` — Grid, extent and strengths of the pool ripple field (craters, chop_strength, ring wave_strength, line fronts).
 - `grid(lip, params)` — Axes (s_axis, o_axis) and 2-D arrays (S, O) indexed [s, o] of the ripple field.
 - `height_field(lip, impact_points, strength, params)` — Height (m) H[s, o] on the lip-local grid, faded to zero at its borders; returns (s_axis, o_axis, H).
 - `slope_stats(height_m, cell_m)` — RMS and 99th-percentile surface slope (rad) of a height field: ripples need ~0.05-0.15 rad to read.
 
-## `materials.water.ripple_bump` — Ripple bump; implementation for water.surface_shading.
-
-- `install_bump(material, image, lip, s_range, o_range)` — Bump the material's Principled Normal with image (mm) mapped over lip-local s_range x o_range (metres).
-
-## `materials.water.ripple_height_image` — Height image; implementation for water.surface_shading.
+## `materials.water.ripple_bump` — Write ripple heights as EXR images and install their lip-local bump mapping.
 
 - `save_height_exr(height_m, path, name='water ripple height (mm)')` — Write height_m (metres, [s, o]) as a float EXR in millimetres and return the image loaded from that file.
 - `height_range_mm(image)` — Min/max (mm) of a loaded height image: proof the field survived saving and loading.
+- `install_bump(material, image, lip, s_range, o_range)` — Bump the material's Principled Normal with image (mm) mapped over lip-local s_range x o_range (metres).
 
 ## `materials.water.seeded_noise` — Smooth, irregular, seeded 1-D noise: the single noise source for the water fields (metres in, [-1, 1] out).
 
@@ -541,17 +510,10 @@ plumbing yourself; the module docstrings and `references/` explain the methods.
 - `clustered_noise(x, seed, min_knot_spacing_m, max_knot_spacing_m)` — Irregular smooth noise in [-1, 1] at x metres; knot spacing uniform in [min_knot_spacing_m, max_knot_spacing_m] metres.
 - `unit_noise(x, seed, min_knot_spacing_m, max_knot_spacing_m)` — Same noise mapped to [0, 1].
 
-## `materials.water.thin_wall_material` — Thin wall; implementation for water.surface_shading.
-
-- `thin_wall_copy(material, name)` — Copy of a water material with Principled Thin Wall on (an open shell with solid water glows white).
-
-## `materials.water.water_mesh` — Water mesh; canonical implementation behind water.
-
-- `water_surface(obj, cell_m=0.1)` — Turn a closed water box into its top surface, diced to `cell_m` metres and smooth -- the build MNEE needs (control: scripts/controls/water/mnee_water.py): a one-quad flat caster delivers NO light, the same plane diced 40x40 does; a closed box adds a degenerate bottom interface. The volume still works: rays enter it crossing the surface downward and leave crossing it upward (opaque basin).
-
-## `materials.water.water_normals` — Water normals; canonical implementation behind water.
+## `materials.water.water_mesh` — Water mesh normals and diced top surfaces for native caustics.
 
 - `smooth_flat(obj, sharp_deg=30.0)` — Shade smooth but keep edges sharper than `sharp_deg` split: a box stays geometrically flat (top normals exactly vertical) while counting as 'smooth normals' -- required by MNEE casters.
+- `water_surface(obj, cell_m=0.1)` — Turn a closed water box into its top surface, diced to `cell_m` metres and smooth -- the build MNEE needs (control: scripts/controls/water/mnee_water.py): a one-quad flat caster delivers NO light, the same plane diced 40x40 does; a closed box adds a degenerate bottom interface. The volume still works: rays enter it crossing the surface downward and leave crossing it upward (opaque basin).
 
 ## `materials.water.wet_wall_proxy` — Wet-wall proxy behind falling water (references/effects/wet-surfaces.md › Wet extent).
 

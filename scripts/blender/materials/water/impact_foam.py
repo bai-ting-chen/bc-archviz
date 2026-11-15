@@ -1,4 +1,4 @@
-"""Foot foam; implementation for water.pool_impacts."""
+"""Foot foam; water impact fields and geometry."""
 import numpy as np
 from materials.water.impact_config import EMPTY_MESH
 from materials.water.impact_drift import _span, _drift

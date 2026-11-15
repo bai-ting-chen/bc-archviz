@@ -1,4 +1,5 @@
 """Blade wet; canonical implementation behind vegetation."""
+from materials.shared.dielectric import WATER_IOR
 
 from materials.shared.node_graph import active_socket
 
@@ -14,6 +15,6 @@ def _wet(graph, p, tone, oi, W):
     graph.link(wet, mx.inputs["Factor"]); graph.link(tone, active_socket(mx.inputs, "A")); graph.link(gm.outputs[0], active_socket(mx.inputs, "B"))
     graph.link(active_socket(mx.outputs, "Result"), p.inputs["Base Color"])
     graph.link(graph.math("MULTIPLY", wet, W["coat"], (100, -650)), p.inputs["Coat Weight"])
-    p.inputs["Coat IOR"].default_value = 1.33
+    p.inputs["Coat IOR"].default_value = WATER_IOR
     p.inputs["Coat Roughness"].default_value = W["coat_rough"]
     return active_socket(mx.outputs, "Result")

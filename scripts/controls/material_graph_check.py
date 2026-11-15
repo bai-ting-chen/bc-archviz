@@ -7,7 +7,6 @@ No study files are edited.
 import importlib
 import ast
 import json
-import math
 import sys
 import tempfile
 from pathlib import Path
@@ -33,7 +32,7 @@ TOPIC_MODULES = {
     "tile_mapping": "materials.tile.tile_mapping",
     "tile_nodes": "materials.tile.tile_nodes",
     "vegetation": "materials.vegetation.vegetation",
-    "water": "materials.water.water",
+    "water": "materials.water.pool_material",
 }
 
 
@@ -281,9 +280,10 @@ def run(topic, out):
             material("pool", m.pool_water)
             fresh()
             obj = cube()
-            m.smooth_flat(obj)
+            from materials.water.water_mesh import smooth_flat, water_surface
+            smooth_flat(obj)
             result["smooth"] = mesh_state(obj)
-            result["count"] = m.water_surface(obj, .1)
+            result["count"] = water_surface(obj, .1)
             result["surface"] = mesh_state(obj)
         elif topic == "tile_nodes":
             fresh()

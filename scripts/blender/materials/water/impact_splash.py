@@ -1,4 +1,4 @@
-"""Foot splash; implementation for water.pool_impacts."""
+"""Foot splash; water impact fields and geometry."""
 import numpy as np
 from materials.water.impact_drift import _span
 

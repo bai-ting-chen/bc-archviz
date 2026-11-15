@@ -1,4 +1,5 @@
 """Caustic objects; implementation for geometry_node_caustics."""
+from materials.shared.dielectric import WATER_IOR
 import bpy
 from mathutils import Vector
 from effects.caustics.caustic_graph import caustic_sheet_group
@@ -6,7 +7,7 @@ from effects.caustics.caustic_shading import caustic_sheet_material
 from materials.shared.node_graph import set_modifier_input
 
 
-def add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=1.333, floor_tex=None,
+def add_caustic_sheet(caster, receivers, occluders, sun_obj, ior=WATER_IOR, floor_tex=None,
                       floor_tile_m=2.0, name="CAUSTIC_SHEET", floor_albedo=(0.5, 0.5, 0.5)):
     """Create the overlay object with the GN modifier; inputs set on the modifier itself."""
     me = bpy.data.meshes.new(name)

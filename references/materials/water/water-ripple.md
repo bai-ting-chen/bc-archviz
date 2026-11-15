@@ -38,25 +38,24 @@ Flow:
 | Rounded chop and boils in a plunge zone | geometry, see §4.3 | amplitude of cm |
 
 - **Never a second water skin over the pool** for ripples: a thin transparent sheet above the pool
-  adds its own Fresnel reflection, and its area reads as a lighter rectangle. A thin-wall skin is
-  fine only for small standing features (crowns, water-splash.md).
+  adds its own Fresnel reflection, and its area reads as a lighter rectangle. Thin-wall water is
+  for small open shells only (crowns, bubbles: water-surface.md §4.5).
 
 ## 3. Code
 `scripts/blender/materials/water/`:
 - `pool_ripples.py`: `height_field(lip, impact_pts, strength, p)` builds the impact field (§4.1); parameters
   in `RippleParams`.
-- `ripple_height_image.py`: `save_height_exr(H, path)` writes the float EXR (§4.2).
-- `ripple_bump.py`: `install_bump(material, image, lip, s_range, o_range)` puts the bump on the pool
-  material (§4.2).
+- `ripple_bump.py`: `save_height_exr(height_m, path)` writes the float EXR and
+  `install_bump(material, image, lip, s_range, o_range)` puts the bump on the pool material (§4.2).
 - `falling_film_assembly.py`: `falling_film()` runs these for a falling film.
 
-No script is named in this file for the choppy pool (§4.3). No control scene is named either.
+No script for the choppy pool (§4.3). Control: `scripts/controls/water/falling_film_check.py` reads the
+impact field back from its EXR.
 
 ## 4. Instructions and parameters, per layer
 
 ### 4.1 Impact field (from a falling sheet or drops)
-- Sources come from where the water actually lands (the landing line, weighted by local thickness;
-  drops through the gaps land weaker), so the line is ragged and heavy streams hit harder.
+- Sources are the impacts and their strengths from water-splash.md §4.1.
 - **Per impact:** a crater (−0.7 A, Gaussian, r < 0.6 R), a crown ring A at radius R with 3–7
   lobes, then damped capillary ripples outside it.
 - **Spreading waves:** short capillary-gravity rings die within tens of cm; longer gravity waves
@@ -70,7 +69,6 @@ No script is named in this file for the choppy pool (§4.3). No control scene is
 
 | Parameter | Value |
 |---|---|
-| Impacts | ~1 per 2 cm of landing line + drops through the gaps |
 | Crater/crown | R 1.2–4 cm × strength, A 1.5–5 mm × strength, cap ±4 mm |
 | Capillary ripples after the crown | λ 1.2–2.2 cm, decay 4–12 cm |
 | Ring waves | λ 2–6 cm (decay ~8 λ) and 8–25 cm (decay ~12 λ), on the stronger half of impacts |
@@ -106,8 +104,9 @@ No script is named in this file for the choppy pool (§4.3). No control scene is
   28 cosines read as a cross-hatch, use ~64.
 - **One wave field object shared by every mesh touching the pond**, so near grid, crest band and
   far plane meet without seams; the far plane gets a hole matching the near region.
-- At grazing view (~70°) water reflects only 6–10 %: the **floor sets the pool's tone**. Polished
-  near-black stone (albedo 0.02–0.05) + absorption ~1.5 /m + chop removes the floor from view.
+- The floor sets the pool's tone (water-surface.md §4.1). Polished near-black stone (albedo
+  0.02–0.05) + absorption ~1.5 /m + chop removes the floor from view.
+- The whitewater over the same plunge zone is shading, not geometry: water-foam.md §4.3.
 - Rounded, not spiky: boils as domes (positive part^1.5); short boils at large amplitude on a fine
   grid draw cones.
 
@@ -119,7 +118,6 @@ No script is named in this file for the choppy pool (§4.3). No control scene is
 | Cosines | ~64 |
 | Chop (rounded) | λ 4–15 cm |
 | Boils | domes of 5–12 cm |
-| Grazing view / reflection | ~70° / 6–10 % |
 | Floor albedo / absorption | 0.02–0.05 / ~1.5 /m |
 
 Generic layers, ripple settings:

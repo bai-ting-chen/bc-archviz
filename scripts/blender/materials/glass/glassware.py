@@ -9,12 +9,6 @@ GLASS + INTERFACE enclose the glass solid; INTERFACE + WATER_TOP enclose the wat
 """
 
 # Compatibility imports; each implementation has one owner (GOV_04).
-from materials.glass.tumbler_profiles import _arc, tumbler_profiles  # noqa: F401
+from materials.glass.tumbler_profiles import tumbler_profiles  # noqa: F401
 from materials.glass.lathe_geometry import lathe  # noqa: F401
-from materials.glass.glass_assembly import GLASS_IOR, WATER_IOR, glass_of_water, glass_of_water_mnee  # noqa: F401
-from materials.shared.pbr import dielectric
-import math
-
-import bpy
-
-
+from materials.glass.glass_assembly import glass_of_water, glass_of_water_mnee  # noqa: F401

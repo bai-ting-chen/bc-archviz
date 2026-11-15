@@ -38,7 +38,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
   saturated and glossier (Lekner & Dorf 1988; Jensen et al. 1999).
 - Colour: wet = dry ** gamma (Gamma node). Albedo falls non-linearly: a bright surface darkens less than a
   dark one, which a plain multiply cannot do.
-- A water film on top: Principled coat, IOR 1.33.
+- A water film on top: Principled coat, IOR 1.333.
 - A wet lawn from a low camera is mostly grazing angles: the film reflects the sky and greys the grass out. That
   sheen is right; a higher gamma (~1.7) keeps the lawn reading as wet.
 
@@ -47,7 +47,7 @@ Specific layers are described in §4. Generic layers are written once, in their 
 | Gamma, soil and stone | ~1.4 (1.8 turns a warm white beige-brown and reads as dirt) |
 | Gamma, grass | ~1.7 |
 | Roughness, wet stone | ~0.1 |
-| Water coat | Principled coat, IOR 1.33, roughness ~0.03 (grass 0.08) |
+| Water coat | Principled coat, IOR 1.333, roughness ~0.03 (grass 0.08) |
 
 ### 4.2 Wet extent
 - **Wet where the water reaches, not where it is near.** Measure the mask on the wet surface itself, from the

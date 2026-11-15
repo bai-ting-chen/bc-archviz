@@ -1,5 +1,5 @@
 """Pool-surface height field around falling water: craters, crowns, rings, wall-parallel fronts, chop
-(references/materials/water/water-ripple.md). Pure numpy; water.surface_shading installs it as a bump on the pool material.
+(references/materials/water/water-ripple.md). Pure numpy; water.ripple_bump installs it as a bump on the pool material.
 
 The field lives on a lip-local grid H[s, o]: s = -reach_side..length+reach_side along the lip, o = 0..reach_out
 from the wall face. Heights in metres; each component is soft-capped (tanh) so overlapping impacts never stack.

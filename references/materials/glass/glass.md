@@ -41,6 +41,7 @@ used here with glass settings.
 - `scripts/blender/materials/glass/` (module `materials.glass.glassware`):
   - `glass_of_water(…, segments)`: a tumbler of water built as in §4.3, the one worked example.
   - `glass_of_water_mnee(…)`: the same for native caustics ([caustics.md](../../effects/caustics.md)).
+- The IOR values of §4.3 are constants in `materials.shared.dielectric`: `GLASS_IOR`, `WATER_IOR`.
 - Controls: `scripts/controls/material_graph_check.py` topic `glass` (node-graph baseline of the base, the
   shell and the distortion); `scripts/controls/environment/outdoor_smoke.py` renders a distorted pane.
 

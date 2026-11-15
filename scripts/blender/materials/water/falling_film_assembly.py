@@ -13,8 +13,12 @@ from pathlib import Path
 import bpy
 import numpy as np
 
-from materials.water import ballistic_sheet, mesh_builders, motion_blur, surface_shading
-from materials.water import falling_film as _film, film_fragments as _fragments, pool_impacts as _foot, pool_ripples as _ripple, wet_wall_proxy as _wet
+from materials.water import (
+    ballistic_sheet, film_config, film_fragments, film_surfaces,
+    impact_bubbles, impact_config, impact_crowns, impact_foam,
+    impact_locations, impact_splash, mesh_builders, motion_blur,
+    pool_material, pool_ripples as ripple_fields, ripple_bump, wet_wall_proxy,
+)
 
 
 @dataclass
@@ -23,11 +27,11 @@ class FallingFilmSetup:
     film_cell_m: float = .0025                     # m film grid
     along_lip_range_m: tuple = None                   # (s0, s1) m: build part of the lip (lab strips); None = whole lip
     flow: ballistic_sheet.SheetFlow = field(default_factory=ballistic_sheet.SheetFlow)
-    film: _film.FilmParams = field(default_factory=_film.FilmParams)
-    fragments: _fragments.FragmentParams = field(default_factory=_fragments.FragmentParams)
-    impacts: _foot.ImpactParams = field(default_factory=_foot.ImpactParams)
-    pool_ripples: _ripple.RippleParams = field(default_factory=_ripple.RippleParams)
-    wet_wall: _wet.WetParams = field(default_factory=_wet.WetParams)
+    film: film_config.FilmParams = field(default_factory=film_config.FilmParams)
+    fragments: film_fragments.FragmentParams = field(default_factory=film_fragments.FragmentParams)
+    impacts: impact_config.ImpactParams = field(default_factory=impact_config.ImpactParams)
+    pool_ripples: ripple_fields.RippleParams = field(default_factory=ripple_fields.RippleParams)
+    wet_wall: wet_wall_proxy.WetParams = field(default_factory=wet_wall_proxy.WetParams)
     motion_shutter_frames: float = .02             # frames; 0 = no motion blur
 
 
@@ -36,9 +40,9 @@ def _film_objects(lip, st, film_mat, collection, name):
     s0, s1 = st.along_lip_range_m or (0., lip.length_m)
     s = np.arange(s0, s1 + 1e-9, st.film_cell_m)
     d = np.arange(0., lip.drop_m + 1e-9, st.film_cell_m)
-    ff = _film.film_surfaces(lip, st.flow, st.film, s, d)
-    strings, gap_drops = _fragments.gap_fill(ff, lip, st.fragments, s, d)
-    drops = np.r_[_fragments.edge_drops(ff, lip, st.fragments, s, d), gap_drops]
+    ff = film_surfaces.film_surfaces(lip, st.flow, st.film, s, d)
+    strings, gap_drops = film_fragments.gap_fill(ff, lip, st.fragments, s, d)
+    drops = np.r_[film_fragments.edge_drops(ff, lip, st.fragments, s, d), gap_drops]
     objs = {
         'film': mesh_builders.film_sheet(f'{name} | film', ff.front, ff.back, ff.keep, film_mat, collection),
         'strings': mesh_builders.tubes(f'{name} | strings', strings, film_mat, collection),
@@ -62,15 +66,15 @@ def _foot_objects(lip, st, ff, drops, pool_height_m, film_mat, foam_mat, collect
     """Impacts from the film's bottom row and the drops, then crowns, bubbles, foam and splash."""
     bottom_mid = (ff.front[-1] + ff.back[-1]) / 2
     bottom_thick = np.linalg.norm(ff.front[-1] - ff.back[-1], axis=-1)
-    pts, strength = _foot.impacts(lip, bottom_mid, ff.keep[-1], bottom_thick, drops, pool_height_m, st.impacts)
-    thin = surface_shading.thin_wall_copy(film_mat, f'{name} | thin-wall water')
+    pts, strength = impact_locations.impacts(lip, bottom_mid, ff.keep[-1], bottom_thick, drops, pool_height_m, st.impacts)
+    thin = pool_material.thin_wall_copy(film_mat, f'{name} | thin-wall water')
     objs = {
-        'crowns': mesh_builders.from_arrays(f'{name} | crowns', *_foot.crowns(pts, strength, st.impacts), thin, collection),
-        'bubbles': mesh_builders.from_arrays(f'{name} | bubbles', *_foot.bubbles(lip, pts, strength, pool_height_m, st.impacts),
+        'crowns': mesh_builders.from_arrays(f'{name} | crowns', *impact_crowns.crowns(pts, strength, st.impacts), thin, collection),
+        'bubbles': mesh_builders.from_arrays(f'{name} | bubbles', *impact_bubbles.bubbles(lip, pts, strength, pool_height_m, st.impacts),
                                     thin, collection),
-        'foam': mesh_builders.from_arrays(f'{name} | foam', *_foot.foam(lip, pts, strength, pool_height_m, st.impacts),
+        'foam': mesh_builders.from_arrays(f'{name} | foam', *impact_foam.foam(lip, pts, strength, pool_height_m, st.impacts),
                                  foam_mat or film_mat, collection, smooth=False),
-        'splash': mesh_builders.spheroids(f'{name} | splash', _foot.splash(lip, pts, strength, pool_height_m, st.impacts),
+        'splash': mesh_builders.spheroids(f'{name} | splash', impact_splash.splash(lip, pts, strength, pool_height_m, st.impacts),
                                  film_mat, collection),
     }
     return objs, pts, strength
@@ -78,15 +82,15 @@ def _foot_objects(lip, st, ff, drops, pool_height_m, film_mat, foam_mat, collect
 
 def _pool_ripples(lip, st, pts, strength, pool_mat, exr_path):
     """Ripple height field -> EXR -> bump on the pool material; returns stats."""
-    s_axis, o_axis, H = _ripple.height_field(lip, pts, strength, st.pool_ripples)
-    image = surface_shading.save_height_exr(H, Path(exr_path))
-    surface_shading.install_bump(pool_mat, image, lip, (s_axis[0], s_axis[-1]), (o_axis[0], o_axis[-1]))
-    return dict(ripple_mm=surface_shading.height_range_mm(image), ripple_slope_rad=_ripple.slope_stats(H, st.pool_ripples.cell_m))
+    s_axis, o_axis, H = ripple_fields.height_field(lip, pts, strength, st.pool_ripples)
+    image = ripple_bump.save_height_exr(H, Path(exr_path))
+    ripple_bump.install_bump(pool_mat, image, lip, (s_axis[0], s_axis[-1]), (o_axis[0], o_axis[-1]))
+    return dict(ripple_mm=ripple_bump.height_range_mm(image), ripple_slope_rad=ripple_fields.slope_stats(H, st.pool_ripples.cell_m))
 
 
 def _replace_wet_proxy(lip, st, pool_height_m, proxy, name):
     """Replace the proxy's mesh in place (every reference to the object stays valid); vertices in its local space."""
-    verts, faces = _wet.build_proxy(lip, pool_height_m, st.wet_wall)
+    verts, faces = wet_wall_proxy.build_proxy(lip, pool_height_m, st.wet_wall)
     to_local = np.array(proxy.matrix_world.inverted())
     verts = verts @ to_local[:3, :3].T + to_local[:3, 3]
     old = proxy.data

@@ -21,7 +21,7 @@ CASES = {
     "polished_granite": lambda m: m['materials.stone.stone'].polished_granite(),
     "stone_tiles": lambda m: m['materials.stone.stone'].stone_tiles(),
     "polished_steel": lambda m: m['materials.metal.metal'].polished_steel(),
-    "pool_water": lambda m: m['materials.water.water'].pool_water(),
+    "pool_water": lambda m: m['materials.water.pool_material'].pool_water(),
     "steam": lambda m: m['materials.shared.volumes'].steam(),
     "sheer": lambda m: m['materials.fabric.fabric'].sheer(),
     "random_tone": lambda m: m['effects.variation_per_unit_shading'].random_tone_material("R", (0.1, 0.1, 0.1), (0.2, 0.2, 0.2)),

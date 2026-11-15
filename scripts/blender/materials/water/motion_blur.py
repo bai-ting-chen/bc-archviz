@@ -2,15 +2,14 @@
 (references/materials/water/water-free-falling-film.md §4.9). The mesh does not move; the streak length is
 speed x shutter / fps (blender-api-traps › Render).
 """
-import bpy
 import numpy as np
 
-from materials.water.ballistic_sheet import GRAVITY_M_S2
+from materials.water import ballistic_sheet
 
 
 def fall_speed(launch_speed_m_s, lip_height_m, z):
     """Free-fall speed U = sqrt(launch_speed_m_s^2 + 2 g (lip_height_m - z)), m/s."""
-    return np.sqrt(launch_speed_m_s ** 2 + 2 * GRAVITY_M_S2 * np.clip(lip_height_m - np.asarray(z), 0, None))
+    return ballistic_sheet.speed_after_drop_m_s(launch_speed_m_s, lip_height_m - np.asarray(z))
 
 
 def set_velocity(obj, velocity):

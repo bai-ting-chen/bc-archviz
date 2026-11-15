@@ -1,4 +1,4 @@
-"""Foot impacts; implementation for water.pool_impacts."""
+"""Foot impacts; water impact fields and geometry."""
 import numpy as np
 
 
