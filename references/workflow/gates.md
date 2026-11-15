@@ -11,7 +11,7 @@ other source. Approved: analyse, compare workflows, choose. A quick lookup durin
 
 ## GAT_02 Model gate
 After the Rhino model passes its checks (pipeline.md › Phase 1; from a reference image, also
-`scripts/research/edge_overlay.py`), show viewport captures and what was modelled and left out.
+`scripts/scene/edge_overlay.py`), show viewport captures and what was modelled and left out.
 Approved: import into Blender. Rejected: fix in Rhino and show again; rework in Rhino is cheap, a look round
 on wrong geometry is not.
 

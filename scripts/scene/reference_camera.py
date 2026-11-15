@@ -11,7 +11,7 @@ camera; z up from the base) and the Blender camera for it.
 readings.json fields: image_width_px, image_height_px, repeat_pitch_m, focal_length_px,
 principal_x_px, repeat_x_px, base_y_px and top_y_px; widths and horizon are optional.
 
-Method (references/research/reference-match.md > Camera from a repeated element): base and top lines meet at the
+Method (references/scene/reference-match.md > Camera from a repeated element): base and top lines meet at the
 façade vanishing point -> horizon; 1/h steps equal -> equal pitch; pitch fixes scale; eye
 height = H * (y_base - horizon) / h. Focal is the weak unknown: estimate it with
 `focal_from_sagitta` per round base and confirm in the overlay. The line residual (`residual_m`)

@@ -1,6 +1,6 @@
 """Draw Rhino model edges (from scripts/rhino/project_edges.py) over the reference image.
 
-    python scripts/research/edge_overlay.py edges.json ref.png out.png [--width-px 1000]
+    python scripts/scene/edge_overlay.py edges.json ref.png out.png [--width-px 1000]
 
 The reference is resized to the width the edges were projected at (--width-px, its own aspect kept),
 washed 35 % toward white, and each layer drawn in its own colour. Run with the MCP venv python.

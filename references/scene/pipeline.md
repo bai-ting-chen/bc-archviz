@@ -46,7 +46,7 @@ Read-only documentation work needs no Blender or Rhino connection.
 4. **Render settings, then camera:** `archviz.render_setup(...)` (it resets view exposure), then
    `archviz.physical_camera`, `straighten_verticals`, white balance → [camera.md](camera/camera.md),
    [render-settings.md](../renderer/render-settings.md).
-5. **From a reference image:** [reference-match.md](../research/reference-match.md).
+5. **From a reference image:** [reference-match.md](reference-match.md).
 6. **Hands over:** a full first build rendered from the final camera.
 7. **Gate:** the material gate (RULES GAT_03) before any look round.
 

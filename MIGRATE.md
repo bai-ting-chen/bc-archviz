@@ -1020,4 +1020,20 @@ From: LAPTOP-25
 - `python scripts/workflow/structure_check.py` (0 problems).
 - `grep -rnE "materials\.water\.(falling_film|water|surface_shading|pool_impacts)\b" scripts/ references/` returns nothing.
 
+# MIGRATE: reference match moved to scene; image measuring tools to review
+From: LAPTOP-25
+
+## What changed
+- `references/research/reference-match.md` is now `references/scene/reference-match.md`.
+- `scripts/research/` keeps only `learning_from_video.py`. `reference_match.py` (with `reference_grid`, `reference_pair`,
+  `reference_patches`, `reference_image`) and `image_statistics.py` moved to `scripts/review/`;
+  `reference_camera.py` and `edge_overlay.py` moved to `scripts/scene/`.
+
+## Steps
+- Study scripts or notes on this machine that call a moved script: switch them to the new path.
+
+## Check after pull
+- `python scripts/workflow/structure_check.py` (0 problems).
+- `grep -rnE "research/reference-match|scripts/research/(reference|edge_overlay|image_statistics)" scripts/ references/ SKILL.md RULES.md` returns nothing.
+
 Remove each section after applying it; delete this file when none is left.

@@ -50,7 +50,7 @@ Read the files for the stage you are in.
 ### 3. Camera, light and materials (→ GAT_03)
 - [Lighting](references/scene/lighting/index.md): HDRI, lumens, IES fixtures, fog; the cheat sheet of common values
 - [Camera](references/scene/camera/camera.md): view, verticals, exposure, white balance, depth of field
-- [Reference match](references/research/reference-match.md): recreating a reference image, camera first
+- [Reference match](references/scene/reference-match.md): recreating a reference image, camera first
 - [Materials](references/materials/index.md): general rules, material families (water in `materials/water/`) and
   shared effects (`references/effects/`: wear, variation, wet surfaces, caustics, anisotropy); the index routes all three
 
@@ -73,8 +73,8 @@ Reference folders and code folders use the same topic names. Each code folder's 
 | Topic | Reference folder | Code folder |
 |---|---|---|
 | Workflow, study tools | `references/workflow/` | `scripts/workflow/` |
-| Research (reference matching, solving, video) | `references/research/` | `scripts/research/` |
-| Scene: Rhino and Max import, camera, lighting, environment | `references/scene/` | `scripts/blender/core/`, `scripts/blender/scene/`, `scripts/scene/` |
+| Research (reference library, new methods, video) | `references/research/` | `scripts/research/` |
+| Scene: Rhino and Max import, camera, reference match, lighting, environment | `references/scene/` | `scripts/blender/core/`, `scripts/blender/scene/`, `scripts/scene/` |
 | Materials, one folder per family | `references/materials/` | `scripts/blender/materials/` |
 | Effects: caustics, variation, wet surfaces | `references/effects/` | `scripts/blender/effects/` |
 | Wear by mechanism and shared locations/patterns | `references/effects/wear/` | `scripts/blender/effects/wear/` |
@@ -86,8 +86,8 @@ Reference folders and code folders use the same topic names. Each code folder's 
 |---|---|---|
 | 1. Research | `references/research/` | `scripts/research/` |
 | 2. Rhino geometry and import | `references/scene/pipeline.md` | `scripts/blender/scene/io/`, `scripts/blender/core/` |
-| 3. Camera, light, materials | `references/scene/camera/`, `references/scene/lighting/`, `references/materials/` | `scripts/blender/scene/camera/`, `scripts/blender/scene/lighting/`, `scripts/blender/materials/` |
-| 4. Look rounds and controls | `references/renderer/`, `references/review/` | `scripts/blender/renderer/`, `scripts/controls/` |
+| 3. Camera, light, materials | `references/scene/camera/`, `references/scene/reference-match.md`, `references/scene/lighting/`, `references/materials/` | `scripts/blender/scene/camera/`, `scripts/scene/`, `scripts/blender/scene/lighting/`, `scripts/blender/materials/` |
+| 4. Look rounds and controls | `references/renderer/`, `references/review/` | `scripts/blender/renderer/`, `scripts/controls/`, `scripts/review/` |
 | 5. Final and closure | `references/renderer/render-settings.md`, `references/workflow/study-close.md` | `scripts/blender/renderer/finals/`, `scripts/workflow/` |
 
 Tool locations and invocation: [machine-setup.md](references/workflow/machine-setup.md).

@@ -20,7 +20,7 @@ def use_gpu(force=False):
 
 def framing_render(root, path):
     """Fast Workbench render, one colour per layer collection -- compare with the reference
-    (`scripts/research/reference_match.py pair --overlay`) while solving the camera. Restores the engine after."""
+    (`scripts/review/reference_match.py pair --overlay`) while solving the camera. Restores the engine after."""
     import random
     sc = bpy.context.scene
     engine = sc.render.engine

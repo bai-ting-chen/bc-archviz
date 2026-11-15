@@ -23,7 +23,7 @@ Only one Blender may hold the MCP port: quit an idle finished-final window first
 |---|---|
 | Blender | `C:\Program Files\Blender Foundation\Blender 5.3\blender.exe` |
 | MCP | server `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\blender-mcp.exe` (user scope, `claude mcp get blender`); add-on `mcp` autostarts on 127.0.0.1:9876 |
-| Host python | MCP venv `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python` (numpy, Pillow) for every host tool in `scripts/research/`, `scripts/scene/`, `scripts/workflow/` |
+| Host python | MCP venv `%LOCALAPPDATA%\BlenderMCP\venv\Scripts\python` (numpy, Pillow) for every host tool in `scripts/research/`, `scripts/review/`, `scripts/scene/`, `scripts/workflow/` |
 | Blender helpers | `scripts/blender/` ([blender-python-helpers.md](../scene/blender-python-helpers.md)); `core.archviz` re-exports the everyday ones |
 | Caustics renderer | LuxCore via the BlendLuxCore extension ([luxcore.md](../renderer/luxcore.md)) |
 | Controls | `scripts/controls/`: rerun after a Blender upgrade (`blender -b --factory-startup --python …`) |

@@ -56,7 +56,7 @@ Read: [research-loop.md](references/research/research-loop.md)
 
 **RES_03 — Making A Look Decision Or Recreating A Reference**  
 Rule: Shortlist the reference library; solve the reference camera first and adjust exposure last.  
-Read: [reference-library.md](references/research/reference-library.md), [reference-match.md](references/research/reference-match.md)
+Read: [reference-library.md](references/research/reference-library.md), [reference-match.md](references/scene/reference-match.md)
 
 ### Renderer Choice
 

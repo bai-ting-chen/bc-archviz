@@ -5,7 +5,8 @@ Use when: judging a look round against a reference, proving a feature works, or 
 ## The look round (iterative refinement)
 
 ### 1. Set the criteria before rendering
-- **Where:** the regions to match and, per material or effect, the reference crop at the same
+- **Where:** about ten regions in 0..1 fractions (each lit surface type, the shadow side, floor near
+  and far, the background) and, per material or effect, the reference crop at the same
   footprint. Compute mm per pixel at the feature in the final view first (VAL_01 › Final-view pixels).
 - **Which numbers decide:** the ratios between regions from `reference_match.py patches` on the PNG (VAL_03);
   exposure is set last (RULES RES_03), so match ratios, not absolute means. For a feature claim,
@@ -17,7 +18,7 @@ Use when: judging a look round against a reference, proving a feature works, or 
 1. Render the wip frame with the study runner (`scripts/workflow/study_run.py`).
 2. Measure the PNG the renderer wrote (VAL_03), then look at the stacked pair: region numbers miss
    joint grids, missing objects and wrongly roofed areas.
-3. Ratios off: fix light or material region by region (`references/research/reference-match.md`,
+3. Ratios off: fix light or material region by region (`references/scene/reference-match.md`,
    step 3) and go back to 1.
 4. Ratios agree: compare native-resolution crops beside the reference (VAL_01), name the worst
    defect, fix only that, and go back to 1.

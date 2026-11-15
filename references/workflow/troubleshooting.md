@@ -76,7 +76,7 @@ correct `uvindex` before export. See [luxcore.md](../renderer/luxcore.md#native-
 
 ## Camera and lighting
 
-Problems of one light type or of the camera are in that file's §5: `references/scene/lighting/` (index, hdri, artificial-light, ies-profiles, fog), `references/scene/camera/camera.md`, `references/research/reference-match.md`.
+Problems of one light type or of the camera are in that file's §5: `references/scene/lighting/` (index, hdri, artificial-light, ies-profiles, fog), `references/scene/camera/camera.md`, `references/scene/reference-match.md`.
 
 ### Camera from a Rhino named view frames wider or narrower
 Cause: Rhino's lens length on a square view is the FOV of a 24 mm frame side.

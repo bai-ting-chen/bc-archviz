@@ -1,6 +1,6 @@
 """Match a render to a reference image (host side; run with the MCP venv python: numpy + Pillow).
 
-See references/research/reference-match.md.
+See references/scene/reference-match.md.
 
     reference_match.py grid    <ref> <out.png> [--step 50]            reference with a 0..1 grid, for reading
                                                                vanishing points and solving the camera

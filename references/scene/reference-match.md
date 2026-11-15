@@ -24,12 +24,11 @@ the light region by region, and setting exposure last (RULES RES_03).
 
 ## 3. Code
 Host side, MCP venv python (numpy, Pillow):
-- `scripts/research/reference_match.py grid | pair | patches`: reading grid, side-by-side or overlay,
-  regional luminance ratios.
-- `scripts/research/reference_camera.py readings.json`: camera from a repeated element
+- `scripts/review/reference_match.py grid | pair`: reading grid, side-by-side or overlay.
+- `scripts/scene/reference_camera.py readings.json`: camera from a repeated element
   (`ReferenceCameraSolve`: `pixel_to_floor`, `pixel_to_facade_plane`, `pixel_to_height`, `fit_circle`,
   `blender_camera_settings()`).
-- `scripts/rhino/project_edges.py` (in Rhino through Rook) with `scripts/research/edge_overlay.py`: the
+- `scripts/rhino/project_edges.py` (in Rhino through Rook) with `scripts/scene/edge_overlay.py`: the
   model's edges drawn over the reference through the solved camera.
 - In Blender: `archviz.framing_render(root, path)`.
 
@@ -61,18 +60,16 @@ Host side, MCP venv python (numpy, Pillow):
    - Prefer the structurally plausible reading, and check that no member covers something the
      reference shows. If still ambiguous, state the reading and let the user correct it.
    Check: repeats fall on one straight line in plan.
-3. **Light.** Needs: camera and geometry.
-   1. `reference_match.py patches ref.png regions.json render.png`, with ~10 regions in 0..1 (each lit
-      surface type, the shadow side, floor near and far, the background). Aim for *equal* ratios.
-   2. Read where the light comes from before placing any: cast shadows give direction (a member of
+3. **Light.** Needs: camera and geometry. Measure every round as the look round in validation.md;
+   this step says what to change when the region ratios disagree.
+   1. Read where the light comes from before placing any: cast shadows give direction (a member of
       depth d throwing a shadow of width w puts the source at elevation ≈ atan(d/w)); a region
       brighter than its visible sources can reach means a source outside the frame. Add it, check
       it is outside the frustum, and declare it.
-   3. When one element is too bright, find the light it sits in and narrow or re-aim that light.
-   4. Graded references: choose the AgX look from the reference's contrast, and tone the material
+   2. When one element is too bright, find the light it sits in and narrow or re-aim that light.
+   3. Graded references: choose the AgX look from the reference's contrast, and tone the material
       albedo before touching grading.
-   Check: region ratios agree within the noise floor. Record the ratio table per iteration in the
-   study notes.
+   Check: the look round's ratio criterion (validation.md).
 4. **Exposure.** Needs: equal ratios. The common ratio is the exposure step
    (`references/scene/camera/camera.md`). If the ratios are unequal, go back to step 3.
 
@@ -83,7 +80,7 @@ Host side, MCP venv python (numpy, Pillow):
 | Depth readings disagree by metres | points read near the horizon | use well-conditioned points (step 2) |
 | Overlay fits one bay, drifts on the others | focal assumed wrong | try another plausible lens (step 1.5) |
 | A region black that is bright in the reference | roofed in the model, or shaded by a misread member | check sky access and the member against the reference (step 2) |
-| One region stays too dark at any exposure | an out-of-frame source is missing | add and declare it (step 3.2) |
+| One region stays too dark at any exposure | an out-of-frame source is missing | add and declare it (step 3.1) |
 | Rhino viewport capture does not match the solve | captures ignore the requested size, so a shifted view captures wrong | use the edge overlay (step 1 check) |
 
 Generic render problems are in troubleshooting.md.

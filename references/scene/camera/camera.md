@@ -5,7 +5,7 @@ The render camera: choosing the view, lens and parallel verticals, physical expo
 balance and depth of field.
 
 **Use when:** setting a camera for a new view. Solving the camera of a reference image is in
-`references/research/reference-match.md`.
+`references/scene/reference-match.md`.
 
 ## 2. Layers and node-editor diagram
 ```

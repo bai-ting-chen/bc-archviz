@@ -69,7 +69,7 @@ def main():
     if not os.path.exists(ref):
         print("rendered", render); return
     from PIL import Image
-    rm = [sys.executable, os.path.join(os.path.dirname(TOOLS), "research", "reference_match.py")]
+    rm = [sys.executable, os.path.join(os.path.dirname(TOOLS), "review", "reference_match.py")]
     subprocess.run(rm + ["pair", render, ref, os.path.join(study, "_wip", "pair_" + a.output_path)])
     r_img = Image.open(ref).convert("RGB"); w, h = r_img.size; s = 1225 / w
     sw, sh = round(w * s), round(h * s)
