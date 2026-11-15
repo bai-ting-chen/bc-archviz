@@ -352,7 +352,7 @@ From: LAPTOP-25
   `scripts/blender/effects/` and `scripts/controls/`, and the empty `scripts/controls/material/` folder.
 
 ## Check after pull
-- `rg "effects\.(edge_wear|surface_wear|runoff|round_edges|wear_nodes|variation_surface_marks)|effects\.wear\.nodes|material_graph_cases" scripts references` finds nothing.
+- `rg "effects\.(edge_wear|surface_wear|runoff|round_edges|wear_nodes|variation_surface_marks)\b|effects\.wear\.nodes|material_graph_cases" scripts references` finds nothing.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
 # MIGRATE: shared map, pixel and node helpers
@@ -397,7 +397,7 @@ Supersedes the builder names in the sections above. `materials.shared.nodes` is 
 - Update external imports and calls with the table; no shim. Delete stale `__pycache__` in `scripts/blender/materials/shared/`.
 
 ## Check after pull
-- `rg "materials\.shared\.nodes|import _paths" scripts references` finds nothing.
+- `rg "materials\.shared\.nodes\b|import _paths" scripts references` finds nothing.
 - `python scripts/workflow/structure_check.py` reports 0 problems.
 
 # MIGRATE: descriptive file and API names, round A
@@ -1018,6 +1018,6 @@ From: LAPTOP-25
 
 ## Check after pull
 - `python scripts/workflow/structure_check.py` (0 problems).
-- `grep -rnE "materials\.water\.(falling_film|water|surface_shading|pool_impacts)" scripts/ references/` returns nothing.
+- `grep -rnE "materials\.water\.(falling_film|water|surface_shading|pool_impacts)\b" scripts/ references/` returns nothing.
 
 Remove each section after applying it; delete this file when none is left.
